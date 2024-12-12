@@ -1,0 +1,169 @@
+/*/* Menu Bar Styling */
+.menu-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 20px;
+  margin-bottom: 20px;
+  color: white;
+  border-bottom: 2px solid black;
+
+}
+
+.menu-title {
+  font-size: 36px;
+  font-weight: bold;
+  text-align: center;
+  flex-grow: 1;
+  padding-left: 20px;
+  color: black;
+}
+
+.menu-title span {
+  display: inline-block;
+  color: blue;
+  font-weight: bold;
+}
+
+
+.menu-items {
+  display: flex;
+  align-items: center;
+  color: black;
+}
+
+.menu-link {
+  color: blue;
+  text-decoration: none;
+  margin: 0 10px;
+}
+
+.menu-link:hover {
+  text-decoration: underline;
+}
+
+.img {
+  padding: 15px;  
+}
+
+.img img {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+}
+
+.introduction p {
+  padding: 15px;
+  text-align: justify;
+}
+
+
+
+
+/* General styles */
+#data_sets_section {
+  padding: 15px;
+}
+
+#stagelr, 
+#size,
+#color {
+  width: 100%;  
+  display: block;  
+  margin-bottom: 20px;  
+}
+
+#stagelr-label, 
+#size-label,
+#color-label {
+  background-color: #e0f2d7 !important;
+  display: block;
+  width: 100%;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+#stagelr-label:hover,
+#size-label:hover,
+#color-label:hover {
+  cursor: default;
+}
+
+
+#stagelr .shiny-options-group, 
+#size .shiny-options-group,
+#color .shiny-options-group
+{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+#stagelr .shiny-options-group .checkbox, 
+#size .shiny-options-group .radio,
+#color .shiny-options-group .radio {
+  margin-top: 10px;
+}
+
+#stagelr .shiny-options-group .checkbox {
+  flex: 1 0 48%;  /* 2 per row */
+}
+
+#size .shiny-options-group .radio {
+  flex: 1 0 31%;  /* 3 per row */
+}
+
+#color .shiny-options-group .radio {
+  flex: 1 0 48%;  /* 2 per row */
+}
+
+
+#stagelr label,
+#size label,
+#color label {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: white;
+  text-align: center;
+  width: 100%;
+}
+
+#stagelr label:hover, 
+#size label:hover,
+#color label:hover {
+  background-color: #dbdbdb;
+}
+
+
+#stagelr input[type="checkbox"], 
+#size input[type="radio"],
+#color input[type="radio"] {
+  display: none;
+}
+
+
+
+
+/*this class added by jquery to ensure the checked label color background*/
+.checked-label {
+            background-color: #d3d3d3 !important;
+            color: black;
+            border: 2px solid #000;
+            padding: 5px;
+            border-radius: 4px;
+        }
+
+
+
+/* Responsive Design */
+@media screen and (max-width: 768px) {
+  .menu-bar {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .display {
+    flex-direction: column;
+  }
+}
