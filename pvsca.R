@@ -16,9 +16,9 @@ ui <- fluidPage(
       div(class = "menu-title",
           span("Plasmodium vivax mapping")),
        div(class = "menu-items",
-          actionLink("home", "Home", class = "menu-link"),
+          actionLink("home", label = tagList(icon("home"), " Home"), class = "menu-link"),
           span("|"),
-          actionLink("data", "Data", class = "menu-link")
+          actionLink("data", label = tagList(icon("table"), " Data display"), class = "menu-link")
       )
   ),
   
@@ -105,8 +105,7 @@ ui <- fluidPage(
              ),
              
              fluidRow(
-               h3("Download"),
-               p("You can click this link to download data: ")
+               downloadButton("download_data","Download", class = "bt-download")
              )
              
              ),
@@ -233,8 +232,6 @@ server <- function(input, output, session) {
   
 
   
-  
-  
   # UMAP plot
   output$umap_plotly <- renderPlotly({
     req(data()) 
@@ -291,6 +288,8 @@ server <- function(input, output, session) {
         config(displaylogo = FALSE, scrollZoom = TRUE)
     }
   })
+  
+  
   
   
 
@@ -352,6 +351,23 @@ output$pca_plotly <- renderPlotly({
   
   
 })
+
+
+
+# handle download data
+
+output$download_data <- downloadHandler(
+  filename = function() {
+    paste("P_vivax_data", Sys.Date(), ".csv")
+  },
+  content = function(file) {
+    withProgress(message = "Processing Data", value = 0, {
+      incProgress(0.4, detail = "Saving file...")
+      write.csv(data(), file, row.names = FALSE) 
+      incProgress(1, detail = "Download complete")
+    })
+  }
+)
 
 
 }
