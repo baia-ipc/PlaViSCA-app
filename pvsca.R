@@ -74,19 +74,45 @@ ui <- fluidPage(
                  choices = list(
                    "Stage" = "STAGE_HR",
                    "Stage 2" = "STAGE_HR2",
-                   "Stain" = "STRAIN",
+                   "Strain" = "STRAIN",
                    "Cluster" = "CLUSTER"
                    
                  ),
-                 selected = list("STAGE_HR2")
+                 selected = "STAGE_HR2"
+               )
+             ),
+            
+             fluidRow(
+               radioButtons(
+                 "plot",
+                 "Plot",
+                 choices = list(
+                   "2D" = "2d",
+                   "3D" = "3d"
+                 ),
+                 selected = "2d"
                )
              ),
              
+             fluidRow(
+               column(width = 6, 
+                 uiOutput("xaxis")  
+               ),
+               column(width = 6,
+                 uiOutput("yaxis")
+               )
+               
+             ),
+             
+             fluidRow(
+               h3("Download"),
+               p("You can click this link to download data: ")
+             )
              
              ),
       
-      column(width = 8, class = "main-content",
-             tabsetPanel(
+      column(width = 8,
+             tabsetPanel(id = "tabset",
                tabPanel(
                  "UMAP", 
                  plotlyOutput("umap_plotly")
@@ -108,6 +134,7 @@ ui <- fluidPage(
 
 
 
+# server path
 server <- function(input, output, session) {
   
   # Show the Data Section when 'Explore data' is clicked
@@ -126,10 +153,10 @@ server <- function(input, output, session) {
     shinyjs::show("home_section")
   })
   
-  
+ 
+ 
   # Make 'data' a reactive object
   data <- reactive({
-    # Read the CSV file
     df <- read.csv("pf-ch10x-data.csv")
     
     # Filter data based on input$stagelr
@@ -137,64 +164,167 @@ server <- function(input, output, session) {
     
     # Columns to convert to factors
     cols_to_convert <- c("STAGE_LR", "STRAIN", "STAGE_HR", "STAGE_HR2")
-    
-    # Convert specified columns to factors
     filtered_df[cols_to_convert] <- lapply(filtered_df[cols_to_convert], as.factor)
     
-    # Return the filtered and converted data
     return(filtered_df)
   })
   
-  # generate colors
+  
+  # Generate colors
   colors <- colorRampPalette(brewer.pal(n = 8, name = "Set2"))(20)
+  
+  
+  # Handle 2d plots
+  pc_columns <- c("PC_1", "PC_2", "PC_3")
+  umap_columns <- c("UMAP_1", "UMAP_2", "UMAP_3")
+  
+  # Ensure data is available before creating selectInputs
+  output$xaxis <- renderUI({
+    
+    if (input$tabset == "UMAP" && input$plot == "2d") {
+      selectInput(
+        width = "98%",
+        "xaxis_input",
+        "Select X-Axis",
+        choices = umap_columns,
+        selected = "UMAP_1"
+      )
+    } else if (input$tabset == "PCA" && input$plot =="2d") {
+      selectInput(
+        width = "98%",
+        "xaxis_input",
+        "Select X-Axis",
+        choices = pc_columns,
+        selected = "PC_1"
+      )
+    }
+    
+    
+  })
+  
+  output$yaxis <- renderUI({
+    if (input$tabset == "UMAP" && input$plot == "2d") {
+      
+      req(input$xaxis_input)
+      y_choices <- setdiff(umap_columns, input$xaxis_input)
+
+      selectInput(
+              width = "98%",
+              "yaxis_input",
+              "Select Y-Axis",
+              choices = y_choices,
+              selected = "UMAP_2"
+            )
+    } else if (input$tabset == "PCA" && input$plot =="2d") {
+      
+      req(input$xaxis_input)
+      y_choices <- setdiff(pc_columns, input$xaxis_input)
+      
+      selectInput(
+        width = "98%",
+        "yaxis_input",
+        "Select Y-Axis",
+        choices = pc_columns,
+        selected = "PC_2"
+      )
+    }
+    
+  })
+  
+
   
   
   
   # UMAP plot
   output$umap_plotly <- renderPlotly({
-    
-    # Ensure data is not empty
-    req(data())
+    req(data()) 
+    req(input$xaxis_input, input$yaxis_input, input$color)  
     
     # Dynamically select the color column
     selected_color <- data()[[input$color]]
     
-    # Plotly rendering
+    # Check if the selected columns exist in the data
+    req(input$xaxis_input %in% colnames(data()), input$yaxis_input %in% colnames(data()))
+    
+    if (input$plot == "2d") {
+      # 2d plot for UMAP
+      plot_ly(
+        data = data(), 
+        x =  data()[[input$xaxis_input]],
+        y =  data()[[input$yaxis_input]],
+        type = "scatter", 
+        mode = "markers",
+        color = ~selected_color,  
+        marker = list(size = input$size), 
+        colors = colors, 
+        width = 1200,
+        height = 800
+      ) %>%
+        layout(
+          xaxis = list(title = paste("X-", input$xaxis_input)),  
+          yaxis = list(title = paste("Y-", input$yaxis_input))  
+        ) %>%
+        config(displaylogo = FALSE, scrollZoom = TRUE)
+      
+    } else {
+      # 3d plot for UMAP
+      plot_ly(
+        data = data(), 
+        x = ~UMAP_1, 
+        y = ~UMAP_2, 
+        z = ~UMAP_3,
+        type = "scatter3d",
+        mode = "markers",
+        color = ~ selected_color,  
+        marker = list(size = input$size), 
+        colors = colors, 
+        width = 1200,
+        height = 800
+      ) %>%
+        layout(
+          scene = list(
+            xaxis = list(title = "X-PC_1"),
+            yaxis = list(title = "Y-PC_2"),
+            zaxis = list(title = "Z-PC_3")
+          )
+        ) %>%
+        config(displaylogo = FALSE, scrollZoom = TRUE)
+    }
+  })
+  
+  
+
+
+# PCA plot
+output$pca_plotly <- renderPlotly({
+  req(data())
+  req(input$xaxis_input, input$yaxis_input, input$color)
+  # Dynamically select the color column
+  selected_color <- data()[[input$color]]
+  
+  if (input$plot == "2d") {
+    # 2d plot for pca
     plot_ly(
       data = data(), 
-      x = ~UMAP_1, 
-      y = ~UMAP_2, 
-      z = ~UMAP_3,
-      type = "scatter3d",
+      x =  data()[[input$xaxis_input]],
+      y =  data()[[input$yaxis_input]],
+      type = "scatter", 
       mode = "markers",
-      color = ~ selected_color,  
+      color = ~selected_color,  
       marker = list(size = input$size), 
       colors = colors, 
       width = 1200,
       height = 800
     ) %>%
       layout(
-        scene = list(
-          xaxis = list(title = "X-PC_1"),
-          yaxis = list(title = "Y-PC_2"),
-          zaxis = list(title = "Z-PC_3")
-        )
-        
+        xaxis = list(title = paste("X-", input$xaxis_input)),  
+        yaxis = list(title = paste("Y-", input$yaxis_input))  
       ) %>%
       config(displaylogo = FALSE, scrollZoom = TRUE)
-  })
-  
-  
-  
+    
+  } else { 
 
-# Render umap_plotly
-output$pca_plotly <- renderPlotly({
-  
-  # Ensure data is not empty
-  req(data())
-  selected_color <- data()[[input$color]]
-  
-  # Plotly rendering
+  # 3plot for PCA
   plot_ly(data(), 
           x = ~PC_1, 
           y = ~PC_2, 
@@ -217,6 +347,10 @@ output$pca_plotly <- renderPlotly({
       
     ) %>%
     config(displaylogo = FALSE, scrollZoom = TRUE)
+  
+  }
+  
+  
 })
 
 

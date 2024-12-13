@@ -20,7 +20,7 @@ $(document).ready(function() {
                     if ($input.attr('type') === 'radio') {
                         $('input[name="' + $input.attr('name') + '"]').closest('label').removeClass('checked-label');
                     }
-                    updateLabelStyles($input);
+                    updateLabelStyles($input); 
                 });
 
                 updateLabelStyles($input);

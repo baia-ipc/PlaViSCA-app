@@ -67,7 +67,8 @@
 
 #stagelr, 
 #size,
-#color {
+#color,
+#plot {
   width: 100%;  
   display: block;  
   margin-bottom: 20px;  
@@ -75,7 +76,8 @@
 
 #stagelr-label, 
 #size-label,
-#color-label {
+#color-label,
+#plot-label {
   background-color: #e0f2d7 !important;
   display: block;
   width: 100%;
@@ -85,15 +87,16 @@
 
 #stagelr-label:hover,
 #size-label:hover,
-#color-label:hover {
+#color-label:hover,
+#plot-label:hover {
   cursor: default;
 }
 
 
 #stagelr .shiny-options-group, 
 #size .shiny-options-group,
-#color .shiny-options-group
-{
+#color .shiny-options-group,
+#plot .shiny-options-group {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
@@ -101,11 +104,15 @@
 
 #stagelr .shiny-options-group .checkbox, 
 #size .shiny-options-group .radio,
-#color .shiny-options-group .radio {
+#color .shiny-options-group .radio, 
+#plot .shiny-options-group .radio {
   margin-top: 10px;
 }
 
-#stagelr .shiny-options-group .checkbox {
+#stagelr .shiny-options-group .checkbox,
+#color .shiny-options-group .radio,
+#plot .shiny-options-group .radio
+{
   flex: 1 0 48%;  /* 2 per row */
 }
 
@@ -113,14 +120,15 @@
   flex: 1 0 31%;  /* 3 per row */
 }
 
-#color .shiny-options-group .radio {
-  flex: 1 0 48%;  /* 2 per row */
-}
+/*#color .shiny-options-group .radio {
+  flex: 1 0 48%; 
+}*/
 
 
 #stagelr label,
 #size label,
-#color label {
+#color label,
+#plot label {
   padding: 10px;
   border: 1px solid #ccc;
   border-radius: 4px;
@@ -131,14 +139,16 @@
 
 #stagelr label:hover, 
 #size label:hover,
-#color label:hover {
+#color label:hover,
+#plot label:hover {
   background-color: #dbdbdb;
 }
 
 
 #stagelr input[type="checkbox"], 
 #size input[type="radio"],
-#color input[type="radio"] {
+#color input[type="radio"],
+#plot input[type="radio"] {
   display: none;
 }
 
@@ -153,6 +163,14 @@
             padding: 5px;
             border-radius: 4px;
         }
+
+
+/*Style selectedinput*/
+.col-sm-6 {
+ padding-left: 0 !important;
+ padding-right: 0 !important;
+}
+
 
 
 
