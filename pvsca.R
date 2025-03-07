@@ -15,20 +15,54 @@ ui <- fluidPage(
   div(class = "menu-bar",
       div(class = "logo", img(src = "Pvivax.jpeg", height = "60px")),
       div(class = "menu-title",
-          span("Plasmodium vivax mapping")),
+          span("Plasmodium vivax")),
        div(class = "menu-items",
-          actionLink("home", label = tagList(icon("home"), " Home"), class = "menu-link"),
+          actionLink("home", label = tagList(icon("home"), " Home"),
+                     class = "menu-link"),
           span("|"),
-          actionLink("data", label = tagList(icon("table"), " Data display"), class = "menu-link")
+          actionLink("data", label = tagList(icon("table"), " Data display"),
+                     class = "menu-link")
       )
   ),
 
   # Home Section
   div(id = "home_section",
       fluidRow(class = "introduction",
-               p("Malaria caused by Plasmodium vivax remains a significant public health challenge in many parts of the world. While less lethal than Plasmodium falciparum, P. vivax infections are more widespread and persistent, causing recurrent relapses that complicate elimination efforts. Its ability to remain dormant in the liver for prolonged periods and resurface months or even years later makes it uniquely difficult to treat and eradicate. Despite its global burden, our understanding of P. vivax biology, epidemiology, and treatment lags behind, partly due to limited data sharing and collaboration across research communities."),
-               p("One of the critical barriers in combating P. vivax malaria is the fragmented nature of data collection and knowledge sharing. Key datasets on genetic diversity, drug resistance, and disease patterns are often siloed within institutions, limiting comprehensive analyses and insights. This lack of coordination hampers progress in developing robust strategies to tackle P. vivax infections. Furthermore, regions most affected by P. vivax, such as South Asia, Southeast Asia, and South America, often have limited resources to gather and analyze the data necessary for actionable interventions. Bridging these gaps requires a collective effort to standardize, centralize, and share knowledge."),
-               p("To address these challenges, we have developed a platform dedicated to facilitating the sharing of Plasmodium vivax-related data and knowledge. This innovative solution seeks to bridge gaps in global collaboration by integrating diverse datasets, promoting transparency, and offering advanced tools for data analysis and visualization. By empowering researchers and policymakers with centralized access to critical information, the platform fosters a culture of open data sharing. Our goal is to accelerate scientific discoveries, refine treatment protocols, and contribute meaningfully to the global fight against P. vivax malaria, paving the way for its eventual elimination.",
+               p("Malaria caused by Plasmodium vivax remains a significant 
+                 public health challenge in many parts of the world. While 
+                 less lethal than Plasmodium falciparum, P. vivax infections
+                 are more widespread and persistent, causing recurrent relapses
+                 that complicate elimination efforts. Its ability to remain
+                 dormant in the liver for prolonged periods and resurface
+                 months or even years later makes it uniquely difficult to treat
+                 and eradicate. Despite its global burden, our understanding of
+                 P. vivax biology, epidemiology, and treatment lags behind,
+                 partly due to limited data sharing and collaboration across
+                 research communities."),
+               p("One of the critical barriers in combating P. vivax malaria is
+                 the fragmented nature of data collection and knowledge sharing.
+                 Key datasets on genetic diversity, drug resistance, and disease
+                 patterns are often siloed within institutions, limiting
+                 comprehensive analyses and insights. This lack of coordination
+                 hampers progress in developing robust strategies to tackle
+                 P. vivax infections. Furthermore, regions most affected by
+                 P. vivax, such as South Asia, Southeast Asia, and South America,
+                 often have limited resources to gather and analyze the data
+                 necessary for actionable interventions. Bridging these gaps
+                 requires a collective effort to standardize, centralize, and
+                 share knowledge."),
+               p("To address these challenges, we have developed a platform
+                 dedicated to facilitating the sharing of Plasmodium
+                 vivax-related data and knowledge. This innovative solution
+                 seeks to bridge gaps in global collaboration by integrating
+                 diverse datasets, promoting transparency, and offering advanced
+                 tools for data analysis and visualization. By empowering
+                 researchers and policymakers with centralized access to
+                 critical information, the platform fosters a culture of open
+                 data sharing. Our goal is to accelerate scientific discoveries,
+                 refine treatment protocols, and contribute meaningfully to the
+                 global fight against P. vivax malaria, paving the way for its
+                 eventual elimination.",
                  actionLink("explore_data", "Explore data >>")),
 
                div(class = "img", img(src = "pvivax.jpg"))
@@ -52,7 +86,8 @@ ui <- fluidPage(
                        "Schizont" = "schizont",
                        "Gametocyte" = "gametocyte"
                      ),
-                     selected = list("trophozoite", "ring", "schizont", "gametocyte")
+                     selected = list("trophozoite", "ring", "schizont",
+                                     "gametocyte")
                    )
              ),
              fluidRow(
@@ -160,7 +195,8 @@ server <- function(input, output, session) {
 
     # Columns to convert to factors
     cols_to_convert <- c("STAGE_LR", "STRAIN", "STAGE_HR", "STAGE_HR2")
-    filtered_df[cols_to_convert] <- lapply(filtered_df[cols_to_convert], as.factor)
+    filtered_df[cols_to_convert] <- lapply(filtered_df[cols_to_convert],
+                                           as.factor)
 
     return(filtered_df)
   })
@@ -338,7 +374,6 @@ output$pca_plotly <- renderPlotly({
 
   }
 })
-
 
 
 # handle download data
