@@ -1,34 +1,43 @@
 library(shiny)
 library(shinyjs)
 library(plotly)
-library(RColorBrewer)
 
 ui <- fluidPage(
   useShinyjs(),
-  
+
   # Link to CSS and JS files
   tags$link(rel = "stylesheet", type = "text/css", href = "style.css"),
   tags$script(src = "script.js"),
-  
+
   # Menu Bar
-  div(class = "menu-bar",
-      div(class = "logo", img(src = "Pvivax.jpeg", height = "60px")),
-      div(class = "menu-title",
-          span("Plasmodium vivax mapping")),
-      div(class = "menu-items",
-          actionLink("home", label = tagList(icon("home"), " Home"),
-                     class = "menu-link"),
-          span("|"),
-          actionLink("data", label = tagList(icon("table"), " Data display"),
-                     class = "menu-link")
+  div(
+    class = "menu-bar",
+    div(class = "logo", img(src = "Pvivax.jpeg", height = "60px")),
+    div(
+      class = "menu-title",
+      span("Plasmodium vivax")
+    ),
+    div(
+      class = "menu-items",
+      actionLink("home",
+        label = tagList(icon("home"), " Home"),
+        class = "menu-link"
+      ),
+      span("|"),
+      actionLink("data",
+        label = tagList(icon("table"), " Data display"),
+        class = "menu-link"
       )
+    )
   ),
-  
+
   # Home Section
-  div(id = "home_section",
-      fluidRow(class = "introduction",
-               p("Malaria caused by Plasmodium vivax remains a significant 
-                 public health challenge in many parts of the world. While 
+  div(
+    id = "home_section",
+    fluidRow(
+      class = "introduction",
+      p("Malaria caused by Plasmodium vivax remains a significant
+                 public health challenge in many parts of the world. While
                  less lethal than Plasmodium falciparum, P. vivax infections
                  are more widespread and persistent, causing recurrent relapses
                  that complicate elimination efforts. Its ability to remain
@@ -38,7 +47,7 @@ ui <- fluidPage(
                  P. vivax biology, epidemiology, and treatment lags behind,
                  partly due to limited data sharing and collaboration across
                  research communities."),
-               p("One of the critical barriers in combating P. vivax malaria is
+      p("One of the critical barriers in combating P. vivax malaria is
                  the fragmented nature of data collection and knowledge sharing.
                  Key datasets on genetic diversity, drug resistance, and disease
                  patterns are often siloed within institutions, limiting
@@ -50,7 +59,8 @@ ui <- fluidPage(
                  necessary for actionable interventions. Bridging these gaps
                  requires a collective effort to standardize, centralize, and
                  share knowledge."),
-               p("To address these challenges, we have developed a platform
+      p(
+        "To address these challenges, we have developed a platform
                  dedicated to facilitating the sharing of Plasmodium
                  vivax-related data and knowledge. This innovative solution
                  seeks to bridge gaps in global collaboration by integrating
@@ -62,59 +72,74 @@ ui <- fluidPage(
                  refine treatment protocols, and contribute meaningfully to the
                  global fight against P. vivax malaria, paving the way for its
                  eventual elimination.",
-                 actionLink("explore_data", "Explore data >>")),
-               
-               div(class = "img", img(src = "pvivax.jpg"))
+        actionLink("explore_data", "Explore data >>")
       ),
-      div(class = "img", img(src = "pvivax.jpg"))
+    ),
+    div(class = "img", img(src = "pvivax.jpg"))
   ),
-  
+
   # Data Section
   div(
     id = "data_sets_section",
     fluidRow(
-      column(width = 4, class = "sidebar",
-             checkboxGroupInput(
-               "stgcat", "STAGE CATEGORIES:",
-               choices = list("Blood" = "blood",
-                              "Liver" = "liver",
-                              "Mosquito" = "mosquito"),
-               selected = list("blood", "liver", "mosquito")
-             ),
-             checkboxGroupInput(
-               "stagelr", "STAGE NAME:",
-               choices = list("Trophozoite" = "trophozoite",
-                              "Ring" = "ring",
-                              "Schizont" = "schizont",
-                              "Gametocyte" = "gametocyte",
-                              "Hypnozoite" = "hypnozoite",
-                              "Hepatic schizont" = "hepatic_schizont",
-                              "zygot" = "zygot",
-                              "Ookinete" = "ookinete",
-                              "Oocyst" = "oocyst",
-                              "Sporozoite" = "sporozoite"
-                              ),
-               selected = list("trophozoite", "ring", "schizont", "gametocyte")
-             ),
-             radioButtons("size", "Size:", 
-                          choices = list("S" = 2, "M" = 4, "L" = 6),
-                          selected = 4),
-             radioButtons("color", "Color:",
-                          choices = list("Stage" = "STAGE_HR",
-                                         "Stage 2" = "STAGE_HR2",
-                                         "Strain" = "STRAIN",
-                                         "Cluster" = "CLUSTER"),
-                          selected = "STAGE_HR2"),
-             radioButtons("plot", "Plot",
-                          choices = list("2D" = "2d", "3D" = "3d"),
-                          selected = "2d"),
-             fluidRow(column(width = 6, uiOutput("xaxis")),
-                      column(width = 6, uiOutput("yaxis"))),
-             downloadButton("download_data","Download", class = "bt-download")
+      column(
+        width = 4, class = "sidebar",
+        checkboxGroupInput(
+          "stgcat", "STAGE CATEGORIES:",
+          choices = list(
+            "Blood" = "blood",
+            "Liver" = "liver",
+            "Saliva gland" = "gland"
+          ),
+          selected = list("blood", "liver", "gland")
+        ),
+        checkboxGroupInput(
+          "stagelr", "STAGE NAME:",
+          choices = list(
+            "Trophozoite" = "trophozoite",
+            "Ring" = "ring",
+            "Schizont" = "schizont",
+            "Gametocyte" = "gametocyte",
+            "Hypnozoite" = "hypnozoite",
+            "Hepatic schizont" = "hepatic_schizont",
+            "zygot" = "zygot",
+            "Ookinete" = "ookinete",
+            "Oocyst" = "oocyst",
+            "Sporozoite" = "sporozoite"
+          ),
+          selected = list(
+            "trophozoite", "ring", "schizont", "gametocyte",
+            "hypnozoite", "hepatic_schizont", "zygot", "ookinete",
+            "oocyst", "sporozoite"
+          )
+        ),
+        radioButtons("size", "Size:",
+          choices = list("S" = 2, "M" = 4, "L" = 6),
+          selected = 4
+        ),
+        radioButtons("color", "Color:",
+          choices = list(
+            "Stage" = "STAGE_HR",
+            "Stage 2" = "STAGE_HR2",
+            "Strain" = "STRAIN",
+            "Cluster" = "CLUSTER"
+          ),
+          selected = "STAGE_HR2"
+        ),
+        radioButtons("plot", "Plot",
+          choices = list("2D" = "2d", "3D" = "3d"),
+          selected = "2d"
+        ),
+        fluidRow(
+          column(width = 6, uiOutput("xaxis")),
+          column(width = 6, uiOutput("yaxis"))
+        ),
+        downloadButton("download_data", "Download", class = "bt-download")
       ),
-      column(width = 8, tabsetPanel(id = "tabset",
-                                    tabPanel("UMAP", plotlyOutput("umap_plotly")),
-                                    tabPanel("PCA", plotlyOutput("pca_plotly"))
+      column(width = 8, tabsetPanel(
+        id = "tabset",
+        tabPanel("UMAP", plotlyOutput("umap_plotly")),
+        tabPanel("PCA", plotlyOutput("pca_plotly"))
       ))
     )
   )
