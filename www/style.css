@@ -108,12 +108,13 @@
   margin-top: 10px;
 }
 
-#color .shiny-options-group .radio,
+
 #plot .shiny-options-group .radio
 {
   flex: 1 0 48%;
 }
 
+#color .shiny-options-group .radio,
 #stagelr .shiny-options-group .checkbox,
 #stgcat .shiny-options-group .checkbox,
 #size .shiny-options-group .radio {
