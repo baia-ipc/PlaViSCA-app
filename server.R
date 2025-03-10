@@ -29,7 +29,7 @@ server <- function(input, output, session) {
     df <- readRDS("data/pvsca_data.rds")
   
     # Filter data based on input$stgcat
-    filtered_df <- df[df$stage %in% input$stgcat, ]
+    filtered_df <- df[df$stage %in% input$location, ]
     return(filtered_df)
   })
 

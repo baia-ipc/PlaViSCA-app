@@ -86,7 +86,7 @@ ui <- fluidPage(
       column(
         width = 4, class = "sidebar",
         checkboxGroupInput(
-          "stgcat", "STAGE CATEGORIES:",
+          "location", "LOCATION:",
           choices = list(
             "Human Blood" = "human_blood",
             "Human Liver" = "human_liver",
