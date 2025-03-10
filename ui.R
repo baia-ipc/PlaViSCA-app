@@ -6,7 +6,8 @@ ui <- fluidPage(
   useShinyjs(),
 
   # Link to CSS and JS files
-  tags$link(rel = "stylesheet", type = "text/css", href = "style.css"),
+  tags$link(rel = "stylesheet", type = "text/css",
+            href = "style.css"),
   tags$script(src = "script.js"),
 
   # Menu Bar
@@ -87,11 +88,11 @@ ui <- fluidPage(
         checkboxGroupInput(
           "stgcat", "STAGE CATEGORIES:",
           choices = list(
-            "Blood" = "blood",
-            "Liver" = "liver",
-            "Saliva gland" = "gland"
+            "Human Blood" = "human_blood",
+            "Human Liver" = "human_liver",
+            "Mosquito Saliva" = "mosquito_saliva"
           ),
-          selected = list("blood", "liver", "gland")
+          selected = list("human_blood", "human_liver")
         ),
         checkboxGroupInput(
           "stagelr", "STAGE NAME:",
@@ -119,14 +120,15 @@ ui <- fluidPage(
         ),
         radioButtons("color", "Color:",
           choices = list(
-            "Stage" = "STAGE_HR",
-            "Stage 2" = "STAGE_HR2",
-            "Strain" = "STRAIN",
-            "Cluster" = "CLUSTER"
+            "Stage" = "stage",
+            "Strain" = "vivax_strain",
+            "Day" = "day",
+            "Condition" = "condition",
+            "Replicate" = "replicate"
           ),
-          selected = "STAGE_HR2"
+          selected = "stage"
         ),
-        radioButtons("plot", "Plot",
+        radioButtons("plot", "plot",
           choices = list("2D" = "2d", "3D" = "3d"),
           selected = "2d"
         ),
@@ -138,8 +140,9 @@ ui <- fluidPage(
       ),
       column(width = 8, tabsetPanel(
         id = "tabset",
+        tabPanel("PCA", plotlyOutput("pca_plotly")),
         tabPanel("UMAP", plotlyOutput("umap_plotly")),
-        tabPanel("PCA", plotlyOutput("pca_plotly"))
+        tabPanel("tSNE", plotlyOutput("tsne_plotly"))
       ))
     )
   )
