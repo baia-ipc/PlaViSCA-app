@@ -18,31 +18,31 @@ metadata_subset <- metadata[, c(
   )
 )]
 
-metadata_subset <- metadata_subset %>% 
+metadata_subset <- metadata_subset %>%
   rownames_to_column("id") %>%
   mutate(species = case_when(
     species == "vivax" ~ "Vivax",
     TRUE ~ species
-  ), 
+  ),
   Stage = case_when(
     Stage == "BloodStage" ~ "human_blood",
     Stage == "Liver Stage" ~ "human_liver",
     Stage == "Sporozoite" ~ "mosquito_saliva",
     TRUE ~ Stage
-  ) 
+  )
   )
 
 # subset reduction from seurat object
-umap_data <- as.data.frame(so@reductions$umap@cell.embeddings) %>% 
+umap_data <- as.data.frame(so@reductions$umap@cell.embeddings) %>%
   rownames_to_column("id")
-pca_data <- as.data.frame(so@reductions$pca@cell.embeddings) %>% 
+pca_data <- as.data.frame(so@reductions$pca@cell.embeddings) %>%
   rownames_to_column("id")
-tsne_data <- as.data.frame(so@reductions$tsne@cell.embeddings) %>% 
+tsne_data <- as.data.frame(so@reductions$tsne@cell.embeddings) %>%
   rownames_to_column("id")
 
 # merge metadata and umap data
 merg_data <- reduce(list(metadata_subset, umap_data, pca_data, tsne_data),
-                         full_join, by = "id") %>% 
+                         full_join, by = "id") %>%
   janitor::clean_names()
 
 # save output
