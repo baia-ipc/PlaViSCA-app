@@ -8,6 +8,11 @@ library(janitor)
 # load seurat object
 so <- readRDS("data/Pv.all.12.Jan2025.rds")
 
+# change features from - to _ to match with gff gene_id
+features <- gsub("-", "_", rownames(so[["RNA"]]@features))
+rownames(so[["RNA"]]@features) <- features
+saveRDS(so, "data/Pv.all.12.Jan2025.modified.rds")
+
 # subset columns from metadata
 metadata <- so@meta.data
 metadata_subset <- metadata[, c(
