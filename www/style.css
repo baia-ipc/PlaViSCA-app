@@ -156,6 +156,25 @@
    display: none;
 }
 
+#sidebar {
+  width: 0;
+  opacity: 0;
+  visibility: hidden;
+  transition: width .1s ease, opacity .5s ease, visibility .1s;
+}
+
+#sidebar.visible {
+  width: 25%;
+  opacity: 1;
+  visibility: visible;
+  transition: width .1s ease, opacity .3s ease;
+}
+
+#data_sets_section .col-sm-8 {
+  width: 75%;
+  transition: width .1s ease;
+}
+
 
 /*this class added by jquery to ensure the checked label color*/
 .checked-label {
