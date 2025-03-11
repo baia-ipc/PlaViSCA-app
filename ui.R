@@ -60,8 +60,7 @@ ui <- fluidPage(
                  necessary for actionable interventions. Bridging these gaps
                  requires a collective effort to standardize, centralize, and
                  share knowledge."),
-      p(
-        "To address these challenges, we have developed a platform
+      p("To address these challenges, we have developed a platform
                  dedicated to facilitating the sharing of Plasmodium
                  vivax-related data and knowledge. This innovative solution
                  seeks to bridge gaps in global collaboration by integrating
@@ -84,18 +83,18 @@ ui <- fluidPage(
     id = "data_sets_section",
     fluidRow(
       column(
-        width = 4, class = "sidebar",
+        width = 4, id = "sidebar", class = "sidebar",
         checkboxGroupInput(
-          "location", "LOCATION:",
+          "location", "INFECTION STAGE:",
           choices = list(
             "Human Blood" = "human_blood",
             "Human Liver" = "human_liver",
             "Mosquito Saliva" = "mosquito_saliva"
           ),
-          selected = list("human_blood", "human_liver")
+          selected = list("human_blood", "human_liver", "mosquito_saliva")
         ),
         checkboxGroupInput(
-          "stagelr", "STAGE NAME:",
+          "stagelr", "Parasite stage:",
           choices = list(
             "Trophozoite" = "trophozoite",
             "Ring" = "ring",
@@ -124,10 +123,12 @@ ui <- fluidPage(
             "Strain" = "vivax_strain",
             "Day" = "day",
             "Condition" = "condition",
-            "Replicate" = "replicate"
+            "Replicate" = "replicate",
+            "CCA resolution" = "cca_res"
           ),
           selected = "stage"
         ),
+        uiOutput("cca_res_ui"),
         radioButtons("plot", "plot",
           choices = list("2D" = "2d", "3D" = "3d"),
           selected = "2d"
@@ -140,6 +141,9 @@ ui <- fluidPage(
       ),
       column(width = 8, tabsetPanel(
         id = "tabset",
+        tabPanel("DATA",
+                 uiOutput("data_table"),
+                 plotlyOutput("data_plotly")),
         tabPanel("PCA", plotlyOutput("pca_plotly")),
         tabPanel("UMAP", plotlyOutput("umap_plotly")),
         tabPanel("tSNE", plotlyOutput("tsne_plotly"))

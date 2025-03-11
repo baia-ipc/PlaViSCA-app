@@ -24,20 +24,58 @@ server <- function(input, output, session) {
     shinyjs::show("home_section")
   })
 
-  # Make 'data' a reactive object
-  data <- reactive({
-    df <- readRDS("data/pvsca_data.rds")
+  # tabset data
+  observe(
+    if (input$tabset == "DATA"){
+      shinyjs::removeClass("sidebar", "visible")
+    }else {
+      shinyjs::addClass("sidebar", "visible")
+    }
+  )
   
-    # Filter data based on input$stgcat
+  # read data
+  df <- readRDS("data/pvsca_data.rds")
+  data <- reactive({
     filtered_df <- df[df$stage %in% input$location, ]
     return(filtered_df)
   })
 
-  
-  # Handle 2d plots
+  # select column 2d plots
   pc_columns <- grep("pc", colnames(df), ignore.case = TRUE, value = TRUE)
   umap_columns <- grep("um", colnames(df), ignore.case = TRUE, value = TRUE)
   tsne_columns <- grep("t_sne", colnames(df), ignore.case = TRUE, value = TRUE)
+  cca_res_columns <- grep("CCA_snn", colnames(df), ignore.case = TRUE,
+                          value = TRUE)
+
+  # dynamic UI for DATA
+  observeEvent(input$tabset, {
+    if (input$tabset == "DATA") {
+      output$data_table <- renderUI({
+        selectInput(
+          "data",
+          "Choose data:",
+          choices = c("PCA", "UMAP", "tSNE"),
+          selected = "PCA"
+        )
+      })
+    } else {
+      output$data <- renderUI({NULL})
+    }
+  })
+  
+  # dynamic UI for CCA resolution
+  observeEvent(input$color, {
+    if (input$color == "cca_res") {
+      output$cca_res_ui <- renderUI({
+        selectInput("cca_res", "Choose CCA resolution:",
+                    choices = cca_res_columns,
+                    selected = "CCA_snn_res.0.1")
+      })
+    } else {
+      output$cca_res_ui <- renderUI({NULL}) 
+    }
+  })
+  
 
   # Ensure data is available before creating selectInputs
   output$xaxis <- renderUI({
@@ -57,7 +95,7 @@ server <- function(input, output, session) {
         choices = pc_columns,
         selected = "pc_1"
       )
-    } else if (input$tabset == "TSNE" && input$plot == "2d") {
+    } else if (input$tabset == "tSNE" && input$plot == "2d") {
       selectInput(
         width = "98%",
         "xaxis_input",
@@ -91,7 +129,7 @@ server <- function(input, output, session) {
         choices = pc_columns,
         selected = "pc_2"
       )
-    } else if (input$tabset == "TSNE" && input$plot == "2d") {
+    } else if (input$tabset == "tSNE" && input$plot == "2d") {
       req(input$xaxis_input)
       y_choices <- setdiff(tsne_columns, input$xaxis_input)
 
@@ -106,21 +144,23 @@ server <- function(input, output, session) {
   })
 
 
-  
   # plots
   output$pca_plotly <- renderPlotly({
+    color_column <- if (input$color == "cca_res") input$cca_res else input$color
     generate_plotly(data(), input$xaxis_input, input$yaxis_input,
-                    input$color, input$size, "PCA", input$plot)
+                    color_column, input$size, "PCA", input$plot)
   })
   
   output$umap_plotly <- renderPlotly({
+    color_column <- if (input$color == "cca_res") input$cca_res else input$color
     generate_plotly(data(), input$xaxis_input, input$yaxis_input,
-                    input$color, input$size, "UMAP", input$plot)
+                    color_column, input$size, "UMAP", input$plot)
   })
   
   output$tsne_plotly <- renderPlotly({
+    color_column <- if (input$color == "cca_res") input$cca_res else input$color
     generate_plotly(data(), input$xaxis_input, input$yaxis_input,
-                    input$color, input$size, "tSNE", input$plot)
+                    color_column, input$size, "tSNE", input$plot)
   })
   
 
