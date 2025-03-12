@@ -124,6 +124,7 @@ ui <- fluidPage(
             "Day" = "day",
             "Condition" = "condition",
             "Replicate" = "replicate",
+            
             "CCA resolution" = "cca_res"
           ),
           selected = "stage"
@@ -142,8 +143,10 @@ ui <- fluidPage(
       column(width = 8, tabsetPanel(
         id = "tabset",
         tabPanel("DATA",
-                 uiOutput("data_table"),
-                 plotlyOutput("data_plotly")),
+                 DT::DTOutput("data_table"),
+                 plotlyOutput("data_count_plotly"),
+                 plotlyOutput("data_feature_plotly")
+                 ),
         tabPanel("PCA", plotlyOutput("pca_plotly")),
         tabPanel("UMAP", plotlyOutput("umap_plotly")),
         tabPanel("tSNE", plotlyOutput("tsne_plotly"))

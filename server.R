@@ -1,6 +1,7 @@
 # load library
 library(shiny)
 library(shinyjs)
+library(DT)
 library(plotly)
 library(RColorBrewer)
 
@@ -47,21 +48,33 @@ server <- function(input, output, session) {
   cca_res_columns <- grep("CCA_snn", colnames(df), ignore.case = TRUE,
                           value = TRUE)
 
-  # dynamic UI for DATA
+  # table for DATA tab
   observeEvent(input$tabset, {
     if (input$tabset == "DATA") {
-      output$data_table <- renderUI({
-        selectInput(
-          "data",
-          "Choose data:",
-          choices = c("PCA", "UMAP", "tSNE"),
-          selected = "PCA"
-        )
-      })
-    } else {
-      output$data <- renderUI({NULL})
+      flt_data <- data() %>% 
+        select(id, species, day, condition, stage, replicate, location,
+               vivax_strain, n_count_rna, n_feature_rna, sample,
+               seurat_clusters)
+     output$data_table <- renderDT({
+       DT::datatable(flt_data,
+                     options = list(pageLength = 10),
+                     selection = "single",
+                     rownames = FALSE
+                     )
+     })
+     
+     output$data_count_plotly <- renderPlotly({
+       violin_plotly(data = flt_data, x = "sample", y = "n_count_rna",
+                     color = "seurat_clusters")
+     })
+     
+     output$data_feature_plotly <- renderPlotly({
+       violin_plotly(data = flt_data, x = "sample", y = "n_feature_rna",
+                          color = "seurat_clusters")
+     })
+     
     }
-  })
+   })
   
   # dynamic UI for CCA resolution
   observeEvent(input$color, {
