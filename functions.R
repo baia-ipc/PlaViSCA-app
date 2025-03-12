@@ -1,4 +1,27 @@
-# function to generate plots
+# function to generate plot for metadata
+violin_plotly <- function(data, x, y, color) {
+  req(data)
+  plot <- plot_ly(data,
+                  x = ~get(x),
+                  y = ~get(y),
+                  color = ~get(color),
+                  type = "violin",
+                  box = list(visible = TRUE),
+                  meanline = list(visible = TRUE),
+                  jitter = 0.4
+                  ) %>% 
+    layout(title = paste(y, "vs", x),
+           xaxis = list(title = x),
+           yaxis = list(title = y),
+           legend = list(title = list(text = color))
+    )
+  
+  return(plot)
+}
+
+
+
+# function to generate plots for PCA, UMAP, and tSNE
 generate_plotly <- function(data, xaxis_input, yaxis_input, color, size,
                             plot_type = "PCA", plot_dim = "2d") {
   req(data)
