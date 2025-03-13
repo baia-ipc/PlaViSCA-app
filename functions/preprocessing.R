@@ -6,7 +6,7 @@ library(tidyverse)
 library(janitor)
 
 # load gff data
-gff_data <- read_tsv("PvivaxP01.gff_data.tsv") %>% 
+gff_data <- read_tsv("ref/PvivaxP01_gff_data.tsv") %>% 
   clean_names()
 
 # load seurat object
@@ -22,10 +22,7 @@ metadata <- so@meta.data
 metadata_subset <- metadata[, c(
   "species", "day", "condition", "Stage","Replicate",
   "is_outlier", "location", "Vivax_strain", "nCount_RNA", "nFeature_RNA",
-  "Sample", "seurat_clusters",
-  grep("CCA_snn", colnames(metadata),
-    value = TRUE
-  )
+  "Sample", "seurat_clusters"
 )]
 
 metadata_subset <- metadata_subset %>%
@@ -51,15 +48,12 @@ tsne_data <- as.data.frame(so@reductions$tsne@cell.embeddings) %>%
   rownames_to_column("id")
 
 # merge metadata and umap data
-merg_data <- reduce(list(metadata_subset, umap_data, pca_data, tsne_data),
+meta_reduc_data <- reduce(list(metadata_subset, umap_data, pca_data, tsne_data),
                          full_join, by = "id") %>%
   janitor::clean_names()
 
-# save merge data
-saveRDS(merg_data, "data/pvsca_data.rds")
-
 # variable genes expression
-ndata <- GetAssayData(so, assay = "RNA", slot = "data")
+ndata <- GetAssayData(so, assay = "RNA", layer = "data")
 mean_expression <- rowMeans(ndata)
 variance_expression <- apply(ndata, 1, var)
 std_variance <-
@@ -82,52 +76,29 @@ ndata <- left_join(ndata, gff_data, by = c("gene" = "id")) %>%
   select(gene, name, mean_expr, std_variance, variable_genes, top) %>% 
   mutate(name = coalesce(name, gene))
   
-# saveRDS(ndata, "data/variable_genes.rds")
-saveRDS(ndata, "data/variable_genes.rds")
 
 
-# 
-# plot_ly() %>%
-#   add_trace(
-#     data = ndata,
-#     x = ~mean_expr,
-#     y = ~std_variance,
-#     text = ~name,
-#     type = 'scatter',
-#     mode = 'markers',
-#     marker = list(size = 6, color = 'lightgray'),
-#     hoverinfo = 'text',
-#     name = paste('Non-variable: (', nrow(ndata), ')', sep = '')
-#   ) %>%
-#   add_trace(
-#     data = ndata[ndata$variable_genes, ],
-#     x = ~mean_expr,
-#     y = ~std_variance,
-#     text = ~name,
-#     type = 'scatter',
-#     mode = 'markers',
-#     marker = list(size = 8, color = 'blue'),
-#     hoverinfo = 'text',
-#     name = paste('Variable: (', nrow(ndata[ndata$variable_genes, ]), ')',
-#                  sep = '')
-#   ) %>%
-#   add_trace(
-#     data = ndata[ndata$top, ],
-#     x = ~mean_expr,
-#     y = ~std_variance,
-#     text = ~name,
-#     type = 'scatter',
-#     mode = 'markers+text',
-#     marker = list(size = 10, color = 'red'),
-#     textposition = 'top',
-#     hoverinfo = 'text',
-#     name = paste('Top Variable Genes (', nrow(ndata[ndata$top, ]), ')', sep = '')
-#   ) %>%
-#   layout(
-#     title = "Variable Features Plot",
-#     xaxis = list(title = "Average Expression"),
-#     yaxis = list(title = "Standardized Varaince"),
-#     showlegend = TRUE
-#   )
-# 
-# 
+# top expression genes
+top_genes <- rowMeans(GetAssayData(so, assay = "RNA", layer = "data"))
+top_genes <- names(sort(top_genes, decreasing = TRUE)[1:10])
+
+# top expression genes with cluster information
+top_genes_exp <- FetchData(so, vars = c(top_genes, "seurat_clusters")) %>% 
+  rownames_to_column("id") %>% 
+  pivot_longer(any_of(top_genes), names_to = "gene", values_to = "expression") %>% 
+  left_join(gff_data, by = c("gene" = "id")) %>%
+  select(gene, name, expression, seurat_clusters) %>% 
+  mutate(name = coalesce(name, gene))
+
+save_data <- list(
+  mr_data = meta_reduc_data,
+  normalized_genes_var = ndata,
+  top_genes_exp = top_genes_exp
+)
+
+# save list of data
+saveRDS(save_data, "data/cleaned_dataset.rds")
+
+# clear objects
+rm(list = ls())
+

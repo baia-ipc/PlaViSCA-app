@@ -6,7 +6,7 @@ library(plotly)
 library(RColorBrewer)
 
 # source function
-source("functions.R")
+source("functions/functions.R")
 
 # server function
 server <- function(input, output, session) {
@@ -35,71 +35,66 @@ server <- function(input, output, session) {
   )
   
   ## read data
-  df <- readRDS("data/pvsca_data.rds")
-  data <- reactive({
-    filtered_df <- df[df$stage %in% input$location, ]
-    return(filtered_df)
+  list_data <- readRDS("data/cleaned_dataset.rds")
+  mr_data <- list_data$mr_data
+  normalized_genes_var <- list_data$normalized_genes_var
+  top_genes_exp <- list_data$top_genes_exp
+  
+  ### select column for 2d plots
+  pc_columns <- grep("pc", colnames(mr_data), ignore.case = TRUE, value = TRUE)
+  umap_columns <- grep("um", colnames(mr_data), ignore.case = TRUE, value = TRUE)
+  tsne_columns <- grep("t_sne", colnames(mr_data), ignore.case = TRUE, value = TRUE)
+ 
+  ### filter data
+  mr_flt_data <- reactive({
+    mr_data <- mr_data %>% 
+      filter(stage %in% input$stagei)
+    return(mr_data)
   })
   
-  var_genes <- readRDS("data/variable_genes.rds")
-  
-  ## select column for 2d plots
-  pc_columns <- grep("pc", colnames(df), ignore.case = TRUE, value = TRUE)
-  umap_columns <- grep("um", colnames(df), ignore.case = TRUE, value = TRUE)
-  tsne_columns <- grep("t_sne", colnames(df), ignore.case = TRUE, value = TRUE)
-  cca_res_columns <- grep("CCA_snn", colnames(df), ignore.case = TRUE,
-                          value = TRUE)
-
-  ## DATA tab
+  ### DATA tab
   observeEvent(input$tabset, {
     if (input$tabset == "DATA") {
-      flt_data <- data() %>% 
+      mr_flt_data <- mr_flt_data()
+      mr_flt_data <- mr_flt_data %>% 
         select(id, species, day, condition, stage, replicate, location,
                vivax_strain, n_count_rna, n_feature_rna, sample,
                seurat_clusters)
-      ### DT table
+      
+      #### DT table
      output$data_table <- renderDT({
-       DT::datatable(flt_data,
+       DT::datatable(mr_flt_data,
                      options = list(pageLength = 10),
                      selection = "single",
                      rownames = FALSE
                      )
      })
       
-      ### violin plot
+      #### violin plot
      output$data_count_plotly <- renderPlotly({
-       violin_plotly(data = flt_data, x = "sample", y = "n_count_rna",
+       violin_plotly(mr_flt_data, x = "sample", y = "n_count_rna",
                      color = "seurat_clusters")
      })
      
      output$data_feature_plotly <- renderPlotly({
-       violin_plotly(data = flt_data, x = "sample", y = "n_feature_rna",
+       violin_plotly(mr_flt_data, x = "sample", y = "n_feature_rna",
                           color = "seurat_clusters")
      })
      
-     ### variable genes plot
+     #### variable genes plot
      output$variable_genes_plotly <- renderPlotly({
-       var_genes_plot(var_genes)
+       var_genes_plot(normalized_genes_var)
+     })
+     
+     ### top variable genes plot
+     output$top_var_genes_plotly <- renderPlotly({
+       top_genes_exp(top_genes_exp)
      })
      
     }
    })
   
-  # dynamic UI for CCA resolution
-  # observeEvent(input$color, {
-  #   if (input$color == "cca_res") {
-  #     output$cca_res_ui <- renderUI({
-  #       selectInput("cca_res", "Choose CCA resolution:",
-  #                   choices = cca_res_columns,
-  #                   selected = "CCA_snn_res.0.1")
-  #     })
-  #   } else {
-  #     output$cca_res_ui <- renderUI({NULL}) 
-  #   }
-  # })
-  
-
-  # Ensure data is available before creating selectInputs
+  ## Ensure data is available before creating selectInputs
   output$xaxis <- renderUI({
     if (input$tabset == "UMAP" && input$plot == "2d") {
       selectInput(
@@ -166,27 +161,24 @@ server <- function(input, output, session) {
   })
 
 
-  # plots
+  ## plots
   output$pca_plotly <- renderPlotly({
-    #color_column <- if (input$color == "cca_res") input$cca_res else input$color
-    generate_plotly(data(), input$xaxis_input, input$yaxis_input,
+    generate_plotly(mr_flt_data(), input$xaxis_input, input$yaxis_input,
                     input$color, input$size, "PCA", input$plot)
   })
   
   output$umap_plotly <- renderPlotly({
-    #color_column <- if (input$color == "cca_res") input$cca_res else input$color
-    generate_plotly(data(), input$xaxis_input, input$yaxis_input,
+    generate_plotly(mr_flt_data(), input$xaxis_input, input$yaxis_input,
                     input$color, input$size, "UMAP", input$plot)
   })
   
   output$tsne_plotly <- renderPlotly({
-    #color_column <- if (input$color == "cca_res") input$cca_res else input$color
-    generate_plotly(data(), input$xaxis_input, input$yaxis_input,
-                    input$color, input$size, "tSNE", input$plot)
+    generate_plotly(mr_flt_data(), input$xaxis_input, input$yaxis_input,
+                     input$color, input$size, "tSNE", input$plot)
   })
   
 
-  # handle download data
+  ## handle download data
   output$download_data <- downloadHandler(
     filename = function() {
       paste("Plasmodium_vivax_data", Sys.Date(), ".csv")
@@ -194,7 +186,7 @@ server <- function(input, output, session) {
     content = function(file) {
       withProgress(message = "Processing Data", value = 0, {
         incProgress(0.4, detail = "Saving file...")
-        write.csv(data(), file, row.names = FALSE)
+        write.csv(mr_flt_data(), file, row.names = FALSE)
         incProgress(1, detail = "Download complete")
       })
     }

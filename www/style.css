@@ -64,7 +64,7 @@
   padding: 15px;
 }
 
-#location,
+#stagei,
 #stagelr,
 #size,
 #color,
@@ -73,7 +73,7 @@
   display: block;
 }
 
-#location-label,
+#stagei-label,
 #size-label,
 #color-label,
 #plot-label {
@@ -83,7 +83,7 @@
   margin-bottom: 5px;
 }
 
-#location-label:hover,
+#stagei-label:hover,
 #stagelr-label:hover,
 #size-label:hover,
 #color-label:hover,
@@ -102,7 +102,7 @@
   align-items: flex-end;
 }
 
-#location .shiny-options-group .checkbox,
+#stagei .shiny-options-group .checkbox,
 #size .shiny-options-group .radio,
 #plot .shiny-options-group .radio {
   margin-top: 10px;
@@ -116,12 +116,12 @@
 
 #color .shiny-options-group .radio,
 #stagelr .shiny-options-group .checkbox,
-#location .shiny-options-group .checkbox,
+#stagei .shiny-options-group .checkbox,
 #size .shiny-options-group .radio {
   flex: 1 0 31%;
 }
 
-#location label {
+#stagei label {
   display: flex;
   flex: 1;
   align-items: center;
@@ -130,7 +130,7 @@
   width: 100%;
 }
 
-#location label,
+#stagei label,
 #size label,
 #color label,
 #plot label {
@@ -142,14 +142,14 @@
   width: 100%;
 }
 
-#location label:hover,
+#stagei label:hover,
 #size label:hover,
 #color label:hover,
 #plot label:hover {
   background-color: #dbdbdb;
 }
 
-#location input[type="checkbox"],
+#stagei input[type="checkbox"],
 #size input[type="radio"],
 #color input[type="radio"],
 #plot input[type="radio"] {

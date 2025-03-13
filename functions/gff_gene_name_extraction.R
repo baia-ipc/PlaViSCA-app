@@ -6,11 +6,13 @@
 library("rtracklayer")
 library("tidyverse")
 
-gff <- import("PlasmoDB-68_PvivaxP01.gff")
+gff <- import("ref/PlasmoDB-68_PvivaxP01.gff")
 
 gff_data <- as.data.frame(mcols(gff)) %>% 
   select("ID", "Name", "description", "ebi_biotype") %>% 
   filter(str_detect(ID, "^PVP01_\\d{7}$"))
 
-write.table(gff_data, "PvivaxP01.gff_data.tsv",
+write.table(gff_data, "ref/PvivaxP01_gff_data.tsv",
             sep = "\t", quote = FALSE, row.names = FALSE)
+
+rm(list = ls())

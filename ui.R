@@ -85,7 +85,7 @@ ui <- fluidPage(
       column(
         width = 4, id = "sidebar", class = "sidebar",
         checkboxGroupInput(
-          "location", "INFECTION STAGE:",
+          "stagei", "INFECTION STAGE:",
           choices = list(
             "Human Blood" = "human_blood",
             "Human Liver" = "human_liver",
@@ -149,7 +149,8 @@ ui <- fluidPage(
                    column(width = 6, plotlyOutput("data_feature_plotly"))
                  ),
                  fluidRow(
-                   plotlyOutput("variable_genes_plotly"),
+                   column(width = 6, plotlyOutput("variable_genes_plotly")),
+                   column(width = 6, plotlyOutput("top_var_genes_plotly"))
                  )
                  ),
         tabPanel("PCA", plotlyOutput("pca_plotly")),
