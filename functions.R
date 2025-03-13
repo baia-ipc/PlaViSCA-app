@@ -1,3 +1,6 @@
+# set color pallet
+colors <- RColorBrewer::brewer.pal(12, "Set3")
+
 # function to generate plot for metadata
 violin_plotly <- function(data, x, y, color) {
   req(data)
@@ -5,6 +8,7 @@ violin_plotly <- function(data, x, y, color) {
                   x = ~get(x),
                   y = ~get(y),
                   color = ~get(color),
+                  colors = colors,
                   type = "violin",
                   box = list(visible = TRUE),
                   meanline = list(visible = TRUE),
@@ -19,7 +23,52 @@ violin_plotly <- function(data, x, y, color) {
   return(plot)
 }
 
-
+# function to generate the variable genes
+var_genes_plot <- function(ndata) {
+  plot_ly() %>%
+    add_trace(
+      data = ndata,
+      x = ~mean_expr,
+      y = ~std_variance,
+      text = ~name,
+      type = 'scatter',
+      mode = 'markers',
+      marker = list(size = 6, color = 'lightgray'),
+      hoverinfo = 'text',
+      name = paste('Non-variable: (', nrow(ndata), ')', sep = '')
+    ) %>%
+    add_trace(
+      data = ndata[ndata$variable_genes, ],
+      x = ~mean_expr,
+      y = ~std_variance,
+      text = ~name,
+      type = 'scatter',
+      mode = 'markers',
+      marker = list(size = 8, color = 'blue'),
+      hoverinfo = 'text',
+      name = paste('Variable: (', nrow(ndata[ndata$variable_genes, ]), ')',
+                   sep = '')
+    ) %>%
+    add_trace(
+      data = ndata[ndata$top, ],
+      x = ~mean_expr,
+      y = ~std_variance,
+      text = ~name,
+      type = 'scatter',
+      mode = 'markers+text',
+      marker = list(size = 10, color = 'red'),
+      textposition = 'top',
+      hoverinfo = 'text',
+      name = paste('Top Variable Genes (', nrow(ndata[ndata$top, ]), ')',
+                   sep = '')
+    ) %>%
+    layout(
+      title = "Variable Features Plot",
+      xaxis = list(title = "Average Expression"),
+      yaxis = list(title = "Standardized Variance"),
+      showlegend = TRUE
+    )
+}
 
 # function to generate plots for PCA, UMAP, and tSNE
 generate_plotly <- function(data, xaxis_input, yaxis_input, color, size,

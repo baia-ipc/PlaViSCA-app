@@ -175,7 +175,6 @@
   transition: width .1s ease;
 }
 
-
 /*this class added by jquery to ensure the checked label color*/
 .checked-label {
   background-color: #d3d3d3 !important;

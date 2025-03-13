@@ -124,8 +124,8 @@ ui <- fluidPage(
             "Day" = "day",
             "Condition" = "condition",
             "Replicate" = "replicate",
-            
-            "CCA resolution" = "cca_res"
+            "Cluster" = "seurat_clusters"
+            #"CCA resolution" = "cca_res"
           ),
           selected = "stage"
         ),
@@ -143,9 +143,14 @@ ui <- fluidPage(
       column(width = 8, tabsetPanel(
         id = "tabset",
         tabPanel("DATA",
-                 DT::DTOutput("data_table"),
-                 plotlyOutput("data_count_plotly"),
-                 plotlyOutput("data_feature_plotly")
+                 fluidRow(DT::DTOutput("data_table")),
+                 fluidRow(
+                   column(width = 6, plotlyOutput("data_count_plotly")),
+                   column(width = 6, plotlyOutput("data_feature_plotly"))
+                 ),
+                 fluidRow(
+                   plotlyOutput("variable_genes_plotly"),
+                 )
                  ),
         tabPanel("PCA", plotlyOutput("pca_plotly")),
         tabPanel("UMAP", plotlyOutput("umap_plotly")),

@@ -8,8 +8,9 @@ library(RColorBrewer)
 # source function
 source("functions.R")
 
+# server function
 server <- function(input, output, session) {
-  # Show the Data Section when 'Explore data' is clicked
+  ## hide and show sections
   observeEvent(input$explore_data, {
     shinyjs::hide("home_section")
     shinyjs::show("data_sets_section")
@@ -25,36 +26,38 @@ server <- function(input, output, session) {
     shinyjs::show("home_section")
   })
 
-  # tabset data
   observe(
-    if (input$tabset == "DATA"){
+    if (input$tabset == "DATA") {
       shinyjs::removeClass("sidebar", "visible")
     }else {
       shinyjs::addClass("sidebar", "visible")
     }
   )
   
-  # read data
+  ## read data
   df <- readRDS("data/pvsca_data.rds")
   data <- reactive({
     filtered_df <- df[df$stage %in% input$location, ]
     return(filtered_df)
   })
-
-  # select column 2d plots
+  
+  var_genes <- readRDS("data/variable_genes.rds")
+  
+  ## select column for 2d plots
   pc_columns <- grep("pc", colnames(df), ignore.case = TRUE, value = TRUE)
   umap_columns <- grep("um", colnames(df), ignore.case = TRUE, value = TRUE)
   tsne_columns <- grep("t_sne", colnames(df), ignore.case = TRUE, value = TRUE)
   cca_res_columns <- grep("CCA_snn", colnames(df), ignore.case = TRUE,
                           value = TRUE)
 
-  # table for DATA tab
+  ## DATA tab
   observeEvent(input$tabset, {
     if (input$tabset == "DATA") {
       flt_data <- data() %>% 
         select(id, species, day, condition, stage, replicate, location,
                vivax_strain, n_count_rna, n_feature_rna, sample,
                seurat_clusters)
+      ### DT table
      output$data_table <- renderDT({
        DT::datatable(flt_data,
                      options = list(pageLength = 10),
@@ -62,7 +65,8 @@ server <- function(input, output, session) {
                      rownames = FALSE
                      )
      })
-     
+      
+      ### violin plot
      output$data_count_plotly <- renderPlotly({
        violin_plotly(data = flt_data, x = "sample", y = "n_count_rna",
                      color = "seurat_clusters")
@@ -73,21 +77,26 @@ server <- function(input, output, session) {
                           color = "seurat_clusters")
      })
      
+     ### variable genes plot
+     output$variable_genes_plotly <- renderPlotly({
+       var_genes_plot(var_genes)
+     })
+     
     }
    })
   
   # dynamic UI for CCA resolution
-  observeEvent(input$color, {
-    if (input$color == "cca_res") {
-      output$cca_res_ui <- renderUI({
-        selectInput("cca_res", "Choose CCA resolution:",
-                    choices = cca_res_columns,
-                    selected = "CCA_snn_res.0.1")
-      })
-    } else {
-      output$cca_res_ui <- renderUI({NULL}) 
-    }
-  })
+  # observeEvent(input$color, {
+  #   if (input$color == "cca_res") {
+  #     output$cca_res_ui <- renderUI({
+  #       selectInput("cca_res", "Choose CCA resolution:",
+  #                   choices = cca_res_columns,
+  #                   selected = "CCA_snn_res.0.1")
+  #     })
+  #   } else {
+  #     output$cca_res_ui <- renderUI({NULL}) 
+  #   }
+  # })
   
 
   # Ensure data is available before creating selectInputs
@@ -159,21 +168,21 @@ server <- function(input, output, session) {
 
   # plots
   output$pca_plotly <- renderPlotly({
-    color_column <- if (input$color == "cca_res") input$cca_res else input$color
+    #color_column <- if (input$color == "cca_res") input$cca_res else input$color
     generate_plotly(data(), input$xaxis_input, input$yaxis_input,
-                    color_column, input$size, "PCA", input$plot)
+                    input$color, input$size, "PCA", input$plot)
   })
   
   output$umap_plotly <- renderPlotly({
-    color_column <- if (input$color == "cca_res") input$cca_res else input$color
+    #color_column <- if (input$color == "cca_res") input$cca_res else input$color
     generate_plotly(data(), input$xaxis_input, input$yaxis_input,
-                    color_column, input$size, "UMAP", input$plot)
+                    input$color, input$size, "UMAP", input$plot)
   })
   
   output$tsne_plotly <- renderPlotly({
-    color_column <- if (input$color == "cca_res") input$cca_res else input$color
+    #color_column <- if (input$color == "cca_res") input$cca_res else input$color
     generate_plotly(data(), input$xaxis_input, input$yaxis_input,
-                    color_column, input$size, "tSNE", input$plot)
+                    input$color, input$size, "tSNE", input$plot)
   })
   
 
