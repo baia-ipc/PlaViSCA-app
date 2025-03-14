@@ -110,21 +110,27 @@ generate_plotly <- function(df, xaxis_input, yaxis_input, color, size,
   colors <- colorRampPalette(brewer.pal(n = 8, name = "Set2"))(50)
   req(xaxis_input, yaxis_input, color)
   
+  x = df[[xaxis_input]]
+  y = df[[yaxis_input]]
   selected_color <- df[[color]]
   
   if (plot_dim == "2d") {
     # 2D plot
     plot <- plot_ly(
       data = df,
-      x = df[[xaxis_input]],
-      y = df[[yaxis_input]],
+      x = x,
+      y = y,
       type = "scatter",
       mode = "markers",
       color = ~selected_color,
       marker = list(size = size),
+      text = ~paste("Cell:", id, "<br>", color, ":", selected_color,
+                    "<br>x:", x,
+                    "<br>y:", y),
+      hoverinfo = "text",
       colors = colors,
-      width = 1200,
-      height = 800
+      width = 1100,
+      height = 750
     ) %>%
       layout(
         xaxis = list(title = paste("X-", xaxis_input)),
@@ -139,15 +145,24 @@ generate_plotly <- function(df, xaxis_input, yaxis_input, color, size,
       x_col <- "pc_1"
       y_col <- "pc_2"
       z_col <- "pc_3"
+    } else if (plot_type == "PCA_integrated") {
+      x_col <- "integratedrpca_1"
+      y_col <- "integratedrpca_2"
+      z_col <- "integratedrpca_3"
     } else if (plot_type == "UMAP") {
       x_col <- "umap_1"
       y_col <- "umap_2"
       z_col <- "umap_3"
+    } else if (plot_type == "UMAP_unintegred") {
+      x_col <- "umapunintegrated_1"
+      y_col <- "umapunintegrated_2"
+      z_col <- "umapunintegrated_3"
     } else if (plot_type == "tSNE") {
       x_col <- "t_sne_1"
       y_col <- "t_sne_2"
       z_col <- "t_sne_3"
     } 
+    
     
     plot <- plot_ly(
       data = df,
@@ -159,8 +174,9 @@ generate_plotly <- function(df, xaxis_input, yaxis_input, color, size,
       color = ~selected_color,
       marker = list(size = size),
       colors = colors,
-      width = 1200,
-      height = 800
+      text = ~paste("Cell:", id, "<br>Cluster:", ident),
+      width = 1100,
+      height = 750
     ) %>%
       layout(
         scene = list(

@@ -41,9 +41,17 @@ server <- function(input, output, session) {
   top_genes_exp <- list_data$top_genes_exp
   
   ### select column for 2d plots
-  pc_columns <- grep("pc", colnames(mr_data), ignore.case = TRUE, value = TRUE)
-  umap_columns <- grep("um", colnames(mr_data), ignore.case = TRUE, value = TRUE)
-  tsne_columns <- grep("t_sne", colnames(mr_data), ignore.case = TRUE, value = TRUE)
+  pc_columns <- grep("^pc_\\d+", colnames(mr_data),
+                     ignore.case = TRUE, value = TRUE)
+  pc_int_columns <- grep("^int.*pca.*", colnames(mr_data),
+                         ignore.case = TRUE, value = TRUE)
+  umap_columns <- grep("^umap_\\d+$", colnames(mr_data),
+                       ignore.case = TRUE, value = TRUE)
+  umap_uint_columns <- grep("^umapunint.*", colnames(mr_data),
+                          ignore.case = TRUE, value = TRUE)
+  tsne_columns <- grep("t_sne", colnames(mr_data), ignore.case = TRUE,
+                       value = TRUE)
+  gene_names <- colnames(mr_data)[tail(seq_along(mr_data), 10)]
  
   ### filter data
   mr_flt_data <- reactive({
@@ -59,7 +67,7 @@ server <- function(input, output, session) {
       mr_flt_data <- mr_flt_data %>% 
         select(id, species, day, condition, stage, replicate, location,
                vivax_strain, n_count_rna, n_feature_rna, sample,
-               seurat_clusters)
+               seurat_clusters, ident)
       
       #### DT table
      output$data_table <- renderDT({
@@ -73,12 +81,12 @@ server <- function(input, output, session) {
       #### violin plot
      output$data_count_plotly <- renderPlotly({
        violin_plotly(mr_flt_data, x = "sample", y = "n_count_rna",
-                     color = "seurat_clusters")
+                     color = "ident")
      })
      
      output$data_feature_plotly <- renderPlotly({
        violin_plotly(mr_flt_data, x = "sample", y = "n_feature_rna",
-                          color = "seurat_clusters")
+                          color = "ident")
      })
      
      #### variable genes plot
@@ -94,6 +102,18 @@ server <- function(input, output, session) {
     }
    })
   
+  # dynamic ui for gene name
+  observeEvent(input$color, {
+    if (input$color == "genes") {
+      output$genes_ui <- renderUI({
+        selectInput("genes_n", "Select Gene", choices = gene_names)
+      })
+    } else {
+      output$genes_ui <- renderUI({NULL})
+    }
+  })
+  
+  
   ## Ensure data is available before creating selectInputs
   output$xaxis <- renderUI({
     if (input$tabset == "UMAP" && input$plot == "2d") {
@@ -104,6 +124,14 @@ server <- function(input, output, session) {
         choices = umap_columns,
         selected = "umap_1"
       )
+    } else if (input$tabset == "UMAP_unintegred" && input$plot == "2d") {
+      selectInput(
+        width = "98%",
+        "xaxis_input",
+        "Select X-Axis",
+        choices = umap_uint_columns,
+        selected = "umapunintegrated_1"
+      )
     } else if (input$tabset == "PCA" && input$plot == "2d") {
       selectInput(
         width = "98%",
@@ -111,6 +139,14 @@ server <- function(input, output, session) {
         "Select X-Axis",
         choices = pc_columns,
         selected = "pc_1"
+      )
+    } else if (input$tabset == "PCA_integrated" && input$plot == "2d") {
+      selectInput(
+        width = "98%",
+        "xaxis_input",
+        "Select X-Axis",
+        choices = pc_int_columns,
+        selected = "integratedrpca_1"
       )
     } else if (input$tabset == "tSNE" && input$plot == "2d") {
       selectInput(
@@ -135,6 +171,17 @@ server <- function(input, output, session) {
         choices = y_choices,
         selected = "umap_2"
       )
+    } else if (input$tabset == "UMAP_unintegred" && input$plot == "2d") {
+      req(input$xaxis_input)
+      y_choices <- setdiff(umap_int_columns, input$xaxis_input)
+      
+      selectInput(
+        width = "98%",
+        "yaxis_input",
+        "Select Y-Axis",
+        choices = umap_uint_columns,
+        selected = "umapunintegrated_2"
+      )
     } else if (input$tabset == "PCA" && input$plot == "2d") {
       req(input$xaxis_input)
       y_choices <- setdiff(pc_columns, input$xaxis_input)
@@ -145,6 +192,17 @@ server <- function(input, output, session) {
         "Select Y-Axis",
         choices = pc_columns,
         selected = "pc_2"
+      )
+    } else if (input$tabset == "PCA_integrated" && input$plot == "2d") {
+      req(input$xaxis_input)
+      y_choices <- setdiff(pc_columns, input$xaxis_input)
+      
+      selectInput(
+        width = "98%",
+        "yaxis_input",
+        "Select Y-Axis",
+        choices = pc_int_columns,
+        selected = "integratedrpca_2"
       )
     } else if (input$tabset == "tSNE" && input$plot == "2d") {
       req(input$xaxis_input)
@@ -163,18 +221,33 @@ server <- function(input, output, session) {
 
   ## plots
   output$pca_plotly <- renderPlotly({
+    color_column <- if (input$color == "genes") input$genes_n else input$color
     generate_plotly(mr_flt_data(), input$xaxis_input, input$yaxis_input,
-                    input$color, input$size, "PCA", input$plot)
+                    color_column, input$size, "PCA", input$plot)
+  })
+  
+  output$pca_int_plotly <- renderPlotly({
+    color_column <- if (input$color == "genes") input$genes_n else input$color
+    generate_plotly(mr_flt_data(), input$xaxis_input, input$yaxis_input,
+                    color_column, input$size, "PCA_integrated", input$plot)
   })
   
   output$umap_plotly <- renderPlotly({
+    color_column <- if (input$color == "genes") input$genes_n else input$color
     generate_plotly(mr_flt_data(), input$xaxis_input, input$yaxis_input,
-                    input$color, input$size, "UMAP", input$plot)
+                    color_column, input$size, "UMAP", input$plot)
+  })
+  
+  output$umap_uint_plotly <- renderPlotly({
+    color_column <- if (input$color == "genes") input$genes_n else input$color
+    generate_plotly(mr_flt_data(), input$xaxis_input, input$yaxis_input,
+                    color_column, input$size, "UMAP_unintegred", input$plot)
   })
   
   output$tsne_plotly <- renderPlotly({
+    color_column <- if (input$color == "genes") input$genes_n else input$color
     generate_plotly(mr_flt_data(), input$xaxis_input, input$yaxis_input,
-                     input$color, input$size, "tSNE", input$plot)
+                    color_column, input$size, "tSNE", input$plot)
   })
   
 

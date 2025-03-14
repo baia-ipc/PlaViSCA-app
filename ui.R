@@ -119,17 +119,17 @@ ui <- fluidPage(
         ),
         radioButtons("color", "Color:",
           choices = list(
+            "Identity" = "ident",
             "Stage" = "stage",
             "Strain" = "vivax_strain",
             "Day" = "day",
             "Condition" = "condition",
-            "Replicate" = "replicate",
-            "Cluster" = "seurat_clusters"
-            #"CCA resolution" = "cca_res"
+            "Replicate" = "replicate", 
+            "Genes" = "genes"
           ),
-          selected = "stage"
+          selected = "ident"
         ),
-        uiOutput("cca_res_ui"),
+        uiOutput("genes_ui"),
         radioButtons("plot", "plot",
           choices = list("2D" = "2d", "3D" = "3d"),
           selected = "2d"
@@ -154,7 +154,9 @@ ui <- fluidPage(
                  )
                  ),
         tabPanel("PCA", plotlyOutput("pca_plotly")),
+        tabPanel("PCA_integrated", plotlyOutput("pca_int_plotly")),
         tabPanel("UMAP", plotlyOutput("umap_plotly")),
+        tabPanel("UMAP_unintegred", plotlyOutput("umap_uint_plotly")),
         tabPanel("tSNE", plotlyOutput("tsne_plotly"))
       ))
     )
