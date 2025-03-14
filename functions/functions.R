@@ -107,12 +107,14 @@ top_genes_exp <- function(df, default_gene = "PVP01_1460700") {
 generate_plotly <- function(df, xaxis_input, yaxis_input, color, size,
                             plot_type = "PCA", plot_dim = "2d") {
   req(df)
-  colors <- colorRampPalette(brewer.pal(n = 8, name = "Set2"))(50)
   req(xaxis_input, yaxis_input, color)
-  
   x = df[[xaxis_input]]
   y = df[[yaxis_input]]
   selected_color <- df[[color]]
+  
+  ifelse(is.character(selected_color),
+         colors <- RColorBrewer::brewer.pal(12, "Set3"),
+         colors <- RColorBrewer::brewer.pal(11, "RdYlBu"))
   
   if (plot_dim == "2d") {
     # 2D plot
@@ -122,9 +124,11 @@ generate_plotly <- function(df, xaxis_input, yaxis_input, color, size,
       y = y,
       type = "scatter",
       mode = "markers",
-      color = ~selected_color,
+      color = as.formula(paste0("~", color)),
       marker = list(size = size),
-      text = ~paste("Cell:", id, "<br>", color, ":", selected_color,
+      text = ~paste("Cell:", id,
+                    "<br>", "cluster:", ident,
+                    "<br>", color, ":", selected_color,
                     "<br>x:", x,
                     "<br>y:", y),
       hoverinfo = "text",
@@ -171,10 +175,15 @@ generate_plotly <- function(df, xaxis_input, yaxis_input, color, size,
       z = ~get(z_col),
       type = "scatter3d",
       mode = "markers",
-      color = ~selected_color,
+      color = as.formula(paste0("~", color)),
       marker = list(size = size),
       colors = colors,
-      text = ~paste("Cell:", id, "<br>Cluster:", ident),
+      text = ~paste("Cell:", id,
+                    "<br>", "cluster:", ident,
+                    "<br>", color, ":", selected_color,
+                    "<br>x:", x,
+                    "<br>y:", y),
+      hoverinfo = "text",
       width = 1100,
       height = 750
     ) %>%

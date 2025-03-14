@@ -114,7 +114,7 @@ server <- function(input, output, session) {
   })
   
   
-  ## Ensure data is available before creating selectInputs
+  ## define x and y axis
   output$xaxis <- renderUI({
     if (input$tabset == "UMAP" && input$plot == "2d") {
       selectInput(
@@ -173,7 +173,7 @@ server <- function(input, output, session) {
       )
     } else if (input$tabset == "UMAP_unintegred" && input$plot == "2d") {
       req(input$xaxis_input)
-      y_choices <- setdiff(umap_int_columns, input$xaxis_input)
+      y_choices <- setdiff(umap_uint_columns, input$xaxis_input)
       
       selectInput(
         width = "98%",
