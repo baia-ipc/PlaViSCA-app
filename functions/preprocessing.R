@@ -12,7 +12,7 @@ gff_data <- read_tsv("ref/PvivaxP01_gff_data.tsv") %>%
 # load seurat object
 so <- readRDS("data/Pv.all.12.Jan2025.rds")
 
-# change features from - to _ to match with gff gene_id
+#change features from - to _ to match with gff gene_id
 features <- gsub("-", "_", rownames(so[["RNA"]]@features))
 rownames(so[["RNA"]]@features) <- features
 saveRDS(so, "data/Pv.all.12.Jan2025.modified.rds")
@@ -53,29 +53,34 @@ meta_reduc_data <- reduce(list(metadata_subset, umap_data, pca_data, tsne_data),
   janitor::clean_names()
 
 # variable genes expression
-ndata <- GetAssayData(so, assay = "RNA", layer = "data")
-mean_expression <- rowMeans(ndata)
-variance_expression <- apply(ndata, 1, var)
-std_variance <-
-  (variance_expression - mean(variance_expression)) / sd(variance_expression)
+so <- FindVariableFeatures(so, assay = "RNA", selection.method = "vst",
+                           nfeatures = 2000)
+vf_data <- HVFInfo(object = so, assay = "RNA", method = "vst", status = TRUE)
 
-ndata <- data.frame(
-  gene = rownames(ndata),
-  mean_expr = mean_expression,
-  std_variance = std_variance
-)
 
-variable_genes <- VariableFeatures(so)
-vf_top <- head(variable_genes, 15)
-
-ndata <- ndata %>% 
-  mutate(variable_genes = gene %in% variable_genes,
-         top = gene %in% vf_top)
-
-ndata <- left_join(ndata, gff_data, by = c("gene" = "id")) %>%
-  select(gene, name, mean_expr, std_variance, variable_genes, top) %>% 
-  mutate(name = coalesce(name, gene))
-  
+# ndata <- GetAssayData(so, assay = "RNA", layer = "data")
+# mean_expression <- rowMeans(ndata)
+# variance_expression <- apply(ndata, 1, var)
+# std_variance <-
+#   (variance_expression - mean(variance_expression)) / sd(variance_expression)
+# 
+# ndata <- data.frame(
+#   gene = rownames(ndata),
+#   mean_expr = mean_expression,
+#   std_variance = std_variance
+# )
+# 
+# variable_genes <- VariableFeatures(so)
+# vf_top <- head(variable_genes, 15)
+# 
+# ndata <- ndata %>% 
+#   mutate(variable_genes = gene %in% variable_genes,
+#          top = gene %in% vf_top)
+# 
+# ndata <- left_join(ndata, gff_data, by = c("gene" = "id")) %>%
+#   select(gene, name, mean_expr, std_variance, variable_genes, top) %>% 
+#   mutate(name = coalesce(name, gene))
+#   
 
 
 # top expression genes
@@ -92,7 +97,7 @@ top_genes_exp <- FetchData(so, vars = c(top_genes, "seurat_clusters")) %>%
 
 save_data <- list(
   mr_data = meta_reduc_data,
-  normalized_genes_var = ndata,
+  vf_data = vf_data,
   top_genes_exp = top_genes_exp
 )
 

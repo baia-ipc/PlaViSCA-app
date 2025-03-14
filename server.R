@@ -37,7 +37,7 @@ server <- function(input, output, session) {
   ## read data
   list_data <- readRDS("data/cleaned_dataset.rds")
   mr_data <- list_data$mr_data
-  normalized_genes_var <- list_data$normalized_genes_var
+  vf_data <- list_data$vf_data
   top_genes_exp <- list_data$top_genes_exp
   
   ### select column for 2d plots
@@ -83,7 +83,7 @@ server <- function(input, output, session) {
      
      #### variable genes plot
      output$variable_genes_plotly <- renderPlotly({
-       var_genes_plot(normalized_genes_var)
+       var_genes_plot(vf_data)
      })
      
      ### top variable genes plot

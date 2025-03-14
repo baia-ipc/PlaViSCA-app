@@ -25,49 +25,39 @@ violin_plotly <- function(df, x, y, color) {
 # function to plot the variable genes
 var_genes_plot <- function(df) {
   req(df)
-  plot_ly() %>%
-    add_trace(
-      data = df,
-      x = ~mean_expr,
-      y = ~std_variance,
-      text = ~name,
-      type = 'scatter',
-      mode = 'markers',
-      marker = list(size = 6, color = 'lightgray'),
-      hoverinfo = 'text',
-      name = paste('Non-variable: (', nrow(df), ')', sep = '')
-    ) %>%
-    add_trace(
-      data = df[df$variable_genes, ],
-      x = ~mean_expr,
-      y = ~std_variance,
-      text = ~name,
-      type = 'scatter',
-      mode = 'markers',
-      marker = list(size = 8, color = 'blue'),
-      hoverinfo = 'text',
-      name = paste('Variable: (', nrow(df[df$variable_genes, ]), ')',
-                   sep = '')
-    ) %>%
-    add_trace(
-      data = df[df$top, ],
-      x = ~mean_expr,
-      y = ~std_variance,
-      text = ~name,
-      type = 'scatter',
-      mode = 'markers+text',
-      marker = list(size = 10, color = 'red'),
-      textposition = 'top',
-      hoverinfo = 'text',
-      name = paste('Top Variable Genes (', nrow(df[df$top, ]), ')',
-                   sep = '')
-    ) %>%
-    layout(
-      title = "Variable genes",
-      xaxis = list(title = "Average Expression"),
-      yaxis = list(title = "Standardized Variance"),
-      showlegend = TRUE
-    )
+  
+  counts <- table(df$variable)
+  var_count <- counts["TRUE"]
+  nonvar_count <- counts["FALSE"]
+  
+  df$variable_status <- ifelse(
+    df$variable,
+    paste0("Variable (n = ", var_count, ")"),
+    paste0("Non-variable (n = ", nonvar_count, ")")
+  )
+  
+  plot_ly(
+    data = df,
+    x = ~mean,
+    y = ~variance.standardized,
+    color = ~variable_status,
+    colors = c("black", "red"),
+    type = 'scatter',
+    mode = 'markers',
+    marker = list(size = 5, opacity = 0.7),
+    text = rownames(df),
+    hovertemplate = paste(
+      "Gene: %{text}<br>",
+      "Mean: %{x}<br>",
+      "Variance: %{y}<extra></extra>"
+    ),
+    hoverinfo = "text"
+  ) %>% layout(
+    title = "Highly Variable Features (HVFs)",
+    xaxis = list(title = "Mean Expression"),
+    yaxis = list(title = "Standardized Variance"),
+    legend = list(title = list(text = "<b>Variable Status</b>"))
+  )
 }
 
 # function to plot top expression gene per cluster
