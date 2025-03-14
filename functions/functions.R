@@ -53,7 +53,7 @@ var_genes_plot <- function(df) {
     ),
     hoverinfo = "text"
   ) %>% layout(
-    title = "Highly Variable Features (HVFs)",
+    title = "Variable Features",
     xaxis = list(title = "Mean Expression"),
     yaxis = list(title = "Standardized Variance"),
     legend = list(title = list(text = "<b>Variable Status</b>"))
@@ -61,13 +61,13 @@ var_genes_plot <- function(df) {
 }
 
 # function to plot top expression gene per cluster
-top_genes_exp <- function(df, default_gene = "GEST") {
+top_genes_exp <- function(df, default_gene = "PVP01_1460700") {
   req(df)
   plot_ly(
     data = df,
-    x = ~seurat_clusters,
+    x = ~ident,
     y = ~expression,
-    color = ~seurat_clusters,
+    color = ~ident,
     colors = colors,
     type = "violin",
     transforms = list(
@@ -80,10 +80,10 @@ top_genes_exp <- function(df, default_gene = "GEST") {
     )
   ) %>%
     layout(
-      title = "Top expression genes per cluster",
-      xaxis = list(title = "Cluster"),
+      title = "Top expression genes per ident cluster",
+      xaxis = list(title = "Idents"),
       yaxis = list(title = "Expression"),
-      showlegend = TRUE,
+      legend = list(title = list(text = "<b>Idents</b>")),
       updatemenus = list(
         list(
           type = "dropdown",
