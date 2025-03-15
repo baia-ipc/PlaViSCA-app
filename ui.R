@@ -6,8 +6,10 @@ ui <- fluidPage(
   useShinyjs(),
 
   # Link to CSS and JS files
-  tags$link(rel = "stylesheet", type = "text/css",
-            href = "style.css"),
+  tags$link(
+    rel = "stylesheet", type = "text/css",
+    href = "style.css"
+  ),
   tags$script(src = "script.js"),
 
   # Menu Bar
@@ -60,7 +62,8 @@ ui <- fluidPage(
                  necessary for actionable interventions. Bridging these gaps
                  requires a collective effort to standardize, centralize, and
                  share knowledge."),
-      p("To address these challenges, we have developed a platform
+      p(
+        "To address these challenges, we have developed a platform
                  dedicated to facilitating the sharing of Plasmodium
                  vivax-related data and knowledge. This innovative solution
                  seeks to bridge gaps in global collaboration by integrating
@@ -124,7 +127,7 @@ ui <- fluidPage(
             "Strain" = "vivax_strain",
             "Day" = "day",
             "Condition" = "condition",
-            "Replicate" = "replicate", 
+            "Replicate" = "replicate",
             "Genes" = "genes"
           ),
           selected = "ident"
@@ -142,17 +145,18 @@ ui <- fluidPage(
       ),
       column(width = 8, tabsetPanel(
         id = "tabset",
-        tabPanel("DATA",
-                 fluidRow(DT::DTOutput("data_table")),
-                 fluidRow(
-                   column(width = 6, plotlyOutput("data_count_plotly")),
-                   column(width = 6, plotlyOutput("data_feature_plotly"))
-                 ),
-                 fluidRow(
-                   column(width = 6, plotlyOutput("variable_genes_plotly")),
-                   column(width = 6, plotlyOutput("top_var_genes_plotly"))
-                 )
-                 ),
+        tabPanel(
+          "DATA",
+          fluidRow(DT::DTOutput("data_table")),
+          fluidRow(
+            column(width = 6, plotlyOutput("data_count_plotly")),
+            column(width = 6, plotlyOutput("data_feature_plotly"))
+          ),
+          fluidRow(
+            column(width = 6, plotlyOutput("variable_genes_plotly")),
+            column(width = 6, plotlyOutput("top_var_genes_plotly"))
+          )
+        ),
         tabPanel("PCA", plotlyOutput("pca_plotly")),
         tabPanel("PCA_integrated", plotlyOutput("pca_int_plotly")),
         tabPanel("UMAP", plotlyOutput("umap_plotly")),

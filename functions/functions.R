@@ -5,45 +5,45 @@ colors <- RColorBrewer::brewer.pal(12, "Set3")
 violin_plotly <- function(df, x, y, color) {
   req(df)
   plot_ly(df,
-          x = ~get(x),
-          y = ~get(y),
-          color = ~get(color),
-          colors = colors,
-          type = "violin",
-          box = list(visible = TRUE),
-          meanline = list(visible = TRUE),
-          jitter = 0.4
-          ) %>% 
-    layout(title = paste(y),
-           xaxis = list(title = x),
-           yaxis = list(title = y),
-           legend = list(title = list(text = color))
+    x = ~ get(x),
+    y = ~ get(y),
+    color = ~ get(color),
+    colors = colors,
+    type = "violin",
+    box = list(visible = TRUE),
+    meanline = list(visible = TRUE),
+    jitter = 0.4
+  ) %>%
+    layout(
+      title = paste(y),
+      xaxis = list(title = x),
+      yaxis = list(title = y),
+      legend = list(title = list(text = color))
     )
-  
 }
 
 # function to plot the variable genes
 var_genes_plot <- function(df) {
   req(df)
-  
+
   counts <- table(df$variable)
   var_count <- counts["TRUE"]
   nonvar_count <- counts["FALSE"]
-  
+
   df$variable_status <- ifelse(
     df$variable,
     paste0("Variable (n = ", var_count, ")"),
     paste0("Non-variable (n = ", nonvar_count, ")")
   )
-  
+
   plot_ly(
     data = df,
     x = ~mean,
     y = ~variance.standardized,
     color = ~variable_status,
     colors = c("black", "red"),
-    type = 'scatter',
-    mode = 'markers',
+    type = "scatter",
+    mode = "markers",
     marker = list(size = 5, opacity = 0.7),
     text = rownames(df),
     hovertemplate = paste(
@@ -108,14 +108,16 @@ generate_plotly <- function(df, xaxis_input, yaxis_input, color, size,
                             plot_type = "PCA", plot_dim = "2d") {
   req(df)
   req(xaxis_input, yaxis_input, color)
-  x = df[[xaxis_input]]
-  y = df[[yaxis_input]]
+  x <- df[[xaxis_input]]
+  y <- df[[yaxis_input]]
   selected_color <- df[[color]]
-  
-  ifelse(is.character(selected_color),
-         colors <- RColorBrewer::brewer.pal(12, "Set3"),
-         colors <- RColorBrewer::brewer.pal(11, "RdYlBu"))
-  
+
+  if (is.character(selected_color) || is.factor(selected_color)) {
+    colors <- RColorBrewer::brewer.pal(8, "Set2")
+  } else {
+    colors <- RColorBrewer::brewer.pal(11, "RdYlBu")
+  }
+
   if (plot_dim == "2d") {
     # 2D plot
     plot <- plot_ly(
@@ -126,15 +128,17 @@ generate_plotly <- function(df, xaxis_input, yaxis_input, color, size,
       mode = "markers",
       color = as.formula(paste0("~", color)),
       marker = list(size = size),
-      text = ~paste("Cell:", id,
-                    "<br>", "cluster:", ident,
-                    "<br>", "color by", color, ":", selected_color,
-                    "<br>", "n_Features_RNA:", n_feature_rna,
-                    "<br>x:", x,
-                    "<br>y:", y),
+      text = ~ paste(
+        "Cell:", id,
+        "<br>", "cluster:", ident,
+        "<br>", "color by", color, ":", selected_color,
+        "<br>", "n_Features_RNA:", n_feature_rna,
+        "<br>x:", x,
+        "<br>y:", y
+      ),
       hoverinfo = "text",
       colors = colors,
-      width = 1100,
+      width = 1000,
       height = 750
     ) %>%
       layout(
@@ -143,7 +147,6 @@ generate_plotly <- function(df, xaxis_input, yaxis_input, color, size,
         legend = list(title = list(text = color))
       ) %>%
       config(displaylogo = FALSE, scrollZoom = TRUE)
-    
   } else {
     # 3D plot
     if (plot_type == "PCA") {
@@ -166,27 +169,29 @@ generate_plotly <- function(df, xaxis_input, yaxis_input, color, size,
       x_col <- "t_sne_1"
       y_col <- "t_sne_2"
       z_col <- "t_sne_3"
-    } 
-    
-    
+    }
+
+
     plot <- plot_ly(
       data = df,
-      x = ~get(x_col),
-      y = ~get(y_col),
-      z = ~get(z_col),
+      x = ~ get(x_col),
+      y = ~ get(y_col),
+      z = ~ get(z_col),
       type = "scatter3d",
       mode = "markers",
       color = as.formula(paste0("~", color)),
       marker = list(size = size),
       colors = colors,
-      text = ~paste("Cell:", id,
-                    "<br>", "cluster:", ident,
-                    "<br>", "color by", color, ":", selected_color,
-                    "<br>", "n_Features_RNA:", n_feature_rna,
-                    "<br>x:", x,
-                    "<br>y:", y),
+      text = ~ paste(
+        "Cell:", id,
+        "<br>", "cluster:", ident,
+        "<br>", "color by", color, ":", selected_color,
+        "<br>", "n_Features_RNA:", n_feature_rna,
+        "<br>x:", x,
+        "<br>y:", y
+      ),
       hoverinfo = "text",
-      width = 1100,
+      width = 1000,
       height = 750
     ) %>%
       layout(
@@ -199,6 +204,6 @@ generate_plotly <- function(df, xaxis_input, yaxis_input, color, size,
       ) %>%
       config(displaylogo = FALSE, scrollZoom = TRUE)
   }
-  
+
   return(plot)
 }
