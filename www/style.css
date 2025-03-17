@@ -1,242 +1,227 @@
-* {
-    box-sizing: border-box;
+*{
+  box-sizing: border-box;
 }
-
 /* Menu Bar */
 .menu-bar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 10px 20px;
-    margin-bottom: 20px;
-    border-bottom: 2px solid black;
-    background-color: #f8fbf8;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 20px;
+  margin-bottom: 20px;
+  border-bottom: 2px solid black;
+  background-color: #f8fbf8;
 }
 
 .menu-title {
-    font-size: 36px;
-    font-weight: bold;
-    text-align: center;
-    flex-grow: 1;
-    padding-left: 20px;
+  font-size: 36px;
+  font-weight: bold;
+  text-align: center;
+  flex-grow: 1;
+  padding-left: 20px;
 }
 
 .menu-title span {
-    display: inline-block;
-    color: blue;
-    font-weight: bold;
+  display: inline-block;
+  color: blue;
+  font-weight: bold;
 }
 
 .menu-items {
-    display: flex;
-    align-items: center;
-    color: black;
+  display: flex;
+  align-items: center;
+  color: black;
 }
 
 .menu-link {
-    color: black;
-    text-decoration: none;
-    margin: 0 10px;
-    font-size: 16px;
+  color: black;
+  text-decoration: none;
+  margin: 0 10px;
+  font-size: 16px;
 }
 
 .menu-link:hover {
-    text-decoration: underline;
+  text-decoration: underline;
 }
 
 .img {
-    padding: 15px;
+  padding: 15px;
 }
 
 .img img {
-    width: 100%;
-    height: auto;
-    object-fit: cover;
+  width: 100%;
+  height: auto;
+  object-fit: cover;
 }
 
-/* Home Page */
+/* home page */
 .introduction p {
-    padding: 15px;
-    text-align: justify;
+  padding: 15px;
+  text-align: justify;
 }
 
-/* Data Section */
+/* data data */
 #data_sets_section {
-    padding: 15px;
+  padding: 15px;
 }
 
-.checkbox, .radio {
-    position: relative;
-    display: block;
-    margin-top: 0px;
-    margin-bottom: 0px;
-    width: 100%;
+#stagei,
+#stagelr,
+#size,
+#color,
+#plot {
+  width: 100%;
+  display: block;
 }
 
-.control-label {
-    background-color: #e0f2d7 !important;
-    width: 100%;
-    font-weight: bold;
-    margin-bottom: 5px;
-    display: flex;
-    max-width: 100%;
-    padding: 10px;
-    justify-content: center;
+#stagei-label,
+#size-label,
+#color-label,
+#plot-label {
+  background-color: #e0f2d7 !important;
+  width: 100%;
+  font-weight: bold;
+  margin-bottom: 5px;
 }
 
-#stagelr-label,
-#xaxis_input-label,
-#yaxis_input-label {
-    background-color: transparent !important;
-    justify-content: left;
-    padding: 0px !important;
-    margin: 0px !important;
-}
-
-.control-label:hover {
-    cursor: default;
-}
-
-.shiny-input-checkboxgroup label~.shiny-options-group,
-.shiny-input-radiogroup label~.shiny-options-group {
-    margin-top: 0px;
-}
-
-.checkbox label,
-.radio label {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    background-color: white;
-    width: 100%;
-    height: 100%;
-}
-
-.checkbox label:hover,
-.radio label:hover {
-    background-color: #dbdbdb;
-}
-
-#stagelr label {
-    display: flex;
-    border: none;
-    justify-content: left;
-    text-align: left;
-    margin-left: 20px;
-    padding: 0px;
-    min-width: 82px;
+#stagei-label:hover,
+#stagelr-label:hover,
+#size-label:hover,
+#color-label:hover,
+#plot-label:hover {
+  cursor: default;
 }
 
 .shiny-options-group {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 5px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
 }
 
-.checkbox+.checkbox, .radio+.radio {
-    margin-top: 0px;
+#color .shiny-options-group,
+#stagelr .shiny-options-group {
+  align-items: flex-end;
 }
 
-.radio,
-.checkbox {
-    flex: 1 0 32%;
-    display: block;
+#stagei .shiny-options-group .checkbox,
+#size .shiny-options-group .radio,
+#plot .shiny-options-group .radio {
+  margin-top: 10px;
 }
 
-#plot {
-    flex: 1 0 48% !important;
+
+#plot .shiny-options-group .radio
+{
+  flex: 1 0 48%;
+}
+
+#color .shiny-options-group .radio,
+#stagelr .shiny-options-group .checkbox,
+#stagei .shiny-options-group .checkbox,
+#size .shiny-options-group .radio {
+  flex: 1 0 31%;
+}
+
+#stagei label {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  width: 100%;
+}
+
+#stagei label,
+#size label,
+#color label,
+#plot label {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: white;
+  text-align: center;
+  width: 100%;
+}
+
+#stagei label:hover,
+#size label:hover,
+#color label:hover,
+#plot label:hover {
+  background-color: #dbdbdb;
 }
 
 #stagei input[type="checkbox"],
 #size input[type="radio"],
 #color input[type="radio"],
 #plot input[type="radio"] {
-    display: none;
+   display: none;
 }
 
 #sidebar {
-    width: 0;
-    opacity: 0;
-    visibility: hidden;
-    transition: width .1s ease, opacity .5s ease, visibility .1s;
+  width: 0;
+  opacity: 0;
+  visibility: hidden;
+  transition: width .1s ease, opacity .5s ease, visibility .1s;
 }
 
 #sidebar.visible {
-    width: 25%;
-    opacity: 1;
-    visibility: visible;
-    transition: width .1s ease, opacity .3s ease;
+  width: 25%;
+  opacity: 1;
+  visibility: visible;
+  transition: width .1s ease, opacity .3s ease;
 }
+
+#xaxis .shiny-input-container {
+width: 93%;
+margin-left: 15px;
+}
+
+#yaxis .shiny-input-container {
+width: 93%;
+margin-left: 5px;
+}
+
 
 #data_sets_section .col-sm-8 {
-    width: 75%;
-    transition: width .1s ease;
+  width: 75%;
+  transition: width .1s ease;
 }
 
-/* Checked Label */
+/*this class added by jquery to ensure the checked label color*/
 .checked-label {
-    background-color: #d3d3d3 !important;
-    color: black;
-    border: 2px solid #000;
-    padding: 5px;
-    border-radius: 4px;
+  background-color: #d3d3d3 !important;
+  color: black;
+  border: 2px solid #000;
+  padding: 5px;
+  border-radius: 4px;
 }
 
-/* Style selected input */
 
+/*Style selectedinput*/
 .col-sm-6 {
-    padding-left: 0px;
-    padding-right: 0px;
-    margin: 0px;
-    width: 45%;
+ padding-left: 0 !important;
+ padding-right: 0 !important;
 }
 
-#xaxis {
-    margin-left: 20px !important;
-    margin-right: 0px !important;
-    padding-left: 0px !important;
-    padding-right: 0px !important;
-}
-
-#yaxis {
-    margin-left: 5px !important;
-    padding-left: 0px !important;
-    margin-right: 0px !important;
-    padding-right: 0px !important;
-
-}
-
-/* #yaxis .shiny-input-select,
-#yaxis_input-label {
-    padding-right: 18px !important;
-    padding-left: 2.5px !important;
-    margin-left: 0px !important;
-} */
-
-/* Style on download button */
+/*style on download button*/
 .bt-download {
-    background-color: #4CAF50;
-    color: white;
-    padding: 10px 20px;
-    font-size: 16px;
-    border-radius: 5px;
-    border: none;
-    cursor: pointer;
-    width: 95%;
+  background-color: #4CAF50;
+  color: white;
+  padding: 10px 20px;
+  font-size: 16px;
+  border-radius: 5px;
+  border: none;
+  cursor: pointer;
+  width: 100%;
 }
 
 /* Responsive Design */
 @media screen and (max-width: 768px) {
-    .menu-bar {
-        flex-direction: column;
-        text-align: center;
-    }
+  .menu-bar {
+    flex-direction: column;
+    text-align: center;
+  }
 
-    .display {
-        flex-direction: column;
-    }
+  .display {
+    flex-direction: column;
+  }
 }
