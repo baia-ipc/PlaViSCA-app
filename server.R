@@ -274,7 +274,7 @@ server <- function(input, output, session) {
     content = function(file) {
       withProgress(message = "Processing Data", value = 0, {
         incProgress(0.4, detail = "Saving file...")
-        write.csv(mr_flt_data(), file, row.names = FALSE)
+        write.csv(filtered_data(), file, row.names = FALSE)
         incProgress(1, detail = "Download complete")
       })
     }

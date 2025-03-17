@@ -103,9 +103,9 @@ top_genes_exp <- function(df, default_gene = "PVP01_1460700") {
     )
   ) %>%
     layout(
-      title = "Top expression genes per ident cluster",
+      title = "Top expression genes per ident",
       xaxis = list(title = "Idents"),
-      yaxis = list(title = "Expression"),
+      yaxis = list(title = "Average expression"),
       legend = list(title = list(text = "<b>Idents</b>")),
       updatemenus = list(
         list(

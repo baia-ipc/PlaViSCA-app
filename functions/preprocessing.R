@@ -94,18 +94,12 @@ save_data <- list(
   top_genes_exp = top_genes_exp
 )
 
-# Differential expression
-de <- FindAllMarkers(so, test.use = "DESeq2")
+# differentially expressed genes
+de_genes <- FindAllMarkers(so)
 
-
-
-
-
-
-
-
-
-
+de_genes <- left_join(de_genes, gff_data, by = c("gene" = "id")) %>%
+  select(gene, name, everything()) 
+saveRDS(de_genes, "data/de_genes.rds")
 
 # save list of data
 saveRDS(save_data, "data/cleaned_dataset.rds")
