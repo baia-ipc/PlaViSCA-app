@@ -8,6 +8,12 @@ library(RColorBrewer)
 # source function
 source("functions/functions.R")
 
+## read data
+list_data <- readRDS("data/cleaned_dataset.rds")
+mr_data <- list_data$mr_data
+vf_data <- list_data$vf_data
+top_genes_exp <- list_data$top_genes_exp
+
 # server function
 server <- function(input, output, session) {
   ## hide and show sections
@@ -34,11 +40,6 @@ server <- function(input, output, session) {
     }
   )
 
-  ## read data
-  list_data <- readRDS("data/cleaned_dataset.rds")
-  mr_data <- list_data$mr_data
-  vf_data <- list_data$vf_data
-  top_genes_exp <- list_data$top_genes_exp
 
   ### select column for 2d plots
   pc_columns <- grep("^pc_\\d+", colnames(mr_data),
@@ -60,42 +61,43 @@ server <- function(input, output, session) {
   gene_names <- colnames(mr_data)[tail(seq_along(mr_data), 10)]
 
   ### filter data
-  mr_flt_data <- reactive({
-    mr_data <- mr_data %>%
-      filter(stage %in% input$stagei)
-    return(mr_data)
+  filtered_data <- reactiveVal(NULL)
+  observeEvent(input$stagei, {
+    filtered_data(mr_data %>% filter(stage %in% input$stagei))
   })
-
+  
+  
   ### DATA tab
   observeEvent(input$tabset, {
+    req(input$tabset) 
     if (input$tabset == "DATA") {
-      mr_flt_data <- mr_flt_data()
-      mr_flt_data <- mr_flt_data %>%
+      filtered_data <- filtered_data()
+      filtered_data <- filtered_data %>%
         select(
-          id, species, day, condition, stage, replicate, location,
-          vivax_strain, n_count_rna, n_feature_rna, sample,
-          seurat_clusters, ident
+          id, species, day, condition, stage, n_count_rna, n_feature_rna,
+          sample, ident, umap_1, umap_2, pc_1, pc_2, t_sne_1,
+          t_sne_2
         )
 
       #### DT table
       output$data_table <- renderDT({
-        DT::datatable(mr_flt_data,
-          options = list(pageLength = 10),
+        DT::datatable(filtered_data,
+          options = list(pageLength = 10, scrollX = TRUE),
           selection = "single",
           rownames = FALSE
         )
-      })
+      }, server = TRUE)
 
       #### violin plot
       output$data_count_plotly <- renderPlotly({
-        violin_plotly(mr_flt_data,
+        violin_plotly(filtered_data,
           x = "sample", y = "n_count_rna",
           color = "ident"
         )
       })
 
       output$data_feature_plotly <- renderPlotly({
-        violin_plotly(mr_flt_data,
+        violin_plotly(filtered_data,
           x = "sample", y = "n_feature_rna",
           color = "ident"
         )
@@ -103,11 +105,11 @@ server <- function(input, output, session) {
 
       #### variable genes plot
       output$variable_genes_plotly <- renderPlotly({
-        var_genes_plot(vf_data)
+        var_genes_plot(vf_data, top_n = 15)
       })
 
-      ### top variable genes plot
-      output$top_var_genes_plotly <- renderPlotly({
+      ### top genes expression plot
+      output$top_genes_exp_plotly <- renderPlotly({
         top_genes_exp(top_genes_exp)
       })
     }
@@ -226,7 +228,7 @@ server <- function(input, output, session) {
   output$pca_plotly <- renderPlotly({
     color_column <- if (input$color == "genes") input$genes_n else input$color
     generate_plotly(
-      mr_flt_data(), input$xaxis_input, input$yaxis_input,
+      filtered_data(), input$xaxis_input, input$yaxis_input,
       color_column, input$size, "PCA", input$plot
     )
   })
@@ -234,7 +236,7 @@ server <- function(input, output, session) {
   output$pca_int_plotly <- renderPlotly({
     color_column <- if (input$color == "genes") input$genes_n else input$color
     generate_plotly(
-      mr_flt_data(), input$xaxis_input, input$yaxis_input,
+      filtered_data(), input$xaxis_input, input$yaxis_input,
       color_column, input$size, "PCA_integrated", input$plot
     )
   })
@@ -242,7 +244,7 @@ server <- function(input, output, session) {
   output$umap_plotly <- renderPlotly({
     color_column <- if (input$color == "genes") input$genes_n else input$color
     generate_plotly(
-      mr_flt_data(), input$xaxis_input, input$yaxis_input,
+      filtered_data(), input$xaxis_input, input$yaxis_input,
       color_column, input$size, "UMAP", input$plot
     )
   })
@@ -250,7 +252,7 @@ server <- function(input, output, session) {
   output$umap_uint_plotly <- renderPlotly({
     color_column <- if (input$color == "genes") input$genes_n else input$color
     generate_plotly(
-      mr_flt_data(), input$xaxis_input, input$yaxis_input,
+      filtered_data(), input$xaxis_input, input$yaxis_input,
       color_column, input$size, "UMAP_unintegred", input$plot
     )
   })
@@ -258,7 +260,7 @@ server <- function(input, output, session) {
   output$tsne_plotly <- renderPlotly({
     color_column <- if (input$color == "genes") input$genes_n else input$color
     generate_plotly(
-      mr_flt_data(), input$xaxis_input, input$yaxis_input,
+      filtered_data(), input$xaxis_input, input$yaxis_input,
       color_column, input$size, "tSNE", input$plot
     )
   })

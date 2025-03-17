@@ -128,6 +128,7 @@ ui <- fluidPage(
             "Day" = "day",
             "Condition" = "condition",
             "Replicate" = "replicate",
+            "Species" = "species",
             "Genes" = "genes"
           ),
           selected = "ident"
@@ -154,7 +155,7 @@ ui <- fluidPage(
           ),
           fluidRow(
             column(width = 6, plotlyOutput("variable_genes_plotly")),
-            column(width = 6, plotlyOutput("top_var_genes_plotly"))
+            column(width = 6, plotlyOutput("top_genes_exp_plotly"))
           )
         ),
         tabPanel("PCA", plotlyOutput("pca_plotly")),

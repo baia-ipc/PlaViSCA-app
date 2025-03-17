@@ -70,6 +70,11 @@ so <- FindVariableFeatures(so,
 )
 vf_data <- HVFInfo(object = so, assay = "RNA", method = "vst", status = TRUE)
 
+vf_data <- vf_data %>%
+  rownames_to_column("id") %>%
+  left_join(gff_data, by = "id") %>%
+  select(id, name, mean, variable, rank, variance.standardized) %>%
+  mutate(name = coalesce(name, id))
 
 # top expression genes
 top_genes <- rowMeans(GetAssayData(so, assay = "RNA", layer = "data"))
@@ -88,6 +93,18 @@ save_data <- list(
   vf_data = vf_data,
   top_genes_exp = top_genes_exp
 )
+
+# Differential expression
+de <- FindAllMarkers(so, test.use = "DESeq2")
+
+
+
+
+
+
+
+
+
 
 
 # save list of data

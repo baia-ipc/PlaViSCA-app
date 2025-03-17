@@ -23,7 +23,7 @@ violin_plotly <- function(df, x, y, color) {
 }
 
 # function to plot the variable genes
-var_genes_plot <- function(df) {
+var_genes_plot <- function(df, top_n = 10) {
   req(df)
 
   counts <- table(df$variable)
@@ -36,28 +36,51 @@ var_genes_plot <- function(df) {
     paste0("Non-variable (n = ", nonvar_count, ")")
   )
 
-  plot_ly(
-    data = df,
-    x = ~mean,
-    y = ~variance.standardized,
-    color = ~variable_status,
-    colors = c("black", "red"),
-    type = "scatter",
-    mode = "markers",
-    marker = list(size = 5, opacity = 0.7),
-    text = rownames(df),
-    hovertemplate = paste(
-      "Gene: %{text}<br>",
-      "Mean: %{x}<br>",
-      "Variance: %{y}<extra></extra>"
-    ),
-    hoverinfo = "text"
-  ) %>% layout(
-    title = "Variable Features",
-    xaxis = list(title = "Mean Expression"),
-    yaxis = list(title = "Standardized Variance"),
-    legend = list(title = list(text = "<b>Variable Status</b>"))
-  )
+  top_hvf <- df %>% 
+    filter(variable == TRUE) %>% 
+    arrange(rank) %>% 
+    head(top_n)
+  
+  plot_ly() %>% 
+    add_trace(
+      data = df,
+      x = ~mean,
+      y = ~variance.standardized,
+      color = ~variable_status,
+      colors = c("black", "red"),
+      type = "scatter",
+      mode = "markers",
+      marker = list(size = 5, opacity = 0.7),
+      text = ~name,
+      hovertemplate = paste(
+        "Gene: %{text}<br>",
+        "Mean: %{x}<br>",
+        "Variance: %{y}<extra></extra>"
+      ),
+      name = "Variable Genes"
+    ) %>%
+    add_trace(
+      data = top_hvf,
+      x = ~mean,
+      y = ~variance.standardized,
+      color = I("orange"),
+      type = "scatter",
+      mode = "markers",
+      marker = list(size = 6, opacity = 1),
+      text = ~name,
+      hovertemplate = paste(
+        "Gene: %{text}<br>",
+        "Mean: %{x}<br>",
+        "Variance: %{y}<extra></extra>"
+      ),
+      name = paste("Top", top_n, "Variable")
+    ) %>% 
+    layout(
+      title = "Variable Features",
+      xaxis = list(title = "Mean Expression"),
+      yaxis = list(title = "Standardized Variance"),
+      legend = list(title = list(text = "<b>Variable Status</b>"))
+    )
 }
 
 # function to plot top expression gene per cluster
