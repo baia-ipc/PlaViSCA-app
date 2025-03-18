@@ -87,83 +87,95 @@ ui <- fluidPage(
     fluidRow(
       column(
         width = 4, id = "sidebar", class = "sidebar",
-        checkboxGroupInput(
-          "stagei", "INFECTION STAGE:",
-          choices = list(
-            "Human Blood" = "human_blood",
-            "Human Liver" = "human_liver",
-            "Mosquito Saliva" = "mosquito_saliva"
-          ),
-          selected = list("human_blood", "human_liver", "mosquito_saliva")
-        ),
-        checkboxGroupInput(
-          "stagelr", "Parasite stage:",
-          choices = list(
-            "Trophozoite" = "trophozoite",
-            "Ring" = "ring",
-            "Schizont" = "schizont",
-            "Gametocyte" = "gametocyte",
-            "Hypnozoite" = "hypnozoite",
-            "Hepatic schizont" = "hepatic_schizont",
-            "zygot" = "zygot",
-            "Ookinete" = "ookinete",
-            "Oocyst" = "oocyst",
-            "Sporozoite" = "sporozoite"
-          ),
-          selected = list(
-            "trophozoite", "ring", "schizont", "gametocyte",
-            "hypnozoite", "hepatic_schizont", "zygot", "ookinete",
-            "oocyst", "sporozoite"
+        column(
+          width = 12,
+          checkboxGroupInput(
+            "stagei", "Infection stage:",
+            choices = list(
+              "Human Blood" = "human_blood",
+              "Human Liver" = "human_liver",
+              "Mosquito Saliva" = "mosquito_saliva"
+            ),
+            selected = list("human_blood", "human_liver", "mosquito_saliva")
           )
         ),
-        radioButtons("size", "Size:",
-          choices = list("S" = 2, "M" = 4, "L" = 6),
-          selected = 4
+        column( width = 12, 
+          checkboxGroupInput(
+            "stagelr", "Parasite stage:",
+            choices = list(
+              "Trophozoite" = "trophozoite",
+              "Ring" = "ring",
+              "Schizont" = "schizont",
+              "Gametocyte" = "gametocyte",
+              "Hypnozoite" = "hypnozoite",
+              "Hepatic schizont" = "hepatic_schizont",
+              "zygot" = "zygot",
+              "Ookinete" = "ookinete",
+              "Oocyst" = "oocyst",
+              "Sporozoite" = "sporozoite"
+            ),
+            selected = list(
+              "trophozoite", "ring", "schizont", "gametocyte",
+              "hypnozoite", "hepatic_schizont", "zygot", "ookinete",
+              "oocyst", "sporozoite"
+            )
+          )
         ),
-        radioButtons("color", "Color:",
-          choices = list(
-            "Identity" = "ident",
-            "Stage" = "stage",
-            "Strain" = "vivax_strain",
-            "Day" = "day",
-            "Condition" = "condition",
-            "Replicate" = "replicate",
-            "Species" = "species",
-            "Genes" = "genes"
-          ),
-          selected = "ident"
+        column(width = 12, radioButtons("size", "Size:",
+                                        choices = list("S" = 2, "M" = 4, "L" = 6),
+                                        selected = 4)
         ),
-        uiOutput("genes_ui"),
-        radioButtons("plot", "plot",
-          choices = list("2D" = "2d", "3D" = "3d"),
-          selected = "2d"
+        column(width = 12, radioButtons("color", "Color:",
+                                        choices = list(
+                                        "Identity" = "ident",
+                                        "Stage" = "stage",
+                                        "Strain" = "vivax_strain",
+                                        "Day" = "day",
+                                        "Condition" = "condition",
+                                        "Replicate" = "replicate",
+                                        "Species" = "species",
+                                        "CCA_snn" = "cca_snn",
+                                        "Genes" = "genes" ),
+                                        selected = "ident"
+          )
         ),
-        fluidRow(
-          column(width = 6, uiOutput("xaxis")),
-          column(width = 6, uiOutput("yaxis"))
+        column(width = 12, uiOutput("gene_or_snn_ui")),
+        column(width = 12, radioButtons("plot", "Plot",
+                                        choices = list("2D" = "2d", "3D" = "3d"),
+                                        selected = "2d")
         ),
-        downloadButton("download_data", "Download", class = "bt-download")
+        column(width = 6, uiOutput("xaxis")),
+        column(width = 6, uiOutput("yaxis")),
+        column(width = 12, downloadButton("download_data", "Download",
+                                          class = "bt-download"))
       ),
-      column(width = 8, tabsetPanel(
-        id = "tabset",
-        tabPanel(
-          "DATA",
-          fluidRow(DT::DTOutput("data_table")),
-          fluidRow(
-            column(width = 6, plotlyOutput("data_count_plotly")),
-            column(width = 6, plotlyOutput("data_feature_plotly"))
+      column(
+        width = 8,
+        tabsetPanel(
+          id = "tabset",
+          tabPanel(
+            "DATA",
+            fluidRow(DT::DTOutput("data_table")),
+            fluidRow(
+              column(width = 6, plotlyOutput("data_count_plotly")),
+              column(width = 6, plotlyOutput("data_feature_plotly"))
+            ),
+            fluidRow(
+              column(width = 6, plotlyOutput("data_pca_stdv_plotly")),
+              column(width = 6, plotlyOutput("variable_genes_plotly"))
+            ),
+            fluidRow(
+              column(width = 12, plotlyOutput("top_genes_exp_plotly"))
+            ),
           ),
-          fluidRow(
-            column(width = 6, plotlyOutput("variable_genes_plotly")),
-            column(width = 6, plotlyOutput("top_genes_exp_plotly"))
-          )
-        ),
-        tabPanel("PCA", plotlyOutput("pca_plotly")),
-        tabPanel("PCA_integrated", plotlyOutput("pca_int_plotly")),
-        tabPanel("UMAP", plotlyOutput("umap_plotly")),
-        tabPanel("UMAP_unintegred", plotlyOutput("umap_uint_plotly")),
-        tabPanel("tSNE", plotlyOutput("tsne_plotly"))
-      ))
+          tabPanel("PCA", plotlyOutput("pca_plotly")),
+          tabPanel("PCA_integrated", plotlyOutput("pca_int_plotly")),
+          tabPanel("UMAP", plotlyOutput("umap_plotly")),
+          tabPanel("UMAP_unintegrated", plotlyOutput("umap_uint_plotly")),
+          tabPanel("tSNE", plotlyOutput("tsne_plotly"))
+        )
+      )
     )
   )
+  
 )

@@ -8,9 +8,10 @@ library(RColorBrewer)
 # source function
 source("functions/functions.R")
 
-## read data
+# read data
 list_data <- readRDS("data/cleaned_dataset.rds")
 mr_data <- list_data$mr_data
+pca_std_df <- list_data$pca_std_df
 vf_data <- list_data$vf_data
 top_genes_exp <- list_data$top_genes_exp
 
@@ -40,32 +41,40 @@ server <- function(input, output, session) {
     }
   )
 
+  observe(
+    if(input$color == "genes") {
+      shinyjs::show("gene_or_snn_ui")
+      shinyjs::show("gene_link_ui")
+    } else if (input$color == "cca_snn") {
+      shinyjs::show("gene_or_snn_ui")
+      shinyjs::hide("gene_link_ui")
+    } else {
+      shinyjs::hide("gene_or_snn_ui")
+      shinyjs::hide("gene_link_ui")
+    }
+  )
 
   ### select column for 2d plots
   pc_columns <- grep("^pc_\\d+", colnames(mr_data),
-    ignore.case = TRUE, value = TRUE
-  )
+    ignore.case = TRUE, value = TRUE)
   pc_int_columns <- grep("^int.*pca.*", colnames(mr_data),
-    ignore.case = TRUE, value = TRUE
-  )
+    ignore.case = TRUE, value = TRUE)
   umap_columns <- grep("^umap_\\d+$", colnames(mr_data),
-    ignore.case = TRUE, value = TRUE
-  )
+    ignore.case = TRUE, value = TRUE)
   umap_uint_columns <- grep("^umapunint.*", colnames(mr_data),
-    ignore.case = TRUE, value = TRUE
-  )
+    ignore.case = TRUE, value = TRUE)
   tsne_columns <- grep("t_sne", colnames(mr_data),
     ignore.case = TRUE,
-    value = TRUE
-  )
+    value = TRUE)
   gene_names <- colnames(mr_data)[tail(seq_along(mr_data), 10)]
+  cca_snn <- grep("CCA_snn", colnames(mr_data), ignore.case = TRUE,
+                  value = TRUE)
 
   ### filter data
   filtered_data <- reactiveVal(NULL)
   observeEvent(input$stagei, {
     filtered_data(mr_data %>% filter(stage %in% input$stagei))
   })
-  
   
   ### DATA tab
   observeEvent(input$tabset, {
@@ -92,16 +101,23 @@ server <- function(input, output, session) {
       output$data_count_plotly <- renderPlotly({
         violin_plotly(filtered_data,
           x = "sample", y = "n_count_rna",
-          color = "ident"
+          color = "ident", title = "RNA Count"
         )
       })
 
+      #### feature plot
       output$data_feature_plotly <- renderPlotly({
         violin_plotly(filtered_data,
           x = "sample", y = "n_feature_rna",
-          color = "ident"
+          color = "ident", title = "Feature Count"
         )
       })
+      
+      #### elbow plot
+      output$data_pca_stdv_plotly <- renderPlotly({
+        elbow_plot(pca_std_df)
+      })
+      
 
       #### variable genes plot
       output$variable_genes_plotly <- renderPlotly({
@@ -110,7 +126,7 @@ server <- function(input, output, session) {
 
       ### top genes expression plot
       output$top_genes_exp_plotly <- renderPlotly({
-        top_genes_exp(top_genes_exp)
+        top_genes_exp_plot(top_genes_exp)
       })
     }
   })
@@ -118,17 +134,33 @@ server <- function(input, output, session) {
   # dynamic ui for gene name
   observeEvent(input$color, {
     if (input$color == "genes") {
-      output$genes_ui <- renderUI({
-        selectInput("genes_n", "Select Gene", choices = gene_names)
+      gene <- input$genes_n
+      plasmo_url <- paste0("https://plasmodb.org/plasmo/app/record/gene/", gene)
+      ncbi_protein_url <- paste0("https://www.ncbi.nlm.nih.gov/protein/", gene)
+      
+      output$gene_or_snn_ui <- renderUI({
+        tagList(
+        selectInput("genes_n", "Select Gene", choices = gene_names),
+        tags$div(id = "link_gene",
+        tags$div(tags$a(href = plasmo_url, target = "_blank", "🔬 PlasmoDB")),
+        tags$div(tags$a(href = ncbi_protein_url, target = "_blank",
+                        "🧬 NCBI"))
+        ))
       })
+      
+    } else if (input$color == "cca_snn") {
+      output$gene_or_snn_ui <- renderUI({
+        selectInput("snn", "Select Resolution", choices = cca_snn)
+      })
+      
+      output$gene_link_ui <- renderUI({NULL})
+      
     } else {
-      output$genes_ui <- renderUI({
-        NULL
-      })
+      output$gene_or_snn_ui <- renderUI({NULL})
+      output$gene_link_ui <- renderUI({NULL})
     }
   })
-
-
+  
   ## define x and y axis
   output$xaxis <- renderUI({
     if (input$tabset == "UMAP" && input$plot == "2d") {
@@ -226,43 +258,48 @@ server <- function(input, output, session) {
 
   ## plots
   output$pca_plotly <- renderPlotly({
-    color_column <- if (input$color == "genes") input$genes_n else input$color
-    generate_plotly(
-      filtered_data(), input$xaxis_input, input$yaxis_input,
-      color_column, input$size, "PCA", input$plot
-    )
+    color_column <- switch( input$color,
+                            "genes" = input$genes_n,
+                            "cca_snn" = input$snn,
+                            input$color )
+    generate_plotly(filtered_data(), input$xaxis_input, input$yaxis_input,
+                    color_column, input$size, "PCA", input$plot)
   })
 
   output$pca_int_plotly <- renderPlotly({
-    color_column <- if (input$color == "genes") input$genes_n else input$color
-    generate_plotly(
-      filtered_data(), input$xaxis_input, input$yaxis_input,
-      color_column, input$size, "PCA_integrated", input$plot
-    )
+    color_column <- switch( input$color,
+                            "genes" = input$genes_n,
+                            "cca_snn" = input$snn,
+                            input$color )
+    generate_plotly(filtered_data(), input$xaxis_input, input$yaxis_input,
+                    color_column, input$size, "PCA_integrated", input$plot)
   })
 
   output$umap_plotly <- renderPlotly({
-    color_column <- if (input$color == "genes") input$genes_n else input$color
-    generate_plotly(
-      filtered_data(), input$xaxis_input, input$yaxis_input,
-      color_column, input$size, "UMAP", input$plot
-    )
+    color_column <- switch( input$color,
+                            "genes" = input$genes_n,
+                            "cca_snn" = input$snn,
+                            input$color )
+    generate_plotly(filtered_data(), input$xaxis_input, input$yaxis_input,
+                    color_column, input$size, "UMAP", input$plot)
   })
 
   output$umap_uint_plotly <- renderPlotly({
-    color_column <- if (input$color == "genes") input$genes_n else input$color
-    generate_plotly(
-      filtered_data(), input$xaxis_input, input$yaxis_input,
-      color_column, input$size, "UMAP_unintegred", input$plot
-    )
+    color_column <- switch( input$color,
+                            "genes" = input$genes_n,
+                            "cca_snn" = input$snn,
+                            input$color )
+    generate_plotly(filtered_data(), input$xaxis_input, input$yaxis_input,
+                    color_column, input$size, "UMAP_unintegred", input$plot)
   })
 
   output$tsne_plotly <- renderPlotly({
-    color_column <- if (input$color == "genes") input$genes_n else input$color
-    generate_plotly(
-      filtered_data(), input$xaxis_input, input$yaxis_input,
-      color_column, input$size, "tSNE", input$plot
-    )
+    color_column <- switch( input$color,
+                            "genes" = input$genes_n,
+                            "cca_snn" = input$snn,
+                            input$color )
+    generate_plotly(filtered_data(), input$xaxis_input, input$yaxis_input,
+                    color_column, input$size, "tSNE", input$plot)
   })
 
 

@@ -2,7 +2,7 @@
 colors <- RColorBrewer::brewer.pal(12, "Set3")
 
 # function to generate plot for metadata
-violin_plotly <- function(df, x, y, color) {
+violin_plotly <- function(df, x, y, color, title) {
   req(df)
   plot_ly(df,
     x = ~ get(x),
@@ -15,12 +15,35 @@ violin_plotly <- function(df, x, y, color) {
     jitter = 0.4
   ) %>%
     layout(
-      title = paste(y),
+      title = paste("Number of", title, "per sample"),
       xaxis = list(title = x),
       yaxis = list(title = y),
       legend = list(title = list(text = color))
     )
 }
+
+# Elbow plot for PCA
+elbow_plot <- function(pca_std_df) {
+  req(pca_std_df)
+  plot_ly(
+    data = pca_std_df,
+    x = ~pc,
+    y = ~std,
+    type = 'scatter',
+    mode = 'lines+markers',
+    marker = list(size = 8, color = 'red'),
+    line = list(color = 'blue'),
+    text = ~paste("PCA:", pc, "<br>Stdv:", pca_std_df),
+    hoverinfo = 'text'
+  ) %>%
+    layout(
+      xaxis = list(title = "PCA"),
+      yaxis = list(title = "Standard Deviation"),
+      showlegend = FALSE
+    )
+}
+
+
 
 # function to plot the variable genes
 var_genes_plot <- function(df, top_n = 10) {
@@ -84,7 +107,7 @@ var_genes_plot <- function(df, top_n = 10) {
 }
 
 # function to plot top expression gene per cluster
-top_genes_exp <- function(df, default_gene = "PVP01_1460700") {
+top_genes_exp_plot <- function(df, default_gene = "PVP01_1460700") {
   req(df)
   plot_ly(
     data = df,
@@ -138,11 +161,10 @@ generate_plotly <- function(df, xaxis_input, yaxis_input, color, size,
   if (is.character(selected_color) || is.factor(selected_color)) {
     colors <- RColorBrewer::brewer.pal(8, "Set2")
   } else {
-    colors <- RColorBrewer::brewer.pal(11, "RdYlBu")
+    colors <- colorRampPalette(c("gray", "red"))(100)
   }
 
   if (plot_dim == "2d") {
-    # 2D plot
     plot <- plot_ly(
       data = df,
       x = x,
@@ -171,7 +193,6 @@ generate_plotly <- function(df, xaxis_input, yaxis_input, color, size,
       ) %>%
       config(displaylogo = FALSE, scrollZoom = TRUE)
   } else {
-    # 3D plot
     if (plot_type == "PCA") {
       x_col <- "pc_1"
       y_col <- "pc_2"
@@ -203,7 +224,7 @@ generate_plotly <- function(df, xaxis_input, yaxis_input, color, size,
       type = "scatter3d",
       mode = "markers",
       color = as.formula(paste0("~", color)),
-      marker = list(size = size),
+      marker = list(size = as.numeric(size) * 0.4),
       colors = colors,
       text = ~ paste(
         "Cell:", id,

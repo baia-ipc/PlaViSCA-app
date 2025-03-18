@@ -105,7 +105,7 @@
 #stagei .shiny-options-group .checkbox,
 #size .shiny-options-group .radio,
 #plot .shiny-options-group .radio {
-  margin-top: 10px;
+  margin-top: 15px;
 }
 
 
@@ -169,6 +169,20 @@
   visibility: visible;
   transition: width .1s ease, opacity .3s ease;
 }
+
+#gene_or_snn_ui{
+  display: flex;
+}
+
+#gene_or_snn_ui .shiny-input-container {
+ width: 60%; 
+ margin-right: 10px;
+}
+
+#link_gene{
+  align-self: center;
+}
+
 
 #xaxis .shiny-input-container {
 width: 93%;

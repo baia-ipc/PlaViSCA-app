@@ -21,7 +21,8 @@ saveRDS(so, "data/Pv.all.12.Jan2025.modified.rds")
 metadata <- c(
   "species", "day", "condition", "Stage", "Replicate", "is_outlier",
   "location", "Vivax_strain", "nCount_RNA", "nFeature_RNA",
-  "Sample", "seurat_clusters"
+  "Sample", "seurat_clusters", grep("CCA_snn", colnames(so@meta.data),
+                                    ignore.case = TRUE, value = TRUE)
 )
 
 # subset reduction from seurat object
@@ -63,6 +64,13 @@ mr_data <- mr_data %>%
     )
   )
 
+# Extract PCA standard deviation
+pca_std_df <- so@reductions$pca@stdev
+pca_std_df <- data.frame(
+  pc = 1:length(pca_std),
+  std = pca_std
+)
+
 # variable genes expression
 so <- FindVariableFeatures(so,
   assay = "RNA", selection.method = "vst",
@@ -83,26 +91,28 @@ top_genes <- names(sort(top_genes, decreasing = TRUE)[1:10])
 # top expression genes with cluster information
 top_genes_exp <- FetchData(so, vars = c(top_genes, "ident")) %>%
   rownames_to_column("id") %>%
-  pivot_longer(any_of(top_genes), names_to = "gene", values_to = "expression") %>%
+  pivot_longer(any_of(top_genes), names_to = "gene",
+               values_to = "expression") %>%
   left_join(gff_data, by = c("gene" = "id")) %>%
   select(id, gene, name, expression, ident) %>%
   mutate(name = coalesce(name, gene))
 
 save_data <- list(
   mr_data = mr_data,
+  pca_std_df = pca_std_df,
   vf_data = vf_data,
   top_genes_exp = top_genes_exp
 )
 
-# differentially expressed genes
+# save list of data
+saveRDS(save_data, "data/cleaned_dataset.rds")
+
+# differential expression genes
 de_genes <- FindAllMarkers(so)
 
 de_genes <- left_join(de_genes, gff_data, by = c("gene" = "id")) %>%
   select(gene, name, everything()) 
 saveRDS(de_genes, "data/de_genes.rds")
-
-# save list of data
-saveRDS(save_data, "data/cleaned_dataset.rds")
 
 # clear objects
 rm(list = ls())
