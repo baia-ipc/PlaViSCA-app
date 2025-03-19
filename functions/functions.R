@@ -43,8 +43,6 @@ elbow_plot <- function(pca_std_df) {
     )
 }
 
-
-
 # function to plot the variable genes
 var_genes_plot <- function(df, top_n = 10) {
   req(df)

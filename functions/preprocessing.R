@@ -28,26 +28,25 @@ metadata <- c(
 # subset reduction from seurat object
 umap <- colnames(so@reductions$umap@cell.embeddings)
 umap_int <- colnames(so@reductions$umap.unintegrated@cell.embeddings)
-pca <- colnames(so@reductions$pca@cell.embeddings)
-pca_int <- colnames(so@reductions$integrated.rpca@cell.embeddings)
+pca <- colnames(so@reductions$pca@cell.embeddings)[1:3]
+pca_int <- colnames(so@reductions$integrated.rpca@cell.embeddings)[1:3]
 tsne <- colnames(so@reductions$tsne@cell.embeddings)
 
-# top 10 highly expressed genes
-mean_exp <- rowMeans(GetAssayData(so, assay = "RNA", layer = "data"))
-top_features <- names(sort(mean_exp, decreasing = TRUE)[1:10])
+# top highly expressed genes
+mean_exp <- rowMeans(GetAssayData(so, assay = "RNA", layer = "data")) 
+
+top_features <- names(sort(mean_exp, decreasing = TRUE))
 
 top_features_name <- gff_data$name[match(top_features, gff_data$id)]
 top_features_name <- ifelse(is.na(top_features_name), top_features,
   top_features_name
 )
 
-mr_data <- FetchData(so, vars = c(
-  metadata, "ident", umap, umap_int, pca,
-  pca_int, tsne, top_features
-)) %>%
+mr_data <- FetchData(so, vars = c(metadata, "ident", umap, umap_int, pca,
+                                  pca_int, tsne, top_features)) %>%
   clean_names()
 
-colnames(mr_data)[tail(seq_along(mr_data), 10)] <- top_features_name
+colnames(mr_data)[tail(seq_along(mr_data), length(mean_exp))] <- top_features
 
 mr_data <- mr_data %>%
   rownames_to_column("id") %>%
@@ -64,18 +63,25 @@ mr_data <- mr_data %>%
     )
   )
 
+# Extract all features
+# GetAssayData(so, assay = "RNA", layer = "data") %>%
+#   as_tibble() %>%
+#   rownames_to_column("gene") %>%
+#   left_join(gff_data, by = c("gene" = "id")) %>% 
+#   mutate(name = coalesce(name, gene)) %>%
+#   select(gene, name, description, everything(), -ebi_biotype) %>%
+#   saveRDS("data/all_features.rds")
+
 # Extract PCA standard deviation
 pca_std_df <- so@reductions$pca@stdev
 pca_std_df <- data.frame(
-  pc = 1:length(pca_std),
-  std = pca_std
+  pc = 1:length(pca_std_df),
+  std = pca_std_df
 )
 
 # variable genes expression
-so <- FindVariableFeatures(so,
-  assay = "RNA", selection.method = "vst",
-  nfeatures = 2000
-)
+so <- FindVariableFeatures(so, assay = "RNA", selection.method = "vst",
+                           nfeatures = 2000)
 vf_data <- HVFInfo(object = so, assay = "RNA", method = "vst", status = TRUE)
 
 vf_data <- vf_data %>%
@@ -87,7 +93,6 @@ vf_data <- vf_data %>%
 # top expression genes
 top_genes <- rowMeans(GetAssayData(so, assay = "RNA", layer = "data"))
 top_genes <- names(sort(top_genes, decreasing = TRUE)[1:10])
-
 # top expression genes with cluster information
 top_genes_exp <- FetchData(so, vars = c(top_genes, "ident")) %>%
   rownames_to_column("id") %>%
@@ -108,11 +113,12 @@ save_data <- list(
 saveRDS(save_data, "data/cleaned_dataset.rds")
 
 # differential expression genes
-de_genes <- FindAllMarkers(so)
-
-de_genes <- left_join(de_genes, gff_data, by = c("gene" = "id")) %>%
-  select(gene, name, everything()) 
-saveRDS(de_genes, "data/de_genes.rds")
+# de_genes <- FindAllMarkers(so)
+# 
+# de_genes <- left_join(de_genes, gff_data, by = c("gene" = "id")) %>%
+#   select(gene, name, everything()) 
+# saveRDS(de_genes, "data/de_genes.rds")
 
 # clear objects
 rm(list = ls())
+

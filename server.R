@@ -41,18 +41,18 @@ server <- function(input, output, session) {
     }
   )
 
-  observe(
-    if(input$color == "genes") {
-      shinyjs::show("gene_or_snn_ui")
-      shinyjs::show("gene_link_ui")
-    } else if (input$color == "cca_snn") {
-      shinyjs::show("gene_or_snn_ui")
-      shinyjs::hide("gene_link_ui")
-    } else {
-      shinyjs::hide("gene_or_snn_ui")
-      shinyjs::hide("gene_link_ui")
-    }
-  )
+  # observe(
+  #   if (input$color == "genes") {
+  #     shinyjs::show("gene_or_snn_ui")
+  #     shinyjs::show("gene_link_ui")
+  #   } else if (input$color == "cca_snn") {
+  #     shinyjs::show("gene_or_snn_ui")
+  #     shinyjs::hide("gene_link_ui")
+  #   } else {
+  #     shinyjs::hide("gene_or_snn_ui")
+  #     shinyjs::hide("gene_link_ui")
+  #   }
+  # )
 
   ### select column for 2d plots
   pc_columns <- grep("^pc_\\d+", colnames(mr_data),
@@ -66,7 +66,8 @@ server <- function(input, output, session) {
   tsne_columns <- grep("t_sne", colnames(mr_data),
     ignore.case = TRUE,
     value = TRUE)
-  gene_names <- colnames(mr_data)[tail(seq_along(mr_data), 10)]
+  #gene_names <- colnames(mr_data)[tail(seq_along(mr_data), 100)]
+  gene_names <- grep("pvp", colnames(mr_data), ignore.case = TRUE, value = TRUE)
   cca_snn <- grep("CCA_snn", colnames(mr_data), ignore.case = TRUE,
                   value = TRUE)
 
@@ -76,16 +77,23 @@ server <- function(input, output, session) {
     filtered_data(mr_data %>% filter(stage %in% input$stagei))
   })
   
+  # df <- reactiveVal()
+  # observeEvent(input$tabset, {
+  #   if (input$tabset != "DATA" && is.null(df())) {
+  #     df(readRDS("data/all_features.rds"))
+  #   }
+  # })
+  
   ### DATA tab
+  data_loaded <- reactiveVal(FALSE)
   observeEvent(input$tabset, {
     req(input$tabset) 
-    if (input$tabset == "DATA") {
+    if (input$tabset == "DATA" && !data_loaded()) {
       filtered_data <- filtered_data()
       filtered_data <- filtered_data %>%
         select(
           id, species, day, condition, stage, n_count_rna, n_feature_rna,
-          sample, ident, umap_1, umap_2, pc_1, pc_2, t_sne_1,
-          t_sne_2
+          sample, ident, umap_1, umap_2, pc_1, pc_2, t_sne_1, t_sne_2
         )
 
       #### DT table
@@ -128,40 +136,90 @@ server <- function(input, output, session) {
       output$top_genes_exp_plotly <- renderPlotly({
         top_genes_exp_plot(top_genes_exp)
       })
+      
+      data_loaded(TRUE)
     }
   })
 
   # dynamic ui for gene name
   observeEvent(input$color, {
     if (input$color == "genes") {
-      gene <- input$genes_n
-      plasmo_url <- paste0("https://plasmodb.org/plasmo/app/record/gene/", gene)
-      ncbi_protein_url <- paste0("https://www.ncbi.nlm.nih.gov/protein/", gene)
-      
       output$gene_or_snn_ui <- renderUI({
         tagList(
-        selectInput("genes_n", "Select Gene", choices = gene_names),
-        tags$div(id = "link_gene",
-        tags$div(tags$a(href = plasmo_url, target = "_blank", "🔬 PlasmoDB")),
-        tags$div(tags$a(href = ncbi_protein_url, target = "_blank",
-                        "🧬 NCBI"))
-        ))
+          #selectInput("genes_n", "Select Gene", choices = gene_names),
+          
+          selectizeInput("genes_n", "Select Gene", 
+                         choices = gene_names, 
+                         selected = gene_names[1], 
+                         multiple = FALSE, 
+                         options = list(
+                           placeholder = 'Searching ...',
+                           maxItems = 1, 
+                           server = TRUE
+                         )
+          ),
+          tags$div(id = "link_gene",
+                   tags$div(tags$a(id = "plasmo_link", href = "#",
+                                   target = "_blank", "🔬 PlasmoDB")),
+                   tags$div(tags$a(id = "ncbi_link", href = "#",
+                                   target = "_blank", "🧬 NCBI"))
+          )
+        )
       })
-      
     } else if (input$color == "cca_snn") {
       output$gene_or_snn_ui <- renderUI({
         selectInput("snn", "Select Resolution", choices = cca_snn)
       })
-      
-      output$gene_link_ui <- renderUI({NULL})
-      
     } else {
-      output$gene_or_snn_ui <- renderUI({NULL})
-      output$gene_link_ui <- renderUI({NULL})
+      output$gene_or_snn_ui <- renderUI({ NULL })
     }
   })
   
+  observeEvent(input$genes_n, {
+    req(input$genes_n)
+    
+    gene <- input$genes_n
+    plasmo_url <- paste0("https://plasmodb.org/plasmo/app/record/gene/", gene)
+    ncbi_protein_url <- paste0("https://www.ncbi.nlm.nih.gov/protein/", gene)
+    
+    output$gene_or_snn_ui <- renderUI({
+      tagList(
+        # selectInput("genes_n", "Select Gene", choices = gene_names,
+        #             selected = gene),
+        selectizeInput("genes_n", "Select Gene", 
+                       choices = gene_names, 
+                       selected = gene_names[1], 
+                       multiple = FALSE, 
+                       options = list(
+                         placeholder = 'Searching ...',
+                         maxItems = 1, 
+                         server = TRUE
+                       )
+        ),
+        tags$div(id = "link_gene",
+                 tags$div(tags$a(href = plasmo_url, target = "_blank",
+                                 "🔬 PlasmoDB")),
+                 tags$div(tags$a(href = ncbi_protein_url, target = "_blank",
+                                 "🧬 NCBI"))
+        )
+      )
+    })
+  })
+  
   ## define x and y axis
+  # observe({
+  # if (input$tabset == "UMAP" && input$plot == "2d") {
+  #   shinyjs::show("xaxis")
+  #   updateSelectInput(session, "xaxis", choices = umap_columns, selected = "umap_1")
+  # }
+  # })
+  # 
+  # observe({
+  #   if (input$plot == "3d") {
+  #     shinyjs::hide("xaxis")
+  #   }
+  # })
+  
   output$xaxis <- renderUI({
     if (input$tabset == "UMAP" && input$plot == "2d") {
       selectInput(
@@ -206,7 +264,7 @@ server <- function(input, output, session) {
       req(input$xaxis_input)
       y_choices <- setdiff(umap_columns, input$xaxis_input)
 
-      selectInput(
+       selectInput(
         "yaxis_input",
         "Select Y-Axis",
         choices = y_choices,

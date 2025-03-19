@@ -144,6 +144,11 @@ ui <- fluidPage(
                                         choices = list("2D" = "2d", "3D" = "3d"),
                                         selected = "2d")
         ),
+        # selectInput(
+        #   "xaxis",
+        #   "Select X-Axis",
+        #   choices = "pc_1"
+        # ),
         column(width = 6, uiOutput("xaxis")),
         column(width = 6, uiOutput("yaxis")),
         column(width = 12, downloadButton("download_data", "Download",
