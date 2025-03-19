@@ -15,6 +15,9 @@ pca_std_df <- list_data$pca_std_df
 vf_data <- list_data$vf_data
 top_genes_exp <- list_data$top_genes_exp
 
+# read gff data
+gff_data <- read_tsv("ref/PvivaxP01_gff_data.tsv")
+
 # server function
 server <- function(input, output, session) {
   ## hide and show sections
@@ -67,7 +70,12 @@ server <- function(input, output, session) {
     ignore.case = TRUE,
     value = TRUE)
   #gene_names <- colnames(mr_data)[tail(seq_along(mr_data), 100)]
-  gene_names <- grep("pvp", colnames(mr_data), ignore.case = TRUE, value = TRUE)
+  gene_names <- grep("pvp", colnames(mr_data), ignore.case = TRUE, value = TRUE) %>%
+    as.data.frame() %>%
+    setNames("gene") %>%  
+    left_join(gff_data, by = c("gene" = "id")) %>% 
+    mutate(name = coalesce(name, gene))
+  
   cca_snn <- grep("CCA_snn", colnames(mr_data), ignore.case = TRUE,
                   value = TRUE)
 
@@ -149,8 +157,8 @@ server <- function(input, output, session) {
           #selectInput("genes_n", "Select Gene", choices = gene_names),
           
           selectizeInput("genes_n", "Select Gene", 
-                         choices = gene_names, 
-                         selected = gene_names[1], 
+                         choices = gene_names$name,, 
+                         selected = gene_names$name[1], 
                          multiple = FALSE, 
                          options = list(
                            placeholder = 'Searching ...',
@@ -178,7 +186,15 @@ server <- function(input, output, session) {
   observeEvent(input$genes_n, {
     req(input$genes_n)
     
-    gene <- input$genes_n
+    # not work because of update selectisizeinput
+    print(input$genes_n)
+      
+    if (input$genes_n %in% gene_names$name) {
+      gene <- gene_names$gene[gene_names$name == input$genes_n]
+    } else {
+      gene <- input$genes_n
+    }
+    
     plasmo_url <- paste0("https://plasmodb.org/plasmo/app/record/gene/", gene)
     ncbi_protein_url <- paste0("https://www.ncbi.nlm.nih.gov/protein/", gene)
     
@@ -187,8 +203,8 @@ server <- function(input, output, session) {
         # selectInput("genes_n", "Select Gene", choices = gene_names,
         #             selected = gene),
         selectizeInput("genes_n", "Select Gene", 
-                       choices = gene_names, 
-                       selected = gene_names[1], 
+                       choices = gene_names$name,, 
+                       selected = gene_names$name[1], 
                        multiple = FALSE, 
                        options = list(
                          placeholder = 'Searching ...',
