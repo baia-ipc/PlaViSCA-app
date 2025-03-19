@@ -22,7 +22,8 @@ metadata <- c(
   "species", "day", "condition", "Stage", "Replicate", "is_outlier",
   "location", "Vivax_strain", "nCount_RNA", "nFeature_RNA",
   "Sample", "seurat_clusters", grep("CCA_snn", colnames(so@meta.data),
-                                    ignore.case = TRUE, value = TRUE)
+    ignore.case = TRUE, value = TRUE
+  )
 )
 
 # subset reduction from seurat object
@@ -33,7 +34,7 @@ pca_int <- colnames(so@reductions$integrated.rpca@cell.embeddings)[1:3]
 tsne <- colnames(so@reductions$tsne@cell.embeddings)
 
 # top highly expressed genes
-mean_exp <- rowMeans(GetAssayData(so, assay = "RNA", layer = "data")) 
+mean_exp <- rowMeans(GetAssayData(so, assay = "RNA", layer = "data"))
 
 top_features <- names(sort(mean_exp, decreasing = TRUE))
 
@@ -42,8 +43,10 @@ top_features_name <- ifelse(is.na(top_features_name), top_features,
   top_features_name
 )
 
-mr_data <- FetchData(so, vars = c(metadata, "ident", umap, umap_int, pca,
-                                  pca_int, tsne, top_features)) %>%
+mr_data <- FetchData(so, vars = c(
+  metadata, "ident", umap, umap_int, pca,
+  pca_int, tsne, top_features
+)) %>%
   clean_names()
 
 colnames(mr_data)[tail(seq_along(mr_data), length(mean_exp))] <- top_features
@@ -67,7 +70,7 @@ mr_data <- mr_data %>%
 # GetAssayData(so, assay = "RNA", layer = "data") %>%
 #   as_tibble() %>%
 #   rownames_to_column("gene") %>%
-#   left_join(gff_data, by = c("gene" = "id")) %>% 
+#   left_join(gff_data, by = c("gene" = "id")) %>%
 #   mutate(name = coalesce(name, gene)) %>%
 #   select(gene, name, description, everything(), -ebi_biotype) %>%
 #   saveRDS("data/all_features.rds")
@@ -80,8 +83,10 @@ pca_std_df <- data.frame(
 )
 
 # variable genes expression
-so <- FindVariableFeatures(so, assay = "RNA", selection.method = "vst",
-                           nfeatures = 2000)
+so <- FindVariableFeatures(so,
+  assay = "RNA", selection.method = "vst",
+  nfeatures = 2000
+)
 vf_data <- HVFInfo(object = so, assay = "RNA", method = "vst", status = TRUE)
 
 vf_data <- vf_data %>%
@@ -96,8 +101,10 @@ top_genes <- names(sort(top_genes, decreasing = TRUE)[1:10])
 # top expression genes with cluster information
 top_genes_exp <- FetchData(so, vars = c(top_genes, "ident")) %>%
   rownames_to_column("id") %>%
-  pivot_longer(any_of(top_genes), names_to = "gene",
-               values_to = "expression") %>%
+  pivot_longer(any_of(top_genes),
+    names_to = "gene",
+    values_to = "expression"
+  ) %>%
   left_join(gff_data, by = c("gene" = "id")) %>%
   select(id, gene, name, expression, ident) %>%
   mutate(name = coalesce(name, gene))
@@ -114,11 +121,10 @@ saveRDS(save_data, "data/cleaned_dataset.rds")
 
 # differential expression genes
 # de_genes <- FindAllMarkers(so)
-# 
+#
 # de_genes <- left_join(de_genes, gff_data, by = c("gene" = "id")) %>%
-#   select(gene, name, everything()) 
+#   select(gene, name, everything())
 # saveRDS(de_genes, "data/de_genes.rds")
 
 # clear objects
 rm(list = ls())
-
