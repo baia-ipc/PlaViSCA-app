@@ -99,7 +99,8 @@ ui <- fluidPage(
             selected = list("human_blood", "human_liver", "mosquito_saliva")
           )
         ),
-        column( width = 12, 
+        column(
+          width = 12,
           checkboxGroupInput(
             "stagelr", "Parasite stage:",
             choices = list(
@@ -122,28 +123,54 @@ ui <- fluidPage(
           )
         ),
         column(width = 12, radioButtons("size", "Size:",
-                                        choices = list("S" = 2, "M" = 4, "L" = 6),
-                                        selected = 4)
-        ),
+          choices = list("S" = 2, "M" = 4, "L" = 6),
+          selected = 4
+        )),
         column(width = 12, radioButtons("color", "Color:",
-                                        choices = list(
-                                        "Identity" = "ident",
-                                        "Stage" = "stage",
-                                        "Strain" = "vivax_strain",
-                                        "Day" = "day",
-                                        "Condition" = "condition",
-                                        "Replicate" = "replicate",
-                                        "Species" = "species",
-                                        "CCA_snn" = "cca_snn",
-                                        "Genes" = "genes" ),
-                                        selected = "ident"
+          choices = list(
+            "Identity" = "ident",
+            "Stage" = "stage",
+            "Strain" = "vivax_strain",
+            "Day" = "day",
+            "Condition" = "condition",
+            "Replicate" = "replicate",
+            "Species" = "species",
+            "CCA_snn" = "cca_snn",
+            "Genes" = "genes"
+          ),
+          selected = "ident"
+        )),
+        column(
+          width = 12,
+          fluidRow(
+            id = "gene_snn_ui",
+            column(
+              width = 7,
+              selectizeInput("genes_n", "Gene:",
+                choices = ""
+              )
+            ),
+            column(
+              width = 5,
+              tags$div(
+                id = "gene_link_ui",
+                tags$a(
+                  id = "plasmo_link", href = "#",
+                  target = "_blank", "🔬 PlasmoDB"
+                ),
+                tags$a(
+                  id = "ncbi_link", href = "#",
+                  target = "_blank", "🧬 NCBI"
+                )
+              )
+            )
           )
         ),
-        column(width = 12, uiOutput("gene_or_snn_ui")),
+        # column(width = 12, uiOutput("gene_or_snn_ui")),
         column(width = 12, radioButtons("plot", "Plot",
-                                        choices = list("2D" = "2d", "3D" = "3d"),
-                                        selected = "2d")
-        ),
+          choices = list("2D" = "2d", "3D" = "3d"),
+          selected = "2d"
+        )),
         # selectInput(
         #   "xaxis",
         #   "Select X-Axis",
@@ -152,7 +179,8 @@ ui <- fluidPage(
         column(width = 6, uiOutput("xaxis")),
         column(width = 6, uiOutput("yaxis")),
         column(width = 12, downloadButton("download_data", "Download",
-                                          class = "bt-download"))
+          class = "bt-download"
+        ))
       ),
       column(
         width = 8,
@@ -182,5 +210,4 @@ ui <- fluidPage(
       )
     )
   )
-  
 )

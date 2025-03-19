@@ -170,7 +170,12 @@
   transition: width .1s ease, opacity .3s ease;
 }
 
-#gene_or_snn_ui{
+#gene_snn_ui{
+  display: flex;
+  align-items: center;
+}
+
+/*#gene_or_snn_ui{
   display: flex;
 }
 
@@ -182,7 +187,7 @@
 #link_gene{
   align-self: center;
 }
-
+*/
 
 #xaxis .shiny-input-container {
 width: 93%;

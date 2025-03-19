@@ -1,3 +1,20 @@
+# function get gene id and name
+get_gene_id <- function(gene_name, gene_names) {
+  if (gene_name %in% gene_names$name) {
+    return(gene_names$gene[gene_names$name == gene_name])
+  } else {
+    return(gene_name)
+  }
+}
+
+get_gene_name <- function(gene_id, gene_names) {
+  if (gene_id %in% gene_names$gene) {
+    return(gene_names$name[gene_names$gene == gene_id])
+  } else {
+    return(gene_id)
+  }
+}
+
 # set color pallet
 colors <- RColorBrewer::brewer.pal(12, "Set3")
 
@@ -29,12 +46,12 @@ elbow_plot <- function(pca_std_df) {
     data = pca_std_df,
     x = ~pc,
     y = ~std,
-    type = 'scatter',
-    mode = 'lines+markers',
-    marker = list(size = 8, color = 'red'),
-    line = list(color = 'blue'),
-    text = ~paste("PCA:", pc, "<br>Stdv:", pca_std_df),
-    hoverinfo = 'text'
+    type = "scatter",
+    mode = "lines+markers",
+    marker = list(size = 8, color = "red"),
+    line = list(color = "blue"),
+    text = ~ paste("PCA:", pc, "<br>Stdv:", pca_std_df),
+    hoverinfo = "text"
   ) %>%
     layout(
       xaxis = list(title = "PCA"),
@@ -57,12 +74,12 @@ var_genes_plot <- function(df, top_n = 10) {
     paste0("Non-variable (n = ", nonvar_count, ")")
   )
 
-  top_hvf <- df %>% 
-    filter(variable == TRUE) %>% 
-    arrange(rank) %>% 
+  top_hvf <- df %>%
+    filter(variable == TRUE) %>%
+    arrange(rank) %>%
     head(top_n)
-  
-  plot_ly() %>% 
+
+  plot_ly() %>%
     add_trace(
       data = df,
       x = ~mean,
@@ -95,7 +112,7 @@ var_genes_plot <- function(df, top_n = 10) {
         "Variance: %{y}<extra></extra>"
       ),
       name = paste("Top", top_n, "Variable")
-    ) %>% 
+    ) %>%
     layout(
       title = "Variable Features",
       xaxis = list(title = "Mean Expression"),
@@ -155,6 +172,8 @@ generate_plotly <- function(df, xaxis_input, yaxis_input, color, size,
   x <- df[[xaxis_input]]
   y <- df[[yaxis_input]]
   selected_color <- df[[color]]
+
+
 
   if (is.character(selected_color) || is.factor(selected_color)) {
     colors <- RColorBrewer::brewer.pal(8, "Set2")
