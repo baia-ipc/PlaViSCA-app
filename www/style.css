@@ -175,28 +175,25 @@
   align-items: center;
 }
 
-/*#gene_or_snn_ui{
+#plasmo_link, #ncbi_link {
+  display: block;
+}
+
+
+#axis{
   display: flex;
+  margin-left: 0;
+  margin-right: 0;
 }
 
-#gene_or_snn_ui .shiny-input-container {
- width: 60%; 
- margin-right: 10px;
+#xaxis-container .shiny-input-container {
+padding-right:2.5px;
+/*margin-left: 15px;*/
 }
 
-#link_gene{
-  align-self: center;
-}
-*/
-
-#xaxis .shiny-input-container {
-width: 93%;
-margin-left: 15px;
-}
-
-#yaxis .shiny-input-container {
-width: 93%;
-margin-left: 5px;
+#yaxis-container .shiny-input-container{
+padding-left:2.5px;
+/*margin-left: 5px;*/
 }
 
 

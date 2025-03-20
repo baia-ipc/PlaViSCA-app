@@ -166,18 +166,26 @@ ui <- fluidPage(
             )
           )
         ),
-        # column(width = 12, uiOutput("gene_or_snn_ui")),
         column(width = 12, radioButtons("plot", "Plot",
           choices = list("2D" = "2d", "3D" = "3d"),
           selected = "2d"
         )),
-        # selectInput(
-        #   "xaxis",
-        #   "Select X-Axis",
-        #   choices = "pc_1"
-        # ),
-        column(width = 6, uiOutput("xaxis")),
-        column(width = 6, uiOutput("yaxis")),
+       
+        column(width = 12,
+               fluidRow(id = "axis",
+                 column(width = 6, id = "xaxis-container",
+                        selectInput("xaxis", "X-axis",
+                                    choices = c("pc_1"),
+                                    selected = "pc_1")
+                        ),
+                 column(width = 6, id = "yaxis-container",
+                        selectInput("yaxis", "Y-axis",
+                                    choices = c("pc_2"),
+                                    selected = "pc_2")
+                        )
+               )
+               ),
+        
         column(width = 12, downloadButton("download_data", "Download",
           class = "bt-download"
         ))
@@ -188,7 +196,10 @@ ui <- fluidPage(
           id = "tabset",
           tabPanel(
             "DATA",
-            fluidRow(DT::DTOutput("data_table")),
+            fluidRow(withSpinner(type = 6,
+                                 size = 0.5,
+                                 color = "#3498db",
+                                 DT::DTOutput("data_table"))),
             fluidRow(
               column(width = 6, plotlyOutput("data_count_plotly")),
               column(width = 6, plotlyOutput("data_feature_plotly"))
