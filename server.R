@@ -26,12 +26,11 @@ server <- function(input, output, session) {
   autoUpdatePlot <- reactiveVal(FALSE)
 
   ## hide and show sections
-  observeEvent(input$explore_data, {
-    shinyjs::hide("home_section")
-    shinyjs::show("data_sets_section")
+  observe({
+    shinyjs::hide("data_sets_section")
+    shinyjs::show("home_section")
   })
-
-  observeEvent(input$data, {
+  observeEvent(list(input$explore_data, input$data), {
     shinyjs::hide("home_section")
     shinyjs::show("data_sets_section")
   })
@@ -48,6 +47,8 @@ server <- function(input, output, session) {
       shinyjs::addClass("sidebar", "visible")
     }
   })
+
+
 
   ## select columns for 2D plots
   pc_columns <- grep("^pc_\\d+", colnames(mr_data),
