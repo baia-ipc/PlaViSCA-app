@@ -171,22 +171,26 @@ ui <- fluidPage(
           choices = list("2D" = "2d", "3D" = "3d"),
           selected = "2d"
         )),
-       
-        column(width = 12,
-               fluidRow(id = "axis",
-                 column(width = 6, id = "xaxis-container",
-                        selectInput("xaxis", "X-axis",
-                                    choices = c("pc_1"),
-                                    selected = "pc_1")
-                        ),
-                 column(width = 6, id = "yaxis-container",
-                        selectInput("yaxis", "Y-axis",
-                                    choices = c("pc_2"),
-                                    selected = "pc_2")
-                        )
-               )
-               ),
-        
+        column(
+          width = 12,
+          fluidRow(
+            id = "axis",
+            column(
+              width = 6, id = "xaxis-container",
+              selectInput("xaxis", "X-axis",
+                choices = c("pc_1"),
+                selected = "pc_1"
+              )
+            ),
+            column(
+              width = 6, id = "yaxis-container",
+              selectInput("yaxis", "Y-axis",
+                choices = c("pc_2"),
+                selected = "pc_2"
+              )
+            )
+          )
+        ),
         column(width = 12, downloadButton("download_data", "Download",
           class = "bt-download"
         ))
@@ -197,10 +201,12 @@ ui <- fluidPage(
           id = "tabset",
           tabPanel(
             "DATA",
-            fluidRow(withSpinner(type = 6,
-                                 size = 0.5,
-                                 color = "#3498db",
-                                 DT::DTOutput("data_table"))),
+            fluidRow(withSpinner(
+              type = 6,
+              size = 0.5,
+              color = "#3498db",
+              DT::DTOutput("data_table")
+            )),
             fluidRow(
               column(width = 6, plotlyOutput("data_count_plotly")),
               column(width = 6, plotlyOutput("data_feature_plotly"))
@@ -213,11 +219,39 @@ ui <- fluidPage(
               column(width = 12, plotlyOutput("top_genes_exp_plotly"))
             ),
           ),
-          tabPanel("PCA", plotlyOutput("pca_plotly")),
-          tabPanel("PCA_integrated", plotlyOutput("pca_int_plotly")),
-          tabPanel("UMAP", plotlyOutput("umap_plotly")),
-          tabPanel("UMAP_unintegrated", plotlyOutput("umap_uint_plotly")),
-          tabPanel("tSNE", plotlyOutput("tsne_plotly"))
+          tabPanel("PCA", withSpinner(
+            type = 6,
+            size = 0.5,
+            color = "#3498db",
+            plotlyOutput("pca_plotly")
+          )),
+          tabPanel("PCA_integrated", withSpinner(
+            type = 6,
+            size = 0.5,
+            color = "#3498db",
+            plotlyOutput("pca_int_plotly")
+          )),
+          tabPanel("UMAP", withSpinner(
+            type = 6,
+            size = 0.5,
+            color = "#3498db",
+            plotlyOutput("umap_plotly"),
+          )),
+          tabPanel(
+            "UMAP_unintegrated",
+            withSpinner(
+              type = 6,
+              size = 0.5,
+              color = "#3498db",
+              plotlyOutput("umap_uint_plotly")
+            )
+          ),
+          tabPanel("tSNE", withSpinner(
+            type = 6,
+            color = "#3498db",
+            size = 0.5,
+            plotlyOutput("tsne_plotly"),
+          ))
         )
       )
     )
