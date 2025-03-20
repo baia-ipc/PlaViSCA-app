@@ -1,6 +1,7 @@
 library(shiny)
 library(shinyjs)
 library(plotly)
+library(shinycssloaders)
 
 ui <- fluidPage(
   useShinyjs(),

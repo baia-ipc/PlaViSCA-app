@@ -5,7 +5,6 @@ library(DT)
 library(plotly)
 library(RColorBrewer)
 library(tidyverse)
-library(shinycssloaders)
 
 # source function
 source("functions/functions.R")
@@ -136,8 +135,6 @@ server <- function(input, output, session) {
     }
   })
 
-
-
   ## dynamic ui for gene name
   shinyjs::hide("gene_snn_ui")
   observe(
@@ -198,7 +195,8 @@ server <- function(input, output, session) {
   })
   
   
-  observeEvent(list(input$tabset, input$plot), {
+  observeEvent(list(input$tabset, input$plot, input$xaxis), {
+    req(input$xaxis)
     if (input$plot == "2d") {
       shinyjs::show("axis")
       y_choices <- switch(input$tabset,
@@ -212,15 +210,13 @@ server <- function(input, output, session) {
       updateSelectInput(session, "yaxis",
                         choices = y_choices,
                         selected = if (input$yaxis %in% y_choices) input$yaxis
-                                   else y_choices[2])
+                                   else y_choices[1])
     } else {
       shinyjs::hide("axis")
     }
   })
-  
+
   ## plots
-  
-  observeEvent(input$tabset, {
     output$pca_plotly <- renderPlotly({
       req(filtered_data(), input$xaxis, input$yaxis, input$color)
       color_column <- switch(input$color,
@@ -247,10 +243,6 @@ server <- function(input, output, session) {
       )
     })
     
-    
-  })
-  
-   
   output$umap_plotly <- renderPlotly({
     req(filtered_data(), input$xaxis, input$yaxis, input$color)
     color_column <- switch(input$color,
