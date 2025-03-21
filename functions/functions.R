@@ -173,8 +173,6 @@ generate_plotly <- function(df, xaxis_input, yaxis_input, color, size,
   y <- df[[yaxis_input]]
   selected_color <- df[[color]]
 
-
-
   if (is.character(selected_color) || is.factor(selected_color)) {
     colors <- RColorBrewer::brewer.pal(8, "Set2")
   } else {

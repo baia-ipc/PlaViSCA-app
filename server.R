@@ -44,8 +44,10 @@ server <- function(input, output, session) {
   observe({
     if (input$tabset == "DATA") {
       shinyjs::removeClass("sidebar", "visible")
+      shinyjs::runjs('$("#main").removeClass("col-sm-8").addClass("col-sm-11");') 
     } else {
       shinyjs::addClass("sidebar", "visible")
+      shinyjs::runjs('$("#main").removeClass("col-sm-11").addClass("col-sm-8");') 
     }
   })
 

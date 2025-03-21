@@ -19,7 +19,7 @@ ui <- fluidPage(
     div(class = "logo", img(src = "Pvivax.jpeg", height = "60px")),
     div(
       class = "menu-title",
-      span("Plasmodium vivax")
+      span("🦟 Plasmodium vivax 🦟")
     ),
     div(
       class = "menu-items",
@@ -196,11 +196,12 @@ ui <- fluidPage(
         ))
       ),
       column(
-        width = 8,
+        width = 8, id = "main", class = "main",
         tabsetPanel(
           id = "tabset",
           tabPanel(
             "DATA",
+            br(),
             fluidRow(withSpinner(
               type = 6,
               size = 0.5,
