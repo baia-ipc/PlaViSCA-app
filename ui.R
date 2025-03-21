@@ -29,7 +29,7 @@ ui <- fluidPage(
       ),
       span("|"),
       actionLink("data",
-        label = tagList(icon("table"), " Data display"),
+        label = tagList(icon("table"), " Explore data"),
         class = "menu-link"
       )
     )
@@ -207,14 +207,17 @@ ui <- fluidPage(
               color = "#3498db",
               DT::DTOutput("data_table")
             )),
+            br(),
             fluidRow(
               column(width = 6, plotlyOutput("data_count_plotly")),
               column(width = 6, plotlyOutput("data_feature_plotly"))
             ),
+            br(),
             fluidRow(
               column(width = 6, plotlyOutput("data_pca_stdv_plotly")),
               column(width = 6, plotlyOutput("variable_genes_plotly"))
             ),
+            br(),
             fluidRow(
               column(width = 12, plotlyOutput("top_genes_exp_plotly"))
             ),

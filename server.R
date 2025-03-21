@@ -26,15 +26,16 @@ server <- function(input, output, session) {
   autoUpdatePlot <- reactiveVal(FALSE)
 
   ## hide and show sections
-  observe({
-    shinyjs::hide("data_sets_section")
-    shinyjs::show("home_section")
-  })
-  observeEvent(list(input$explore_data, input$data), {
+  observeEvent(input$explore_data, {
     shinyjs::hide("home_section")
     shinyjs::show("data_sets_section")
   })
-
+  
+  observeEvent(input$data, {
+    shinyjs::hide("home_section")
+    shinyjs::show("data_sets_section")
+  })
+  
   observeEvent(input$home, {
     shinyjs::hide("data_sets_section")
     shinyjs::show("home_section")
@@ -146,7 +147,7 @@ server <- function(input, output, session) {
     }
   })
 
-  ## Dynamic UI for gene selection
+  ## Dynamic UI for gene and cca_snn selection
   shinyjs::hide("gene_snn_ui")
   observe({
     if (input$color == "genes") {

@@ -1,6 +1,8 @@
-*{
+/* Global Styles */
+* {
   box-sizing: border-box;
 }
+
 /* Menu Bar */
 .menu-bar {
   display: flex;
@@ -22,27 +24,40 @@
 
 .menu-title span {
   display: inline-block;
-  color: blue;
+  color: #f44336;
   font-weight: bold;
 }
 
 .menu-items {
   display: flex;
   align-items: center;
-  color: black;
+  color: #2c3e50; 
 }
 
 .menu-link {
-  color: black;
+  color: #2c3e50; 
   text-decoration: none;
   margin: 0 10px;
   font-size: 16px;
+  transition: color 0.3s ease, text-decoration 0.3s ease;
 }
 
 .menu-link:hover {
+  color: #388e3c;
   text-decoration: underline;
 }
 
+#explore_data:hover {
+  color: #43a047;
+  margin: 10px 10px;
+  font-size: 16px;
+  font-style: italic;
+  transition: color 0.3s ease, text-decoration 0.3s ease;
+}
+
+
+
+/* Image Styling */
 .img {
   padding: 15px;
 }
@@ -53,17 +68,13 @@
   object-fit: cover;
 }
 
-/* home page */
-.introduction p {
-  padding: 15px;
-  text-align: justify;
-}
-
-/* data data */
+/* Home Page */
+.introduction p,
 #data_sets_section {
   padding: 15px;
 }
 
+/* Input Sections */
 #stagei,
 #stagelr,
 #size,
@@ -77,10 +88,13 @@
 #size-label,
 #color-label,
 #plot-label {
-  background-color: #e0f2d7 !important;
+  background-color: #c8e6c9 !important;
   width: 100%;
   font-weight: bold;
   margin-bottom: 5px;
+  color: #2e7d32;
+  font-weight: bold;
+  font-size: 18px;
 }
 
 #stagei-label:hover,
@@ -91,6 +105,7 @@
   cursor: default;
 }
 
+/* Option Groups */
 .shiny-options-group {
   display: flex;
   flex-wrap: wrap;
@@ -102,15 +117,14 @@
   align-items: flex-end;
 }
 
+/* Checkbox and Radio Button Layout */
 #stagei .shiny-options-group .checkbox,
 #size .shiny-options-group .radio,
 #plot .shiny-options-group .radio {
   margin-top: 15px;
 }
 
-
-#plot .shiny-options-group .radio
-{
+#plot .shiny-options-group .radio {
   flex: 1 0 48%;
 }
 
@@ -121,106 +135,109 @@
   flex: 1 0 31%;
 }
 
-#stagei label {
-  display: flex;
-  flex: 1;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  width: 100%;
+.shiny-options-group .radio label:hover,
+.shiny-options-group .checkbox label:hover {
+  background-color: #fff9c4;
+  font-style: italic;
 }
 
+
+/* Labels */
 #stagei label,
 #size label,
 #color label,
 #plot label {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
   padding: 10px;
   border: 1px solid #ccc;
   border-radius: 4px;
-  background-color: white;
   text-align: center;
   width: 100%;
 }
 
-#stagei label:hover,
-#size label:hover,
-#color label:hover,
-#plot label:hover {
-  background-color: #dbdbdb;
+/* Remove Background Color from stage-lr Labels */
+#stagelr label {
+  background-color: transparent !important;
 }
 
+
+/* Hide Default Inputs */
 #stagei input[type="checkbox"],
 #size input[type="radio"],
 #color input[type="radio"],
 #plot input[type="radio"] {
-   display: none;
+  display: none;
 }
 
+/* Sidebar */
 #sidebar {
   width: 0;
   opacity: 0;
   visibility: hidden;
-  transition: width .1s ease, opacity .5s ease, visibility .1s;
+  transition: width 0.5s ease, opacity 0.5s ease, visibility 0.8s;
 }
 
 #sidebar.visible {
   width: 25%;
   opacity: 1;
   visibility: visible;
-  transition: width .1s ease, opacity .3s ease;
+  transition: width 0.5s ease, opacity 0.5s ease;
 }
 
-#gene_snn_ui{
+/* Other Elements */
+#gene_snn_ui {
   display: flex;
   align-items: center;
 }
 
-#plasmo_link, #ncbi_link {
+#plasmo_link, 
+#ncbi_link {
   display: block;
 }
 
-
-#axis{
+#axis {
   display: flex;
   margin-left: 0;
   margin-right: 0;
 }
 
 #xaxis-container .shiny-input-container {
-padding-right:2.5px;
-/*margin-left: 15px;*/
+  padding-right: 2.5px;
 }
 
-#yaxis-container .shiny-input-container{
-padding-left:2.5px;
-/*margin-left: 5px;*/
+#yaxis-container .shiny-input-container {
+  padding-left: 2.5px;
 }
 
-
+/* Data Section Layout */
 #data_sets_section .col-sm-8 {
   width: 75%;
-  transition: width .1s ease;
+  transition: width 0.1s ease;
 }
 
-/*this class added by jquery to ensure the checked label color*/
+/* Checked Label Styling */
 .checked-label {
-  background-color: #d3d3d3 !important;
-  color: black;
-  border: 2px solid #000;
-  padding: 5px;
-  border-radius: 4px;
+  background-color: #d6eaf8; 
+  font-weight: bold;
+  border: 2px solid #1a5a8c;
+  padding: 6px;
+  border-radius: 6px;
+  font-weight: bold;
+  transition: background-color 0.3s, border-color 0.3s;
 }
 
-
-/*Style selectedinput*/
+/* Selected Input Styling */
 .col-sm-6 {
- padding-left: 0 !important;
- padding-right: 0 !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
 }
 
-/*style on download button*/
+/* Download Button */
 .bt-download {
-  background-color: #4CAF50;
+  background-color: #43a047;
   color: white;
   padding: 10px 20px;
   font-size: 16px;
@@ -228,16 +245,49 @@ padding-left:2.5px;
   border: none;
   cursor: pointer;
   width: 100%;
+  transition: font-size 0.3s;
 }
+
+/* Hover Effect */
+.bt-download:hover {
+  background-color: #388e3c;
+  font-size: 18px;
+}
+
+
 
 /* Responsive Design */
 @media screen and (max-width: 768px) {
   .menu-bar {
     flex-direction: column;
     text-align: center;
+    padding: 15px;
   }
 
-  .display {
-    flex-direction: column;
+  .menu-title {
+    font-size: 28px;
+    margin-bottom: 10px;
   }
+
+  .menu-items {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .menu-link {
+    margin: 5px 0;
+  }
+}
+
+/* Image Styling */
+.img {
+  padding: 15px;
+}
+
+.img img {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
