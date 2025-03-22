@@ -15,7 +15,7 @@ so <- readRDS("data/Pv.all.12.Jan2025.rds")
 # change features from - to _ to match with gff gene_id
 features <- gsub("-", "_", rownames(so[["RNA"]]@features))
 rownames(so[["RNA"]]@features) <- features
-saveRDS(so, "data/Pv.all.12.Jan2025.modified.rds")
+# saveRDS(so, "data/Pv.all.12.Jan2025.modified.rds")
 
 # subset columns from metadata
 metadata <- c(
@@ -33,23 +33,24 @@ pca <- colnames(so@reductions$pca@cell.embeddings)[1:3]
 pca_int <- colnames(so@reductions$integrated.rpca@cell.embeddings)[1:3]
 tsne <- colnames(so@reductions$tsne@cell.embeddings)
 
-# top highly expressed genes
+# expressed genes
 mean_exp <- rowMeans(GetAssayData(so, assay = "RNA", layer = "data"))
 
-top_features <- names(sort(mean_exp, decreasing = TRUE))
+sort_features <- names(sort(mean_exp, decreasing = TRUE))
 
-top_features_name <- gff_data$name[match(top_features, gff_data$id)]
-top_features_name <- ifelse(is.na(top_features_name), top_features,
-  top_features_name
-)
+# sort_features_name <- gff_data$name[match(sort_features, gff_data$id)]
+# sort_features_name <- ifelse(is.na(sort_features_name), sort_features,
+#   sort_features_name
+# )
 
 mr_data <- FetchData(so, vars = c(
   metadata, "ident", umap, umap_int, pca,
-  pca_int, tsne, top_features
+  pca_int, tsne, sort_features
 )) %>%
-  clean_names()
+  clean_names() %>%
+  rename_with(~ toupper(.), contains("pvp"))
 
-colnames(mr_data)[tail(seq_along(mr_data), length(mean_exp))] <- top_features
+# colnames(mr_data)[tail(seq_along(mr_data), length(mean_exp))] <- sort_features
 
 mr_data <- mr_data %>%
   rownames_to_column("id") %>%
@@ -65,15 +66,6 @@ mr_data <- mr_data %>%
       TRUE ~ stage
     )
   )
-
-# Extract all features
-# GetAssayData(so, assay = "RNA", layer = "data") %>%
-#   as_tibble() %>%
-#   rownames_to_column("gene") %>%
-#   left_join(gff_data, by = c("gene" = "id")) %>%
-#   mutate(name = coalesce(name, gene)) %>%
-#   select(gene, name, description, everything(), -ebi_biotype) %>%
-#   saveRDS("data/all_features.rds")
 
 # Extract PCA standard deviation
 pca_std_df <- so@reductions$pca@stdev

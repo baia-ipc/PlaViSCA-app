@@ -30,12 +30,12 @@ server <- function(input, output, session) {
     shinyjs::hide("home_section")
     shinyjs::show("data_sets_section")
   })
-  
+
   observeEvent(input$data, {
     shinyjs::hide("home_section")
     shinyjs::show("data_sets_section")
   })
-  
+
   observeEvent(input$home, {
     shinyjs::hide("data_sets_section")
     shinyjs::show("home_section")
@@ -44,14 +44,12 @@ server <- function(input, output, session) {
   observe({
     if (input$tabset == "DATA") {
       shinyjs::removeClass("sidebar", "visible")
-      shinyjs::runjs('$("#main").removeClass("col-sm-8").addClass("col-sm-11");') 
+      shinyjs::runjs('$("#main").removeClass("col-sm-8").addClass("col-sm-11");')
     } else {
       shinyjs::addClass("sidebar", "visible")
-      shinyjs::runjs('$("#main").removeClass("col-sm-11").addClass("col-sm-8");') 
+      shinyjs::runjs('$("#main").removeClass("col-sm-11").addClass("col-sm-8");')
     }
   })
-
-
 
   ## select columns for 2D plots
   pc_columns <- grep("^pc_\\d+", colnames(mr_data),
@@ -91,7 +89,7 @@ server <- function(input, output, session) {
     filtered_data(mr_data %>% filter(stage %in% input$stagei))
   })
 
-  ## DATA tab: load data and initialize plots/table only once
+  ## DATA tab
   data_loaded <- reactiveVal(FALSE)
   observeEvent(input$tabset, {
     req(input$tabset)
@@ -117,16 +115,16 @@ server <- function(input, output, session) {
 
       # Violin plots
       output$data_count_plotly <- renderPlotly({
-        violin_plotly(filt_data,
+        rna_feature_plot(filt_data,
           x = "sample", y = "n_count_rna",
-          color = "ident", title = "RNA Count"
+          color = "ident", y_title = "RNA count", title = "RNA Count"
         )
       })
 
       output$data_feature_plotly <- renderPlotly({
-        violin_plotly(filt_data,
+        rna_feature_plot(filt_data,
           x = "sample", y = "n_feature_rna",
-          color = "ident", title = "Feature Count"
+          color = "ident", y_title = "nFeature count", title = "Feature Count"
         )
       })
 
@@ -243,10 +241,11 @@ server <- function(input, output, session) {
       )
       generate_plotly(
         filtered_data(), input$xaxis, input$yaxis,
-        color_column, input$size, "PCA", input$plot
+        color_column, input$genes_n, input$size, "PCA", input$plot
       )
     })
   })
+
 
   output$pca_int_plotly <- renderPlotly({
     req(filtered_data(), input$xaxis, input$yaxis, input$color, autoUpdatePlot())
@@ -258,7 +257,7 @@ server <- function(input, output, session) {
       )
       generate_plotly(
         filtered_data(), input$xaxis, input$yaxis,
-        color_column, input$size, "PCA_integrated", input$plot
+        color_column, input$genes_n, input$size, "PCA_integrated", input$plot
       )
     })
   })
@@ -273,7 +272,7 @@ server <- function(input, output, session) {
       )
       generate_plotly(
         filtered_data(), input$xaxis, input$yaxis,
-        color_column, input$size, "UMAP", input$plot
+        color_column, input$genes_n, input$size, "UMAP", input$plot
       )
     })
   })
@@ -288,7 +287,7 @@ server <- function(input, output, session) {
       )
       generate_plotly(
         filtered_data(), input$xaxis, input$yaxis,
-        color_column, input$size, "UMAP_unintegred", input$plot
+        color_column, input$genes_n, input$size, "UMAP_unintegred", input$plot
       )
     })
   })
@@ -303,7 +302,7 @@ server <- function(input, output, session) {
       )
       generate_plotly(
         filtered_data(), input$xaxis, input$yaxis,
-        color_column, input$size, "tSNE", input$plot
+        color_column, input$genes_n, input$size, "tSNE", input$plot
       )
     })
   })
@@ -321,4 +320,11 @@ server <- function(input, output, session) {
       })
     }
   )
+
+  ## clear memory
+  onSessionEnded(function() {
+    rm(list = ls(envir = .GlobalEnv), envir = .GlobalEnv)
+    gc()
+    session$reload()
+  })
 }
