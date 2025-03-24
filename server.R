@@ -84,10 +84,13 @@ server <- function(input, output, session) {
   cca_snn <- grep("CCA_snn", colnames(mr_data), ignore.case = TRUE, value = TRUE)
 
   ## filter data
-  filtered_data <- reactiveVal(NULL)
-  observeEvent(input$stagei, {
-    filtered_data(mr_data %>% filter(stage %in% input$stagei))
-  })
+  filtered_data <- eventReactive(input$stagei, {
+    if (length(input$stagei) == 0) {
+      return(NULL) 
+    } else {
+      return(mr_data %>% filter(stage %in% input$stagei))
+    }
+  }, ignoreNULL = FALSE)
 
   ## DATA tab
   data_loaded <- reactiveVal(FALSE)
@@ -100,6 +103,7 @@ server <- function(input, output, session) {
           id, species, day, condition, stage, n_count_rna, n_feature_rna,
           sample, ident, umap_1, umap_2, pc_1, pc_2, t_sne_1, t_sne_2
         )
+      
 
       # DT table
       output$data_table <- renderDT(

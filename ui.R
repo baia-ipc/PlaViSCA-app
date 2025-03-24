@@ -93,11 +93,11 @@ ui <- fluidPage(
           checkboxGroupInput(
             "stagei", "Infection stage:",
             choices = list(
-              "Human Blood" = "human_blood",
-              "Human Liver" = "human_liver",
-              "Mosquito Saliva" = "mosquito_saliva"
+              "Blood" = "blood",
+              "Liver" = "liver",
+              "Sporozoite" = "sporozoite"
             ),
-            selected = list("human_blood", "human_liver", "mosquito_saliva")
+            selected = list("blood", "liver", "sporozoite")
           )
         ),
         column(

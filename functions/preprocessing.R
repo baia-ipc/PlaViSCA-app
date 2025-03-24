@@ -38,19 +38,12 @@ mean_exp <- rowMeans(GetAssayData(so, assay = "RNA", layer = "data"))
 
 sort_features <- names(sort(mean_exp, decreasing = TRUE))
 
-# sort_features_name <- gff_data$name[match(sort_features, gff_data$id)]
-# sort_features_name <- ifelse(is.na(sort_features_name), sort_features,
-#   sort_features_name
-# )
-
 mr_data <- FetchData(so, vars = c(
   metadata, "ident", umap, umap_int, pca,
   pca_int, tsne, sort_features
 )) %>%
   clean_names() %>%
   rename_with(~ toupper(.), contains("pvp"))
-
-# colnames(mr_data)[tail(seq_along(mr_data), length(mean_exp))] <- sort_features
 
 mr_data <- mr_data %>%
   rownames_to_column("id") %>%
@@ -60,9 +53,9 @@ mr_data <- mr_data %>%
       TRUE ~ species
     ),
     stage = case_when(
-      stage == "BloodStage" ~ "human_blood",
-      stage == "Liver Stage" ~ "human_liver",
-      stage == "Sporozoite" ~ "mosquito_saliva",
+      stage == "BloodStage" ~ "blood",
+      stage == "Liver Stage" ~ "liver",
+      stage == "Sporozoite" ~ "sporozoite",
       TRUE ~ stage
     )
   )
