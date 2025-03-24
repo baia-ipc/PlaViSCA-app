@@ -112,6 +112,7 @@
 }
 
 #color .shiny-options-group,
+#data_type .shiny-options-group,
 #stagelr .shiny-options-group {
   align-items: flex-end;
 }
@@ -186,7 +187,15 @@
   transition: width 0.5s ease, opacity 0.5s ease;
 }
 
-/* Other Elements */
+#data_type .shiny-options-group {
+  margin: 0;
+}
+
+#data_type .shiny-options-group {
+  justify-content: space-between;
+}
+
+
 #gene_snn_ui {
   display: flex;
   align-items: center;

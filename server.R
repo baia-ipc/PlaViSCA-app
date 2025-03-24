@@ -100,7 +100,7 @@ server <- function(input, output, session) {
       filt_data <- filtered_data()
       filt_data <- filt_data %>%
         select(
-          id, species, day, condition, stage, n_count_rna, n_feature_rna,
+          id, species, type, day, condition, stage, n_count_rna, n_feature_rna,
           sample, ident, umap_1, umap_2, pc_1, pc_2, t_sne_1, t_sne_2
         )
       
@@ -153,8 +153,10 @@ server <- function(input, output, session) {
 
   ## Dynamic UI for gene and cca_snn selection
   shinyjs::hide("gene_snn_ui")
+  shinyjs::hide("data_type")
   observe({
     if (input$color == "genes") {
+      shinyjs::show("data_type")
       shinyjs::show("gene_snn_ui")
       shinyjs::show("gene_link_ui")
       updateSelectizeInput(session, "genes_n",
@@ -164,6 +166,7 @@ server <- function(input, output, session) {
     } else if (input$color == "cca_snn") {
       shinyjs::show("gene_snn_ui")
       shinyjs::hide("gene_link_ui")
+      shinyjs::hide("data_type")
       updateSelectInput(session, "genes_n",
         label = "Select Resolution",
         choices = cca_snn
@@ -171,6 +174,7 @@ server <- function(input, output, session) {
     } else {
       shinyjs::hide("gene_snn_ui")
       shinyjs::hide("gene_link_ui")
+      shinyjs::hide("data_type")
     }
   })
 
@@ -195,11 +199,11 @@ server <- function(input, output, session) {
     if (input$plot == "2d") {
       shinyjs::show("axis")
       x_choices <- switch(input$tabset,
-        "UMAP" = umap_columns,
+        "UMAP_integrated" = umap_columns,
         "UMAP_unintegrated" = umap_uint_columns,
-        "PCA" = pc_columns,
+        "PCA_unintergrated" = pc_columns,
         "PCA_integrated" = pc_int_columns,
-        "tSNE" = tsne_columns
+        "tSNE_integrated" = tsne_columns
       )
       updateSelectInput(session, "xaxis",
         choices = x_choices,
@@ -207,11 +211,11 @@ server <- function(input, output, session) {
       )
 
       y_choices <- switch(input$tabset,
-        "UMAP" = setdiff(umap_columns, input$xaxis),
+        "UMAP_integrated" = setdiff(umap_columns, input$xaxis),
         "UMAP_unintegrated" = setdiff(umap_uint_columns, input$xaxis),
-        "PCA" = setdiff(pc_columns, input$xaxis),
+        "PCA_unintergrated" = setdiff(pc_columns, input$xaxis),
         "PCA_integrated" = setdiff(pc_int_columns, input$xaxis),
-        "tSNE" = setdiff(tsne_columns, input$xaxis)
+        "tSNE_integrated" = setdiff(tsne_columns, input$xaxis)
       )
       updateSelectInput(session, "yaxis",
         choices = y_choices,

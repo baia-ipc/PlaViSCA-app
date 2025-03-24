@@ -1,4 +1,4 @@
-# this script is use to pre processing data
+# this script is use to pre processing data for pvsca project
 
 # load library
 library(Seurat)
@@ -9,17 +9,30 @@ library(janitor)
 gff_data <- read_tsv("ref/PvivaxP01_gff_data.tsv") %>%
   clean_names()
 
+# load parasite sex data
+type_df <- read.csv("data/pbio_3000711_s034.csv") %>% 
+  clean_names() %>% 
+  select(sample, type) %>% 
+  mutate(sample = gsub(".*_", "", sample))
+
 # load seurat object
 so <- readRDS("data/Pv.all.12.Jan2025.rds")
 
 # change features from - to _ to match with gff gene_id
 features <- gsub("-", "_", rownames(so[["RNA"]]@features))
 rownames(so[["RNA"]]@features) <- features
+
+# add column type as parasite sex to metadata
+so@meta.data$cleaned_barcode <- sub("_.*", "", so@meta.data$Barcode)
+so@meta.data$type <- type_df$type[match(so@meta.data$cleaned_barcode,
+                                        type_df$sample)]
+so@meta.data$cleaned_barcode <- NULL
+
 # saveRDS(so, "data/Pv.all.12.Jan2025.modified.rds")
 
 # subset columns from metadata
 metadata <- c(
-  "species", "day", "condition", "Stage", "Replicate", "is_outlier",
+  "species", "day", "condition", "Stage", "Replicate", "is_outlier","type",
   "location", "Vivax_strain", "nCount_RNA", "nFeature_RNA",
   "Sample", "seurat_clusters", grep("CCA_snn", colnames(so@meta.data),
     ignore.case = TRUE, value = TRUE
