@@ -10,9 +10,9 @@ gff_data <- read_tsv("ref/PvivaxP01_gff_data.tsv") %>%
   clean_names()
 
 # load parasite sex data
-type_df <- read.csv("data/pbio_3000711_s034.csv") %>% 
-  clean_names() %>% 
-  select(sample, type) %>% 
+type_df <- read.csv("data/pbio_3000711_s034.csv") %>%
+  clean_names() %>%
+  select(sample, type) %>%
   mutate(sample = gsub(".*_", "", sample))
 
 # load seurat object
@@ -24,40 +24,38 @@ rownames(so[["RNA"]]@features) <- features
 
 # add column type as parasite sex to metadata
 so@meta.data$cleaned_barcode <- sub("_.*", "", so@meta.data$Barcode)
-so@meta.data$type <- type_df$type[match(so@meta.data$cleaned_barcode,
-                                        type_df$sample)]
+so@meta.data$type <- type_df$type[match(
+  so@meta.data$cleaned_barcode,
+  type_df$sample
+)]
 so@meta.data$cleaned_barcode <- NULL
 
 # saveRDS(so, "data/Pv.all.12.Jan2025.modified.rds")
 
 # subset columns from metadata
 metadata <- c(
-  "species", "day", "condition", "Stage", "Replicate", "is_outlier","type",
+  "species", "day", "condition", "Stage", "Replicate", "type",
   "location", "Vivax_strain", "nCount_RNA", "nFeature_RNA",
   "Sample", "seurat_clusters", grep("CCA_snn", colnames(so@meta.data),
     ignore.case = TRUE, value = TRUE
   )
 )
 
-# subset reduction from seurat object
+# subset reduction columns from seurat object
 umap <- colnames(so@reductions$umap@cell.embeddings)
 umap_int <- colnames(so@reductions$umap.unintegrated@cell.embeddings)
 pca <- colnames(so@reductions$pca@cell.embeddings)[1:3]
 pca_int <- colnames(so@reductions$integrated.rpca@cell.embeddings)[1:3]
 tsne <- colnames(so@reductions$tsne@cell.embeddings)
 
-# expressed genes
-mean_exp <- rowMeans(GetAssayData(so, assay = "RNA", layer = "data"))
-
-sort_features <- names(sort(mean_exp, decreasing = TRUE))
-
+# Extract metadata and reduction data
 mr_data <- FetchData(so, vars = c(
   metadata, "ident", umap, umap_int, pca,
-  pca_int, tsne, sort_features
+  pca_int, tsne
 )) %>%
-  clean_names() %>%
-  rename_with(~ toupper(.), contains("pvp"))
+  clean_names()
 
+# clean mr_data
 mr_data <- mr_data %>%
   rownames_to_column("id") %>%
   mutate(
@@ -72,6 +70,43 @@ mr_data <- mr_data %>%
       TRUE ~ stage
     )
   )
+
+# Extract reduction data from mr_data
+red_df <- mr_data %>%
+  select(
+    id, stage, ident, n_feature_rna,
+    any_of(make_clean_names(umap)),
+    any_of(make_clean_names(umap_int)),
+    any_of(make_clean_names(pca)),
+    any_of(make_clean_names(pca_int)),
+    any_of(make_clean_names(tsne))
+  )
+
+# Extract genes for normalize data
+norm_exp <- rowMeans(GetAssayData(so, assay = "RNA", layer = "data"))
+sort_norm_exp <- names(sort(norm_exp, decreasing = TRUE))
+norm_exp <- FetchData(so, vars = c(sort_norm_exp)) %>% rownames_to_column("id")
+normalize_df <- left_join(red_df, norm_exp, by = "id")
+
+# Extract genes for raw count data
+raw_exp <- rowMeans(GetAssayData(so, assay = "RNA", layer = "count"))
+sort_raw_exp <- names(sort(raw_exp, decreasing = TRUE))
+raw_exp <- FetchData(so, vars = c(sort_raw_exp)) %>% rownames_to_column("id")
+raw_df <- left_join(red_df, raw_exp, by = "id")
+
+# Extract genes for scale data
+scale_exp <- rowMeans(GetAssayData(so, assay = "RNA", layer = "scale.data"))
+sort_scale_exp <- names(sort(scale_exp, decreasing = TRUE))
+scale_exp <- FetchData(so, vars = c(sort_scale_exp)) %>% rownames_to_column("id")
+scale_df <- left_join(red_df, scale_exp, by = "id")
+
+exp_df <- list(
+  normalize_df = normalize_df,
+  raw_df = raw_df,
+  scale_df = scale_df
+)
+
+saveRDS(exp_df, "data/expression_data.rds")
 
 # Extract PCA standard deviation
 pca_std_df <- so@reductions$pca@stdev
@@ -96,6 +131,7 @@ vf_data <- vf_data %>%
 # top expression genes
 top_genes <- rowMeans(GetAssayData(so, assay = "RNA", layer = "data"))
 top_genes <- names(sort(top_genes, decreasing = TRUE)[1:10])
+
 # top expression genes with cluster information
 top_genes_exp <- FetchData(so, vars = c(top_genes, "ident")) %>%
   rownames_to_column("id") %>%

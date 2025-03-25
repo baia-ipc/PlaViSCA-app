@@ -141,7 +141,12 @@ ui <- fluidPage(
           selected = "ident"
         )),
         
-        fluidRow(
+        
+        
+        column(
+          width = 12,
+          fluidRow(
+            width = 12,
             column(width = 12,
                    radioButtons("data_type", "Data type:",
                                 choices = list("Raw" = "raw",
@@ -150,9 +155,9 @@ ui <- fluidPage(
                                 ),
                                 selected = "normalize"
                    )
-            ) 
-            
+            )
           ),
+          
           fluidRow(
             id = "gene_snn_ui",
             column(
@@ -175,7 +180,8 @@ ui <- fluidPage(
                 )
               )
             )
-          ),
+          )
+        ),
         column(width = 12, radioButtons("plot", "Plot",
           choices = list("2D" = "2d", "3D" = "3d"),
           selected = "2d"
@@ -232,8 +238,6 @@ ui <- fluidPage(
               column(width = 12, plotlyOutput("top_genes_exp_plotly"))
             ),
           ),
-          
-         
           
           tabPanel("PCA_integrated", withSpinner(
             type = 6,
