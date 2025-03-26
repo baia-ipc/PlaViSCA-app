@@ -6,7 +6,7 @@ genes <- function(data, gff_data, pattern = "pvp") {
     as.data.frame() %>%
     setNames("gene") %>%
     left_join(gff_data, by = c("gene" = "id")) %>%
-    mutate(name = coalesce(name, gene)) %>% 
+    mutate(name = coalesce(name, gene)) %>%
     select(gene, name)
 }
 
@@ -169,58 +169,66 @@ top_genes_exp_plot <- function(df, default_gene = "PVP01_1460700") {
 }
 
 
+# Function to assign colors based on the number of categories
+assign_colors <- function(num_categories) {
+  if (num_categories <= 12) {
+    return(RColorBrewer::brewer.pal(
+      n = max(num_categories, 3),
+      name = "Set3"
+    )[1:num_categories])
+  } else {
+    return(rep(RColorBrewer::brewer.pal(12, "Set3"), length.out = num_categories))
+  }
+}
+
 # function to generate plots for PCA, UMAP, and tSNE
 generate_plotly <- function(df, xaxis_input, yaxis_input, color, legend_title,
                             size, plot_type = "PCA", plot_dim = "2d") {
   x <- df[[xaxis_input]]
   y <- df[[yaxis_input]]
   selected_color <- df[[color]]
-  
+
   if (!is.numeric(selected_color)) {
     legend_title <- color
   }
-  
+
   is_categorical <- is.character(selected_color) || is.factor(selected_color)
-  
+
   if (is_categorical) {
-    # Handle missing values and ensure unique factor levels
-    df[[color]] <- as.character(df[[color]])  
+    df[[color]] <- as.character(df[[color]])
     df[[color]][is.na(df[[color]])] <- "NA (missing)"
-    
+
     unique_categories <- unique(df[[color]])
-    
-    # Assign colors
-    num_colors <- length(unique_categories)
-    
-    # Default Set2 colors plus more options (blue, purple, etc.)
-    if (num_colors > 1) {
-      extended_palette <- c(
-        "gray",
-        brewer.pal(max(min(num_colors - 1, 8), 3), "Set2"),
-        brewer.pal(max(min(num_colors - 1, 12), 3), "Paired"),
-        "blue", "purple", "green", "orange", "pink", "cyan"
+
+    if ("NA (missing)" %in% unique_categories) {
+      non_missing_categories <-
+        unique_categories[unique_categories != "NA (missing)"]
+      num_non_missing <- length(non_missing_categories)
+
+      if (num_non_missing > 0) {
+        assigned_colors <- assign_colors(num_non_missing)
+      } else {
+        assigned_colors <- character(0)
+      }
+
+      colors <- setNames(
+        c("#A9A9A94D", assigned_colors),
+        c("NA (missing)", non_missing_categories)
       )
-      
-      # Ensure we have enough colors
-      category_colors <- extended_palette[1:num_colors]
+
+      # Set factor levels with "NA (missing)" first
+      df[[color]] <- factor(df[[color]], levels = c(
+        "NA (missing)",
+        non_missing_categories
+      ))
     } else {
-      category_colors <- "gray"
+      num_categories <- length(unique_categories)
+      assigned_colors <- assign_colors(num_categories)
+      colors <- setNames(assigned_colors, unique_categories)
+      df[[color]] <- factor(df[[color]], levels = unique_categories)
     }
-    
-    
-    # If more colors are needed, extend with gray
-    if (length(category_colors) < num_colors) {
-      category_colors <- c(category_colors,
-                           rep("gray", num_colors - length(category_colors)))
-    }
-    
-    colors <- setNames(category_colors, unique_categories)
-    
-    df[[color]] <- factor(df[[color]], levels = unique_categories)
-  } else {
-    colors <- colorRampPalette(c("gray", "red"))(100)
   }
-  
+
   hover_text <- ~ paste(
     "Cell:", id,
     "<br>Cluster:", ident,
@@ -229,7 +237,7 @@ generate_plotly <- function(df, xaxis_input, yaxis_input, color, legend_title,
     "<br>X:", x,
     "<br>Y:", y
   )
-  
+
   legend_layout <- list(
     title = list(text = legend_title),
     orientation = "v",
@@ -239,7 +247,7 @@ generate_plotly <- function(df, xaxis_input, yaxis_input, color, legend_title,
     yanchor = "top",
     len = 0.5
   )
-  
+
   if (plot_dim == "2d") {
     if (is_categorical) {
       plot <- plot_ly(
@@ -252,7 +260,7 @@ generate_plotly <- function(df, xaxis_input, yaxis_input, color, legend_title,
         marker = list(size = size),
         text = hover_text,
         hoverinfo = "text",
-        colors = colors, 
+        colors = colors,
         width = 1000,
         height = 750
       ) %>%
@@ -271,7 +279,7 @@ generate_plotly <- function(df, xaxis_input, yaxis_input, color, legend_title,
         marker = list(
           size = size,
           color = selected_color,
-          colorscale = list(c(0, "gray"), c(1, "red")),
+          colorscale = list(c(0, "#0000FF4C"), c(1, "red")),
           showscale = TRUE,
           colorbar = legend_layout
         ),
@@ -299,12 +307,12 @@ generate_plotly <- function(df, xaxis_input, yaxis_input, color, legend_title,
       ),
       tSNE = c("t_sne_1", "t_sne_2", "t_sne_3")
     )
-    
+
     coords <- dim_map[[plot_type]]
     x_col <- coords[1]
     y_col <- coords[2]
     z_col <- coords[3]
-    
+
     if (is_categorical) {
       plot <- plot_ly(
         data = df,
@@ -340,7 +348,7 @@ generate_plotly <- function(df, xaxis_input, yaxis_input, color, legend_title,
         marker = list(
           size = as.numeric(size) * 0.4,
           color = selected_color,
-          colorscale = list(c(0, "gray"), c(1, "red")),
+          colorscale = list(c(0, "#0000FF4C"), c(1, "red")),
           showscale = TRUE,
           colorbar = legend_layout
         ),
@@ -358,6 +366,6 @@ generate_plotly <- function(df, xaxis_input, yaxis_input, color, legend_title,
         )
     }
   }
-  
+
   return(plot %>% config(displaylogo = FALSE, scrollZoom = TRUE))
 }
