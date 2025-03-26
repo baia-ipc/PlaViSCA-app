@@ -54,4 +54,7 @@ $(document).ready(function() {
     updateLabelStyles($input);
     updateTooltips();
   });
+  
+  
+  
 });

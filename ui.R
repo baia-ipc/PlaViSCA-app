@@ -63,7 +63,8 @@ ui <- fluidPage(
                  necessary for actionable interventions. Bridging these gaps
                  requires a collective effort to standardize, centralize, and
                  share knowledge."),
-      p("To address these challenges, we have developed a platform
+      p(
+        "To address these challenges, we have developed a platform
                  dedicated to facilitating the sharing of Plasmodium
                  vivax-related data and knowledge. This innovative solution
                  seeks to bridge gaps in global collaboration by integrating
@@ -140,24 +141,22 @@ ui <- fluidPage(
           ),
           selected = "ident"
         )),
-        
-        
-        
         column(
           width = 12,
           fluidRow(
             width = 12,
-            column(width = 12,
-                   radioButtons("data_type", "Data type:",
-                                choices = list("Raw" = "raw",
-                                               "Normalized" = "normalize",
-                                               "Scaled" = "scale"
-                                ),
-                                selected = "normalize"
-                   )
+            column(
+              width = 12,
+              radioButtons("data_type", "Data type:",
+                choices = list(
+                  "Raw" = "raw",
+                  "Normalized" = "normalize",
+                  "Scaled" = "scale"
+                ),
+                selected = "normalize"
+              )
             )
           ),
-          
           fluidRow(
             id = "gene_snn_ui",
             column(
@@ -217,58 +216,133 @@ ui <- fluidPage(
           tabPanel(
             "DATA",
             br(),
-            fluidRow(withSpinner(
-              type = 6,
-              size = 0.5,
-              color = "#3498db",
-              DT::DTOutput("data_table")
-            )),
-            br(),
             fluidRow(
-              column(width = 6, plotlyOutput("data_count_plotly")),
-              column(width = 6, plotlyOutput("data_feature_plotly"))
+              column(
+                width = 12,
+                actionLink(
+                  "toggle_metadata",
+                  HTML("<span id='arrow_meta'>&#9656;</span> Metadata")
+                )
+              )
             ),
-            br(),
-            fluidRow(
-              column(width = 6, plotlyOutput("data_pca_stdv_plotly")),
-              column(width = 6, plotlyOutput("variable_genes_plotly"))
-            ),
-            br(),
-            fluidRow(
-              column(width = 12, plotlyOutput("top_genes_exp_plotly"))
-            ),
+            hidden(
+              div(
+                id = "metadata_section",
+                fluidRow(
+                  column(
+                    width = 2,
+                    selectizeInput("ident", "Ident:",
+                      choices = c(""),
+                      multiple = TRUE,
+                      options = list(
+                        placeholder = "Select an option...",
+                        onInitialize = I('function() { this.setValue(""); }')
+                      )
+                    )
+                  ),
+                  column(
+                    width = 2,
+                    selectizeInput("species", "Species:",
+                      choices = c(""),
+                      multiple = TRUE,
+                      options = list(
+                        placeholder = "Select an option...",
+                        onInitialize = I('function() { this.setValue(""); }')
+                      )
+                    )
+                  ),
+                  column(
+                    width = 2,
+                    selectizeInput("type", "Type:",
+                      choices = c(""),
+                      multiple = TRUE,
+                      options = list(
+                        placeholder = "Select an option...",
+                        onInitialize = I('function() { this.setValue(""); }')
+                      )
+                    )
+                  ),
+                  column(
+                    width = 2,
+                    selectizeInput("condition", "Condition:",
+                      choices = c(""),
+                      multiple = TRUE,
+                      options = list(
+                        placeholder = "Select an option...",
+                        onInitialize = I('function() { this.setValue(""); }')
+                      )
+                    )
+                  ),
+                  column(
+                    width = 2,
+                    selectizeInput("stage", "Stage:",
+                      choices = c(""),
+                      multiple = TRUE,
+                      options = list(
+                        placeholder = "Select an option...",
+                        onInitialize = I('function() { this.setValue(""); }')
+                      )
+                    )
+                  ),
+                  column(
+                    width = 2,
+                    selectizeInput("sample", "Sample:",
+                      choices = c(""),
+                      multiple = TRUE,
+                      options = list(
+                        placeholder = "Select an option...",
+                        onInitialize = I('function() { this.setValue(""); }')
+                      )
+                    )
+                  )
+                ),
+                fluidRow(withSpinner(
+                  type = 6,
+                  size = 0.5,
+                  color = "#3498db",
+                  DT::DTOutput("data_table")
+                )),
+                br(),
+                fluidRow(
+                  column(width = 6, plotlyOutput("data_count_plotly")),
+                  column(width = 6, plotlyOutput("data_feature_plotly"))
+                ),
+                br(),
+                fluidRow(
+                  column(width = 6, plotlyOutput("data_pca_stdv_plotly")),
+                  column(width = 6, plotlyOutput("variable_genes_plotly"))
+                ),
+                br(),
+                fluidRow(
+                  column(width = 12, plotlyOutput("top_genes_exp_plotly"))
+                ),
+              )
+            )
           ),
-          
           tabPanel("PCA_integrated", withSpinner(
             type = 6,
             size = 0.5,
             color = "#3498db",
             plotlyOutput("pca_int_plotly")
           )),
-          
           tabPanel("UMAP_integrated", withSpinner(
             type = 6,
             size = 0.5,
             color = "#3498db",
             plotlyOutput("umap_plotly"),
           )),
-          
           tabPanel("tSNE_integrated", withSpinner(
             type = 6,
             color = "#3498db",
             size = 0.5,
             plotlyOutput("tsne_plotly"),
           )),
-          
-          
           tabPanel("PCA_unintegrated", withSpinner(
             type = 6,
             size = 0.5,
             color = "#3498db",
             plotlyOutput("pca_plotly")
           )),
-          
-          
           tabPanel(
             "UMAP_unintegrated",
             withSpinner(
@@ -278,8 +352,6 @@ ui <- fluidPage(
               plotlyOutput("umap_uint_plotly")
             )
           )
-          
-        
         )
       )
     )

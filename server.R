@@ -46,6 +46,20 @@ server <- function(input, output, session) {
     }
   })
 
+
+  # Toggle track visibility
+  metadata_visible <- reactiveVal(FALSE)
+  observeEvent(input$toggle_metadata, {
+    shinyjs::toggle("metadata_section")
+    metadata_visible(!metadata_visible())
+    if (metadata_visible()) {
+      shinyjs::html("arrow_meta", "&#9662;")
+    } else {
+      shinyjs::html("arrow_meta", "&#9656;")
+    }
+  })
+
+
   ## select columns for 2D plots
   pc_columns <- grep("^pc_\\d+", colnames(mr_data),
     ignore.case = TRUE,
@@ -66,7 +80,6 @@ server <- function(input, output, session) {
     ignore.case = TRUE,
     value = TRUE
   )
-
   cca_snn <- grep("CCA_snn", colnames(mr_data),
     ignore.case = TRUE,
     value = TRUE
@@ -84,7 +97,7 @@ server <- function(input, output, session) {
       )
       list(
         data = dataset,
-        genes = genes(dataset, gff_data)
+        genes = genes(dataset, gff_data) # genes from function.R
       )
     }
   })
@@ -105,8 +118,7 @@ server <- function(input, output, session) {
     }
   })
 
-
-  ## filter data
+  # data from merge meta data
   filtered_data <- eventReactive(input$stagei,
     {
       if (length(input$stagei) == 0) {
@@ -129,6 +141,38 @@ server <- function(input, output, session) {
 
 
   ## DATA tab
+  observeEvent(input$tabset, {
+    if (input$tabset == "DATA") {
+      filt_data <- filtered_data()
+      updateSelectInput(session, "ident", choices = unique(filt_data$ident))
+      updateSelectInput(session, "species", choices = unique(filt_data$species))
+      updateSelectInput(session, "type", choices = unique(filt_data$type))
+      updateSelectInput(session, "condition", choices = unique(filt_data$condition))
+      updateSelectInput(session, "stage", choices = unique(filt_data$stage))
+      updateSelectInput(session, "sample", choices = unique(filt_data$sample))
+    }
+  })
+
+
+  observeEvent(list(
+    input$ident, input$species, input$type,
+    input$condition, input$stage, input$sample
+  ), {
+    filt_data <- filtered_data()
+
+    head(filt_data)
+
+    filt_data <- filt_data %>%
+      filter(
+        type %in% input$type,
+        species %in% input$species
+      )
+
+    print(filt_data)
+  })
+
+
+
   data_loaded <- reactiveVal(FALSE)
   observeEvent(input$tabset, {
     req(input$tabset)
@@ -136,11 +180,9 @@ server <- function(input, output, session) {
       filt_data <- filtered_data()
       filt_data <- filt_data %>%
         select(
-          id, species, type, day, condition, stage, n_count_rna, n_feature_rna,
-          sample, ident, umap_1, umap_2, pc_1, pc_2, t_sne_1, t_sne_2
+          id, ident, species, type, day, condition, stage, sample, n_count_rna,
+          n_feature_rna
         )
-
-      # DT table
       output$data_table <- renderDT(
         {
           DT::datatable(filt_data,
