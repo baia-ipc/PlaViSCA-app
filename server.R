@@ -60,6 +60,12 @@ server <- function(input, output, session) {
   })
 
 
+  # to delete
+  observeEvent(input$tog_switch, {
+    print(input$tog_switch)
+  })
+
+
   ## select columns for 2D plots
   pc_columns <- grep("^pc_\\d+", colnames(mr_data),
     ignore.case = TRUE,
@@ -160,15 +166,62 @@ server <- function(input, output, session) {
   ), {
     filt_data <- filtered_data()
 
-    head(filt_data)
+    if (!is.null(input$ident) | !is.null(input$species) | !is.null(input$type) |
+      !is.null(input$condition) | !is.null(input$stage) | !is.null(input$sample)) {
+      filt_data <- filt_data %>%
+        filter(
+          if (!is.null(input$ident)) ident %in% input$ident else TRUE,
+          if (!is.null(input$species)) species %in% input$species else TRUE,
+          if (!is.null(input$type)) type %in% input$type else TRUE,
+          if (!is.null(input$condition)) condition %in% input$condition else TRUE,
+          if (!is.null(input$stage)) stage %in% input$stage else TRUE,
+          if (!is.null(input$sample)) sample %in% input$sample else TRUE
+        )
+    } else {
+      filt_data <- filtered_data()
+    }
 
-    filt_data <- filt_data %>%
-      filter(
-        type %in% input$type,
-        species %in% input$species
+    output$data_table <- renderDT(
+      {
+        DT::datatable(filt_data,
+          options = list(pageLength = 10, scrollX = TRUE),
+          selection = "single",
+          rownames = FALSE
+        )
+      },
+      server = TRUE
+    )
+
+
+    # Violin plots
+    output$data_count_plotly <- renderPlotly({
+      rna_feature_plot(filt_data,
+        x = "sample", y = "n_count_rna",
+        color = "ident", y_title = "RNA count", title = "RNA Count"
       )
+    })
 
-    print(filt_data)
+    output$data_feature_plotly <- renderPlotly({
+      rna_feature_plot(filt_data,
+        x = "sample", y = "n_feature_rna",
+        color = "ident", y_title = "nFeature count", title = "Feature Count"
+      )
+    })
+
+    # PCA elbow plot
+    output$data_pca_stdv_plotly <- renderPlotly({
+      elbow_plot(pca_std_df)
+    })
+
+    # Variable genes plot
+    output$variable_genes_plotly <- renderPlotly({
+      var_genes_plot(vf_data, top_n = 15)
+    })
+
+    # Top genes expression plot
+    output$top_genes_exp_plotly <- renderPlotly({
+      top_genes_exp_plot(top_genes_exp)
+    })
   })
 
 
@@ -183,46 +236,47 @@ server <- function(input, output, session) {
           id, ident, species, type, day, condition, stage, sample, n_count_rna,
           n_feature_rna
         )
-      output$data_table <- renderDT(
-        {
-          DT::datatable(filt_data,
-            options = list(pageLength = 10, scrollX = TRUE),
-            selection = "single",
-            rownames = FALSE
-          )
-        },
-        server = TRUE
-      )
 
-      # Violin plots
-      output$data_count_plotly <- renderPlotly({
-        rna_feature_plot(filt_data,
-          x = "sample", y = "n_count_rna",
-          color = "ident", y_title = "RNA count", title = "RNA Count"
-        )
-      })
+      # output$data_table <- renderDT(
+      #   {
+      #     DT::datatable(filt_data,
+      #       options = list(pageLength = 10, scrollX = TRUE),
+      #       selection = "single",
+      #       rownames = FALSE
+      #     )
+      #   },
+      #   server = TRUE
+      # )
 
-      output$data_feature_plotly <- renderPlotly({
-        rna_feature_plot(filt_data,
-          x = "sample", y = "n_feature_rna",
-          color = "ident", y_title = "nFeature count", title = "Feature Count"
-        )
-      })
-
-      # PCA elbow plot
-      output$data_pca_stdv_plotly <- renderPlotly({
-        elbow_plot(pca_std_df)
-      })
-
-      # Variable genes plot
-      output$variable_genes_plotly <- renderPlotly({
-        var_genes_plot(vf_data, top_n = 15)
-      })
-
-      # Top genes expression plot
-      output$top_genes_exp_plotly <- renderPlotly({
-        top_genes_exp_plot(top_genes_exp)
-      })
+      # # Violin plots
+      # output$data_count_plotly <- renderPlotly({
+      #   rna_feature_plot(filt_data,
+      #     x = "sample", y = "n_count_rna",
+      #     color = "ident", y_title = "RNA count", title = "RNA Count"
+      #   )
+      # })
+      #
+      # output$data_feature_plotly <- renderPlotly({
+      #   rna_feature_plot(filt_data,
+      #     x = "sample", y = "n_feature_rna",
+      #     color = "ident", y_title = "nFeature count", title = "Feature Count"
+      #   )
+      # })
+      #
+      # # PCA elbow plot
+      # output$data_pca_stdv_plotly <- renderPlotly({
+      #   elbow_plot(pca_std_df)
+      # })
+      #
+      # # Variable genes plot
+      # output$variable_genes_plotly <- renderPlotly({
+      #   var_genes_plot(vf_data, top_n = 15)
+      # })
+      #
+      # # Top genes expression plot
+      # output$top_genes_exp_plotly <- renderPlotly({
+      #   top_genes_exp_plot(top_genes_exp)
+      # })
 
       data_loaded(TRUE)
     }

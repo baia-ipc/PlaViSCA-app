@@ -163,6 +163,18 @@ ui <- fluidPage(
               width = 7,
               selectizeInput("genes_n", "Gene:",
                 choices = ""
+              ),
+            ),
+            column(
+              id = "switch_id",
+              width = 2,
+              div(
+                class = "switch",
+                checkboxInput("check",
+                  label = "id",
+                  value = FALSE
+                ),
+                tags$span(class = "slider")
               )
             ),
             column(

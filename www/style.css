@@ -199,7 +199,77 @@
 #gene_snn_ui {
   display: flex;
   align-items: center;
+  position: relative;
 }
+
+#switch_id {
+  position: absolute;
+  top: 0;
+  left: 150px;
+  padding: 0;
+}
+
+
+
+/* Style the switch container */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 25px;
+}
+
+/* Style the slider (background) */
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+/* Create the slider (background color, rounded corners, etc.) */
+.switch .slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: 0.4s;
+  border-radius: 34px;
+}
+
+/* Create the circle (the toggle button) */
+.switch .slider:before {
+  position: absolute;
+  content: "";
+  height: 17px;
+  width: 17px;
+  border-radius: 50%;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  transition: 0.4s;
+}
+
+/* When the checkbox is checked, move the slider and change color */
+input:checked + .slider {
+  background-color: green;
+}
+
+input:checked + .slider:before {
+  transform: translateX(26px);
+}
+
+/* When the checkbox is not checked, the slider stays gray and left-aligned */
+input:not(:checked) + .slider {
+  background-color: #ccc;
+}
+
+
+
+
+
 
 #plasmo_link, 
 #ncbi_link {
