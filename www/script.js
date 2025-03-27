@@ -5,10 +5,11 @@ $(document).ready(function() {
   function updateLabelStyles($input) {
     var $label = $input.closest('label');
     var inputName = $input.attr('name');
+    var inputId = $input.attr('id'); // Get the ID
 
     if ($input.is(':checked')) {
-      // Check if the name is not "stagelr" or "data_type"
-      if (inputName !== 'stagelr' && inputName !== 'data_type') {
+      // Exclude 'stagelr', 'data_type', and elements with ID 'check'
+      if (inputName !== 'stagelr' && inputName !== 'data_type' && inputId !== 'check') {
         $label.addClass('checked-label');
       } else {
         $label.removeClass('checked-label');
@@ -46,7 +47,7 @@ $(document).ready(function() {
 
     if ($input.attr('type') === 'radio') {
       $('input[name="' + $input.attr('name') + '"]')
-        .not('[name="stagelr"], [name="data_type"]') // Exclude "stagelr" and "data_type"
+        .not('[name="stagelr"], [name="data_type"]')
         .closest('label')
         .removeClass('checked-label');
     }
@@ -54,7 +55,4 @@ $(document).ready(function() {
     updateLabelStyles($input);
     updateTooltips();
   });
-  
-  
-  
 });

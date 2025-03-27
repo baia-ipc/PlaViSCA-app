@@ -91,7 +91,7 @@ ui <- fluidPage(
         column(
           width = 12,
           checkboxGroupInput(
-            "stagei", "Infection stage:",
+            "stagei", "Infection stage",
             choices = list(
               "Blood" = "blood",
               "Liver" = "liver",
@@ -103,7 +103,7 @@ ui <- fluidPage(
         column(
           width = 12,
           checkboxGroupInput(
-            "stagelr", "Parasite stage:",
+            "stagelr", "Parasite stage",
             choices = list(
               "Trophozoite" = "trophozoite",
               "Ring" = "ring",
@@ -123,11 +123,11 @@ ui <- fluidPage(
             )
           )
         ),
-        column(width = 12, radioButtons("size", "Size:",
+        column(width = 12, radioButtons("size", "Size",
           choices = list("S" = 2, "M" = 4, "L" = 6),
           selected = 4
         )),
-        column(width = 12, radioButtons("color", "Color:",
+        column(width = 12, radioButtons("color", "Color",
           choices = list(
             "Identity" = "ident",
             "Stage" = "stage",
@@ -147,7 +147,7 @@ ui <- fluidPage(
             width = 12,
             column(
               width = 12,
-              radioButtons("data_type", "Data type:",
+              radioButtons("data_type", "Data type",
                 choices = list(
                   "Raw" = "raw",
                   "Normalized" = "normalize",
@@ -161,19 +161,16 @@ ui <- fluidPage(
             id = "gene_snn_ui",
             column(
               width = 7,
-              selectizeInput("genes_n", "Gene:",
+              selectizeInput("genes_n", "Gene",
                 choices = ""
               ),
             ),
             column(
               id = "switch_id",
               width = 2,
-              div(
+              tags$label(
                 class = "switch",
-                checkboxInput("check",
-                  label = "id",
-                  value = FALSE
-                ),
+                tags$input(id = "check", type = "checkbox"),
                 tags$span(class = "slider")
               )
             ),

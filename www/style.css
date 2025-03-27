@@ -202,34 +202,35 @@
   position: relative;
 }
 
+
 #switch_id {
   position: absolute;
   top: 0;
-  left: 150px;
+  left: 120px;
   padding: 0;
+  margin-bottom: 5px;
 }
-
-
 
 /* Style the switch container */
 .switch {
   position: relative;
   display: inline-block;
-  width: 50px;
-  height: 25px;
+  width: 40px;
+  height: 20px;
+  cursor: pointer;
 }
 
-/* Style the slider (background) */
+/* Hide the default checkbox */
 .switch input {
   opacity: 0;
   width: 0;
   height: 0;
+  position: absolute;
 }
 
-/* Create the slider (background color, rounded corners, etc.) */
-.switch .slider {
+/* Create the slider (background) */
+.slider {
   position: absolute;
-  cursor: pointer;
   top: 0;
   left: 0;
   right: 0;
@@ -237,34 +238,40 @@
   background-color: #ccc;
   transition: 0.4s;
   border-radius: 34px;
+  border: none; /* Ensure no extra border shows */
 }
 
-/* Create the circle (the toggle button) */
-.switch .slider:before {
+/* Create the toggle button */
+.slider:before {
   position: absolute;
   content: "";
-  height: 17px;
-  width: 17px;
+  height: 15px;
+  width: 15px;
   border-radius: 50%;
   left: 4px;
-  bottom: 4px;
+  bottom: 2px;
   background-color: white;
   transition: 0.4s;
 }
 
-/* When the checkbox is checked, move the slider and change color */
+/* When checkbox is checked, change slider background */
 input:checked + .slider {
   background-color: green;
 }
 
+/* Move the toggle button when checked */
 input:checked + .slider:before {
-  transform: translateX(26px);
+  transform: translateX(17px); /* Adjust to maintain 4px on both sides */
 }
 
-/* When the checkbox is not checked, the slider stays gray and left-aligned */
-input:not(:checked) + .slider {
-  background-color: #ccc;
+/* Style for surrounding labels */
+#switch_id span {
+  font-weight: bold;
+  font-size: 14px;
 }
+
+
+
 
 
 

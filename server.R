@@ -61,8 +61,8 @@ server <- function(input, output, session) {
 
 
   # to delete
-  observeEvent(input$tog_switch, {
-    print(input$tog_switch)
+  observeEvent(input$check, {
+    print(input$check)
   })
 
 
@@ -291,7 +291,7 @@ server <- function(input, output, session) {
       shinyjs::show("gene_snn_ui")
       shinyjs::show("gene_link_ui")
       updateSelectizeInput(session, "genes_n",
-        label = "Choose Gene",
+        label = "Select Gene id",
         choices = gene_data()$genes$name,
         server = TRUE
       )
