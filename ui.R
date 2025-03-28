@@ -223,7 +223,7 @@ ui <- fluidPage(
         tabsetPanel(
           id = "tabset",
           tabPanel(
-            "DATA",
+            "Data",
             br(),
             fluidRow(
               column(
@@ -326,14 +326,39 @@ ui <- fluidPage(
                   column(width = 12, plotlyOutput("top_genes_exp_plotly"))
                 ),
               )
+            ),
+            fluidRow(
+              column(
+                width = 12,
+                actionLink(
+                  "data_source",
+                  HTML("<span id='arrow_source'>&#9656;</span> Data sources")
+                )
+              )
             )
           ),
-          tabPanel("PCA_integrated", withSpinner(
-            type = 6,
-            size = 0.5,
-            color = "#3498db",
-            plotlyOutput("pca_int_plotly")
-          )),
+          tabPanel(
+            "PCA",
+            column(
+              id = "tab_switch",
+              width = 6,
+              tags$span(class = "left-label", "Integrated"),
+              tags$label(
+                class = "switch",
+                tags$input(id = "check_pca", type = "checkbox"),
+                tags$span(class = "slider")
+              ),
+              tags$span(class = "right-label", "Unintegrated")
+            ),
+            br(),
+            br(),
+            withSpinner(
+              type = 6,
+              size = 0.5,
+              color = "#3498db",
+              plotlyOutput("pca_int_plotly")
+            )
+          ),
           tabPanel("UMAP_integrated", withSpinner(
             type = 6,
             size = 0.5,

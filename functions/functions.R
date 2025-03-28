@@ -19,6 +19,15 @@ get_gene_id <- function(gene_name, gene_names) {
   }
 }
 
+# color column based on input
+get_color_column <- function(color_type, gene_input, gene_data_obj) {
+  switch(color_type,
+    "genes" = get_gene_id(gene_input, gene_data_obj),
+    "cca_snn" = gene_input,
+    color_type
+  )
+}
+
 # set color pallet
 colors <- RColorBrewer::brewer.pal(12, "Set3")
 

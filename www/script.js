@@ -8,8 +8,8 @@ $(document).ready(function() {
     var inputId = $input.attr('id'); // Get the ID
 
     if ($input.is(':checked')) {
-      // Exclude 'stagelr', 'data_type', and elements with ID 'check'
-      if (inputName !== 'stagelr' && inputName !== 'data_type' && inputId !== 'check') {
+      if (inputName !== 'stagelr' && inputName !== 'data_type'
+      && inputId !== 'check' && inputId !== 'check_pca') {
         $label.addClass('checked-label');
       } else {
         $label.removeClass('checked-label');
@@ -18,6 +18,7 @@ $(document).ready(function() {
       $label.removeClass('checked-label');
     }
   }
+
 
   function updateTooltips() {
     $('input[type="checkbox"], input[type="radio"]').each(function() {
