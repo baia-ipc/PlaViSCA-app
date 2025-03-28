@@ -228,16 +228,20 @@ server <- function(input, output, session) {
   })
 
   ## Observer for updating x- and y-axis selections for 2D plots
-  observeEvent(list(input$tabset, input$plot, input$xaxis), {
+  observeEvent(list(input$tabset, input$plot, input$xaxis, input$check_pca), {
     if (input$plot == "2d") {
       shinyjs::show("axis")
+
       x_choices <- switch(input$tabset,
         "UMAP_integrated" = umap_columns,
         "UMAP_unintegrated" = umap_uint_columns,
-        "PCA_unintergrated" = pc_columns,
-        "PCA" = pc_int_columns,
+        "PCA_unintegrated" = pc_columns,
+        "PCA" = x_col(input$check_pca, pc_columns, pc_int_columns),
         "tSNE_integrated" = tsne_columns
       )
+
+
+
       updateSelectInput(session, "xaxis",
         choices = x_choices,
         selected = x_choices[1]
@@ -246,8 +250,8 @@ server <- function(input, output, session) {
       y_choices <- switch(input$tabset,
         "UMAP_integrated" = setdiff(umap_columns, input$xaxis),
         "UMAP_unintegrated" = setdiff(umap_uint_columns, input$xaxis),
-        "PCA_unintergrated" = setdiff(pc_columns, input$xaxis),
-        "PCA" = setdiff(pc_int_columns, input$xaxis),
+        "PCA_unintegrated" = setdiff(pc_columns, input$xaxis),
+        "PCA" = y_col(input$check_pca, input$xaxis, pc_columns, pc_int_columns),
         "tSNE_integrated" = setdiff(tsne_columns, input$xaxis)
       )
       updateSelectInput(session, "yaxis",
@@ -258,6 +262,8 @@ server <- function(input, output, session) {
       shinyjs::hide("axis")
     }
   })
+
+
 
   # Reset plot update flag and schedule update after 1 second
   observe({

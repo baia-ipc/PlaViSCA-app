@@ -238,7 +238,7 @@
   background-color: #ccc;
   transition: 0.4s;
   border-radius: 34px;
-  border: none; /* Ensure no extra border shows */
+  border: none;
 }
 
 /* Create the toggle button */
@@ -261,7 +261,7 @@ input:checked + .slider {
 
 /* Move the toggle button when checked */
 input:checked + .slider:before {
-  transform: translateX(17px); /* Adjust to maintain 4px on both sides */
+  transform: translateX(17px); 
 }
 
 /* Style for surrounding labels */
@@ -269,13 +269,6 @@ input:checked + .slider:before {
   font-weight: bold;
   font-size: 14px;
 }
-
-
-
-
-
-
-
 
 
 #plasmo_link, 
@@ -302,6 +295,71 @@ input:checked + .slider:before {
   width: 75%;
   transition: width 0.1s ease;
 }
+
+
+
+
+
+#tab_switch {
+  position: relative;
+  margin-top: 15px;
+  margin-bottom: 5px;
+  display: flex;
+  gap: 10px; 
+}
+
+#tab_switch .switch {
+  position: relative;
+  display: inline-block;
+  width: 60px; 
+  height: 20px; 
+  cursor: pointer;
+}
+
+#tab_switch .slider {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: 0.4s;
+  border-radius: 50px;
+}
+
+#tab_switch .slider:before {
+  content: "";
+  position: absolute;
+  height: 15px;
+  width: 15px;
+  border-radius: 50%;
+  left: 4px;
+  top: 2px;
+  background-color: white;
+  transition: 0.4s;
+}
+
+/* When checkbox is checked, change slider background */
+#tab_switch input:checked + .slider {
+  background-color: green;
+}
+
+/* Move the toggle button when checked */
+#tab_switch input:checked + .slider:before {
+  transform: translateX(39px); 
+}
+
+/* Label text styling */
+.left-label,
+.right-label {
+  font-size: 14px;
+  color: #333;
+}
+
+
+
+
+
 
 /* Checked Label Styling */
 .checked-label {

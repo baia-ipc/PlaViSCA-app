@@ -19,6 +19,24 @@ get_gene_id <- function(gene_name, gene_names) {
   }
 }
 
+# x and y column base on input
+x_col <- function(check_input, unintegrated, integrated) {
+  if (check_input) {
+    unintegrated
+  } else {
+    integrated
+  }
+}
+
+y_col <- function(check_input, x_col, unintegrated, integrated) {
+  if (check_input) {
+    setdiff(unintegrated, x_col)
+  } else {
+    setdiff(integrated, x_col)
+  }
+}
+
+
 # color column based on input
 get_color_column <- function(color_type, gene_input, gene_data_obj) {
   switch(color_type,
