@@ -356,34 +356,51 @@ ui <- fluidPage(
               type = 6,
               size = 0.5,
               color = "#3498db",
-              plotlyOutput("pca_int_plotly")
+              plotlyOutput("pca_plotly")
             )
           ),
-          tabPanel("UMAP_integrated", withSpinner(
-            type = 6,
-            size = 0.5,
-            color = "#3498db",
-            plotlyOutput("umap_plotly"),
-          )),
-          tabPanel("tSNE_integrated", withSpinner(
-            type = 6,
-            color = "#3498db",
-            size = 0.5,
-            plotlyOutput("tsne_plotly"),
-          )),
-          tabPanel("PCA_unintegrated", withSpinner(
-            type = 6,
-            size = 0.5,
-            color = "#3498db",
-            plotlyOutput("pca_plotly")
-          )),
           tabPanel(
-            "UMAP_unintegrated",
+            "UMAP",
+            column(
+              id = "tab_switch",
+              width = 6,
+              tags$span(class = "left-label", "Integrated"),
+              tags$label(
+                class = "switch",
+                tags$input(id = "check_umap", type = "checkbox"),
+                tags$span(class = "slider")
+              ),
+              tags$span(class = "right-label", "Unintegrated")
+            ),
+            br(),
+            br(),
             withSpinner(
               type = 6,
               size = 0.5,
               color = "#3498db",
-              plotlyOutput("umap_uint_plotly")
+              plotlyOutput("umap_plotly"),
+            )
+          ),
+          tabPanel(
+            "tSNE",
+            column(
+              id = "tab_switch",
+              width = 6,
+              tags$span(class = "left-label", "Integrated"),
+              tags$label(
+                class = "switch",
+                tags$input(id = "check_tsne", type = "checkbox"),
+                tags$span(class = "slider")
+              ),
+              tags$span(class = "right-label", "Unintegrated")
+            ),
+            br(),
+            br(),
+            withSpinner(
+              type = 6,
+              color = "#3498db",
+              size = 0.5,
+              plotlyOutput("tsne_plotly"),
             )
           )
         )
