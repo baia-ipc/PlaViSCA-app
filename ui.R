@@ -41,41 +41,41 @@ ui <- fluidPage(
     fluidRow(
       class = "introduction",
       p("Malaria caused by Plasmodium vivax remains a significant
-                 public health challenge in many parts of the world. While
-                 less lethal than Plasmodium falciparum, P. vivax infections
-                 are more widespread and persistent, causing recurrent relapses
-                 that complicate elimination efforts. Its ability to remain
-                 dormant in the liver for prolonged periods and resurface
-                 months or even years later makes it uniquely difficult to treat
-                 and eradicate. Despite its global burden, our understanding of
-                 P. vivax biology, epidemiology, and treatment lags behind,
-                 partly due to limited data sharing and collaboration across
-                 research communities."),
+      public health challenge in many parts of the world. While
+      less lethal than Plasmodium falciparum, P. vivax infections
+      are more widespread and persistent, causing recurrent relapses
+      that complicate elimination efforts. Its ability to remain
+      dormant in the liver for prolonged periods and resurface
+      months or even years later makes it uniquely difficult to treat
+      and eradicate. Despite its global burden, our understanding of
+      P. vivax biology, epidemiology, and treatment lags behind,
+      partly due to limited data sharing and collaboration across
+      research communities."),
       p("One of the critical barriers in combating P. vivax malaria is
-                 the fragmented nature of data collection and knowledge sharing.
-                 Key datasets on genetic diversity, drug resistance, and disease
-                 patterns are often siloed within institutions, limiting
-                 comprehensive analyses and insights. This lack of coordination
-                 hampers progress in developing robust strategies to tackle
-                 P. vivax infections. Furthermore, regions most affected by
-                 P. vivax, such as South Asia, Southeast Asia, and South America,
-                 often have limited resources to gather and analyze the data
-                 necessary for actionable interventions. Bridging these gaps
-                 requires a collective effort to standardize, centralize, and
-                 share knowledge."),
+      the fragmented nature of data collection and knowledge sharing.
+      Key datasets on genetic diversity, drug resistance, and disease
+      patterns are often siloed within institutions, limiting
+      comprehensive analyses and insights. This lack of coordination
+      hampers progress in developing robust strategies to tackle
+      P. vivax infections. Furthermore, regions most affected by
+      P. vivax, such as South Asia, Southeast Asia, and South America,
+      often have limited resources to gather and analyze the data
+      necessary for actionable interventions. Bridging these gaps
+      requires a collective effort to standardize, centralize, and
+      share knowledge."),
       p(
         "To address these challenges, we have developed a platform
-                 dedicated to facilitating the sharing of Plasmodium
-                 vivax-related data and knowledge. This innovative solution
-                 seeks to bridge gaps in global collaboration by integrating
-                 diverse datasets, promoting transparency, and offering advanced
-                 tools for data analysis and visualization. By empowering
-                 researchers and policymakers with centralized access to
-                 critical information, the platform fosters a culture of open
-                 data sharing. Our goal is to accelerate scientific discoveries,
-                 refine treatment protocols, and contribute meaningfully to the
-                 global fight against P. vivax malaria, paving the way for its
-                 eventual elimination.",
+      dedicated to facilitating the sharing of Plasmodium
+      vivax-related data and knowledge. This innovative solution
+      seeks to bridge gaps in global collaboration by integrating
+      diverse datasets, promoting transparency, and offering advanced
+      tools for data analysis and visualization. By empowering
+      researchers and policymakers with centralized access to
+      critical information, the platform fosters a culture of open
+      data sharing. Our goal is to accelerate scientific discoveries,
+      refine treatment protocols, and contribute meaningfully to the
+      global fight against P. vivax malaria, paving the way for its
+      eventual elimination.",
         actionLink("explore_data", "Explore data >>")
       ),
     ),
@@ -111,16 +111,12 @@ ui <- fluidPage(
               "Gametocyte" = "gametocyte",
               "Hypnozoite" = "hypnozoite",
               "Hepatic schizont" = "hepatic_schizont",
-              "zygot" = "zygot",
+              "Zygot" = "zygot",
               "Ookinete" = "ookinete",
               "Oocyst" = "oocyst",
               "Sporozoite" = "sporozoite"
             ),
-            selected = list(
-              "trophozoite", "ring", "schizont", "gametocyte",
-              "hypnozoite", "hepatic_schizont", "zygot", "ookinete",
-              "oocyst", "sporozoite"
-            )
+            selected = list()
           )
         ),
         column(width = 12, radioButtons("size", "Size",
@@ -144,7 +140,6 @@ ui <- fluidPage(
         column(
           width = 12,
           fluidRow(
-            width = 12,
             column(
               width = 12,
               radioButtons("data_type", "Data type",
@@ -230,7 +225,7 @@ ui <- fluidPage(
                 width = 12,
                 actionLink(
                   "toggle_metadata",
-                  HTML("<span id='arrow_meta'>&#9656;</span> Metadata")
+                  HTML("<span id='arrow_meta'>&#9656;</span> Explore")
                 )
               )
             ),
@@ -331,10 +326,69 @@ ui <- fluidPage(
               column(
                 width = 12,
                 actionLink(
-                  "data_source",
+                  "toggle_source",
                   HTML("<span id='arrow_source'>&#9656;</span> Data sources")
                 )
               )
+            )
+          ),
+          tabPanel(
+            "Gene Exp",
+            br(),
+            column(
+              width = 12,
+              radioButtons("data_type_exp", "Data type",
+                choices = list(
+                  "Raw" = "raw",
+                  "Normalized" = "normalize",
+                  "Scaled" = "scale"
+                ),
+                selected = "normalize"
+              )
+            ),
+            div(
+              id = "gene_exp_ui",
+              column(
+                width = 4,
+                selectizeInput("genes_exp", "Gene", choices = NULL)
+              ),
+              column(
+                id = "switch_exp",
+                width = 2,
+                tags$label(
+                  class = "switch",
+                  tags$input(
+                    id = "check_exp", type = "checkbox"
+                  ),
+                  tags$span(class = "slider")
+                )
+              ),
+              column(
+                width = 4,
+                id = "gene_link_exp",
+                tags$div(
+                  id = "gene_link_ui",
+                  tags$a(
+                    id = "plasmo_link_exp", href = "#",
+                    target = "_blank", "🔬 PlasmoDB"
+                  ),
+                  tags$a(
+                    id = "ncbi_link_exp", href = "#",
+                    target = "_blank", "🧬 NCBI"
+                  )
+                )
+              )
+            ),
+            column(
+              width = 4,
+              selectInput("criteria", "Criteria",
+                choices = c("Stage", "Species"),
+                selected = "Stage"
+              )
+            ),
+            column(
+              width = 12,
+              plotlyOutput("gene_exp_plotly")
             )
           ),
           tabPanel(

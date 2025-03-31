@@ -74,7 +74,7 @@ mr_data <- mr_data %>%
 # Extract reduction data from mr_data
 red_df <- mr_data %>%
   select(
-    id, stage, ident, n_feature_rna,
+    id, stage, species, ident, n_feature_rna,
     any_of(make_clean_names(umap)),
     any_of(make_clean_names(umap_int)),
     any_of(make_clean_names(pca)),

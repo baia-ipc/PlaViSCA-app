@@ -35,7 +35,7 @@ server <- function(input, output, session) {
   })
 
   observe({
-    if (input$tabset == "Data") {
+    if (input$tabset == "Data" || input$tabset == "Gene Exp") {
       shinyjs::removeClass("sidebar", "visible")
       shinyjs::runjs('$("#main").removeClass("col-sm-8").addClass("col-sm-11");')
     } else {
@@ -56,14 +56,36 @@ server <- function(input, output, session) {
     }
   })
 
+  shource_visible <- reactiveVal(FALSE)
+  observeEvent(input$toggle_source, {
+    shinyjs::toggle("source_section")
+    metadata_visible(!metadata_visible())
+    if (metadata_visible()) {
+      shinyjs::html("arrow_source", "&#9662;")
+    } else {
+      shinyjs::html("arrow_source", "&#9656;")
+    }
+  })
+
   # Consolidated gene_data reactive
-  gene_data <- eventReactive(list(input$stagei, input$data_type), {
+  gene_data <- eventReactive(list(
+    input$stagei, input$data_type,
+    input$data_type_exp
+  ), {
     req(input$stagei)
+
     dataset <- switch(input$data_type,
       "raw" = raw_df,
       "normalize" = norm_df,
       "scale" = scale_df
     )
+
+    dataset <- switch(input$data_type_exp,
+      "raw" = raw_df,
+      "normalize" = norm_df,
+      "scale" = scale_df
+    )
+
     list(
       data = dataset %>% filter(stage %in% input$stagei),
       genes = genes(dataset, gff_data)
@@ -179,7 +201,7 @@ server <- function(input, output, session) {
       shinyjs::show("gene_link_ui")
       shinyjs::show("switch_id")
       updateSelectizeInput(session, "genes_n",
-        label = if (input$check) "Gene id" else "Gene name",
+        label = if (input$check) "Gene ID" else "Gene name",
         choices = choice(),
         server = TRUE
       )
@@ -202,19 +224,100 @@ server <- function(input, output, session) {
   })
 
 
+  # Delay updates to prevent missing column errors
+  autoUpdateExp <- reactiveVal(TRUE)
+  observe({
+    list(input$check_exp, input$data_type_exp)
+    autoUpdateExp(FALSE)
+    later(function() {
+      autoUpdateExp(TRUE)
+    }, 0.5)
+  })
+
+  observeEvent(list(input$check_exp, input$data_type_exp), {
+    req(gene_data())
+
+    choice_exp <- if (input$check_exp) {
+      gene_data()$genes$gene
+    } else {
+      gene_data()$genes %>%
+        filter(!str_detect(name, "^PVP01")) %>%
+        pull(name)
+    }
+
+    updateSelectizeInput(session, "genes_exp",
+      label = if (input$check_exp) "Gene ID" else "Gene name",
+      choices = choice_exp,
+      server = TRUE
+    )
+  })
+
+  df_exp <- reactive({
+    req(autoUpdateExp(), gene_data(), input$genes_exp, input$criteria)
+
+    data <- gene_data()$data
+    gene_exp <- if (!input$check_exp) {
+      get_gene_id(input$genes_exp, gene_data()$genes)
+    } else {
+      input$genes_exp
+    }
+
+    if (!(gene_exp %in% colnames(data))) {
+      data$gene_expr <- NA
+    } else {
+      data <- data %>% mutate(gene_expr = .data[[gene_exp]])
+    }
+
+    if (!(tolower(input$criteria) %in% colnames(data))) {
+      data[[input$criteria]] <- NA
+    }
+
+    return(data)
+  })
+
+
+
+  output$gene_exp_plotly <- renderPlotly({
+    req(df_exp())
+    plot_gene_expression(df_exp(), tolower(input$criteria))
+  })
+
+
+  # observeEvent(list(input$plasmo_link_exp, input$ncbi_link_exp), {
+  #   gene_id <- get_gene_id(input$genes_exp, gene_data()$genes)
+  #   plasmo_url <- paste0(
+  #     "https://plasmodb.org/plasmo/app/record/gene/",
+  #     gene_id
+  #   )
+  #   ncbi_url <- paste0("https://www.ncbi.nlm.nih.gov/protein/", gene_id)
+  #   shinyjs::runjs(sprintf("document.getElementById('plasmo_link_exp').
+  #                            href = '%s';", plasmo_url))
+  #   shinyjs::runjs(sprintf("document.getElementById('ncbi_link_exp').
+  #                            href = '%s';", ncbi_url))
+  # })
+
+
+  shinyjs::onclick("plasmo_link_exp", {
+    req(input$genes_exp)
+    gene_id <- get_gene_id(input$genes_exp, gene_data()$genes)
+    update_gene_links(gene_id)
+    
+  })
+  
+  
   observeEvent(input$genes_n, {
     req(input$genes_n)
     if (input$color == "genes") {
       gene_id <- get_gene_id(input$genes_n, gene_data()$genes)
-      plasmo_url <- paste0("https://plasmodb.org/plasmo/app/record/gene/", gene_id)
-      ncbi_url <- paste0("https://www.ncbi.nlm.nih.gov/protein/", gene_id)
-      shinyjs::runjs(sprintf("document.getElementById('plasmo_link').href = '%s';", plasmo_url))
-      shinyjs::runjs(sprintf("document.getElementById('ncbi_link').href = '%s';", ncbi_url))
+      update_gene_links(gene_id)
     }
   })
 
   ## Observer for updating x- and y-axis selections for 2D plots
-  observeEvent(list(input$tabset, input$plot, input$xaxis, input$check_pca, input$check_umap, input$check_tsne), {
+  observeEvent(list(
+    input$tabset, input$plot, input$xaxis, input$check_pca,
+    input$check_umap, input$check_tsne
+  ), {
     if (input$plot == "2d") {
       shinyjs::show("axis")
 
@@ -224,10 +327,16 @@ server <- function(input, output, session) {
         "tSNE" = tsne_columns
       )
 
-      updateSelectInput(session, "xaxis", choices = x_choices, selected = x_choices[1])
+      updateSelectInput(session, "xaxis",
+        choices = x_choices,
+        selected = x_choices[1]
+      )
 
       y_choices <- switch(input$tabset,
-        "UMAP" = y_col(input$check_umap, input$xaxis, umap_uint_columns, umap_columns),
+        "UMAP" = y_col(
+          input$check_umap, input$xaxis, umap_uint_columns,
+          umap_columns
+        ),
         "PCA" = y_col(input$check_pca, input$xaxis, pc_columns, pc_int_columns),
         "tSNE" = setdiff(tsne_columns, input$xaxis)
       )
@@ -255,11 +364,14 @@ server <- function(input, output, session) {
   })
 
   # Ensure plots update when any of the toggles change
-  observeEvent(list(input$check, input$check_pca, input$check_umap, input$check_tsne), {
+  observeEvent(list(
+    input$check, input$check_pca, input$check_umap,
+    input$check_tsne
+  ), {
     autoUpdatePlot(TRUE)
   })
 
-  ## Determine the actual plot type based on tab and toggle state before generating plots
+  ## Determine plot type based on tab and toggle state before generating plots
   get_plot_type <- reactive({
     switch(input$tabset,
       "PCA" = if (isTRUE(input$check_pca)) "PCA_integrated" else "PCA",

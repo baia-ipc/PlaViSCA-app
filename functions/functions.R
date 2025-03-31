@@ -195,6 +195,41 @@ top_genes_exp_plot <- function(df, default_gene = "PVP01_1460700") {
     )
 }
 
+# function to plot the gene expression
+plot_gene_expression <- function(data, x_col) {
+  plot_ly(
+    data = data,
+    x = ~ .data[[x_col]],
+    y = ~gene_expr,
+    type = "violin",
+    color = ~ .data[[x_col]],
+    box = list(visible = TRUE),
+    meanline = list(visible = TRUE)
+  ) %>%
+    layout(
+      xaxis = list(title = x_col),
+      yaxis = list(title = "Expression")
+    )
+}
+
+
+# Helper function to update PlasmoDB and NCBI links
+update_gene_links <- function(gene_id) {
+  plasmo_url <- paste0(
+    "https://plasmodb.org/plasmo/app/record/gene/",
+    gene_id
+  )
+  ncbi_url <- paste0("https://www.ncbi.nlm.nih.gov/protein/", gene_id)
+
+  shinyjs::runjs(sprintf(
+    "document.getElementById('plasmo_link').href = '%s';",
+    plasmo_url
+  ))
+  shinyjs::runjs(sprintf(
+    "document.getElementById('ncbi_link').href = '%s';",
+    ncbi_url
+  ))
+}
 
 # Function to assign colors based on the number of categories
 assign_colors <- function(num_categories) {

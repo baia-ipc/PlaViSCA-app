@@ -113,6 +113,7 @@
 
 #color .shiny-options-group,
 #data_type .shiny-options-group,
+#data_type_exp .shiny-options-group,
 #stagelr .shiny-options-group {
   align-items: flex-end;
 }
@@ -187,11 +188,9 @@
   transition: width 0.5s ease, opacity 0.5s ease;
 }
 
-#data_type .shiny-options-group {
+#data_type .shiny-options-group,
+#data_type_exp .shiny-options-group {
   margin: 0;
-}
-
-#data_type .shiny-options-group {
   justify-content: space-between;
 }
 
@@ -204,10 +203,17 @@
 
 
 #switch_id {
-  position: absolute;
-  top : 5px;
-  left: 100px;
-  padding: 0;
+ position: absolute;
+ top : 5px;
+ left: 100px;
+ padding: 0;
+}
+
+#switch_exp {
+ position: absolute;
+ top: 85px;
+ left: 110px;
+ padding: 0;
 }
 
 /* Style the switch container */
@@ -269,6 +275,15 @@ input:checked + .slider:before {
   font-size: 14px;
 }
 
+#gene_exp_ui{
+  position: relative;
+}
+
+#gene_link_exp{
+  position: absolute;
+  top: 100px;
+  left: 320px;
+}
 
 #plasmo_link, 
 #ncbi_link {
