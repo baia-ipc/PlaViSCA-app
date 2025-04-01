@@ -335,60 +335,68 @@ ui <- fluidPage(
           tabPanel(
             "Gene Exp",
             br(),
-            column(
-              width = 12,
-              radioButtons("data_type_exp", "Data type",
-                choices = list(
-                  "Raw" = "raw",
-                  "Normalized" = "normalize",
-                  "Scaled" = "scale"
-                ),
-                selected = "normalize"
+            fluidRow(
+              column(
+                width = 12,
+                radioButtons("data_type_exp", "Data type",
+                  choices = list(
+                    "Raw" = "raw",
+                    "Normalized" = "normalize",
+                    "Scaled" = "scale"
+                  ),
+                  selected = "normalize"
+                )
               )
             ),
-            div(
-              id = "gene_exp_ui",
+            fluidRow(
               column(
+                id = "gene_exp_ui",
                 width = 4,
-                selectizeInput("genes_exp", "Gene", choices = NULL)
-              ),
-              column(
-                id = "switch_exp",
-                width = 2,
-                tags$label(
-                  class = "switch",
-                  tags$input(
-                    id = "check_exp", type = "checkbox"
+                column(
+                  width = 10,
+                  selectizeInput("genes_exp", "Gene", choices = NULL),
+                  column(
+                    id = "switch_exp",
+                    width = 2,
+                    tags$label(
+                      class = "switch",
+                      tags$input(
+                        id = "check_exp", type = "checkbox"
+                      ),
+                      tags$span(class = "slider")
+                    )
                   ),
-                  tags$span(class = "slider")
-                )
-              ),
-              column(
-                width = 4,
-                id = "gene_link_exp",
-                tags$div(
-                  id = "gene_link_ui",
-                  tags$a(
-                    id = "plasmo_link_exp", href = "#",
-                    target = "_blank", "🔬 PlasmoDB"
-                  ),
-                  tags$a(
-                    id = "ncbi_link_exp", href = "#",
-                    target = "_blank", "🧬 NCBI"
+                  column(
+                    width = 4,
+                    id = "gene_link_exp",
+                    tags$div(
+                      id = "gene_link_ui_exp",
+                      tags$a(
+                        id = "plasmo_link_exp", href = "#",
+                        target = "_blank", "🔬 PlasmoDB"
+                      ),
+                      span("|"),
+                      tags$a(
+                        id = "ncbi_link_exp", href = "#",
+                        target = "_blank", "🧬 NCBI"
+                      )
+                    )
                   )
                 )
+              ),
+              column(
+                width = 4,
+                selectInput("criteria", "Criteria",
+                  choices = c("Stage", "Species"),
+                  selected = "Stage"
+                )
               )
             ),
-            column(
-              width = 4,
-              selectInput("criteria", "Criteria",
-                choices = c("Stage", "Species"),
-                selected = "Stage"
+            fluidRow(
+              column(
+                width = 12,
+                plotlyOutput("gene_exp_plotly")
               )
-            ),
-            column(
-              width = 12,
-              plotlyOutput("gene_exp_plotly")
             )
           ),
           tabPanel(

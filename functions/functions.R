@@ -213,23 +213,26 @@ plot_gene_expression <- function(data, x_col) {
 }
 
 
-# Helper function to update PlasmoDB and NCBI links
+# function to update PlasmoDB and NCBI links
 update_gene_links <- function(gene_id) {
-  plasmo_url <- paste0(
-    "https://plasmodb.org/plasmo/app/record/gene/",
-    gene_id
-  )
+  plasmo_url <- paste0("https://plasmodb.org/plasmo/app/record/gene/", gene_id)
   ncbi_url <- paste0("https://www.ncbi.nlm.nih.gov/protein/", gene_id)
 
   shinyjs::runjs(sprintf(
-    "document.getElementById('plasmo_link').href = '%s';",
-    plasmo_url
+    "document.getElementById('plasmo_link_exp').href = '%s';", plasmo_url
   ))
   shinyjs::runjs(sprintf(
-    "document.getElementById('ncbi_link').href = '%s';",
-    ncbi_url
+    "document.getElementById('ncbi_link_exp').href = '%s';", ncbi_url
+  ))
+
+  shinyjs::runjs(sprintf(
+    "document.getElementById('plasmo_link').href = '%s';", plasmo_url
+  ))
+  shinyjs::runjs(sprintf(
+    "document.getElementById('ncbi_link').href = '%s';", ncbi_url
   ))
 }
+
 
 # Function to assign colors based on the number of categories
 assign_colors <- function(num_categories) {

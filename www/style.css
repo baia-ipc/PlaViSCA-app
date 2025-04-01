@@ -210,9 +210,8 @@
 }
 
 #switch_exp {
- position: absolute;
- top: 85px;
- left: 110px;
+ top: -70px;
+ left: 85px;
  padding: 0;
 }
 
@@ -269,20 +268,22 @@ input:checked + .slider:before {
   transform: translateX(11px); 
 }
 
-/* Style for surrounding labels */
-#switch_id span {
-  font-weight: bold;
-  font-size: 14px;
-}
-
-#gene_exp_ui{
+#gene_exp_ui {
   position: relative;
+  display: flex;
+  margin-left: 0 !important;
+  padding-left: 0 !important;
 }
 
-#gene_link_exp{
+#gene_link_exp {
   position: absolute;
-  top: 100px;
-  left: 320px;
+  padding-left : 0;
+  width: 300px;
+}
+
+#gene_link_ui_exp {
+  display: flex;
+  gap: 15px;
 }
 
 #plasmo_link, 

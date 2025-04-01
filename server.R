@@ -231,7 +231,7 @@ server <- function(input, output, session) {
     autoUpdateExp(FALSE)
     later(function() {
       autoUpdateExp(TRUE)
-    }, 0.5)
+    }, 1)
   })
 
   observeEvent(list(input$check_exp, input$data_type_exp), {
@@ -282,29 +282,15 @@ server <- function(input, output, session) {
     plot_gene_expression(df_exp(), tolower(input$criteria))
   })
 
-
-  # observeEvent(list(input$plasmo_link_exp, input$ncbi_link_exp), {
-  #   gene_id <- get_gene_id(input$genes_exp, gene_data()$genes)
-  #   plasmo_url <- paste0(
-  #     "https://plasmodb.org/plasmo/app/record/gene/",
-  #     gene_id
-  #   )
-  #   ncbi_url <- paste0("https://www.ncbi.nlm.nih.gov/protein/", gene_id)
-  #   shinyjs::runjs(sprintf("document.getElementById('plasmo_link_exp').
-  #                            href = '%s';", plasmo_url))
-  #   shinyjs::runjs(sprintf("document.getElementById('ncbi_link_exp').
-  #                            href = '%s';", ncbi_url))
-  # })
-
-
-  shinyjs::onclick("plasmo_link_exp", {
+  # gene expression link
+  observeEvent(input$genes_exp, {
     req(input$genes_exp)
+
     gene_id <- get_gene_id(input$genes_exp, gene_data()$genes)
     update_gene_links(gene_id)
-    
   })
-  
-  
+
+  # gene link
   observeEvent(input$genes_n, {
     req(input$genes_n)
     if (input$color == "genes") {
@@ -312,6 +298,8 @@ server <- function(input, output, session) {
       update_gene_links(gene_id)
     }
   })
+
+
 
   ## Observer for updating x- and y-axis selections for 2D plots
   observeEvent(list(
