@@ -45,27 +45,27 @@ server <- function(input, output, session) {
   })
 
   # Toggle metadata visibility with arrow indicator
-  metadata_visible <- reactiveVal(FALSE)
-  observeEvent(input$toggle_metadata, {
-    shinyjs::toggle("metadata_section")
-    metadata_visible(!metadata_visible())
-    if (metadata_visible()) {
-      shinyjs::html("arrow_meta", "&#9662;")
-    } else {
-      shinyjs::html("arrow_meta", "&#9656;")
-    }
-  })
-
-  shource_visible <- reactiveVal(FALSE)
-  observeEvent(input$toggle_source, {
-    shinyjs::toggle("source_section")
-    metadata_visible(!metadata_visible())
-    if (metadata_visible()) {
-      shinyjs::html("arrow_source", "&#9662;")
-    } else {
-      shinyjs::html("arrow_source", "&#9656;")
-    }
-  })
+  # metadata_visible <- reactiveVal(FALSE)
+  # observeEvent(input$toggle_metadata, {
+  #   shinyjs::toggle("metadata_section")
+  #   metadata_visible(!metadata_visible())
+  #   if (metadata_visible()) {
+  #     shinyjs::html("arrow_meta", "&#9662;")
+  #   } else {
+  #     shinyjs::html("arrow_meta", "&#9656;")
+  #   }
+  # })
+  #
+  # shource_visible <- reactiveVal(FALSE)
+  # observeEvent(input$toggle_source, {
+  #   shinyjs::toggle("source_section")
+  #   metadata_visible(!metadata_visible())
+  #   if (metadata_visible()) {
+  #     shinyjs::html("arrow_source", "&#9662;")
+  #   } else {
+  #     shinyjs::html("arrow_source", "&#9656;")
+  #   }
+  # })
 
   # Consolidated gene_data reactive
   gene_data <- eventReactive(list(
@@ -111,24 +111,165 @@ server <- function(input, output, session) {
   })
 
   ## Update UI elements for the Data tab based on filtered_data
-  observeEvent(input$tabset, {
-    if (input$tabset == "Data") {
-      filt_data <- filtered_data()
-      updateSelectInput(session, "ident", choices = unique(filt_data$ident))
-      updateSelectInput(session, "species", choices = unique(filt_data$species))
-      updateSelectInput(session, "type", choices = unique(filt_data$type))
-      updateSelectInput(session, "condition", choices = unique(filt_data$condition))
-      updateSelectInput(session, "stage", choices = unique(filt_data$stage))
-      updateSelectInput(session, "sample", choices = unique(filt_data$sample))
-    }
-  })
+  # observeEvent(input$tabset, {
+  #   if (input$tabset == "Data") {
+  #     filt_data <- filtered_data()
+  #     updateSelectInput(session, "ident", choices = unique(filt_data$ident))
+  #     updateSelectInput(session, "species", choices = unique(filt_data$species))
+  #     updateSelectInput(session, "type", choices = unique(filt_data$type))
+  #     updateSelectInput(session, "condition", choices = unique(filt_data$condition))
+  #     updateSelectInput(session, "stage", choices = unique(filt_data$stage))
+  #     updateSelectInput(session, "sample", choices = unique(filt_data$sample))
+  #   }
+  # })
 
   # Filter data based on several select inputs
+  # observeEvent(list(
+  #   input$ident, input$species, input$type, input$condition,
+  #   input$stage, input$sample
+  # ), {
+  #   filt_data <- filtered_data() %>%
+  #     select(any_of(c(
+  #       "id", "ident", "seurat_clusters", "species", "type", "condition", "stage",
+  #       "sample", "day", "replicate", "location", "vivax_strain", "n_count_rna",
+  #       "n_feature_rna"
+  #     )))
+  #
+  #
+  #   if (!is.null(input$ident) || !is.null(input$species) || !is.null(input$type) ||
+  #     !is.null(input$condition) || !is.null(input$stage) || !is.null(input$sample)) {
+  #     filt_data <- filt_data %>%
+  #       filter(
+  #         if (!is.null(input$ident)) ident %in% input$ident else TRUE,
+  #         if (!is.null(input$species)) species %in% input$species else TRUE,
+  #         if (!is.null(input$type)) type %in% input$type else TRUE,
+  #         if (!is.null(input$condition)) condition %in% input$condition else TRUE,
+  #         if (!is.null(input$stage)) stage %in% input$stage else TRUE,
+  #         if (!is.null(input$sample)) sample %in% input$sample else TRUE
+  #       )
+  #   }
+
+  # output$data_table <- renderDT(
+  #   {
+  #     DT::datatable(
+  #       filt_data %>%
+  #         rename_with(~ str_to_title(.), .cols = any_of(c(
+  #           "id", "ident", "seurat_clusters", "species", "type",
+  #           "condition", "stage",
+  #           "sample", "day", "replicate", "location", "vivax_strain"
+  #         ))) %>%
+  #         rename(
+  #           nCount_RNA = n_count_rna,
+  #           nFeature_RNA = n_feature_rna
+  #         ),
+  #       options = list(pageLength = 10, scrollX = TRUE),
+  #       selection = "single",
+  #       rownames = FALSE
+  #     )
+  #   },
+  #   server = TRUE
+  # )
+
+  # # stage vs count
+  # output$stage_plotly <- renderPlotly({
+  #   filt_data %>%
+  #     group_by(stage) %>%
+  #     summarise(count = n(), .groups = "drop") %>%
+  #     arrange(count) %>%
+  #     mutate(stage = factor(stage, levels = stage)) %>%
+  #     plot_ly(x = ~count, y = ~stage, type = "bar") %>%
+  #     layout(
+  #       xaxis = list(title = "Count"),
+  #       yaxis = list(title = "Stage"),
+  #       showlegend = FALSE,
+  #       barmode = "group",
+  #       bargap = 0.1
+  #     )
+  # })
+  #
+  # # sample vs count
+  # output$sample_plotly <- renderPlotly({
+  #   filt_data %>%
+  #     group_by(sample) %>%
+  #     summarise(count = n(), .groups = "drop") %>%
+  #     arrange(count) %>%
+  #     mutate(sample = factor(sample, levels = sample)) %>%
+  #     plot_ly(x = ~count, y = ~sample, type = "bar") %>%
+  #     layout(
+  #       xaxis = list(title = "Count"),
+  #       yaxis = list(title = "Sample"),
+  #       showlegend = FALSE,
+  #       barmode = "group",
+  #       bargap = 0.1
+  #     )
+  # })
+  #
+  # # strain vs count
+  # output$strain_plotly <- renderPlotly({
+  #   filt_data %>%
+  #     group_by(vivax_strain) %>%
+  #     summarise(count = n(), .groups = "drop") %>%
+  #     arrange(count) %>%
+  #     mutate(vivax_strain = factor(vivax_strain, levels = vivax_strain)) %>%
+  #     plot_ly(x = ~count, y = ~vivax_strain, type = "bar") %>%
+  #     layout(
+  #       xaxis = list(title = "Count"),
+  #       yaxis = list(title = "Strain"),
+  #       showlegend = FALSE,
+  #       barmode = "group",
+  #       bargap = 0.1
+  #     )
+  # })
+
+
+  # output$data_count_plotly <- renderPlotly({
+  #   rna_feature_plot(filt_data,
+  #     x = "sample", y = "n_count_rna",
+  #     color = "ident", y_title = "RNA count", title = "RNA Count"
+  #   )
+  # })
+  #
+  # output$data_feature_plotly <- renderPlotly({
+  #   rna_feature_plot(filt_data,
+  #     x = "sample", y = "n_feature_rna",
+  #     color = "ident", y_title = "nFeature count", title = "Feature Count"
+  #   )
+  # })
+  #
+  # output$data_pca_stdv_plotly <- renderPlotly({
+  #   elbow_plot(pca_std_df)
+  # })
+  #
+  # output$variable_genes_plotly <- renderPlotly({
+  #   var_genes_plot(vf_data, top_n = 15)
+  # })
+  #
+  # output$top_genes_exp_plotly <- renderPlotly({
+  #   top_genes_exp_plot(top_genes_exp)
+  # })
+  # })
+
+  # option to display
   observeEvent(list(
-    input$ident, input$species, input$type, input$condition,
-    input$stage, input$sample
+    input$data_opt, input$ident, input$species, input$type,
+    input$condition, input$stage, input$sample
   ), {
-    filt_data <- filtered_data()
+    filt_data <- filtered_data() %>%
+      select(any_of(c(
+        "id", "ident", "seurat_clusters", "species", "type", "condition", "stage",
+        "sample", "day", "replicate", "location", "vivax_strain", "n_count_rna",
+        "n_feature_rna"
+      )))
+
+
+    updateSelectInput(session, "ident", choices = unique(filt_data$ident))
+    updateSelectInput(session, "species", choices = unique(filt_data$species))
+    updateSelectInput(session, "type", choices = unique(filt_data$type))
+    updateSelectInput(session, "condition", choices = unique(filt_data$condition))
+    updateSelectInput(session, "stage", choices = unique(filt_data$stage))
+    updateSelectInput(session, "sample", choices = unique(filt_data$sample))
+
+
     if (!is.null(input$ident) || !is.null(input$species) || !is.null(input$type) ||
       !is.null(input$condition) || !is.null(input$stage) || !is.null(input$sample)) {
       filt_data <- filt_data %>%
@@ -142,43 +283,88 @@ server <- function(input, output, session) {
         )
     }
 
-    output$data_table <- renderDT(
-      {
-        DT::datatable(filt_data,
-          options = list(pageLength = 10, scrollX = TRUE),
-          selection = "single",
-          rownames = FALSE
+
+    if (input$data_opt == "meta") {
+      shinyjs::show("meta_section")
+      shinyjs::hide("qual_section")
+      shinyjs::hide("source_section")
+
+      output$data_table <- renderDT(
+        {
+          DT::datatable(
+            filt_data %>%
+              rename_with(~ str_to_title(.), .cols = any_of(c(
+                "id", "ident", "seurat_clusters", "species", "type",
+                "condition", "stage",
+                "sample", "day", "replicate", "location", "vivax_strain"
+              ))) %>%
+              rename(
+                nCount_RNA = n_count_rna,
+                nFeature_RNA = n_feature_rna
+              ),
+            options = list(pageLength = 10, scrollX = TRUE),
+            selection = "single",
+            rownames = FALSE
+          )
+        },
+        server = TRUE
+      )
+
+      # stage vs count
+      output$stage_plotly <- renderPlotly({
+        meta_plotly(filt_data, "stage", "Count", "Stage", "bar")
+      })
+
+      # sample vs count
+      output$sample_plotly <- renderPlotly({
+        meta_plotly(filt_data, "sample", "Count", "Sample", "bar")
+      })
+
+      # strain vs count
+      output$strain_plotly <- renderPlotly({
+        meta_plotly(filt_data, "vivax_strain", "Count", "Strain", "bar")
+      })
+    } else if (input$data_opt == "qual") {
+      shinyjs::show("qual_section")
+      shinyjs::hide("meta_section")
+      shinyjs::hide("source_section")
+
+      output$data_count_plotly <- renderPlotly({
+        rna_feature_plot(filt_data,
+          x = "sample", y = "n_count_rna",
+          color = "ident", y_title = "RNA count", title = "RNA Count"
         )
-      },
-      server = TRUE
-    )
+      })
 
-    output$data_count_plotly <- renderPlotly({
-      rna_feature_plot(filt_data,
-        x = "sample", y = "n_count_rna",
-        color = "ident", y_title = "RNA count", title = "RNA Count"
-      )
-    })
+      output$data_feature_plotly <- renderPlotly({
+        rna_feature_plot(filt_data,
+          x = "sample", y = "n_feature_rna",
+          color = "ident", y_title = "nFeature count",
+          title = "Feature Count"
+        )
+      })
 
-    output$data_feature_plotly <- renderPlotly({
-      rna_feature_plot(filt_data,
-        x = "sample", y = "n_feature_rna",
-        color = "ident", y_title = "nFeature count", title = "Feature Count"
-      )
-    })
+      output$data_pca_stdv_plotly <- renderPlotly({
+        elbow_plot(pca_std_df)
+      })
 
-    output$data_pca_stdv_plotly <- renderPlotly({
-      elbow_plot(pca_std_df)
-    })
+      output$variable_genes_plotly <- renderPlotly({
+        var_genes_plot(vf_data, top_n = 15)
+      })
 
-    output$variable_genes_plotly <- renderPlotly({
-      var_genes_plot(vf_data, top_n = 15)
-    })
-
-    output$top_genes_exp_plotly <- renderPlotly({
-      top_genes_exp_plot(top_genes_exp)
-    })
+      output$top_genes_exp_plotly <- renderPlotly({
+        top_genes_exp_plot(top_genes_exp)
+      })
+    } else {
+      shinyjs::show("source_section")
+      shinyjs::hide("qual_section")
+      shinyjs::hide("meta_section")
+    }
   })
+
+
+
+
 
   # Switch gene id or name based on input$check.
   choice <- eventReactive(list(input$check, input$data_type), {

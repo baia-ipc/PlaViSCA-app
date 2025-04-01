@@ -223,111 +223,141 @@ ui <- fluidPage(
             fluidRow(
               column(
                 width = 12,
-                actionLink(
-                  "toggle_metadata",
-                  HTML("<span id='arrow_meta'>&#9656;</span> Explore")
+                radioButtons("data_opt", NULL,
+                  choices = list(
+                    "Metadata" = "meta",
+                    "Quality" = "qual",
+                    "Sources" = "source"
+                  ),
+                  selected = "meta"
                 )
               )
             ),
-            hidden(
-              div(
-                id = "metadata_section",
-                fluidRow(
-                  column(
-                    width = 2,
-                    selectizeInput("ident", "Ident:",
-                      choices = c(""),
-                      multiple = TRUE,
-                      options = list(
-                        placeholder = "Select an option...",
-                        onInitialize = I('function() { this.setValue(""); }')
-                      )
-                    )
-                  ),
-                  column(
-                    width = 2,
-                    selectizeInput("species", "Species:",
-                      choices = c(""),
-                      multiple = TRUE,
-                      options = list(
-                        placeholder = "Select an option...",
-                        onInitialize = I('function() { this.setValue(""); }')
-                      )
-                    )
-                  ),
-                  column(
-                    width = 2,
-                    selectizeInput("type", "Type:",
-                      choices = c(""),
-                      multiple = TRUE,
-                      options = list(
-                        placeholder = "Select an option...",
-                        onInitialize = I('function() { this.setValue(""); }')
-                      )
-                    )
-                  ),
-                  column(
-                    width = 2,
-                    selectizeInput("condition", "Condition:",
-                      choices = c(""),
-                      multiple = TRUE,
-                      options = list(
-                        placeholder = "Select an option...",
-                        onInitialize = I('function() { this.setValue(""); }')
-                      )
-                    )
-                  ),
-                  column(
-                    width = 2,
-                    selectizeInput("stage", "Stage:",
-                      choices = c(""),
-                      multiple = TRUE,
-                      options = list(
-                        placeholder = "Select an option...",
-                        onInitialize = I('function() { this.setValue(""); }')
-                      )
-                    )
-                  ),
-                  column(
-                    width = 2,
-                    selectizeInput("sample", "Sample:",
-                      choices = c(""),
-                      multiple = TRUE,
-                      options = list(
-                        placeholder = "Select an option...",
-                        onInitialize = I('function() { this.setValue(""); }')
-                      )
+            div(
+              id = "meta_section",
+              fluidRow(
+                column(
+                  width = 2,
+                  selectizeInput("ident", "Ident:",
+                    choices = c(""),
+                    multiple = TRUE,
+                    options = list(
+                      placeholder = "Select an option...",
+                      onInitialize = I('function() { this.setValue(""); }')
                     )
                   )
                 ),
-                fluidRow(withSpinner(
-                  type = 6,
-                  size = 0.5,
-                  color = "#3498db",
-                  DT::DTOutput("data_table")
-                )),
-                br(),
-                fluidRow(
-                  column(width = 6, plotlyOutput("data_count_plotly")),
-                  column(width = 6, plotlyOutput("data_feature_plotly"))
+                column(
+                  width = 2,
+                  selectizeInput("species", "Species:",
+                    choices = c(""),
+                    multiple = TRUE,
+                    options = list(
+                      placeholder = "Select an option...",
+                      onInitialize = I('function() { this.setValue(""); }')
+                    )
+                  )
                 ),
-                br(),
-                fluidRow(
-                  column(width = 6, plotlyOutput("data_pca_stdv_plotly")),
-                  column(width = 6, plotlyOutput("variable_genes_plotly"))
+                column(
+                  width = 2,
+                  selectizeInput("type", "Type:",
+                    choices = c(""),
+                    multiple = TRUE,
+                    options = list(
+                      placeholder = "Select an option...",
+                      onInitialize = I('function() { this.setValue(""); }')
+                    )
+                  )
                 ),
-                br(),
-                fluidRow(
-                  column(width = 12, plotlyOutput("top_genes_exp_plotly"))
+                column(
+                  width = 2,
+                  selectizeInput("condition", "Condition:",
+                    choices = c(""),
+                    multiple = TRUE,
+                    options = list(
+                      placeholder = "Select an option...",
+                      onInitialize = I('function() { this.setValue(""); }')
+                    )
+                  )
                 ),
+                column(
+                  width = 2,
+                  selectizeInput("stage", "Stage:",
+                    choices = c(""),
+                    multiple = TRUE,
+                    options = list(
+                      placeholder = "Select an option...",
+                      onInitialize = I('function() { this.setValue(""); }')
+                    )
+                  )
+                ),
+                column(
+                  width = 2,
+                  selectizeInput("sample", "Sample:",
+                    choices = c(""),
+                    multiple = TRUE,
+                    options = list(
+                      placeholder = "Select an option...",
+                      onInitialize = I('function() { this.setValue(""); }')
+                    )
+                  )
+                )
+              ),
+              fluidRow(withSpinner(
+                type = 6,
+                size = 0.5,
+                color = "#3498db",
+                DT::DTOutput("data_table")
+              )),
+              br(),
+              fluidRow(
+                column(width = 4, plotlyOutput("stage_plotly")),
+                column(width = 4, plotlyOutput("sample_plotly")),
+                column(width = 4, plotlyOutput("strain_plotly"))
               )
             ),
-            fluidRow(
-              column(
-                width = 12,
-                actionLink(
-                  "toggle_source",
-                  HTML("<span id='arrow_source'>&#9656;</span> Data sources")
+            div(
+              id = "qual_section",
+              fluidRow(
+                column(
+                  width = 6,
+                  withSpinner(
+                    type = 6,
+                    size = 0.5,
+                    color = "#3498db",
+                    plotlyOutput("data_count_plotly")
+                  )
+                ),
+                column(
+                  width = 6,
+                  withSpinner(
+                    type = 6,
+                    size = 0.5,
+                    color = "#3498db",
+                    plotlyOutput("data_feature_plotly")
+                  )
+                )
+              ),
+              br(),
+              fluidRow(
+                column(width = 6, plotlyOutput("data_pca_stdv_plotly")),
+                column(width = 6, plotlyOutput("variable_genes_plotly"))
+              ),
+              br(),
+              fluidRow(
+                column(width = 12, plotlyOutput("top_genes_exp_plotly"))
+              )
+            ),
+            div(
+              id = "source_section",
+              fluidRow(
+                h3("Table of data sources in here"),
+                column(
+                  width = 12,
+                  actionLink(
+                    "toggle_source",
+                    HTML("<span id='arrow_source'>&#9656;</span> Data sources")
+                  )
                 )
               )
             )

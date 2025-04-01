@@ -49,6 +49,37 @@ get_color_column <- function(color_type, gene_input, gene_data_obj) {
 # set color pallet
 colors <- RColorBrewer::brewer.pal(12, "Set3")
 
+
+# function to generate metadata plot
+meta_plotly <- function(data, x_var, x_label, y_label, plt_type = "bar") {
+  data_summary <- data %>%
+    group_by(.data[[x_var]]) %>%
+    summarise(count = n(), .groups = "drop") %>%
+    arrange(count)
+
+  data_summary[[x_var]] <- factor(data_summary[[x_var]],
+    levels = data_summary[[x_var]]
+  )
+
+  plot_ly(data_summary,
+    x = ~count,
+    y = as.formula(paste("~", x_var)),
+    color = ~ .data[[x_var]],
+    colors = brewer.pal(
+      n = length(unique(data_summary[[x_var]])),
+      name = "Set3"
+    ),
+    type = plt_type
+  ) %>%
+    layout(
+      xaxis = list(title = x_label),
+      yaxis = list(title = y_label),
+      showlegend = FALSE,
+      barmode = "group",
+      bargap = 0.1
+    )
+}
+
 # function to generate plot for for RNA and feature count
 rna_feature_plot <- function(df, x, y, color, y_title, title) {
   req(df)
@@ -64,7 +95,6 @@ rna_feature_plot <- function(df, x, y, color, y_title, title) {
     jitter = 0.4
   ) %>%
     layout(
-      title = paste("Number of", title, "per sample"),
       xaxis = list(title = x),
       yaxis = list(title = y_title),
       legend = list(title = list(text = color))
@@ -146,7 +176,6 @@ var_genes_plot <- function(df, top_n = 10) {
       name = paste("Top", top_n, "Variable")
     ) %>%
     layout(
-      title = "Variable Features",
       xaxis = list(title = "Mean Expression"),
       yaxis = list(title = "Standardized Variance"),
       legend = list(title = list(text = "<b>Variable Status</b>"))
@@ -173,7 +202,6 @@ top_genes_exp_plot <- function(df, default_gene = "PVP01_1460700") {
     )
   ) %>%
     layout(
-      title = "Top expression genes per ident",
       xaxis = list(title = "Idents"),
       yaxis = list(title = "Average expression"),
       legend = list(title = list(text = "<b>Idents</b>")),

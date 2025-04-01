@@ -96,6 +96,10 @@
   font-size: 18px;
 }
 
+#data_opt-label {
+  display: none !important;
+}
+
 #stagei-label:hover,
 #stagelr-label:hover,
 #size-label:hover,
@@ -118,9 +122,11 @@
   align-items: flex-end;
 }
 
+
 /* Checkbox and Radio Button Layout */
 #stagei .shiny-options-group .checkbox,
 #size .shiny-options-group .radio,
+#data_opt .shiny-options-group .radio,
 #plot .shiny-options-group .radio {
   margin-top: 15px;
 }
@@ -159,6 +165,29 @@
   width: 100%;
 }
 
+
+#data_opt {
+  width: 100% !important;
+}
+
+#data_opt .shiny-options-group {
+  justify-content: center;
+}
+
+#data_opt label {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  text-align: center;
+  width: 300px;
+  
+}
+
+
 /* Remove Background Color from stage-lr Labels */
 #stagelr label {
   background-color: transparent !important;
@@ -169,6 +198,7 @@
 #stagei input[type="checkbox"],
 #size input[type="radio"],
 #color input[type="radio"],
+#data_opt input[type="radio"],
 #plot input[type="radio"] {
   display: none;
 }
