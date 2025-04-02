@@ -314,6 +314,11 @@ ui <- fluidPage(
                 column(width = 4, plotlyOutput("stage_plotly")),
                 column(width = 4, plotlyOutput("sample_plotly")),
                 column(width = 4, plotlyOutput("strain_plotly"))
+              ),
+              fluidRow(
+                column(width = 4, plotlyOutput("species_plotly")),
+                column(width = 4, plotlyOutput("type_plotly")),
+                column(width = 4, plotlyOutput("location_plotly")),
               )
             ),
             div(
@@ -475,17 +480,17 @@ ui <- fluidPage(
           ),
           tabPanel(
             "tSNE",
-            column(
-              id = "tab_switch",
-              width = 6,
-              tags$span(class = "left-label", "Integrated"),
-              tags$label(
-                class = "switch",
-                tags$input(id = "check_tsne", type = "checkbox"),
-                tags$span(class = "slider")
-              ),
-              tags$span(class = "right-label", "Unintegrated")
-            ),
+            # column(
+            #   id = "tab_switch",
+            #   width = 6,
+            #   tags$span(class = "left-label", "Integrated"),
+            #   tags$label(
+            #     class = "switch",
+            #     tags$input(id = "check_tsne", type = "checkbox"),
+            #     tags$span(class = "slider")
+            #   ),
+            #   tags$span(class = "right-label", "Unintegrated")
+            # ),
             br(),
             br(),
             withSpinner(

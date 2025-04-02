@@ -15,10 +15,10 @@
 }
 
 .menu-title {
+  flex-grow: 1;
   font-size: 36px;
   font-weight: bold;
   text-align: center;
-  flex-grow: 1;
   padding-left: 20px;
 }
 
@@ -31,11 +31,11 @@
 .menu-items {
   display: flex;
   align-items: center;
-  color: #2c3e50; 
+  color: #2c3e50;
 }
 
 .menu-link {
-  color: #2c3e50; 
+  color: #2c3e50;
   text-decoration: none;
   margin: 0 10px;
   font-size: 16px;
@@ -49,12 +49,10 @@
 
 #explore_data:hover {
   color: #43a047;
-  margin: 10px 10px;
+  margin: 10px;
   font-style: italic;
   transition: color 0.3s ease, text-decoration 0.3s ease;
 }
-
-
 
 /* Image Styling */
 .img {
@@ -65,15 +63,16 @@
   width: 100%;
   height: auto;
   object-fit: cover;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-/* Home Page */
+/* Home Page & Input Sections */
 .introduction p,
 #data_sets_section {
   padding: 15px;
 }
 
-/* Input Sections */
 #stagei,
 #stagelr,
 #size,
@@ -83,13 +82,13 @@
   display: block;
 }
 
+/* Label Headers for Inputs */
 #stagei-label,
 #size-label,
 #color-label,
 #plot-label {
   background-color: #c8e6c9 !important;
   width: 100%;
-  font-weight: bold;
   margin-bottom: 5px;
   color: #2e7d32;
   font-weight: bold;
@@ -122,7 +121,6 @@
   align-items: flex-end;
 }
 
-
 /* Checkbox and Radio Button Layout */
 #stagei .shiny-options-group .checkbox,
 #size .shiny-options-group .radio,
@@ -142,14 +140,14 @@
   flex: 1 0 31%;
 }
 
+/* Hover on Checkbox/Radio Labels */
 .shiny-options-group .radio label:hover,
 .shiny-options-group .checkbox label:hover {
   background-color: #fff9c4;
   font-style: italic;
 }
 
-
-/* Labels */
+/* General Labels */
 #stagei label,
 #size label,
 #color label,
@@ -165,7 +163,7 @@
   width: 100%;
 }
 
-
+/* Data Option Section */
 #data_opt {
   width: 100% !important;
 }
@@ -174,25 +172,48 @@
   justify-content: center;
 }
 
-#data_opt label {
+/* Custom Radio Button Labels (Data Options) */
+#data_opt .radio label {
+  position: relative;
   display: flex;
-  flex: 1;
   align-items: center;
   justify-content: center;
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  text-align: center;
+  clip-path: polygon(75% 0%, 82% 50%, 75% 100%, 0% 100%, 3% 49%, 0% 0%);
   width: 300px;
-  
+  height: 50px;
+  cursor: pointer;
 }
 
+#data_opt .radio label::before {
+  content: "";
+  position: absolute;
+  inset: -3px;
+  background-color: #eaecea;
+  clip-path: inherit;
+  width: 306px;
+  height: calc(100% + 6px);
+  z-index: -1;
+  transition: background-color 0.3s;
+}
+
+#data_opt .radio label:hover::before {
+  background-color: #fff9c4 !important;
+  font-style: italic;
+}
+
+#data_opt .radio label.checked-label::before {
+  background-color: #d6eaf8 !important;
+}
+
+#data_opt .radio label span {
+  position: relative;
+  left: -40px;
+}
 
 /* Remove Background Color from stage-lr Labels */
 #stagelr label {
   background-color: transparent !important;
 }
-
 
 /* Hide Default Inputs */
 #stagei input[type="checkbox"],
@@ -218,34 +239,34 @@
   transition: width 0.5s ease, opacity 0.5s ease;
 }
 
+/* Data Type Option Groups */
 #data_type .shiny-options-group,
 #data_type_exp .shiny-options-group {
   margin: 0;
   justify-content: space-between;
 }
 
-
+/* Gene and Switch UI */
 #gene_snn_ui {
   display: flex;
   align-items: center;
   position: relative;
 }
 
-
 #switch_id {
- position: absolute;
- top : 5px;
- left: 100px;
- padding: 0;
+  position: absolute;
+  top: 5px;
+  left: 100px;
+  padding: 0;
 }
 
 #switch_exp {
- top: -70px;
- left: 85px;
- padding: 0;
+  top: -70px;
+  left: 85px;
+  padding: 0;
 }
 
-/* Style the switch container */
+/* Switch Styles */
 .switch {
   position: relative;
   display: inline-block;
@@ -254,7 +275,6 @@
   cursor: pointer;
 }
 
-/* Hide the default checkbox */
 .switch input {
   opacity: 0;
   width: 0;
@@ -262,7 +282,6 @@
   position: absolute;
 }
 
-/* Create the slider (background) */
 .slider {
   position: absolute;
   top: 0;
@@ -275,7 +294,6 @@
   border: none;
 }
 
-/* Create the toggle button */
 .slider:before {
   position: absolute;
   content: "";
@@ -288,16 +306,15 @@
   transition: 0.4s;
 }
 
-/* When checkbox is checked, change slider background */
 input:checked + .slider {
   background-color: green;
 }
 
-/* Move the toggle button when checked */
 input:checked + .slider:before {
-  transform: translateX(11px); 
+  transform: translateX(11px);
 }
 
+/* Gene Expression UI */
 #gene_exp_ui {
   position: relative;
   display: flex;
@@ -307,7 +324,7 @@ input:checked + .slider:before {
 
 #gene_link_exp {
   position: absolute;
-  padding-left : 0;
+  padding-left: 0;
   width: 300px;
 }
 
@@ -316,11 +333,12 @@ input:checked + .slider:before {
   gap: 15px;
 }
 
-#plasmo_link, 
+#plasmo_link,
 #ncbi_link {
   display: block;
 }
 
+/* Axis Container */
 #axis {
   display: flex;
   margin-left: 0;
@@ -341,23 +359,20 @@ input:checked + .slider:before {
   transition: width 0.1s ease;
 }
 
-
-
-
-
+/* Tab Switch */
 #tab_switch {
   position: relative;
   margin-top: 15px;
   margin-bottom: 5px;
   display: flex;
-  gap: 10px; 
+  gap: 10px;
 }
 
 #tab_switch .switch {
   position: relative;
   display: inline-block;
-  width: 60px; 
-  height: 20px; 
+  width: 60px;
+  height: 20px;
   cursor: pointer;
 }
 
@@ -384,36 +399,27 @@ input:checked + .slider:before {
   transition: 0.4s;
 }
 
-/* When checkbox is checked, change slider background */
 #tab_switch input:checked + .slider {
   background-color: green;
 }
 
-/* Move the toggle button when checked */
 #tab_switch input:checked + .slider:before {
-  transform: translateX(39px); 
+  transform: translateX(39px);
 }
 
-/* Label text styling */
+/* Label Text Styling */
 .left-label,
 .right-label {
   font-size: 14px;
   color: #333;
 }
 
-
-
-
-
-
 /* Checked Label Styling */
 .checked-label {
-  background-color: #d6eaf8; 
+  background-color: #d6eaf8 !important;
   font-weight: bold;
-  border: 2px solid #1a5a8c;
   padding: 6px;
   border-radius: 6px;
-  font-weight: bold;
   transition: background-color 0.3s, border-color 0.3s;
 }
 
@@ -435,13 +441,10 @@ input:checked + .slider:before {
   width: 100%;
 }
 
-/* Hover Effect */
 .bt-download:hover {
   background-color: #388e3c;
   font-style: italic;
 }
-
-
 
 /* Responsive Design */
 @media screen and (max-width: 768px) {
@@ -450,31 +453,15 @@ input:checked + .slider:before {
     text-align: center;
     padding: 15px;
   }
-
   .menu-title {
     font-size: 28px;
     margin-bottom: 10px;
   }
-
   .menu-items {
     flex-direction: column;
     align-items: center;
   }
-
   .menu-link {
     margin: 5px 0;
   }
-}
-
-/* Image Styling */
-.img {
-  padding: 15px;
-}
-
-.img img {
-  width: 100%;
-  height: auto;
-  object-fit: cover;
-  border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }

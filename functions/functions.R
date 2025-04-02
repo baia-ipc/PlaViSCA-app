@@ -385,11 +385,17 @@ generate_plotly <- function(df, xaxis_input, yaxis_input, color, legend_title,
     # 3D plotting: define coordinate mapping based on plot_type.
     dim_map <- list(
       PCA = c("pc_1", "pc_2", "pc_3"),
-      PCA_integrated = c("integratedrpca_1", "integratedrpca_2", "integratedrpca_3"),
+      PCA_integrated = c(
+        "integratedrpca_1", "integratedrpca_2",
+        "integratedrpca_3"
+      ),
       UMAP = c("umap_1", "umap_2", "umap_3"),
-      UMAP_unintegred = c("umapunintegrated_1", "umapunintegrated_2", "umapunintegrated_3"),
-      tSNE = c("t_sne_1", "t_sne_2", "t_sne_3"),
-      tSNE_integrated = c("t_sne_integrated_1", "t_sne_integrated_2", "t_sne_integrated_3")
+      UMAP_unintegred = c(
+        "umapunintegrated_1",
+        "umapunintegrated_2",
+        "umapunintegrated_3"
+      ),
+      tSNE = c("t_sne_1", "t_sne_2", "t_sne_3")
     )
 
     coords <- dim_map[[plot_type]]
