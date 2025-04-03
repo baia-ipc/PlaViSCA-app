@@ -260,7 +260,7 @@
   padding: 0;
 }
 
-#switch_exp {
+.switch_exp {
   top: -70px;
   left: 85px;
   padding: 0;
@@ -322,13 +322,13 @@ input:checked + .slider:before {
   padding-left: 0 !important;
 }
 
-#gene_link_exp {
+.gene_link_exp {
   position: absolute;
   padding-left: 0;
   width: 300px;
 }
 
-#gene_link_ui_exp {
+.gene_link_ui_exp {
   display: flex;
   gap: 15px;
 }

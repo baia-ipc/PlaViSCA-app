@@ -1,3 +1,60 @@
+# function to create a dynamic Gene Exp block.
+dynamicBlock <- function(i, choices) {
+  tagList(
+    fluidRow(
+      column(
+        width = 6,
+        selectizeInput(
+          paste0("genes_exp_", i),
+          label = "Gene",
+          choices = choices
+        ),
+        column(
+          width = 2,
+          class = "switch_exp",
+          tags$label(
+            class = "switch",
+            tags$input(id = paste0("check_exp_", i), type = "checkbox"),
+            tags$span(class = "slider")
+          )
+        ),
+        column(
+          width = 4,
+          id = "gene_link_exp",
+          class = "gene_link_exp",
+          tags$div(
+            id = "gene_link_ui_exp",
+            class = "gene_link_ui_exp",
+            tags$a(
+              id = "plasmo_link_exp", href = "#",
+              target = "_blank", "🔬 PlasmoDB"
+            ),
+            span("|"),
+            tags$a(
+              id = "ncbi_link_exp", href = "#",
+              target = "_blank", "🧬 NCBI"
+            )
+          )
+        )
+      ),
+      column(
+        width = 6,
+        selectInput(
+          paste0("group_exp_", i),
+          "Group by",
+          choices = c("Stage", "Species"),
+          selected = "Stage"
+        )
+      )
+    ),
+    fluidRow(
+      width = 12,
+      plotlyOutput(paste0("gene_exp_plotly_", i))
+    )
+  )
+}
+
+
 # function to get gene name
 genes <- function(data, gff_data, pattern = "pvp") {
   data %>%

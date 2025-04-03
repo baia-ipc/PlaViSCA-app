@@ -5,12 +5,7 @@ library(shinycssloaders)
 
 ui <- fluidPage(
   useShinyjs(),
-
-  # Link to CSS and JS files
-  tags$link(
-    rel = "stylesheet", type = "text/css",
-    href = "style.css"
-  ),
+  includeCSS("www/style.css"),
   tags$script(src = "script.js"),
 
   # Menu Bar
@@ -77,12 +72,12 @@ ui <- fluidPage(
       global fight against P. vivax malaria, paving the way for its
       eventual elimination.",
         actionLink("explore_data", "Explore data >>")
-      ),
+      )
     ),
     div(class = "img", img(src = "pvivax.jpg"))
   ),
 
-  # Data Section
+  # Explore data Section
   div(
     id = "data_sets_section",
     fluidRow(
@@ -158,7 +153,7 @@ ui <- fluidPage(
               width = 7,
               selectizeInput("genes_n", "Gene",
                 choices = ""
-              ),
+              )
             ),
             column(
               id = "switch_id",
@@ -318,7 +313,7 @@ ui <- fluidPage(
               fluidRow(
                 column(width = 4, plotlyOutput("species_plotly")),
                 column(width = 4, plotlyOutput("type_plotly")),
-                column(width = 4, plotlyOutput("location_plotly")),
+                column(width = 4, plotlyOutput("location_plotly"))
               )
             ),
             div(
@@ -373,7 +368,8 @@ ui <- fluidPage(
             fluidRow(
               column(
                 width = 12,
-                radioButtons("data_type_exp", "Data type",
+                radioButtons(
+                  "data_type_exp", "Data type",
                   choices = list(
                     "Raw" = "raw",
                     "Normalized" = "normalize",
@@ -385,54 +381,57 @@ ui <- fluidPage(
             ),
             fluidRow(
               column(
-                id = "gene_exp_ui",
-                width = 4,
-                column(
-                  width = 10,
-                  selectizeInput("genes_exp", "Gene", choices = NULL),
+                id = "gene_exp_tar",
+                width = 6,
+                fluidRow(
                   column(
-                    id = "switch_exp",
-                    width = 2,
-                    tags$label(
-                      class = "switch",
-                      tags$input(
-                        id = "check_exp", type = "checkbox"
-                      ),
-                      tags$span(class = "slider")
+                    width = 6,
+                    selectizeInput("genes_exp", "Gene", choices = NULL),
+                    column(
+                      width = 2,
+                      class = "switch_exp",
+                      tags$label(
+                        class = "switch",
+                        tags$input(id = "check_exp", type = "checkbox"),
+                        tags$span(class = "slider")
+                      )
+                    ),
+                    column(
+                      width = 4,
+                      id = "gene_link_exp",
+                      class = "gene_link_exp",
+                      tags$div(
+                        id = "gene_link_ui_exp",
+                        class = "gene_link_ui_exp",
+                        tags$a(
+                          id = "plasmo_link_exp", href = "#",
+                          target = "_blank", "🔬 PlasmoDB"
+                        ),
+                        span("|"),
+                        tags$a(
+                          id = "ncbi_link_exp", href = "#",
+                          target = "_blank", "🧬 NCBI"
+                        )
+                      )
                     )
                   ),
                   column(
-                    width = 4,
-                    id = "gene_link_exp",
-                    tags$div(
-                      id = "gene_link_ui_exp",
-                      tags$a(
-                        id = "plasmo_link_exp", href = "#",
-                        target = "_blank", "🔬 PlasmoDB"
-                      ),
-                      span("|"),
-                      tags$a(
-                        id = "ncbi_link_exp", href = "#",
-                        target = "_blank", "🧬 NCBI"
-                      )
+                    width = 6,
+                    selectInput("group_exp", "Group by",
+                      choices = c("Stage", "Species"),
+                      selected = "Stage"
                     )
                   )
-                )
-              ),
-              column(
-                width = 4,
-                selectInput("criteria", "Criteria",
-                  choices = c("Stage", "Species"),
-                  selected = "Stage"
+                ),
+                fluidRow(
+                  width = 12,
+                  plotlyOutput("gene_exp_plotly"),
+                  actionButton("add_btn", "Add", class = "btn btn-success"),
+                  actionButton("remove_btn", "Remove", class = "btn btn-danger")
                 )
               )
             ),
-            fluidRow(
-              column(
-                width = 12,
-                plotlyOutput("gene_exp_plotly")
-              )
-            )
+            div(id = "gene_exp_container")
           ),
           tabPanel(
             "PCA",
@@ -474,30 +473,18 @@ ui <- fluidPage(
             withSpinner(
               type = 6,
               size = 0.5,
-              color = "#3498db",
-              plotlyOutput("umap_plotly"),
+              plotlyOutput("umap_plotly")
             )
           ),
           tabPanel(
             "tSNE",
-            # column(
-            #   id = "tab_switch",
-            #   width = 6,
-            #   tags$span(class = "left-label", "Integrated"),
-            #   tags$label(
-            #     class = "switch",
-            #     tags$input(id = "check_tsne", type = "checkbox"),
-            #     tags$span(class = "slider")
-            #   ),
-            #   tags$span(class = "right-label", "Unintegrated")
-            # ),
             br(),
             br(),
             withSpinner(
               type = 6,
               color = "#3498db",
               size = 0.5,
-              plotlyOutput("tsne_plotly"),
+              plotlyOutput("tsne_plotly")
             )
           )
         )
