@@ -389,7 +389,7 @@ server <- function(input, output, session) {
     }
   })
 
-  # First, ensure that the loop is inside a proper reactive context
+  # get gene id or name for dynamic ui
   observe({
     for (i in 1:counter()) {
       observeEvent(input[[paste0("genes_exp_", i)]], {
