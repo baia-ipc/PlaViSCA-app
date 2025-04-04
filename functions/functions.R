@@ -1,4 +1,3 @@
-# function to create a dynamic Gene Exp block.
 dynamicBlock <- function(i, choices) {
   tagList(
     fluidRow(
@@ -20,18 +19,18 @@ dynamicBlock <- function(i, choices) {
         ),
         column(
           width = 4,
-          id = "gene_link_exp",
+          id = paste0("gene_link_exp_", i),
           class = "gene_link_exp",
           tags$div(
-            id = "gene_link_ui_exp",
+            id = paste0("gene_link_ui_exp_", i),
             class = "gene_link_ui_exp",
             tags$a(
-              id = "plasmo_link_exp", href = "#",
+              id = paste0("plasmo_link_exp_", i), href = "#",
               target = "_blank", "🔬 PlasmoDB"
             ),
             span("|"),
             tags$a(
-              id = "ncbi_link_exp", href = "#",
+              id = paste0("ncbi_link_exp_", i), href = "#",
               target = "_blank", "🧬 NCBI"
             )
           )
@@ -49,10 +48,16 @@ dynamicBlock <- function(i, choices) {
     ),
     fluidRow(
       width = 12,
-      plotlyOutput(paste0("gene_exp_plotly_", i))
+      fluidRow(plotlyOutput(paste0("gene_exp_plotly_", i))),
+      fluidRow(
+        class = "btn-add-rm-container",
+        actionButton(paste0("add_btn_", i), "Add", class = "btn btn-success"),
+        actionButton(paste0("remove_btn_", i), "Remove", class = "btn btn-danger")
+      )
     )
   )
 }
+
 
 
 # function to get gene name

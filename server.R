@@ -299,71 +299,145 @@ server <- function(input, output, session) {
   })
 
 
-  # Reactive counter for dynamic blocks
+
+
+
+
+
   counter <- reactiveVal(0)
-  observeEvent(input$add_btn, {
-    new_count <- counter() + 1
+
+  # Function to handle adding new dynamic blocks
+  addNewBlock <- function(new_count) {
     counter(new_count)
 
-    if (new_count == 1) {
+    insertUI(
+      selector = "#gene_exp_container",
+      where = "beforeEnd",
+      ui = column(
+        width = 6,
+        id = paste0("dynamic_col_", new_count),
+        dynamicBlock(new_count, choices = choice_exp())
+      )
+    )
+
+    # Dynamically observe the Remove button inside the new block
+    observeEvent(input[[paste0("remove_btn_", new_count)]],
+      {
+        removeBlock(new_count)
+      },
+      ignoreNULL = TRUE,
+      once = TRUE
+    )
+
+    # Render Plotly for the new block
+    observe({
+      req(
+        input[[paste0("genes_exp_", new_count)]],
+        input[[paste0("group_exp_", new_count)]]
+      )
+      data_for_block <- isolate(df_exp())
+
+      output[[paste0("gene_exp_plotly_", new_count)]] <- renderPlotly({
+        plot_gene_expression(data_for_block, tolower(input[[paste0("group_exp_", new_count)]]))
+      })
+    })
+
+    # Observe the change in the selectizeInput (genes_exp_) and update the plot
+    observeEvent(input[[paste0("genes_exp_", new_count)]], {
+      req(input[[paste0("genes_exp_", new_count)]], df_exp())
+      output[[paste0("gene_exp_plotly_", new_count)]] <- renderPlotly({
+        plot_gene_expression(df_exp(), tolower(input[[paste0("group_exp_", new_count)]]))
+      })
+    })
+  }
+
+  # Function to handle removing dynamic blocks
+  removeBlock <- function(remove_count) {
+    removeUI(selector = paste0("#dynamic_col_", remove_count))
+    current_count <- counter()
+
+    if (current_count > 0) {
+      counter(current_count - 1)
+    }
+
+    # If no blocks are left, show the Add button again
+    if (counter() == 0) {
+      shinyjs::show("add_btn")
+    }
+  }
+
+  # Observe the initial "Add" button
+  observeEvent(input$add_btn,
+    {
+      new_count <- counter() + 1
+      counter(new_count)
+
+      shinyjs::hide("add_btn")
+
+      # Insert the first dynamic block
       insertUI(
         selector = "#gene_exp_tar",
         where = "afterEnd",
         ui = column(
           width = 6,
-          id = "dynamic_col_1",
+          id = paste0("dynamic_col_", new_count),
           dynamicBlock(new_count, choices = choice_exp())
         )
       )
-    } else {
-      m <- new_count - 1
-      row_num <- ceiling(m / 2)
-      if (m %% 2 == 1) {
-        insertUI(
-          selector = "#gene_exp_container",
-          where = "beforeEnd",
-          ui = div(
-            id = paste0("dynamic_row_", row_num),
-            fluidRow(
-              column(
-                width = 6,
-                dynamicBlock(new_count, choices = choice_exp())
-              ),
-              column(
-                width = 6,
-                div(id = paste0("row_", row_num, "_col2"))
-              )
-            )
-          )
-        )
-      } else {
-        insertUI(
-          selector = paste0("#row_", row_num, "_col2"),
-          where = "beforeEnd",
-          ui = dynamicBlock(new_count, choices = choice_exp())
-        )
-      }
+
+      # Dynamically observe the Add button for the new block
+      observeEvent(input[[paste0("add_btn_", new_count)]],
+        {
+          addNewBlock(counter() + 1)
+        },
+        ignoreNULL = TRUE,
+        once = TRUE
+      )
+
+      # Dynamically observe the Remove button inside the first block
+      observeEvent(input[[paste0("remove_btn_", new_count)]],
+        {
+          removeBlock(new_count)
+        },
+        ignoreNULL = TRUE,
+        once = TRUE
+      )
+
+      # Render Plotly for the first block
+      observe({
+        req(input[[paste0("genes_exp_", new_count)]], input[[paste0("group_exp_", new_count)]], df_exp())
+
+        # Isolate df_exp() to prevent unintended changes in all blocks
+        data_for_block <- isolate(df_exp())
+
+        output[[paste0("gene_exp_plotly_", new_count)]] <- renderPlotly({
+          plot_gene_expression(data_for_block, tolower(input[[paste0("group_exp_", new_count)]]))
+        })
+      })
+
+      # Observe the change in the selectizeInput (genes_exp_) and update the plot
+      observeEvent(input[[paste0("genes_exp_", new_count)]], {
+        req(input[[paste0("genes_exp_", new_count)]], df_exp())
+        output[[paste0("gene_exp_plotly_", new_count)]] <- renderPlotly({
+          plot_gene_expression(df_exp(), tolower(input[[paste0("group_exp_", new_count)]]))
+        })
+      })
+    },
+    ignoreNULL = TRUE
+  )
+
+  # Show the main Add button if there are no blocks present
+  observe({
+    if (counter() == 0) {
+      shinyjs::show("add_btn")
     }
   })
 
-  # Remove Button Observer for dynamic blocks
-  observeEvent(input$remove_btn, {
-    if (counter() > 0) {
-      last <- counter()
-      if (last == 1) {
-        removeUI(selector = "#dynamic_col_1")
-      } else {
-        m <- last - 1
-        row_num <- ceiling(m / 2)
-        if (m %% 2 == 1) {
-          removeUI(selector = paste0("#dynamic_row_", row_num))
-        } else {
-          removeUI(selector = paste0("#row_", row_num, "_col2 > *:last-child"))
-        }
-      }
-      counter(last - 1)
-    }
-  })
+
+
+
+
+
 
 
 
@@ -401,10 +475,6 @@ server <- function(input, output, session) {
       })
     }
   })
-
-
-
-
 
 
   # Switch gene id or name for pca, umap and tsne plot

@@ -426,8 +426,7 @@ ui <- fluidPage(
                 fluidRow(
                   width = 12,
                   plotlyOutput("gene_exp_plotly"),
-                  actionButton("add_btn", "Add", class = "btn btn-success"),
-                  actionButton("remove_btn", "Remove", class = "btn btn-danger")
+                  actionButton("add_btn", "Add", class = "btn btn-success")
                 )
               )
             ),
