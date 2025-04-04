@@ -59,10 +59,13 @@ $(document).ready(function() {
     updateTooltips();
   });
   
-  
-  
-  
 });
+
+$(document).on('click', '.btn_add', function(){
+      var btn_id = this.id; 
+      Shiny.setInputValue('click_add_btn', btn_id, {priority: 'event'});
+    });
+    
 
 $(document).on('click', '.btn_remove', function(){
       var btn_id = this.id; 

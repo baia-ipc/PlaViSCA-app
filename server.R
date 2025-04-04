@@ -348,64 +348,42 @@ server <- function(input, output, session) {
   }
 
 
+  observeEvent(input$click_add_btn, {
+    btn_id <- input$click_add_btn
+    id <- as.numeric(gsub("add_btn_?", "", btn_id))
 
-  # Observe the initial "Add" button
-  observeEvent(input$add_btn,
-    {
-      new_count <- counter() + 1
-      counter(new_count)
-      shinyjs::hide("add_btn")
+    if (id == 0) {
+      shinyjs::hide(paste0("add_btn_", id))
+      id <- id + 1
+
       insertUI(
         selector = "#gene_exp_tar",
         where = "afterEnd",
         ui = column(
           width = 6,
-          id = paste0("dynamic_col_", new_count),
-          dynamicBlock(new_count, choices = choice_exp())
+          id = paste0("dynamic_col_", id),
+          dynamicBlock(id, choices = choice_exp())
         )
       )
-      df_exp_i <- generate_df_exp(new_count)
-
-      observe({
-        req(df_exp_i())
-
-        output[[paste0("gene_exp_plotly_", new_count)]] <- renderPlotly({
-          plot_gene_expression(
-            df_exp_i(),
-            tolower(input[[paste0("group_exp_", new_count)]])
-          )
-        })
+      df_exp_i <- generate_df_exp(id)
+      output[[paste0("gene_exp_plotly_", id)]] <- renderPlotly({
+        plot_gene_expression(
+          df_exp_i(),
+          tolower(input[[paste0("group_exp_", id)]])
+        )
       })
-    },
-    ignoreNULL = TRUE,
-    once = TRUE
-  )
-
-
-  # Dynamically observe the Add button for the new block
-  observeEvent(input[[paste0("add_btn_", counter())]],
-    {
-      print(counter())
-      new_count <- counter() + 1
-      counter(new_count)
-      shinyjs::hide(paste0("add_btn_", new_count - 1))
-      addNewBlock(new_count)
-
-      df_exp_i <- generate_df_exp(new_count)
-
-      observe({
-        req(df_exp_i())
-
-        output[[paste0("gene_exp_plotly_", new_count)]] <- renderPlotly({
-          plot_gene_expression(
-            df_exp_i(),
-            tolower(input[[paste0("group_exp_", new_count)]])
-          )
-        })
+    } else {
+      id <- id + 1
+      addNewBlock(id)
+      df_exp_i <- generate_df_exp(id)
+      output[[paste0("gene_exp_plotly_", id)]] <- renderPlotly({
+        plot_gene_expression(
+          df_exp_i(),
+          tolower(input[[paste0("group_exp_", id)]])
+        )
       })
-    },
-    ignoreNULL = TRUE
-  )
+    }
+  })
 
 
   observeEvent(input$click_remove_btn,
@@ -413,8 +391,8 @@ server <- function(input, output, session) {
       btn_id <- input$click_remove_btn
       block_id <- as.numeric(gsub("remove_btn_", "", btn_id))
       removeUI(selector = paste0("#dynamic_col_", block_id))
-      if (block_id == 0) {
-        shinyjs::show("add_btn")
+      if (block_id == 1) {
+        shinyjs::show("add_btn_0")
       }
     },
     ignoreNULL = TRUE
@@ -429,7 +407,7 @@ server <- function(input, output, session) {
   # Show the main Add button if there are no blocks present
   observe({
     if (counter() == 1) {
-      shinyjs::show("add_btn")
+      shinyjs::show("add_btn_0")
     }
   })
 
