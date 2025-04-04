@@ -58,4 +58,13 @@ $(document).ready(function() {
     updateLabelStyles($input);
     updateTooltips();
   });
+  
+  
+  
+  
 });
+
+$(document).on('click', '.btn_remove', function(){
+      var btn_id = this.id; 
+      Shiny.setInputValue('click_remove_btn', btn_id, {priority: 'event'});
+    });

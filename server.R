@@ -315,31 +315,6 @@ server <- function(input, output, session) {
         dynamicBlock(new_count, choices = choice_exp())
       )
     )
-
-    # Dynamically observe the Remove button inside the new block
-    observeEvent(input[[paste0("remove_btn_", new_count)]],
-      {
-        removeBlock(new_count)
-      },
-      ignoreNULL = TRUE,
-      once = TRUE
-    )
-  }
-
-
-  # Function to handle removing dynamic blocks
-  removeBlock <- function(remove_count) {
-    removeUI(selector = paste0("#dynamic_col_", remove_count))
-    current_count <- counter()
-
-    if (current_count > 0) {
-      counter(current_count - 1)
-    }
-
-    # If no blocks are left, show the Add button again
-    if (counter() == 0) {
-      shinyjs::show("add_btn")
-    }
   }
 
   # function to generate the data
@@ -432,16 +407,18 @@ server <- function(input, output, session) {
     ignoreNULL = TRUE
   )
 
-  # Dynamically observe the Remove button inside the first block
-  # observeEvent(input[[paste0("remove_btn_", new_count)]],
-  #   {
-  #     removeBlock(new_count)
-  #   },
-  #   ignoreNULL = TRUE,
-  #   once = TRUE
-  # )
 
-
+  observeEvent(input$click_remove_btn,
+    {
+      btn_id <- input$click_remove_btn
+      block_id <- as.numeric(gsub("remove_btn_", "", btn_id))
+      removeUI(selector = paste0("#dynamic_col_", block_id))
+      if (block_id == 0) {
+        shinyjs::show("add_btn")
+      }
+    },
+    ignoreNULL = TRUE
+  )
 
 
 

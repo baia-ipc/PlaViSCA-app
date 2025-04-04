@@ -52,7 +52,9 @@ dynamicBlock <- function(i, choices) {
       fluidRow(
         class = "btn-add-rm-container",
         actionButton(paste0("add_btn_", i), "Add", class = "btn btn-success"),
-        actionButton(paste0("remove_btn_", i), "Remove", class = "btn btn-danger")
+        actionButton(paste0("remove_btn_", i), "Remove",
+          class = "btn btn-danger btn_remove"
+        )
       )
     )
   )
