@@ -34,7 +34,7 @@ server <- function(input, output, session) {
     shinyjs::show("home_section")
   })
 
-  # data and Gene Exp tabset
+  # adjust ui for data and Gene Exp tabset
   observe({
     if (input$tabset == "Data" || input$tabset == "Gene Exp") {
       shinyjs::removeClass("sidebar", "visible")
@@ -46,7 +46,7 @@ server <- function(input, output, session) {
   })
 
 
-  # choose raw, normalized and scaled data and filter by stagei
+  # select raw, normalized and scaled data and filter by stagei
   gene_data <- eventReactive(list(
     input$stagei, input$data_type,
     input$data_type_exp
@@ -246,7 +246,7 @@ server <- function(input, output, session) {
   observeEvent(list(input$check_exp, input$data_type_exp), {
     req(gene_data())
 
-    updateSelectizeInput(session, "genes_exp",
+    updateSelectizeInput(session, "genes_exp_0",
       label = if (input$check_exp) "Gene ID" else "Gene name",
       choices = choice_exp(),
       server = TRUE
@@ -254,13 +254,13 @@ server <- function(input, output, session) {
   })
 
   df_exp <- reactive({
-    req(autoUpdateExp(), gene_data(), input$genes_exp, input$group_exp)
+    req(autoUpdateExp(), gene_data(), input$genes_exp_0, input$group_exp)
 
     data <- gene_data()$data
     gene_exp <- if (!input$check_exp) {
-      get_gene_id(input$genes_exp, gene_data()$genes)
+      get_gene_id(input$genes_exp_0, gene_data()$genes)
     } else {
-      input$genes_exp
+      input$genes_exp_0
     }
 
     if (!(gene_exp %in% colnames(data))) {
@@ -282,10 +282,10 @@ server <- function(input, output, session) {
   })
 
   # gene expression link
-  observeEvent(input$genes_exp, {
-    req(input$genes_exp)
+  observeEvent(input$genes_exp_0, {
+    req(input$genes_exp_0)
 
-    gene_id <- get_gene_id(input$genes_exp, gene_data()$genes)
+    gene_id <- get_gene_id(input$genes_exp_0, gene_data()$genes)
     update_gene_links(gene_id)
   })
 
@@ -300,12 +300,12 @@ server <- function(input, output, session) {
 
 
 
-  counter <- reactiveVal(0)
 
+
+  counter <- reactiveVal(0)
   # Function to handle adding new dynamic blocks
   addNewBlock <- function(new_count) {
     counter(new_count)
-
     insertUI(
       selector = "#gene_exp_container",
       where = "beforeEnd",
@@ -324,15 +324,32 @@ server <- function(input, output, session) {
       ignoreNULL = TRUE,
       once = TRUE
     )
+  }
 
-    # Define the df_exp_i reactive expression within the dynamic block
-    df_exp_i <- reactive({
+
+  # Function to handle removing dynamic blocks
+  removeBlock <- function(remove_count) {
+    removeUI(selector = paste0("#dynamic_col_", remove_count))
+    current_count <- counter()
+
+    if (current_count > 0) {
+      counter(current_count - 1)
+    }
+
+    # If no blocks are left, show the Add button again
+    if (counter() == 0) {
+      shinyjs::show("add_btn")
+    }
+  }
+
+  # function to generate the data
+  generate_df_exp <- function(new_count) {
+    reactive({
       req(
         input[[paste0("genes_exp_", new_count)]],
         input[[paste0("group_exp_", new_count)]]
       )
 
-      # to debugs
       data <- gene_data()$data
       gene_exp <- if (!input[[paste0("check_exp_", new_count)]]) {
         get_gene_id(input[[paste0("genes_exp_", new_count)]], gene_data()$genes)
@@ -353,37 +370,15 @@ server <- function(input, output, session) {
 
       return(data)
     })
-
-    # Render Plotly for the new block, ensure it's inside the reactive context
-    observe({
-      req(df_exp_i())
-      output[[paste0("gene_exp_plotly_", new_count)]] <- renderPlotly({
-        plot_gene_expression(df_exp_i(), tolower(input[[paste0("group_exp_", new_count)]]))
-      })
-    })
   }
 
-  # Function to handle removing dynamic blocks
-  removeBlock <- function(remove_count) {
-    removeUI(selector = paste0("#dynamic_col_", remove_count))
-    current_count <- counter()
 
-    if (current_count > 0) {
-      counter(current_count - 1)
-    }
-
-    # If no blocks are left, show the Add button again
-    if (counter() == 0) {
-      shinyjs::show("add_btn")
-    }
-  }
 
   # Observe the initial "Add" button
   observeEvent(input$add_btn,
     {
       new_count <- counter() + 1
       counter(new_count)
-
       shinyjs::hide("add_btn")
       insertUI(
         selector = "#gene_exp_tar",
@@ -394,106 +389,98 @@ server <- function(input, output, session) {
           dynamicBlock(new_count, choices = choice_exp())
         )
       )
+      df_exp_i <- generate_df_exp(new_count)
 
-      # Dynamically observe the Add button for the new block
-      observeEvent(input[[paste0("add_btn_", new_count)]],
-        {
-          addNewBlock(counter() + 1)
-        },
-        ignoreNULL = TRUE,
-        once = TRUE
-      )
-
-      # Dynamically observe the Remove button inside the first block
-      observeEvent(input[[paste0("remove_btn_", new_count)]],
-        {
-          removeBlock(new_count)
-        },
-        ignoreNULL = TRUE,
-        once = TRUE
-      )
-
-      # Reactive expression for df_exp_i inside the first block
-      df_exp_i <- reactive({
-        req(
-          input[[paste0("genes_exp_", new_count)]],
-          input[[paste0("group_exp_", new_count)]]
-        )
-
-        data <- gene_data()$data
-        gene_exp <- if (!input[[paste0("check_exp_", new_count)]]) {
-          get_gene_id(input[[paste0("genes_exp_", new_count)]], gene_data()$genes)
-        } else {
-          input[[paste0("genes_exp_", new_count)]]
-        }
-
-        if (!(gene_exp %in% colnames(data))) {
-          data$gene_expr <- NA
-        } else {
-          data <- data %>% mutate(gene_expr = .data[[gene_exp]])
-        }
-
-        group_col <- input[[paste0("group_exp_", new_count)]]
-        if (!(tolower(group_col) %in% colnames(data))) {
-          data[[group_col]] <- NA
-        }
-
-        return(data)
-      })
-
-      # Render Plotly for the first block
       observe({
-        req(df_exp_i()) # Ensure df_exp_i is reactive and properly evaluated
+        req(df_exp_i())
 
         output[[paste0("gene_exp_plotly_", new_count)]] <- renderPlotly({
-          plot_gene_expression(df_exp_i(), tolower(input[[paste0("group_exp_", new_count)]]))
+          plot_gene_expression(
+            df_exp_i(),
+            tolower(input[[paste0("group_exp_", new_count)]])
+          )
+        })
+      })
+    },
+    ignoreNULL = TRUE,
+    once = TRUE
+  )
+
+
+  # Dynamically observe the Add button for the new block
+  observeEvent(input[[paste0("add_btn_", counter())]],
+    {
+      print(counter())
+      new_count <- counter() + 1
+      counter(new_count)
+      shinyjs::hide(paste0("add_btn_", new_count - 1))
+      addNewBlock(new_count)
+
+      df_exp_i <- generate_df_exp(new_count)
+
+      observe({
+        req(df_exp_i())
+
+        output[[paste0("gene_exp_plotly_", new_count)]] <- renderPlotly({
+          plot_gene_expression(
+            df_exp_i(),
+            tolower(input[[paste0("group_exp_", new_count)]])
+          )
         })
       })
     },
     ignoreNULL = TRUE
   )
 
+  # Dynamically observe the Remove button inside the first block
+  # observeEvent(input[[paste0("remove_btn_", new_count)]],
+  #   {
+  #     removeBlock(new_count)
+  #   },
+  #   ignoreNULL = TRUE,
+  #   once = TRUE
+  # )
+
+
+
+
+
+
+
+
+
   # Show the main Add button if there are no blocks present
   observe({
-    if (counter() == 0) {
+    if (counter() == 1) {
       shinyjs::show("add_btn")
     }
   })
 
-
-
-
-
-
-
-
-
-
-
-
-
-
   observe({
     for (i in 1:counter()) {
-      observeEvent(input[[paste0("check_exp_", i)]], {
-        is_checked <- input[[paste0("check_exp_", i)]]
+      observeEvent(
+        list(input[[paste0("check_exp_", i)]], input$data_type_exp),
+        {
+          is_checked <- input[[paste0("check_exp_", i)]]
 
-        if (is_checked) {
-          updateSelectInput(session, paste0("genes_exp_", i),
-            label = "Gene ID",
-            choices = gene_data()$genes$gene
-          )
-        } else {
-          updateSelectInput(session, paste0("genes_exp_", i),
-            label = "Gene Name",
-            choices = gene_data()$genes %>%
-              filter(!str_detect(name, "^PVP01")) %>%
-              pull(name)
-          )
+          if (!is.null(is_checked) && is_checked) {
+            updateSelectInput(session, paste0("genes_exp_", i),
+              label = "Gene ID",
+              choices = gene_data()$genes$gene
+            )
+          } else {
+            updateSelectInput(session, paste0("genes_exp_", i),
+              label = "Gene Name",
+              choices = gene_data()$genes %>%
+                filter(!str_detect(name, "^PVP01")) %>%
+                pull(name)
+            )
+          }
         }
-      })
+      )
     }
   })
+
 
   # get gene id or name for dynamic ui
   observe({
