@@ -300,10 +300,6 @@ server <- function(input, output, session) {
 
 
 
-
-
-
-
   counter <- reactiveVal(0)
 
   # Function to handle adding new dynamic blocks
@@ -329,24 +325,40 @@ server <- function(input, output, session) {
       once = TRUE
     )
 
-    # Render Plotly for the new block
-    observe({
+    # Define the df_exp_i reactive expression within the dynamic block
+    df_exp_i <- reactive({
       req(
         input[[paste0("genes_exp_", new_count)]],
         input[[paste0("group_exp_", new_count)]]
       )
-      data_for_block <- isolate(df_exp())
 
-      output[[paste0("gene_exp_plotly_", new_count)]] <- renderPlotly({
-        plot_gene_expression(data_for_block, tolower(input[[paste0("group_exp_", new_count)]]))
-      })
+      # to debugs
+      data <- gene_data()$data
+      gene_exp <- if (!input[[paste0("check_exp_", new_count)]]) {
+        get_gene_id(input[[paste0("genes_exp_", new_count)]], gene_data()$genes)
+      } else {
+        input[[paste0("genes_exp_", new_count)]]
+      }
+
+      if (!(gene_exp %in% colnames(data))) {
+        data$gene_expr <- NA
+      } else {
+        data <- data %>% mutate(gene_expr = .data[[gene_exp]])
+      }
+
+      group_col <- input[[paste0("group_exp_", new_count)]]
+      if (!(tolower(group_col) %in% colnames(data))) {
+        data[[group_col]] <- NA
+      }
+
+      return(data)
     })
 
-    # Observe the change in the selectizeInput (genes_exp_) and update the plot
-    observeEvent(input[[paste0("genes_exp_", new_count)]], {
-      req(input[[paste0("genes_exp_", new_count)]], df_exp())
+    # Render Plotly for the new block, ensure it's inside the reactive context
+    observe({
+      req(df_exp_i())
       output[[paste0("gene_exp_plotly_", new_count)]] <- renderPlotly({
-        plot_gene_expression(df_exp(), tolower(input[[paste0("group_exp_", new_count)]]))
+        plot_gene_expression(df_exp_i(), tolower(input[[paste0("group_exp_", new_count)]]))
       })
     })
   }
@@ -373,8 +385,6 @@ server <- function(input, output, session) {
       counter(new_count)
 
       shinyjs::hide("add_btn")
-
-      # Insert the first dynamic block
       insertUI(
         selector = "#gene_exp_tar",
         where = "afterEnd",
@@ -403,23 +413,40 @@ server <- function(input, output, session) {
         once = TRUE
       )
 
-      # Render Plotly for the first block
-      observe({
-        req(input[[paste0("genes_exp_", new_count)]], input[[paste0("group_exp_", new_count)]], df_exp())
+      # Reactive expression for df_exp_i inside the first block
+      df_exp_i <- reactive({
+        req(
+          input[[paste0("genes_exp_", new_count)]],
+          input[[paste0("group_exp_", new_count)]]
+        )
 
-        # Isolate df_exp() to prevent unintended changes in all blocks
-        data_for_block <- isolate(df_exp())
+        data <- gene_data()$data
+        gene_exp <- if (!input[[paste0("check_exp_", new_count)]]) {
+          get_gene_id(input[[paste0("genes_exp_", new_count)]], gene_data()$genes)
+        } else {
+          input[[paste0("genes_exp_", new_count)]]
+        }
 
-        output[[paste0("gene_exp_plotly_", new_count)]] <- renderPlotly({
-          plot_gene_expression(data_for_block, tolower(input[[paste0("group_exp_", new_count)]]))
-        })
+        if (!(gene_exp %in% colnames(data))) {
+          data$gene_expr <- NA
+        } else {
+          data <- data %>% mutate(gene_expr = .data[[gene_exp]])
+        }
+
+        group_col <- input[[paste0("group_exp_", new_count)]]
+        if (!(tolower(group_col) %in% colnames(data))) {
+          data[[group_col]] <- NA
+        }
+
+        return(data)
       })
 
-      # Observe the change in the selectizeInput (genes_exp_) and update the plot
-      observeEvent(input[[paste0("genes_exp_", new_count)]], {
-        req(input[[paste0("genes_exp_", new_count)]], df_exp())
+      # Render Plotly for the first block
+      observe({
+        req(df_exp_i()) # Ensure df_exp_i is reactive and properly evaluated
+
         output[[paste0("gene_exp_plotly_", new_count)]] <- renderPlotly({
-          plot_gene_expression(df_exp(), tolower(input[[paste0("group_exp_", new_count)]]))
+          plot_gene_expression(df_exp_i(), tolower(input[[paste0("group_exp_", new_count)]]))
         })
       })
     },
@@ -432,6 +459,11 @@ server <- function(input, output, session) {
       shinyjs::show("add_btn")
     }
   })
+
+
+
+
+
 
 
 
