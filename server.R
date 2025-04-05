@@ -226,15 +226,15 @@ server <- function(input, output, session) {
   # Gene Exp tabset
   autoUpdateExp <- reactiveVal(TRUE)
   observe({
-    list(input$check_exp, input$data_type_exp)
+    list(input$check_exp_0, input$data_type_exp)
     autoUpdateExp(FALSE)
     later(function() {
       autoUpdateExp(TRUE)
     }, 1)
   })
 
-  choice_exp <- eventReactive(input$check_exp, {
-    if (input$check_exp) {
+  choice_exp <- eventReactive(input$check_exp_0, {
+    if (input$check_exp_0) {
       gene_data()$genes$gene
     } else {
       gene_data()$genes %>%
@@ -243,11 +243,11 @@ server <- function(input, output, session) {
     }
   })
 
-  observeEvent(list(input$check_exp, input$data_type_exp), {
+  observeEvent(list(input$check_exp_0, input$data_type_exp), {
     req(gene_data())
 
     updateSelectizeInput(session, "genes_exp_0",
-      label = if (input$check_exp) "Gene ID" else "Gene name",
+      label = if (input$check_exp_0) "Gene ID" else "Gene name",
       choices = choice_exp(),
       server = TRUE
     )
@@ -257,7 +257,7 @@ server <- function(input, output, session) {
     req(autoUpdateExp(), gene_data(), input$genes_exp_0, input$group_exp)
 
     data <- gene_data()$data
-    gene_exp <- if (!input$check_exp) {
+    gene_exp <- if (!input$check_exp_0) {
       get_gene_id(input$genes_exp_0, gene_data()$genes)
     } else {
       input$genes_exp_0
@@ -351,11 +351,10 @@ server <- function(input, output, session) {
   observeEvent(input$click_add_btn, {
     btn_id <- input$click_add_btn
     id <- as.numeric(gsub("add_btn_?", "", btn_id))
+    shinyjs::hide(paste0("add_btn_", id))
 
     if (id == 0) {
-      shinyjs::hide(paste0("add_btn_", id))
       id <- id + 1
-
       insertUI(
         selector = "#gene_exp_tar",
         where = "afterEnd",
@@ -402,53 +401,124 @@ server <- function(input, output, session) {
 
 
 
+  choice_exp1 <- eventReactive(input$click_toggle_exp, {
+    is_checked <- input[[input$click_toggle_exp]]
 
-
-  # Show the main Add button if there are no blocks present
-  observe({
-    if (counter() == 1) {
-      shinyjs::show("add_btn_0")
+    if (!is_checked) {
+      gene_data()$genes$gene
+    } else {
+      gene_data()$genes %>%
+        filter(!str_detect(name, "^PVP01")) %>%
+        pull(name)
     }
   })
 
-  observe({
-    for (i in 1:counter()) {
-      observeEvent(
-        list(input[[paste0("check_exp_", i)]], input$data_type_exp),
-        {
-          is_checked <- input[[paste0("check_exp_", i)]]
 
-          if (!is.null(is_checked) && is_checked) {
-            updateSelectInput(session, paste0("genes_exp_", i),
-              label = "Gene ID",
-              choices = gene_data()$genes$gene
-            )
-          } else {
-            updateSelectInput(session, paste0("genes_exp_", i),
-              label = "Gene Name",
-              choices = gene_data()$genes %>%
-                filter(!str_detect(name, "^PVP01")) %>%
-                pull(name)
-            )
-          }
-        }
+
+
+  observeEvent(list(input$click_toggle_exp, input$data_type_exp), {
+    req(gene_data())
+    req(input$click_toggle_exp)
+
+    btn_id <- input$click_toggle_exp
+    id <- as.numeric(gsub("check_exp_", "", btn_id))
+
+    if (is.character(input$click_toggle_exp)) {
+      is_checked <- input[[input$click_toggle_exp]]
+
+      updateSelectizeInput(
+        session,
+        paste0("genes_exp_", id),
+        label = if (isTRUE(is_checked)) "Gene ID" else "Gene name",
+        choices = choice_exp1(),
+        server = TRUE
       )
     }
   })
 
 
-  # get gene id or name for dynamic ui
-  observe({
-    for (i in 1:counter()) {
-      observeEvent(input[[paste0("genes_exp_", i)]], {
-        req(input[[paste0("genes_exp_", i)]])
 
-        gene_id <- get_gene_id(input[[paste0("genes_exp_", i)]], gene_data()$genes)
 
-        update_gene_links(gene_id)
-      })
-    }
+
+
+
+  # observeEvent(input$click_toggle_exp,
+  #   {
+  #     btn_id <- input$click_toggle_exp
+  #     id <- as.numeric(gsub("check_exp_", "", btn_id))
+  #
+  #     is_checked <- input[[paste0("check_exp_", id)]]
+  #
+  #     if (is.null(is_checked)) {
+  #       is_checked <- TRUE
+  #     }
+  #
+  #     if (!is_checked) {
+  #       updateSelectInput(session, paste0("genes_exp_", id),
+  #         label = "Gene ID",
+  #         choices = gene_data()$genes$gene
+  #       )
+  #     } else {
+  #       updateSelectInput(session, paste0("genes_exp_", id),
+  #         label = "Gene Name",
+  #         choices = gene_data()$genes %>%
+  #           filter(!str_detect(name, "^PVP01")) %>%
+  #           pull(name)
+  #       )
+  #     }
+  #   },
+  #   ignoreNULL = TRUE
+  # )
+
+
+
+  observeEvent(input$change_gene_exp, {
+    id <- input$change_gene_exp
+    id <- as.numeric(gsub("genes_exp_", "", id))
+    gene_id <- get_gene_id(input[[paste0("genes_exp_", id)]], gene_data()$genes)
+    update_gene_links(gene_id)
   })
+
+
+
+  # observe({
+  #   for (i in 1:counter()) {
+  #     observeEvent(
+  #       list(input[[paste0("check_exp_", i)]], input$data_type_exp),
+  #       {
+  #         is_checked <- input[[paste0("check_exp_", i)]]
+  #
+  #         if (!is.null(is_checked) && is_checked) {
+  #           updateSelectInput(session, paste0("genes_exp_", i),
+  #             label = "Gene ID",
+  #             choices = gene_data()$genes$gene
+  #           )
+  #         } else {
+  #           updateSelectInput(session, paste0("genes_exp_", i),
+  #             label = "Gene Name",
+  #             choices = gene_data()$genes %>%
+  #               filter(!str_detect(name, "^PVP01")) %>%
+  #               pull(name)
+  #           )
+  #         }
+  #       }
+  #     )
+  #   }
+  # })
+  #
+  #
+  # # get gene id or name for dynamic ui
+  # observe({
+  #   for (i in 1:counter()) {
+  #     observeEvent(input[[paste0("genes_exp_", i)]], {
+  #       req(input[[paste0("genes_exp_", i)]])
+  #
+  #       gene_id <- get_gene_id(input[[paste0("genes_exp_", i)]], gene_data()$genes)
+  #
+  #       update_gene_links(gene_id)
+  #     })
+  #   }
+  # })
 
 
   # Switch gene id or name for pca, umap and tsne plot

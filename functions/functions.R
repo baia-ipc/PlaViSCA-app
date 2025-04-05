@@ -5,7 +5,7 @@ dynamicBlock <- function(i, choices) {
         width = 6,
         selectizeInput(
           paste0("genes_exp_", i),
-          label = "Gene",
+          label = "Gene Name",
           choices = choices
         ),
         column(
@@ -13,7 +13,10 @@ dynamicBlock <- function(i, choices) {
           class = "switch_exp",
           tags$label(
             class = "switch",
-            tags$input(id = paste0("check_exp_", i), type = "checkbox"),
+            tags$input(
+              id = paste0("check_exp_", i), type = "checkbox",
+              class = "toggle_exp"
+            ),
             tags$span(class = "slider")
           )
         ),

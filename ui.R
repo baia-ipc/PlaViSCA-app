@@ -392,7 +392,10 @@ ui <- fluidPage(
                       class = "switch_exp",
                       tags$label(
                         class = "switch",
-                        tags$input(id = "check_exp", type = "checkbox"),
+                        tags$input(
+                          id = "check_exp_0", type = "checkbox",
+                          class = "toggle_exp"
+                        ),
                         tags$span(class = "slider")
                       )
                     ),

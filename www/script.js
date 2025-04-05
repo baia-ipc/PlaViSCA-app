@@ -71,3 +71,13 @@ $(document).on('click', '.btn_remove', function(){
       var btn_id = this.id; 
       Shiny.setInputValue('click_remove_btn', btn_id, {priority: 'event'});
     });
+    
+$(document).on('click', '.toggle_exp', function(){
+      var btn_id = this.id; 
+      Shiny.setInputValue('click_toggle_exp', btn_id, {priority: 'event'});
+    });
+    
+$(document).on('change', '[id^="genes_exp_"]', function() {
+  const id = this.id;
+  Shiny.setInputValue('change_gene_exp', id, {priority: 'event'});
+});
