@@ -1,4 +1,4 @@
-dynamicBlock <- function(i, choices) {
+dynamicBlock <- function(i) {
   tagList(
     fluidRow(
       column(
@@ -6,7 +6,7 @@ dynamicBlock <- function(i, choices) {
         selectizeInput(
           paste0("genes_exp_", i),
           label = "Gene Name",
-          choices = choices
+          choices = NULL
         ),
         column(
           width = 2,
@@ -54,11 +54,13 @@ dynamicBlock <- function(i, choices) {
       fluidRow(plotlyOutput(paste0("gene_exp_plotly_", i))),
       fluidRow(
         class = "btn-add-rm-container",
-        actionButton(paste0("add_btn_", i), "Add",
-          class = "btn btn-success btn_add"
-        ),
-        actionButton(paste0("remove_btn_", i), "Remove",
+        actionButton(paste0("remove_btn_", i),
+          label = icon("minus"),
           class = "btn btn-danger btn_remove"
+        ),
+        actionButton(paste0("add_btn_", i),
+          label = icon("plus"),
+          class = "btn btn-success btn_add"
         )
       )
     )

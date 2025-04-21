@@ -417,6 +417,7 @@ input:checked + .slider:before {
 .btn-add-rm-container{
   display: flex;
   gap: 5px;
+  margin-right: 40px;
   justify-content: flex-end;
 }
 

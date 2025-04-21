@@ -312,9 +312,18 @@ server <- function(input, output, session) {
       ui = column(
         width = 6,
         id = paste0("dynamic_col_", new_count),
-        dynamicBlock(new_count, choices = choice_exp())
+        dynamicBlock(new_count)
       )
     )
+
+    shinyjs::delay(100, {
+      updateSelectizeInput(
+        session,
+        inputId = paste0("genes_exp_", new_count),
+        choices = choice_exp(),
+        server = TRUE
+      )
+    })
   }
 
   # function to generate the data
@@ -361,9 +370,19 @@ server <- function(input, output, session) {
         ui = column(
           width = 6,
           id = paste0("dynamic_col_", id),
-          dynamicBlock(id, choices = choice_exp())
+          dynamicBlock(id)
         )
       )
+
+      shinyjs::delay(100, {
+        updateSelectizeInput(
+          session,
+          inputId = paste0("genes_exp_", id),
+          choices = choice_exp(),
+          server = TRUE
+        )
+      })
+
       df_exp_i <- generate_df_exp(id)
       output[[paste0("gene_exp_plotly_", id)]] <- renderPlotly({
         plot_gene_expression(
@@ -387,17 +406,29 @@ server <- function(input, output, session) {
 
   observeEvent(input$click_remove_btn,
     {
-      btn_id <- input$click_remove_btn
-      block_id <- as.numeric(gsub("remove_btn_", "", btn_id))
-      removeUI(selector = paste0("#dynamic_col_", block_id))
-      if (block_id == 1) {
-        shinyjs::show("add_btn_0")
+      rm_btn_id <- input$click_remove_btn
+      id <- as.numeric(gsub("remove_btn_", "", rm_btn_id))
+
+      removeUI(selector = paste0("#dynamic_col_", id))
+
+      if (id > 1) {
+        shinyjs::show(paste0("add_btn_", id - 1))
       }
     },
     ignoreNULL = TRUE
   )
 
 
+  # React only when Shiny actually gets a numeric count
+  observeEvent(input$num_dynamic_blocks, {
+    num_blocks <- as.numeric(input$num_dynamic_blocks) + 1
+
+    if (num_blocks <= 1) {
+      shinyjs::show("add_btn_0")
+    } else {
+      shinyjs::hide("add_btn_0")
+    }
+  })
 
 
 
@@ -436,89 +467,12 @@ server <- function(input, output, session) {
     }
   })
 
-
-
-
-
-
-
-  # observeEvent(input$click_toggle_exp,
-  #   {
-  #     btn_id <- input$click_toggle_exp
-  #     id <- as.numeric(gsub("check_exp_", "", btn_id))
-  #
-  #     is_checked <- input[[paste0("check_exp_", id)]]
-  #
-  #     if (is.null(is_checked)) {
-  #       is_checked <- TRUE
-  #     }
-  #
-  #     if (!is_checked) {
-  #       updateSelectInput(session, paste0("genes_exp_", id),
-  #         label = "Gene ID",
-  #         choices = gene_data()$genes$gene
-  #       )
-  #     } else {
-  #       updateSelectInput(session, paste0("genes_exp_", id),
-  #         label = "Gene Name",
-  #         choices = gene_data()$genes %>%
-  #           filter(!str_detect(name, "^PVP01")) %>%
-  #           pull(name)
-  #       )
-  #     }
-  #   },
-  #   ignoreNULL = TRUE
-  # )
-
-
-
   observeEvent(input$change_gene_exp, {
     id <- input$change_gene_exp
     id <- as.numeric(gsub("genes_exp_", "", id))
     gene_id <- get_gene_id(input[[paste0("genes_exp_", id)]], gene_data()$genes)
     update_gene_links(gene_id)
   })
-
-
-
-  # observe({
-  #   for (i in 1:counter()) {
-  #     observeEvent(
-  #       list(input[[paste0("check_exp_", i)]], input$data_type_exp),
-  #       {
-  #         is_checked <- input[[paste0("check_exp_", i)]]
-  #
-  #         if (!is.null(is_checked) && is_checked) {
-  #           updateSelectInput(session, paste0("genes_exp_", i),
-  #             label = "Gene ID",
-  #             choices = gene_data()$genes$gene
-  #           )
-  #         } else {
-  #           updateSelectInput(session, paste0("genes_exp_", i),
-  #             label = "Gene Name",
-  #             choices = gene_data()$genes %>%
-  #               filter(!str_detect(name, "^PVP01")) %>%
-  #               pull(name)
-  #           )
-  #         }
-  #       }
-  #     )
-  #   }
-  # })
-  #
-  #
-  # # get gene id or name for dynamic ui
-  # observe({
-  #   for (i in 1:counter()) {
-  #     observeEvent(input[[paste0("genes_exp_", i)]], {
-  #       req(input[[paste0("genes_exp_", i)]])
-  #
-  #       gene_id <- get_gene_id(input[[paste0("genes_exp_", i)]], gene_data()$genes)
-  #
-  #       update_gene_links(gene_id)
-  #     })
-  #   }
-  # })
 
 
   # Switch gene id or name for pca, umap and tsne plot

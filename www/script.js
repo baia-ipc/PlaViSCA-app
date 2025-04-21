@@ -64,20 +64,39 @@ $(document).ready(function() {
 $(document).on('click', '.btn_add', function(){
       var btn_id = this.id; 
       Shiny.setInputValue('click_add_btn', btn_id, {priority: 'event'});
-    });
+});
     
 
 $(document).on('click', '.btn_remove', function(){
       var btn_id = this.id; 
       Shiny.setInputValue('click_remove_btn', btn_id, {priority: 'event'});
-    });
+});
     
 $(document).on('click', '.toggle_exp', function(){
       var btn_id = this.id; 
       Shiny.setInputValue('click_toggle_exp', btn_id, {priority: 'event'});
-    });
+});
     
 $(document).on('change', '[id^="genes_exp_"]', function() {
-  const id = this.id;
-  Shiny.setInputValue('change_gene_exp', id, {priority: 'event'});
+      var id = this.id;
+      Shiny.setInputValue('change_gene_exp', id, {priority: 'event'});
 });
+
+
+
+$(document).on('click', '.btn_add', function() {
+  var count = $('[id^="dynamic_col_"]').length;
+  Shiny.setInputValue('num_dynamic_blocks', count, { priority: 'event' });
+});
+
+$(document).on('click', '.btn_remove', function() {
+  setTimeout(function() {
+    var count = $('[id^="dynamic_col_"]').length;
+    Shiny.setInputValue('num_dynamic_blocks', count, { priority: 'event' });
+  }, 100); 
+});
+
+
+
+
+

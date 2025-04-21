@@ -429,8 +429,12 @@ ui <- fluidPage(
                 fluidRow(
                   width = 12,
                   plotlyOutput("gene_exp_plotly"),
-                  actionButton("add_btn_0", "Add",
-                    class = "btn btn-success btn_add"
+                  fluidRow(
+                    class = "btn-add-rm-container",
+                    actionButton("add_btn_0",
+                      label = icon("plus"),
+                      class = "btn btn-success btn_add"
+                    )
                   )
                 )
               )
