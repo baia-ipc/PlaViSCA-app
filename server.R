@@ -361,7 +361,6 @@ server <- function(input, output, session) {
     btn_id <- input$click_add_btn
     id <- as.numeric(gsub("add_btn_?", "", btn_id))
     shinyjs::hide(paste0("add_btn_", id))
-
     if (id == 0) {
       id <- id + 1
       insertUI(
@@ -408,28 +407,20 @@ server <- function(input, output, session) {
     {
       rm_btn_id <- input$click_remove_btn
       id <- as.numeric(gsub("remove_btn_", "", rm_btn_id))
-
       removeUI(selector = paste0("#dynamic_col_", id))
-
-      if (id > 1) {
-        shinyjs::show(paste0("add_btn_", id - 1))
-      }
     },
     ignoreNULL = TRUE
   )
 
-
-  # React only when Shiny actually gets a numeric count
   observeEvent(input$num_dynamic_blocks, {
     num_blocks <- as.numeric(input$num_dynamic_blocks) + 1
-
     if (num_blocks <= 1) {
       shinyjs::show("add_btn_0")
     } else {
       shinyjs::hide("add_btn_0")
+      shinyjs::show(paste0("add_btn_", num_blocks - 1))
     }
   })
-
 
 
   choice_exp1 <- eventReactive(input$click_toggle_exp, {
@@ -443,8 +434,6 @@ server <- function(input, output, session) {
         pull(name)
     }
   })
-
-
 
 
   observeEvent(list(input$click_toggle_exp, input$data_type_exp), {

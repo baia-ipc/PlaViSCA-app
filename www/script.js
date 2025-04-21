@@ -85,8 +85,10 @@ $(document).on('change', '[id^="genes_exp_"]', function() {
 
 
 $(document).on('click', '.btn_add', function() {
-  var count = $('[id^="dynamic_col_"]').length;
-  Shiny.setInputValue('num_dynamic_blocks', count, { priority: 'event' });
+  setTimeout(function() {
+    var count = $('[id^="dynamic_col_"]').length;
+    Shiny.setInputValue('num_dynamic_blocks', count, { priority: 'event' });
+  }, 100);
 });
 
 $(document).on('click', '.btn_remove', function() {
