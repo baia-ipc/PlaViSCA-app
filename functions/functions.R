@@ -193,105 +193,105 @@ elbow_plot <- function(pca_std_df) {
 }
 
 # function to plot the variable genes
-# var_genes_plot <- function(df, top_n = 10) {
-#   req(df)
-#
-#   counts <- table(df$variable)
-#   var_count <- counts["TRUE"]
-#   nonvar_count <- counts["FALSE"]
-#
-#   df$variable_status <- ifelse(
-#     df$variable,
-#     paste0("Variable (n = ", var_count, ")"),
-#     paste0("Non-variable (n = ", nonvar_count, ")")
-#   )
-#
-#   top_hvf <- df %>%
-#     filter(variable == TRUE) %>%
-#     arrange(rank) %>%
-#     head(top_n)
-#
-#   plot_ly() %>%
-#     add_trace(
-#       data = df,
-#       x = ~mean,
-#       y = ~variance.standardized,
-#       color = ~variable_status,
-#       colors = c("black", "red"),
-#       type = "scatter",
-#       mode = "markers",
-#       marker = list(size = 5, opacity = 0.7),
-#       text = ~name,
-#       hovertemplate = paste(
-#         "Gene: %{text}<br>",
-#         "Mean: %{x}<br>",
-#         "Variance: %{y}<extra></extra>"
-#       ),
-#       name = "Variable Genes"
-#     ) %>%
-#     add_trace(
-#       data = top_hvf,
-#       x = ~mean,
-#       y = ~variance.standardized,
-#       color = I("orange"),
-#       type = "scatter",
-#       mode = "markers",
-#       marker = list(size = 6, opacity = 1),
-#       text = ~name,
-#       hovertemplate = paste(
-#         "Gene: %{text}<br>",
-#         "Mean: %{x}<br>",
-#         "Variance: %{y}<extra></extra>"
-#       ),
-#       name = paste("Top", top_n, "Variable")
-#     ) %>%
-#     layout(
-#       xaxis = list(title = "Mean Expression"),
-#       yaxis = list(title = "Standardized Variance"),
-#       legend = list(title = list(text = "<b>Variable Status</b>"))
-#     )
-# }
-
-# function to plot top expression gene per cluster
-top_genes_exp_plot <- function(df, default_gene = "PVP01_1460700") {
+var_genes_plot <- function(df, top_n = 10) {
   req(df)
-  plot_ly(
-    data = df,
-    x = ~ident,
-    y = ~expression,
-    color = ~ident,
-    colors = colors,
-    type = "violin",
-    transforms = list(
-      list(
-        type = "filter",
-        target = ~name,
-        operation = "=",
-        value = default_gene
-      )
-    )
-  ) %>%
+
+  counts <- table(df$variable)
+  var_count <- counts["TRUE"]
+  nonvar_count <- counts["FALSE"]
+
+  df$variable_status <- ifelse(
+    df$variable,
+    paste0("Variable (n = ", var_count, ")"),
+    paste0("Non-variable (n = ", nonvar_count, ")")
+  )
+
+  top_hvf <- df %>%
+    filter(variable == TRUE) %>%
+    arrange(rank) %>%
+    head(top_n)
+
+  plot_ly() %>%
+    add_trace(
+      data = df,
+      x = ~mean,
+      y = ~variance.standardized,
+      color = ~variable_status,
+      colors = c("black", "red"),
+      type = "scatter",
+      mode = "markers",
+      marker = list(size = 5, opacity = 0.7),
+      text = ~name,
+      hovertemplate = paste(
+        "Gene: %{text}<br>",
+        "Mean: %{x}<br>",
+        "Variance: %{y}<extra></extra>"
+      ),
+      name = "Variable Genes"
+    ) %>%
+    add_trace(
+      data = top_hvf,
+      x = ~mean,
+      y = ~variance.standardized,
+      color = I("orange"),
+      type = "scatter",
+      mode = "markers",
+      marker = list(size = 6, opacity = 1),
+      text = ~name,
+      hovertemplate = paste(
+        "Gene: %{text}<br>",
+        "Mean: %{x}<br>",
+        "Variance: %{y}<extra></extra>"
+      ),
+      name = paste("Top", top_n, "Variable")
+    ) %>%
     layout(
-      xaxis = list(title = "Idents"),
-      yaxis = list(title = "Average expression"),
-      legend = list(title = list(text = "<b>Idents</b>")),
-      updatemenus = list(
-        list(
-          type = "dropdown",
-          buttons = lapply(unique(df$name), function(g) {
-            list(
-              method = "restyle",
-              args = list("transforms[0].value", g),
-              label = g
-            )
-          }),
-          direction = "down",
-          x = 0.1,
-          y = 1.1
-        )
-      )
+      xaxis = list(title = "Mean Expression"),
+      yaxis = list(title = "Standardized Variance"),
+      legend = list(title = list(text = "<b>Variable Status</b>"))
     )
 }
+
+# # function to plot top expression gene per cluster
+# top_genes_exp_plot <- function(df, default_gene = "PVP01_1460700") {
+#   req(df)
+#   plot_ly(
+#     data = df,
+#     x = ~ident,
+#     y = ~expression,
+#     color = ~ident,
+#     colors = colors,
+#     type = "violin",
+#     transforms = list(
+#       list(
+#         type = "filter",
+#         target = ~name,
+#         operation = "=",
+#         value = default_gene
+#       )
+#     )
+#   ) %>%
+#     layout(
+#       xaxis = list(title = "Idents"),
+#       yaxis = list(title = "Average expression"),
+#       legend = list(title = list(text = "<b>Idents</b>")),
+#       updatemenus = list(
+#         list(
+#           type = "dropdown",
+#           buttons = lapply(unique(df$name), function(g) {
+#             list(
+#               method = "restyle",
+#               args = list("transforms[0].value", g),
+#               label = g
+#             )
+#           }),
+#           direction = "down",
+#           x = 0.1,
+#           y = 1.1
+#         )
+#       )
+#     )
+# }
 
 # function to plot the gene expression
 plot_gene_expression <- function(data, x_col) {

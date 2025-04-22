@@ -423,14 +423,6 @@ server <- function(input, output, session) {
   )
 
 
-
-
-
-
-
-
-
-
   choice_exp1 <- eventReactive(input$click_toggle_exp, {
     is_checked <- input[[input$click_toggle_exp]]
 
