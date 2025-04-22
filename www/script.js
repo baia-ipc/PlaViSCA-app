@@ -67,10 +67,21 @@ $(document).on('click', '.btn_add', function(){
 });
     
 
-$(document).on('click', '.btn_remove', function(){
-      var btn_id = this.id; 
-      Shiny.setInputValue('click_remove_btn', btn_id, {priority: 'event'});
+$(document).on('click', '.btn_remove', function() {
+  var btn_id = this.id;
+  var ids = $('[id^="dynamic_col_"]').map(function() {
+    return parseInt(this.id.replace("dynamic_col_", ""));
+  }).get();
+
+  setTimeout(function() {
+    Shiny.setInputValue('click_remove_btn', {
+      btn_id: btn_id,
+      ids: ids
+    }, {priority: 'event'});
+  }, 100);
 });
+
+
     
 $(document).on('click', '.toggle_exp', function(){
       var btn_id = this.id; 
@@ -84,19 +95,6 @@ $(document).on('change', '[id^="genes_exp_"]', function() {
 
 
 
-$(document).on('click', '.btn_add', function() {
-  setTimeout(function() {
-    var count = $('[id^="dynamic_col_"]').length;
-    Shiny.setInputValue('num_dynamic_blocks', count, { priority: 'event' });
-  }, 100);
-});
-
-$(document).on('click', '.btn_remove', function() {
-  setTimeout(function() {
-    var count = $('[id^="dynamic_col_"]').length;
-    Shiny.setInputValue('num_dynamic_blocks', count, { priority: 'event' });
-  }, 100); 
-});
 
 
 

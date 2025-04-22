@@ -113,8 +113,9 @@ server <- function(input, output, session) {
         "location", "vivax_strain", "n_count_rna", "n_feature_rna"
       )))
 
-    if (!is.null(input$ident) || !is.null(input$species) || !is.null(input$type) ||
-      !is.null(input$condition) || !is.null(input$stage) || !is.null(input$sample)) {
+    if (!is.null(input$ident) || !is.null(input$species) ||
+      !is.null(input$type) || !is.null(input$condition) ||
+      !is.null(input$stage) || !is.null(input$sample)) {
       filt_data <- filt_data %>%
         filter(
           if (!is.null(input$ident)) ident %in% input$ident else TRUE,
@@ -212,9 +213,9 @@ server <- function(input, output, session) {
         var_genes_plot(vf_data, top_n = 15)
       })
 
-      output$top_genes_exp_plotly <- renderPlotly({
-        top_genes_exp_plot(top_genes_exp)
-      })
+      # output$top_genes_exp_plotly <- renderPlotly({
+      #   top_genes_exp_plot(top_genes_exp)
+      # })
     } else {
       shinyjs::show("source_section")
       shinyjs::hide("qual_section")
@@ -297,9 +298,6 @@ server <- function(input, output, session) {
       update_gene_links(gene_id)
     }
   })
-
-
-
 
 
   counter <- reactiveVal(0)
@@ -405,22 +403,32 @@ server <- function(input, output, session) {
 
   observeEvent(input$click_remove_btn,
     {
-      rm_btn_id <- input$click_remove_btn
+      rm_btn_id <- input$click_remove_btn$btn_id
       id <- as.numeric(gsub("remove_btn_", "", rm_btn_id))
+      ids <- as.numeric(unlist(input$click_remove_btn$ids))
       removeUI(selector = paste0("#dynamic_col_", id))
+      remaining_ids <- ids[ids != id]
+
+      for (i in remaining_ids) {
+        shinyjs::hide(paste0("add_btn_", i))
+      }
+
+      if (length(remaining_ids) == 0) {
+        shinyjs::show("add_btn_0")
+      } else {
+        shinyjs::show(paste0("add_btn_", max(remaining_ids)))
+      }
     },
     ignoreNULL = TRUE
   )
 
-  observeEvent(input$num_dynamic_blocks, {
-    num_blocks <- as.numeric(input$num_dynamic_blocks) + 1
-    if (num_blocks <= 1) {
-      shinyjs::show("add_btn_0")
-    } else {
-      shinyjs::hide("add_btn_0")
-      shinyjs::show(paste0("add_btn_", num_blocks - 1))
-    }
-  })
+
+
+
+
+
+
+
 
 
   choice_exp1 <- eventReactive(input$click_toggle_exp, {
