@@ -1,13 +1,35 @@
 # function to get genes choice
-get_gene_choices <- function(checked, genes_df) {
-  if (checked) {
-    genes_df$gene
+# get_gene_choices <- function(checked, genes_df) {
+#   if (checked) {
+#     genes_df$gene
+#   } else {
+#     genes_df %>%
+#       filter(!str_detect(name, "^PVP01")) %>%
+#       pull(name)
+#   }
+# }
+
+# function to get gene name
+genes <- function(data, gff_data, pattern = "pvp") {
+  data %>%
+    colnames() %>%
+    grep(pattern, ., ignore.case = TRUE, value = TRUE) %>%
+    as.data.frame() %>%
+    setNames("gene") %>%
+    left_join(gff_data, by = c("gene" = "id")) %>%
+    mutate(name = coalesce(name, gene)) %>%
+    select(gene, name)
+}
+
+# function get gene name
+get_gene_id <- function(gene_name, gene_names) {
+  if (gene_name %in% gene_names$name) {
+    return(gene_names$gene[gene_names$name == gene_name])
   } else {
-    genes_df %>%
-      filter(!str_detect(name, "^PVP01")) %>%
-      pull(name)
+    return(gene_name)
   }
 }
+
 
 # function to generate subBlock for gene expression
 subBlock <- function(i) {
@@ -135,26 +157,6 @@ generate_df_exp <- function(new_count, input, gene_data, get_gene_id) {
 
 
 
-# function to get gene name
-genes <- function(data, gff_data, pattern = "pvp") {
-  data %>%
-    colnames() %>%
-    grep(pattern, ., ignore.case = TRUE, value = TRUE) %>%
-    as.data.frame() %>%
-    setNames("gene") %>%
-    left_join(gff_data, by = c("gene" = "id")) %>%
-    mutate(name = coalesce(name, gene)) %>%
-    select(gene, name)
-}
-
-# function get gene name
-get_gene_id <- function(gene_name, gene_names) {
-  if (gene_name %in% gene_names$name) {
-    return(gene_names$gene[gene_names$name == gene_name])
-  } else {
-    return(gene_name)
-  }
-}
 
 # x and y column base on input
 x_col <- function(check_input, unintegrated, integrated) {

@@ -225,14 +225,22 @@ server <- function(input, output, session) {
   })
 
   choice_exp <- eventReactive(input$check_exp_0, {
-    get_gene_choices(input$check_exp_0, gene_data()$genes)
+    # get_gene_choices(input$check_exp_0, gene_data()$genes)
+
+    if (input$check_exp_0) {
+      gene_data()$genes$gene
+    } else {
+      gene_data()$genes %>%
+        filter(!str_detect(name, "^PVP01")) %>%
+        pull(name)
+    }
   })
 
   observeEvent(list(input$check_exp_0, input$data_type_exp), {
     req(gene_data())
 
     updateSelectizeInput(session, "genes_exp_0",
-      label = if (input$check_exp_0) "Gene ID" else "Gene name",
+      label = if (isTRUE(input$check_exp_0)) "Gene ID" else "Gene name",
       choices = choice_exp(),
       server = TRUE
     )
@@ -282,6 +290,7 @@ server <- function(input, output, session) {
     id <- as.numeric(gsub("add_btn_?", "", btn_id))
     shinyjs::hide(paste0("add_btn_", id))
     df_exp_i <- generate_df_exp(id, input, gene_data, get_gene_id)
+
 
     if (id == 0) {
       id <- id + 1
@@ -344,7 +353,14 @@ server <- function(input, output, session) {
 
   choice_exp1 <- eventReactive(input$click_toggle_exp, {
     is_checked <- input[[input$click_toggle_exp]]
-    get_gene_choices(is_checked, gene_data()$genes)
+    # get_gene_choices(is_checked, gene_data()$genes)
+    if (!is_checked) {
+      gene_data()$genes$gene
+    } else {
+      gene_data()$genes %>%
+        filter(!str_detect(name, "^PVP01")) %>%
+        pull(name)
+    }
   })
 
   observeEvent(list(input$click_toggle_exp, input$data_type_exp), {
@@ -360,7 +376,7 @@ server <- function(input, output, session) {
       updateSelectizeInput(
         session,
         paste0("genes_exp_", id),
-        label = if (is_checked) "Gene ID" else "Gene name",
+        label = if (isTRUE(is_checked)) "Gene name" else "Gene ID",
         choices = choice_exp1(),
         server = TRUE
       )
@@ -384,7 +400,14 @@ server <- function(input, output, session) {
   })
 
   choice <- eventReactive(list(input$check, input$data_type), {
-    get_gene_choices(input$check, gene_data()$genes)
+    # get_gene_choices(input$check, gene_data()$genes)
+    if (input$check) {
+      gene_data()$genes$gene
+    } else {
+      gene_data()$genes %>%
+        filter(!str_detect(name, "^PVP01")) %>%
+        pull(name)
+    }
   })
 
   ## dynamic UI for gene and cca_snn selection
@@ -397,7 +420,7 @@ server <- function(input, output, session) {
       shinyjs::show("gene_link_ui")
       shinyjs::show("switch_id")
       updateSelectizeInput(session, "genes_n",
-        label = if (input$check) "Gene ID" else "Gene name",
+        label = if (isTRUE(input$check)) "Gene ID" else "Gene name",
         choices = choice(),
         server = TRUE
       )
