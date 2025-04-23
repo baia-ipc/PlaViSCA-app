@@ -319,46 +319,6 @@ var_genes_plot <- function(df, top_n = 10) {
     )
 }
 
-# # function to plot top expression gene per cluster
-# top_genes_exp_plot <- function(df, default_gene = "PVP01_1460700") {
-#   req(df)
-#   plot_ly(
-#     data = df,
-#     x = ~ident,
-#     y = ~expression,
-#     color = ~ident,
-#     colors = colors,
-#     type = "violin",
-#     transforms = list(
-#       list(
-#         type = "filter",
-#         target = ~name,
-#         operation = "=",
-#         value = default_gene
-#       )
-#     )
-#   ) %>%
-#     layout(
-#       xaxis = list(title = "Idents"),
-#       yaxis = list(title = "Average expression"),
-#       legend = list(title = list(text = "<b>Idents</b>")),
-#       updatemenus = list(
-#         list(
-#           type = "dropdown",
-#           buttons = lapply(unique(df$name), function(g) {
-#             list(
-#               method = "restyle",
-#               args = list("transforms[0].value", g),
-#               label = g
-#             )
-#           }),
-#           direction = "down",
-#           x = 0.1,
-#           y = 1.1
-#         )
-#       )
-#     )
-# }
 
 # function to plot the gene expression
 plot_gene_expression <- function(data, x_col) {
@@ -410,50 +370,63 @@ assign_colors <- function(num_categories) {
   }
 }
 
-# function to generate plots for PCA, UMAP, and tSNE
-generate_plotly <- function(df, xaxis_input, yaxis_input, color, legend_title,
-                            size, plot_type = "PCA", plot_dim = "2d") {
-  x <- df[[xaxis_input]]
-  y <- df[[yaxis_input]]
-  selected_color <- df[[color]]
 
-  if (!is.numeric(selected_color)) {
-    legend_title <- color
+# colors
+assign_colors <- function(num_categories) {
+  if (num_categories <= 12) {
+    return(RColorBrewer::brewer.pal(n = max(num_categories, 3), name = "Set3")[1:num_categories])
+  } else {
+    return(rep(RColorBrewer::brewer.pal(12, "Set3"), length.out = num_categories))
+  }
+}
+
+is_categorical_data <- function(x) {
+  is.character(x) || is.factor(x)
+}
+
+prepare_categorical_colors <- function(df, color) {
+  df[[color]] <- as.character(df[[color]])
+  df[[color]][is.na(df[[color]])] <- "NA (missing)"
+  unique_categories <- unique(df[[color]])
+
+  if ("NA (missing)" %in% unique_categories) {
+    non_missing <- unique_categories[unique_categories != "NA (missing)"]
+    assigned <- if (length(non_missing) > 0) assign_colors(length(non_missing)) else character(0)
+    colors <- setNames(c("#A9A9A94D", assigned), c("NA (missing)", non_missing))
+    df[[color]] <- factor(df[[color]], levels = c("NA (missing)", non_missing))
+  } else {
+    assigned <- assign_colors(length(unique_categories))
+    colors <- setNames(assigned, unique_categories)
+    df[[color]] <- factor(df[[color]], levels = unique_categories)
   }
 
-  is_categorical <- is.character(selected_color) || is.factor(selected_color)
+  return(list(df = df, colors = colors))
+}
 
-  if (is_categorical) {
-    df[[color]] <- as.character(df[[color]])
-    df[[color]][is.na(df[[color]])] <- "NA (missing)"
+# plot dimention
+get_dim_map <- function(plot_type) {
+  list(
+    PCA = c("pc_1", "pc_2", "pc_3"),
+    PCA_integrated = c("integratedrpca_1", "integratedrpca_2", "integratedrpca_3"),
+    UMAP = c("umap_1", "umap_2", "umap_3"),
+    UMAP_unintegred = c("umapunintegrated_1", "umapunintegrated_2", "umapunintegrated_3"),
+    tSNE = c("t_sne_1", "t_sne_2", "t_sne_3")
+  )[[plot_type]]
+}
 
-    unique_categories <- unique(df[[color]])
+get_legend_layout <- function(legend_title) {
+  list(
+    title = list(text = legend_title),
+    orientation = "v",
+    x = 1.02, xanchor = "left",
+    y = 1, yanchor = "top",
+    len = 0.5
+  )
+}
 
-    if ("NA (missing)" %in% unique_categories) {
-      non_missing_categories <- unique_categories[unique_categories != "NA (missing)"]
-      num_non_missing <- length(non_missing_categories)
-
-      if (num_non_missing > 0) {
-        assigned_colors <- assign_colors(num_non_missing)
-      } else {
-        assigned_colors <- character(0)
-      }
-
-      colors <- setNames(
-        c("#A9A9A94D", assigned_colors),
-        c("NA (missing)", non_missing_categories)
-      )
-
-      df[[color]] <- factor(df[[color]], levels = c("NA (missing)", non_missing_categories))
-    } else {
-      num_categories <- length(unique_categories)
-      assigned_colors <- assign_colors(num_categories)
-      colors <- setNames(assigned_colors, unique_categories)
-      df[[color]] <- factor(df[[color]], levels = unique_categories)
-    }
-  }
-
-  hover_text2d <- ~ paste(
+# 2D Plot
+plot_2d <- function(df, x, y, color, legend_title, size, is_categorical, selected_color, colors) {
+  hover_text <- ~ paste(
     "Cell:", id,
     "<br>Cluster:", ident,
     "<br>Color by", legend_title, ":", selected_color,
@@ -462,7 +435,51 @@ generate_plotly <- function(df, xaxis_input, yaxis_input, color, legend_title,
     "<br>Y:", y
   )
 
-  hover_text3d <- ~ paste(
+  legend_layout <- get_legend_layout(legend_title)
+
+  if (is_categorical) {
+    plot_ly(
+      data = df, x = x, y = y,
+      type = "scatter", mode = "markers",
+      color = ~ factor(df[[color]]),
+      marker = list(size = size),
+      text = hover_text, hoverinfo = "text",
+      colors = colors,
+      width = 1000, height = 750
+    ) %>%
+      layout(
+        xaxis = list(title = paste("X-", deparse(substitute(x)))),
+        yaxis = list(title = paste("Y-", deparse(substitute(y)))),
+        legend = legend_layout
+      )
+  } else {
+    plot_ly(
+      data = df, x = x, y = y,
+      type = "scatter", mode = "markers",
+      marker = list(
+        size = size,
+        color = selected_color,
+        colorscale = list(c(0, "#0000FF4C"), c(1, "red")),
+        showscale = TRUE,
+        colorbar = legend_layout
+      ),
+      text = hover_text, hoverinfo = "text",
+      width = 1000, height = 750
+    ) %>%
+      layout(
+        xaxis = list(title = paste("X-", deparse(substitute(x)))),
+        yaxis = list(title = paste("Y-", deparse(substitute(y))))
+      )
+  }
+}
+
+# 3D Plot
+plot_3d <- function(df, color, legend_title, size, selected_color, is_categorical, colors, coords) {
+  x_col <- coords[1]
+  y_col <- coords[2]
+  z_col <- coords[3]
+
+  hover_text <- ~ paste(
     "Cell:", id,
     "<br>Cluster:", ident,
     "<br>Color by", legend_title, ":", selected_color,
@@ -472,137 +489,76 @@ generate_plotly <- function(df, xaxis_input, yaxis_input, color, legend_title,
     "<br>Z:", df[[z_col]]
   )
 
-  legend_layout <- list(
-    title = list(text = legend_title),
-    orientation = "v",
-    x = 1.02,
-    xanchor = "left",
-    y = 1,
-    yanchor = "top",
-    len = 0.5
-  )
+  legend_layout <- get_legend_layout(legend_title)
 
-  if (plot_dim == "2d") {
-    if (is_categorical) {
-      plot <- plot_ly(
-        data = df,
-        x = x,
-        y = y,
-        type = "scatter",
-        mode = "markers",
-        color = ~ factor(df[[color]]),
-        marker = list(size = size),
-        text = hover_text2d,
-        hoverinfo = "text",
-        colors = colors,
-        width = 1000,
-        height = 750
-      ) %>%
-        layout(
-          xaxis = list(title = paste("X-", xaxis_input)),
-          yaxis = list(title = paste("Y-", yaxis_input)),
-          legend = legend_layout
-        )
-    } else {
-      plot <- plot_ly(
-        data = df,
-        x = x,
-        y = y,
-        type = "scatter",
-        mode = "markers",
-        marker = list(
-          size = size,
-          color = selected_color,
-          colorscale = list(c(0, "#0000FF4C"), c(1, "red")),
-          showscale = TRUE,
-          colorbar = legend_layout
+  if (is_categorical) {
+    plot_ly(
+      data = df,
+      x = ~ get(x_col), y = ~ get(y_col), z = ~ get(z_col),
+      type = "scatter3d", mode = "markers",
+      color = ~ factor(df[[color]]),
+      marker = list(size = as.numeric(size) * 0.4),
+      colors = colors,
+      text = hover_text, hoverinfo = "text",
+      width = 1000, height = 750
+    ) %>%
+      layout(
+        scene = list(
+          xaxis = list(title = paste("X-", x_col)),
+          yaxis = list(title = paste("Y-", y_col)),
+          zaxis = list(title = paste("Z-", z_col))
         ),
-        text = hover_text,
-        hoverinfo = "text",
-        width = 1000,
-        height = 750
-      ) %>%
-        layout(
-          xaxis = list(title = paste("X-", xaxis_input)),
-          yaxis = list(title = paste("Y-", yaxis_input))
-        )
-    }
+        legend = legend_layout
+      )
   } else {
-    # 3D plotting: define coordinate mapping based on plot_type.
-    dim_map <- list(
-      PCA = c("pc_1", "pc_2", "pc_3"),
-      PCA_integrated = c(
-        "integratedrpca_1", "integratedrpca_2",
-        "integratedrpca_3"
+    plot_ly(
+      data = df,
+      x = ~ get(x_col), y = ~ get(y_col), z = ~ get(z_col),
+      type = "scatter3d", mode = "markers",
+      marker = list(
+        size = as.numeric(size) * 0.4,
+        color = selected_color,
+        colorscale = list(c(0, "#0000FF4C"), c(1, "red")),
+        showscale = TRUE,
+        colorbar = legend_layout
       ),
-      UMAP = c("umap_1", "umap_2", "umap_3"),
-      UMAP_unintegred = c(
-        "umapunintegrated_1",
-        "umapunintegrated_2",
-        "umapunintegrated_3"
-      ),
-      tSNE = c("t_sne_1", "t_sne_2", "t_sne_3")
-    )
-
-    coords <- dim_map[[plot_type]]
-    x_col <- coords[1]
-    y_col <- coords[2]
-    z_col <- coords[3]
-
-
-    if (is_categorical) {
-      plot <- plot_ly(
-        data = df,
-        x = ~ get(x_col),
-        y = ~ get(y_col),
-        z = ~ get(z_col),
-        type = "scatter3d",
-        mode = "markers",
-        color = ~ factor(df[[color]]),
-        marker = list(size = as.numeric(size) * 0.4),
-        colors = colors,
-        text = hover_text3d,
-        hoverinfo = "text",
-        width = 1000,
-        height = 750
-      ) %>%
-        layout(
-          scene = list(
-            xaxis = list(title = paste("X-", x_col)),
-            yaxis = list(title = paste("Y-", y_col)),
-            zaxis = list(title = paste("Z-", z_col))
-          ),
-          legend = legend_layout
+      text = hover_text, hoverinfo = "text",
+      width = 1000, height = 750
+    ) %>%
+      layout(
+        scene = list(
+          xaxis = list(title = paste("X-", x_col)),
+          yaxis = list(title = paste("Y-", y_col)),
+          zaxis = list(title = paste("Z-", z_col))
         )
-    } else {
-      plot <- plot_ly(
-        data = df,
-        x = ~ get(x_col),
-        y = ~ get(y_col),
-        z = ~ get(z_col),
-        type = "scatter3d",
-        mode = "markers",
-        marker = list(
-          size = as.numeric(size) * 0.4,
-          color = selected_color,
-          colorscale = list(c(0, "#0000FF4C"), c(1, "red")),
-          showscale = TRUE,
-          colorbar = legend_layout
-        ),
-        text = hover_text,
-        hoverinfo = "text",
-        width = 1000,
-        height = 750
-      ) %>%
-        layout(
-          scene = list(
-            xaxis = list(title = paste("X-", x_col)),
-            yaxis = list(title = paste("Y-", y_col)),
-            zaxis = list(title = paste("Z-", z_col))
-          )
-        )
-    }
+      )
+  }
+}
+
+# main pca, umap and tsne plotting function
+generate_plotly <- function(df, xaxis_input, yaxis_input, color, legend_title,
+                            size, plot_type = "PCA", plot_dim = "2d") {
+  x <- df[[xaxis_input]]
+  y <- df[[yaxis_input]]
+  selected_color <- df[[color]]
+  is_categorical <- is_categorical_data(selected_color)
+
+  if (!is.numeric(selected_color)) legend_title <- color
+
+  if (is_categorical) {
+    prep <- prepare_categorical_colors(df, color)
+    df <- prep$df
+    colors <- prep$colors
+  } else {
+    colors <- NULL
   }
 
-  return(plot %>% config(displaylogo = FALSE, scrollZoom = TRUE))
+  if (plot_dim == "2d") {
+    return(plot_2d(df, x, y, color, legend_title, size, is_categorical, selected_color, colors) %>%
+      config(displaylogo = FALSE, scrollZoom = TRUE))
+  } else {
+    coords <- get_dim_map(plot_type)
+    return(plot_3d(df, color, legend_title, size, selected_color, is_categorical, colors, coords) %>%
+      config(displaylogo = FALSE, scrollZoom = TRUE))
+  }
 }

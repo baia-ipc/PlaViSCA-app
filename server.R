@@ -555,7 +555,7 @@ server <- function(input, output, session) {
     })
   })
 
-  ## Handle download data
+  # handle download data
   output$download_data <- downloadHandler(
     filename = function() {
       paste("Plasmodium_vivax_data", Sys.Date(), ".csv")
@@ -569,7 +569,7 @@ server <- function(input, output, session) {
     }
   )
 
-  ## Clear memory on session end (review scope as needed)
+  # clear memory on session end (review scope as needed)
   onSessionEnded(function() {
     rm(list = ls(envir = sessionData), envir = sessionData)
     gc()

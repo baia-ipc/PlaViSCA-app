@@ -1,5 +1,5 @@
 # source function
-source("functions/helper_functions.R")
+source("functions/helpers.R")
 
 # read gff data
 gff_data <- read.table("ref/PvivaxP01_gff_data.tsv", sep = "\t", header = TRUE)
