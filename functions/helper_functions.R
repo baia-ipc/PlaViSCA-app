@@ -1,4 +1,16 @@
-dynamicBlock <- function(i) {
+# function to get genes choice
+get_gene_choices <- function(checked, genes_df) {
+  if (checked) {
+    genes_df$gene
+  } else {
+    genes_df %>%
+      filter(!str_detect(name, "^PVP01")) %>%
+      pull(name)
+  }
+}
+
+# function to generate subBlock for gene expression
+subBlock <- function(i) {
   tagList(
     fluidRow(
       column(
@@ -66,6 +78,61 @@ dynamicBlock <- function(i) {
     )
   )
 }
+
+# function for creating right block
+newBlock <- function(new_count, counter, choice_exp, dynamicBlock,
+                     session) {
+  counter(new_count)
+  insertUI(
+    selector = "#gene_exp_container",
+    where = "beforeEnd",
+    ui = column(
+      width = 6,
+      id = paste0("dynamic_col_", new_count),
+      dynamicBlock(new_count)
+    )
+  )
+
+  shinyjs::delay(100, {
+    updateSelectizeInput(
+      session,
+      inputId = paste0("genes_exp_", new_count),
+      choices = choice_exp,
+      server = TRUE
+    )
+  })
+}
+
+# function to generate df for gene expression
+generate_df_exp <- function(new_count, input, gene_data, get_gene_id) {
+  reactive({
+    req(
+      input[[paste0("genes_exp_", new_count)]],
+      input[[paste0("group_exp_", new_count)]]
+    )
+
+    data <- gene_data()$data
+    gene_exp <- if (!input[[paste0("check_exp_", new_count)]]) {
+      get_gene_id(input[[paste0("genes_exp_", new_count)]], gene_data()$genes)
+    } else {
+      input[[paste0("genes_exp_", new_count)]]
+    }
+
+    if (!(gene_exp %in% colnames(data))) {
+      data$gene_expr <- NA
+    } else {
+      data <- data %>% mutate(gene_expr = .data[[gene_exp]])
+    }
+
+    group_col <- input[[paste0("group_exp_", new_count)]]
+    if (!(tolower(group_col) %in% colnames(data))) {
+      data[[group_col]] <- NA
+    }
+
+    return(data)
+  })
+}
+
 
 
 # function to get gene name
@@ -386,13 +453,23 @@ generate_plotly <- function(df, xaxis_input, yaxis_input, color, legend_title,
     }
   }
 
-  hover_text <- ~ paste(
+  hover_text2d <- ~ paste(
     "Cell:", id,
     "<br>Cluster:", ident,
     "<br>Color by", legend_title, ":", selected_color,
     "<br>n_Features_RNA:", n_feature_rna,
     "<br>X:", x,
     "<br>Y:", y
+  )
+
+  hover_text3d <- ~ paste(
+    "Cell:", id,
+    "<br>Cluster:", ident,
+    "<br>Color by", legend_title, ":", selected_color,
+    "<br>n_Features_RNA:", n_feature_rna,
+    "<br>X:", df[[x_col]],
+    "<br>Y:", df[[y_col]],
+    "<br>Z:", df[[z_col]]
   )
 
   legend_layout <- list(
@@ -415,7 +492,7 @@ generate_plotly <- function(df, xaxis_input, yaxis_input, color, legend_title,
         mode = "markers",
         color = ~ factor(df[[color]]),
         marker = list(size = size),
-        text = hover_text,
+        text = hover_text2d,
         hoverinfo = "text",
         colors = colors,
         width = 1000,
@@ -484,7 +561,7 @@ generate_plotly <- function(df, xaxis_input, yaxis_input, color, legend_title,
         color = ~ factor(df[[color]]),
         marker = list(size = as.numeric(size) * 0.4),
         colors = colors,
-        text = hover_text,
+        text = hover_text3d,
         hoverinfo = "text",
         width = 1000,
         height = 750
