@@ -556,11 +556,17 @@ generate_plotly <- function(df, xaxis_input, yaxis_input, color, legend_title,
   }
 
   if (plot_dim == "2d") {
-    return(plot_2d(df, x, y, color, legend_title, size, is_categorical, selected_color, colors) %>%
+    return(plot_2d(
+      df, x, y, color, legend_title, size, is_categorical,
+      selected_color, colors
+    ) %>%
       config(displaylogo = FALSE, scrollZoom = TRUE))
   } else {
     coords <- get_dim_map(plot_type)
-    return(plot_3d(df, color, legend_title, size, selected_color, is_categorical, colors, coords) %>%
+    return(plot_3d(
+      df, color, legend_title, size, selected_color,
+      is_categorical, colors, coords
+    ) %>%
       config(displaylogo = FALSE, scrollZoom = TRUE))
   }
 }

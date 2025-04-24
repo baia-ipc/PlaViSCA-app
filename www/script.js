@@ -5,7 +5,7 @@ $(document).ready(function() {
   function updateLabelStyles($input) {
     var $label = $input.closest('label');
     var inputName = $input.attr('name');
-    var inputId = $input.attr('id'); // Get the ID
+    var inputId = $input.attr('id'); 
 
     if ($input.is(':checked')) {
       if (inputName !== 'stagelr' && inputName !== 'data_type'
@@ -33,7 +33,8 @@ $(document).ready(function() {
       $input.parent().attr('title', tooltipText);
     });
 
-    $('input[type="checkbox"], input[type="radio"]').tooltip({ placement: 'right' });
+    $('input[type="checkbox"], input[type="radio"]').
+    tooltip({ placement: 'right' });
   }
 
   // Initialize styles and tooltips
@@ -66,7 +67,6 @@ $(document).on('click', '.btn_add', function(){
       Shiny.setInputValue('click_add_btn', btn_id, {priority: 'event'});
 });
     
-
 $(document).on('click', '.btn_remove', function() {
   var btn_id = this.id;
   var ids = $('[id^="dynamic_col_"]').map(function() {
@@ -80,8 +80,6 @@ $(document).on('click', '.btn_remove', function() {
     }, {priority: 'event'});
   }, 100);
 });
-
-
     
 $(document).on('click', '.toggle_exp', function(){
       var btn_id = this.id; 

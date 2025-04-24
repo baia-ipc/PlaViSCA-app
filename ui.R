@@ -237,7 +237,7 @@ ui <- fluidPage(
                     choices = c(""),
                     multiple = TRUE,
                     options = list(
-                      placeholder = "Select an option...",
+                      placeholder = "Select options...",
                       onInitialize = I('function() { this.setValue(""); }')
                     )
                   )
@@ -248,7 +248,7 @@ ui <- fluidPage(
                     choices = c(""),
                     multiple = TRUE,
                     options = list(
-                      placeholder = "Select an option...",
+                      placeholder = "Select options...",
                       onInitialize = I('function() { this.setValue(""); }')
                     )
                   )
@@ -259,7 +259,7 @@ ui <- fluidPage(
                     choices = c(""),
                     multiple = TRUE,
                     options = list(
-                      placeholder = "Select an option...",
+                      placeholder = "Select options...",
                       onInitialize = I('function() { this.setValue(""); }')
                     )
                   )
@@ -270,7 +270,7 @@ ui <- fluidPage(
                     choices = c(""),
                     multiple = TRUE,
                     options = list(
-                      placeholder = "Select an option...",
+                      placeholder = "Select options...",
                       onInitialize = I('function() { this.setValue(""); }')
                     )
                   )
@@ -281,7 +281,7 @@ ui <- fluidPage(
                     choices = c(""),
                     multiple = TRUE,
                     options = list(
-                      placeholder = "Select an option...",
+                      placeholder = "Select options...",
                       onInitialize = I('function() { this.setValue(""); }')
                     )
                   )
@@ -292,7 +292,7 @@ ui <- fluidPage(
                     choices = c(""),
                     multiple = TRUE,
                     options = list(
-                      placeholder = "Select an option...",
+                      placeholder = "Select options...",
                       onInitialize = I('function() { this.setValue(""); }')
                     )
                   )

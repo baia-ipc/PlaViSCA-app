@@ -226,7 +226,6 @@ server <- function(input, output, session) {
 
   choice_exp <- eventReactive(input$check_exp_0, {
     # get_gene_choices(input$check_exp_0, gene_data()$genes)
-
     if (input$check_exp_0) {
       gene_data()$genes$gene
     } else {
@@ -281,7 +280,6 @@ server <- function(input, output, session) {
     gene_id <- get_gene_id(input$genes_exp_0, gene_data()$genes)
     update_gene_links(gene_id)
   })
-
 
   ## add button (click_add_btn from js)
   counter <- reactiveVal(0)
