@@ -115,11 +115,14 @@
 }
 
 #color .shiny-options-group,
+#embedding .shiny-options-group,
 #data_type .shiny-options-group,
 #data_type_exp .shiny-options-group,
 #stagelr .shiny-options-group {
   align-items: flex-end;
 }
+
+
 
 /* Checkbox and Radio Button Layout */
 #stagei .shiny-options-group .checkbox,
@@ -220,9 +223,37 @@
 #size input[type="radio"],
 #color input[type="radio"],
 #data_opt input[type="radio"],
-#plot input[type="radio"] {
+#plot input[type="radio"]{
   display: none;
 }
+
+#embedding .shiny-options-group {
+  display: flex;
+  align-items: center;
+}
+
+#embedding .radio-inline {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100px;
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s, border-color 0.3s;
+}
+
+#embedding .radio-inline input[type="radio"] {
+  display: none; 
+}
+
+#embedding .radio-inline.checked-label {
+  background-color: #d6eaf8;
+  border-color: #3498db;
+  font-weight: bold;
+}
+
 
 /* Sidebar */
 #sidebar {

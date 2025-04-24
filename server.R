@@ -441,18 +441,25 @@ server <- function(input, output, session) {
   })
 
 
+  observeEvent(input$embedding, {
+    if (input$embedding == "tsne") {
+      runjs('$("#tab_switch").css("visibility", "hidden");')
+    } else {
+      runjs('$("#tab_switch").css("visibility", "visible");')
+    }
+  })
+
   ## observer for updating x- and y-axis selections for 2D plots
   observeEvent(list(
-    input$tabset, input$plot, input$xaxis, input$check_pca,
-    input$check_umap, input$check_tsne
+    input$embedding, input$plot, input$xaxis, input$check_all
   ), {
     if (input$plot == "2d") {
       shinyjs::show("axis")
 
-      x_choices <- switch(input$tabset,
-        "UMAP" = x_col(input$check_umap, umap_uint_columns, umap_columns),
-        "PCA" = x_col(input$check_pca, pc_columns, pc_int_columns),
-        "tSNE" = tsne_columns
+      x_choices <- switch(input$embedding,
+        "umap" = if (isTRUE(input$check_all)) umap_uint_columns else umap_columns,
+        "pca" = if (isTRUE(input$check_all)) pc_columns else pc_int_columns,
+        "tsne" = tsne_columns
       )
 
       updateSelectInput(session, "xaxis",
@@ -460,13 +467,13 @@ server <- function(input, output, session) {
         selected = x_choices[1]
       )
 
-      y_choices <- switch(input$tabset,
-        "UMAP" = y_col(
-          input$check_umap, input$xaxis, umap_uint_columns,
+      y_choices <- switch(input$embedding,
+        "umap" = y_col(
+          input$check_all, input$xaxis, umap_uint_columns,
           umap_columns
         ),
-        "PCA" = y_col(input$check_pca, input$xaxis, pc_columns, pc_int_columns),
-        "tSNE" = setdiff(tsne_columns, input$xaxis)
+        "pca" = y_col(input$check_all, input$xaxis, pc_columns, pc_int_columns),
+        "tsne" = setdiff(tsne_columns, input$xaxis)
       )
 
       updateSelectInput(session, "yaxis",
@@ -478,12 +485,14 @@ server <- function(input, output, session) {
     }
   })
 
+
+
   ## schedule update after 1 second
   observe({
     list(
-      input$tabset, input$plot, input$xaxis, input$yaxis, input$color,
+      input$embedding, input$plot, input$xaxis, input$yaxis, input$color,
       input$size, input$genes_n, input$data_type, data(), input$check,
-      input$check_pca, input$check_umap, input$check_tsne
+      input$check_all
     )
     autoUpdatePlot(FALSE)
     later(function() {
@@ -493,23 +502,22 @@ server <- function(input, output, session) {
 
   # Plots update when any of the toggles change
   observeEvent(list(
-    input$check, input$check_pca, input$check_umap,
-    input$check_tsne
+    input$check, input$check_all
   ), {
     autoUpdatePlot(TRUE)
   })
 
   ## Determine plot type based on toggle state before generating plots
   get_plot_type <- reactive({
-    switch(input$tabset,
-      "PCA" = if (isTRUE(input$check_pca)) "PCA_integrated" else "PCA",
-      "UMAP" = if (isTRUE(input$check_umap)) "UMAP_unintegred" else "UMAP",
-      "tSNE" = if (isTRUE(input$check_tsne)) "tSNE_integrated" else "tSNE"
+    switch(input$embedding,
+      "pca" = if (isTRUE(input$check_all)) "PCA" else "PCA_integrated",
+      "umap" = if (isTRUE(input$check_all)) "UMAP_unintegrated" else "UMAP",
+      "tsne" = "tSNE"
     )
   })
 
-  ## Plot pca, umap and tsne rendering
-  output$pca_plotly <- renderPlotly({
+
+  output$all_plotly <- renderPlotly({
     req(data(), input$xaxis, input$yaxis, autoUpdatePlot())
     isolate({
       color_column <- switch(input$color,
@@ -517,10 +525,7 @@ server <- function(input, output, session) {
         "cca_snn" = input$genes_n,
         input$color
       )
-
-      data <- data() %>%
-        select(-any_of(c(umap_columns, umap_uint_columns, tsne_columns)))
-
+      data <- data()
       actual_plot_type <- get_plot_type()
       generate_plotly(
         data, input$xaxis, input$yaxis,
@@ -530,51 +535,6 @@ server <- function(input, output, session) {
     })
   })
 
-  output$umap_plotly <- renderPlotly({
-    req(data(), input$xaxis, input$yaxis, autoUpdatePlot())
-    isolate({
-      color_column <- switch(input$color,
-        "genes" = get_gene_id(input$genes_n, gene_data()$genes),
-        "cca_snn" = input$genes_n,
-        input$color
-      )
-
-      data <- data() %>%
-        select(-any_of(c(pc_columns, pc_int_columns, tsne_columns)))
-
-      actual_plot_type <- get_plot_type()
-      generate_plotly(
-        data, input$xaxis, input$yaxis,
-        color_column, input$genes_n, input$size,
-        plot_type = actual_plot_type, plot_dim = input$plot
-      )
-    })
-  })
-
-  output$tsne_plotly <- renderPlotly({
-    req(data(), input$xaxis, input$yaxis, autoUpdatePlot())
-    isolate({
-      color_column <- switch(input$color,
-        "genes" = get_gene_id(input$genes_n, gene_data()$genes),
-        "cca_snn" = input$genes_n,
-        input$color
-      )
-
-      data <- data() %>%
-        select(-any_of(c(
-          umap_columns, umap_uint_columns, pc_columns,
-          pc_int_columns
-        )))
-
-      actual_plot_type <- get_plot_type()
-
-      generate_plotly(
-        data, input$xaxis, input$yaxis,
-        color_column, input$genes_n, input$size,
-        plot_type = actual_plot_type, plot_dim = input$plot
-      )
-    })
-  })
 
   # handle download data
   output$download_data <- downloadHandler(

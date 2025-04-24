@@ -10,8 +10,7 @@ $(document).ready(function() {
     if ($input.is(':checked')) {
       if (inputName !== 'stagelr' && inputName !== 'data_type'
       && inputName !== 'data_type_exp' && inputId !== 'check' 
-      && inputId !== 'check_exp'&& inputId !== 'check_pca'
-      && inputId !== 'check_umap' && inputId !== 'check_tsne') {
+      && inputId !== 'check_exp' && inputId !== 'embedding') {
         $label.addClass('checked-label');
       } else {
         $label.removeClass('checked-label');

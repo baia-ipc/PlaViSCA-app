@@ -342,11 +342,11 @@ ui <- fluidPage(
               fluidRow(
                 column(width = 6, plotlyOutput("data_pca_stdv_plotly")),
                 column(width = 6, plotlyOutput("variable_genes_plotly"))
-              ),
-              br(),
-              fluidRow(
-                column(width = 12, plotlyOutput("top_genes_exp_plotly"))
               )
+              # br(),
+              # fluidRow(
+              #   column(width = 12, plotlyOutput("top_genes_exp_plotly"))
+              # )
             ),
             div(
               id = "source_section",
@@ -442,57 +442,42 @@ ui <- fluidPage(
             div(id = "gene_exp_container")
           ),
           tabPanel(
-            "PCA",
-            column(
-              id = "tab_switch",
-              width = 6,
-              tags$span(class = "left-label", "Integrated"),
-              tags$label(
-                class = "switch",
-                tags$input(id = "check_pca", type = "checkbox"),
-                tags$span(class = "slider")
+            "Embeddings",
+            fluidRow(
+              column(
+                id = "tab_switch",
+                width = 5,
+                tags$span(class = "left-label", "Integrated"),
+                tags$label(
+                  class = "switch",
+                  tags$input(id = "check_all", type = "checkbox"),
+                  tags$span(class = "slider")
+                ),
+                tags$span(class = "right-label", "Unintegrated")
               ),
-              tags$span(class = "right-label", "Unintegrated")
+              column(
+                width = 6,
+                class = "radio",
+                radioButtons(
+                  "embedding", NULL,
+                  inline = TRUE,
+                  choices = list(
+                    "PCA" = "pca",
+                    "UMAP" = "umap",
+                    "tSNE" = "tsne"
+                  ),
+                  selected = "pca"
+                )
+              )
             ),
             br(),
-            br(),
-            withSpinner(
-              type = 6,
-              size = 0.5,
-              color = "#3498db",
-              plotlyOutput("pca_plotly")
-            )
-          ),
-          tabPanel(
-            "UMAP",
-            column(
-              id = "tab_switch",
-              width = 6,
-              tags$span(class = "left-label", "Integrated"),
-              tags$label(
-                class = "switch",
-                tags$input(id = "check_umap", type = "checkbox"),
-                tags$span(class = "slider")
-              ),
-              tags$span(class = "right-label", "Unintegrated")
-            ),
-            br(),
-            br(),
-            withSpinner(
-              type = 6,
-              size = 0.5,
-              plotlyOutput("umap_plotly")
-            )
-          ),
-          tabPanel(
-            "tSNE",
-            br(),
-            br(),
-            withSpinner(
-              type = 6,
-              color = "#3498db",
-              size = 0.5,
-              plotlyOutput("tsne_plotly")
+            fluidRow(
+              withSpinner(
+                type = 6,
+                size = 0.5,
+                color = "#3498db",
+                plotlyOutput("all_plotly")
+              )
             )
           )
         )
