@@ -34,7 +34,7 @@ server <- function(input, output, session) {
     shinyjs::show("home_section")
   })
 
-  # add ui class sm-11 for for data and Gene Exp tabset
+  # adjust css class for data and Gene Exp tabset
   observe({
     if (input$tabset == "Data" || input$tabset == "Gene Exp") {
       shinyjs::removeClass("sidebar", "visible")
@@ -45,7 +45,7 @@ server <- function(input, output, session) {
     }
   })
 
-  # select raw, normalized and scaled data and filter by stagei
+  # select and filter data (raw, normalized and scaled)
   gene_data <- eventReactive(list(
     input$stagei, input$data_type,
     input$data_type_exp
@@ -69,13 +69,13 @@ server <- function(input, output, session) {
     )
   })
 
-  # Metadata filter by stagei
+  # metadata filter
   filtered_data <- eventReactive(input$stagei, {
     req(input$stagei)
     mr_data %>% filter(stage %in% input$stagei)
   })
 
-  # dataset for further output based on color input
+  # data based on input color
   data <- reactive({
     if (input$color == "genes") {
       gene_data()$data
@@ -130,7 +130,6 @@ server <- function(input, output, session) {
 
       output$data_table <- renderDT(
         {
-          ## metadata table
           DT::datatable(
             filt_data %>%
               rename_with(~ str_to_title(.),
@@ -225,7 +224,6 @@ server <- function(input, output, session) {
   })
 
   choice_exp <- eventReactive(input$check_exp_0, {
-    # get_gene_choices(input$check_exp_0, gene_data()$genes)
     if (input$check_exp_0) {
       gene_data()$genes$gene
     } else {
@@ -237,7 +235,6 @@ server <- function(input, output, session) {
 
   observeEvent(list(input$check_exp_0, input$data_type_exp), {
     req(gene_data())
-
     updateSelectizeInput(session, "genes_exp_0",
       label = if (isTRUE(input$check_exp_0)) "Gene ID" else "Gene name",
       choices = choice_exp(),
@@ -247,7 +244,6 @@ server <- function(input, output, session) {
 
   df_exp <- reactive({
     req(autoUpdateExp(), gene_data(), input$genes_exp_0, input$group_exp)
-
     data <- gene_data()$data
     gene_exp <- if (!input$check_exp_0) {
       get_gene_id(input$genes_exp_0, gene_data()$genes)
@@ -276,7 +272,6 @@ server <- function(input, output, session) {
   ## gene expression link
   observeEvent(input$genes_exp_0, {
     req(input$genes_exp_0)
-
     gene_id <- get_gene_id(input$genes_exp_0, gene_data()$genes)
     update_gene_links(gene_id)
   })
@@ -288,7 +283,6 @@ server <- function(input, output, session) {
     id <- as.numeric(gsub("add_btn_?", "", btn_id))
     shinyjs::hide(paste0("add_btn_", id))
     df_exp_i <- generate_df_exp(id, input, gene_data, get_gene_id)
-
 
     if (id == 0) {
       id <- id + 1
@@ -351,7 +345,6 @@ server <- function(input, output, session) {
 
   choice_exp1 <- eventReactive(input$click_toggle_exp, {
     is_checked <- input[[input$click_toggle_exp]]
-    # get_gene_choices(is_checked, gene_data()$genes)
     if (!is_checked) {
       gene_data()$genes$gene
     } else {
@@ -388,7 +381,7 @@ server <- function(input, output, session) {
     update_gene_links(gene_id)
   })
 
-  # pca, umap and tsne tabset
+  # selectinput genes
   observeEvent(input$genes_n, {
     req(input$genes_n)
     if (input$color == "genes") {
@@ -398,7 +391,6 @@ server <- function(input, output, session) {
   })
 
   choice <- eventReactive(list(input$check, input$data_type), {
-    # get_gene_choices(input$check, gene_data()$genes)
     if (input$check) {
       gene_data()$genes$gene
     } else {
@@ -440,7 +432,7 @@ server <- function(input, output, session) {
     }
   })
 
-
+  ## hide tab_swithch for tsne
   observeEvent(input$embedding, {
     if (input$embedding == "tsne") {
       runjs('$("#tab_switch").css("visibility", "hidden");')
@@ -449,7 +441,7 @@ server <- function(input, output, session) {
     }
   })
 
-  ## observer for updating x- and y-axis selections for 2D plots
+  ## get x- and y-axis selections for 2D plots
   observeEvent(list(
     input$embedding, input$plot, input$xaxis, input$check_all
   ), {
@@ -485,8 +477,6 @@ server <- function(input, output, session) {
     }
   })
 
-
-
   ## schedule update after 1 second
   observe({
     list(
@@ -500,14 +490,12 @@ server <- function(input, output, session) {
     }, 1)
   })
 
-  # Plots update when any of the toggles change
-  observeEvent(list(
-    input$check, input$check_all
-  ), {
+  # update plots when toggles change
+  observeEvent(list(input$check, input$check_all), {
     autoUpdatePlot(TRUE)
   })
 
-  ## Determine plot type based on toggle state before generating plots
+  ## determine plot type
   get_plot_type <- reactive({
     switch(input$embedding,
       "pca" = if (isTRUE(input$check_all)) "PCA" else "PCA_integrated",
@@ -516,7 +504,7 @@ server <- function(input, output, session) {
     )
   })
 
-
+  ## generate plotly plot
   output$all_plotly <- renderPlotly({
     req(data(), input$xaxis, input$yaxis, autoUpdatePlot())
     isolate({
@@ -534,7 +522,6 @@ server <- function(input, output, session) {
       )
     })
   })
-
 
   # handle download data
   output$download_data <- downloadHandler(

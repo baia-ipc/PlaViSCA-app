@@ -1,4 +1,4 @@
-# this script is use to pre processing data for pvsca project
+# this script is used to pre processing data for pvsca project
 
 # load library
 library(Seurat)
