@@ -1,4 +1,3 @@
-/* Global Styles */
 * {
   box-sizing: border-box;
 }
@@ -54,7 +53,7 @@
   transition: color 0.3s ease, text-decoration 0.3s ease;
 }
 
-/* Image Styling */
+/* image*/
 .img {
   padding: 15px;
 }
@@ -67,7 +66,6 @@
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-/* Home Page & Input Sections */
 .introduction p,
 #data_sets_section {
   padding: 15px;
@@ -82,7 +80,8 @@
   display: block;
 }
 
-/* Label Headers for Inputs */
+
+/* Inputs label */
 #stagei-label,
 #size-label,
 #color-label,
@@ -122,9 +121,7 @@
   align-items: flex-end;
 }
 
-
-
-/* Checkbox and Radio Button Layout */
+/* Checkbox and Radio button */
 #stagei .shiny-options-group .checkbox,
 #size .shiny-options-group .radio,
 #data_opt .shiny-options-group .radio,
@@ -150,7 +147,6 @@
   font-style: italic;
 }
 
-/* General Labels */
 #stagei label,
 #size label,
 #color label,
@@ -166,7 +162,7 @@
   width: 100%;
 }
 
-/* Data Option Section */
+/* Data options */
 #data_opt {
   width: 100% !important;
 }
@@ -175,7 +171,7 @@
   justify-content: center;
 }
 
-/* Custom Radio Button Labels (Data Options) */
+/* Custom label for data_opt*/
 #data_opt .radio label {
   position: relative;
   display: flex;
@@ -213,12 +209,12 @@
   left: -40px;
 }
 
-/* Remove Background Color from stage-lr Labels */
+/* Remove background color */
 #stagelr label {
   background-color: transparent !important;
 }
 
-/* Hide Default Inputs */
+/* Hide default checkbox and radio */
 #stagei input[type="checkbox"],
 #size input[type="radio"],
 #color input[type="radio"],
@@ -255,7 +251,7 @@
 }
 
 
-/* Sidebar */
+/* Sidebar layout */
 #sidebar {
   width: 0;
   opacity: 0;
@@ -270,14 +266,14 @@
   transition: width 0.5s ease, opacity 0.5s ease;
 }
 
-/* Data Type Option Groups */
+/* Data type option */
 #data_type .shiny-options-group,
 #data_type_exp .shiny-options-group {
   margin: 0;
   justify-content: space-between;
 }
 
-/* Gene and Switch UI */
+/* Gene and switch UI */
 #gene_snn_ui {
   display: flex;
   align-items: center;
@@ -297,7 +293,7 @@
   padding: 0;
 }
 
-/* Switch Styles */
+/* Switch styles */
 .switch {
   position: relative;
   display: inline-block;
@@ -345,7 +341,7 @@ input:checked + .slider:before {
   transform: translateX(11px);
 }
 
-/* Gene Expression UI */
+/* Gene expression UI */
 #gene_exp_ui {
   position: relative;
   display: flex;
@@ -384,13 +380,13 @@ input:checked + .slider:before {
   padding-left: 2.5px;
 }
 
-/* Data Section Layout */
+/* Data section layout */
 #data_sets_section .col-sm-8 {
   width: 75%;
   transition: width 0.1s ease;
 }
 
-/* Tab Switch */
+/* Tab switch */
 #tab_switch {
   position: relative;
   margin-top: 15px;
@@ -438,7 +434,7 @@ input:checked + .slider:before {
   transform: translateX(39px);
 }
 
-/* Label Text Styling */
+/* label for switch */
 .left-label,
 .right-label {
   font-size: 14px;
@@ -453,8 +449,7 @@ input:checked + .slider:before {
 }
 
 
-
-/* Checked Label Styling */
+/* Checked label */
 .checked-label {
   background-color: #d6eaf8 !important;
   font-weight: bold;
@@ -463,13 +458,13 @@ input:checked + .slider:before {
   transition: background-color 0.3s, border-color 0.3s;
 }
 
-/* Selected Input Styling */
+/* remove padding left and right for col-sm-6 */
 .col-sm-6 {
   padding-left: 0 !important;
   padding-right: 0 !important;
 }
 
-/* Download Button */
+/* Download button */
 .bt-download {
   background-color: #43a047;
   color: white;
@@ -486,7 +481,7 @@ input:checked + .slider:before {
   font-style: italic;
 }
 
-/* Responsive Design */
+/* Responsive design */
 @media screen and (max-width: 768px) {
   .menu-bar {
     flex-direction: column;

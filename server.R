@@ -14,6 +14,7 @@ raw_df <- exp_df$raw_df
 scale_df <- exp_df$scale_df
 rm(exp_df)
 
+
 server <- function(input, output, session) {
   sessionData <- new.env(parent = emptyenv())
   autoUpdatePlot <- reactiveVal(FALSE)
@@ -46,22 +47,33 @@ server <- function(input, output, session) {
   })
 
   # select and filter data (raw, normalized and scaled)
+  last_input <- reactiveVal(NULL)
+  observeEvent(input$data_type, {
+    last_input("data_type")
+  })
+
+  observeEvent(input$data_type_exp, {
+    last_input("data_type_exp")
+  })
+
   gene_data <- eventReactive(list(
-    input$stagei, input$data_type,
-    input$data_type_exp
+    input$stagei, input$data_type, input$data_type_exp
   ), {
     req(input$stagei)
-    dataset <- switch(input$data_type,
-      "raw" = raw_df,
-      "normalize" = norm_df,
-      "scale" = scale_df
-    )
-
-    dataset <- switch(input$data_type_exp,
-      "raw" = raw_df,
-      "normalize" = norm_df,
-      "scale" = scale_df
-    )
+    current_input <- last_input()
+    if (current_input == "data_type") {
+      dataset <- switch(input$data_type,
+        "raw" = raw_df,
+        "normalize" = norm_df,
+        "scale" = scale_df
+      )
+    } else {
+      dataset <- switch(input$data_type_exp,
+        "raw" = raw_df,
+        "normalize" = norm_df,
+        "scale" = scale_df
+      )
+    }
 
     list(
       data = dataset %>% filter(stage %in% input$stagei),
@@ -75,16 +87,7 @@ server <- function(input, output, session) {
     mr_data %>% filter(stage %in% input$stagei)
   })
 
-  # data based on input color
-  data <- reactive({
-    if (input$color == "genes") {
-      gene_data()$data
-    } else {
-      filtered_data()
-    }
-  })
-
-  # Data tabset
+  # Data tabset ---
   observeEvent(input$tabset, {
     if (input$tabset == "Data") {
       filt_data <- filtered_data()
@@ -122,7 +125,6 @@ server <- function(input, output, session) {
         )
     }
 
-
     if (input$data_opt == "meta") {
       shinyjs::show("meta_section")
       shinyjs::hide("qual_section")
@@ -130,6 +132,7 @@ server <- function(input, output, session) {
 
       output$data_table <- renderDT(
         {
+          ## data table
           DT::datatable(
             filt_data %>%
               rename_with(~ str_to_title(.),
@@ -150,32 +153,32 @@ server <- function(input, output, session) {
         server = TRUE
       )
 
-      ## stage vs count
+      ## plot stage vs count
       output$stage_plotly <- renderPlotly({
         meta_plotly(filt_data, "stage", "Count", "Stage", "bar")
       })
 
-      ## sample vs count
+      ## plot sample vs count
       output$sample_plotly <- renderPlotly({
         meta_plotly(filt_data, "sample", "Count", "Sample", "bar")
       })
 
-      ## strain vs count
+      ## plot strain vs count
       output$strain_plotly <- renderPlotly({
         meta_plotly(filt_data, "vivax_strain", "Count", "Strain", "bar")
       })
 
-      ## species vs count
+      ## plot species vs count
       output$species_plotly <- renderPlotly({
         meta_plotly(filt_data, "species", "Count", "Species", "bar")
       })
 
-      ## type vs count
+      ## plot type vs count
       output$type_plotly <- renderPlotly({
         meta_plotly(filt_data, "type", "Count", "Type", "bar")
       })
 
-      ## type vs count
+      ## plot type vs count
       output$location_plotly <- renderPlotly({
         meta_plotly(filt_data, "location", "Count", "Location", "bar")
       })
@@ -184,25 +187,29 @@ server <- function(input, output, session) {
       shinyjs::hide("meta_section")
       shinyjs::hide("source_section")
 
+      ## plot nCount in qual tabset
       output$data_count_plotly <- renderPlotly({
-        rna_feature_plot(filtered_data(),
+        feature_plot(filtered_data(),
           x = "sample", y = "n_count_rna",
           color = "ident", y_title = "RNA count", title = "RNA Count"
         )
       })
 
+      ## plot nFeature in qual tabset
       output$data_feature_plotly <- renderPlotly({
-        rna_feature_plot(filtered_data(),
+        feature_plot(filtered_data(),
           x = "sample", y = "n_feature_rna",
           color = "ident", y_title = "nFeature count",
           title = "Feature Count"
         )
       })
 
+      ## plot elbow
       output$data_pca_stdv_plotly <- renderPlotly({
         elbow_plot(pca_std_df)
       })
 
+      ## plot variable genes
       output$variable_genes_plotly <- renderPlotly({
         var_genes_plot(vf_data, top_n = 15)
       })
@@ -210,71 +217,80 @@ server <- function(input, output, session) {
       shinyjs::show("source_section")
       shinyjs::hide("qual_section")
       shinyjs::hide("meta_section")
-      # further implementation with data sources
+      ## further implementation with data sources
     }
   })
 
-  # Gene Exp tabset
+  # Gene Exp tabset ---
   autoUpdateExp <- reactiveVal(TRUE)
-  observeEvent(list(input$check_exp_0, input$data_type_exp), {
+  observe({
+    list(input$check_exp_0, input$data_type_exp)
     autoUpdateExp(FALSE)
     later(function() {
       autoUpdateExp(TRUE)
     }, 1)
   })
 
-  choice_exp <- eventReactive(input$check_exp_0, {
-    if (input$check_exp_0) {
-      gene_data()$genes$gene
-    } else {
-      gene_data()$genes %>%
-        filter(!str_detect(name, "^PVP01")) %>%
-        pull(name)
-    }
+  choice_exp0 <- eventReactive(input$check_exp_0, {
+    get_gene_choices(gene_data()$genes, input$check_exp_0)
   })
 
   observeEvent(list(input$check_exp_0, input$data_type_exp), {
     req(gene_data())
     updateSelectizeInput(session, "genes_exp_0",
       label = if (isTRUE(input$check_exp_0)) "Gene ID" else "Gene name",
-      choices = choice_exp(),
+      choices = choice_exp0(),
       server = TRUE
     )
   })
 
   df_exp <- reactive({
     req(autoUpdateExp(), gene_data(), input$genes_exp_0, input$group_exp)
-    data <- gene_data()$data
-    gene_exp <- if (!input$check_exp_0) {
-      get_gene_id(input$genes_exp_0, gene_data()$genes)
-    } else {
-      input$genes_exp_0
-    }
 
-    if (!(gene_exp %in% colnames(data))) {
-      data$gene_expr <- NA
-    } else {
-      data <- data %>% mutate(gene_expr = .data[[gene_exp]])
-    }
-
-    if (!(tolower(input$group_exp) %in% colnames(data))) {
-      data[[input$group_exp]] <- NA
-    }
-
-    return(data)
+    df_exp0(
+      gene_data = gene_data(), gene_input = input$genes_exp_0,
+      group_input = input$group_exp,
+      check_exp = input$check_exp_0
+    )
   })
 
   output$gene_exp_plotly <- renderPlotly({
     req(df_exp())
-    plot_gene_expression(df_exp(), tolower(input$group_exp))
+    gene_exp_plot(df_exp(), tolower(input$group_exp))
   })
 
   ## gene expression link
   observeEvent(input$genes_exp_0, {
     req(input$genes_exp_0)
     gene_id <- get_gene_id(input$genes_exp_0, gene_data()$genes)
-    update_gene_links(gene_id)
+    gene_links(gene_id)
   })
+
+
+  # choice_expi <- eventReactive(input$click_toggle_exp, {
+  #   checked_input <- input[[input$click_toggle_exp]]
+  #   get_gene_choices(gene_data()$genes, checked_input, reverse = TRUE)
+  # })
+
+  choice_expi <- reactive({
+    toggle_id <- input$click_toggle_exp
+
+    if (!is.null(toggle_id) &&
+      is.character(toggle_id) &&
+      length(toggle_id) == 1 &&
+      !is.null(input[[toggle_id]])) {
+      checked_input <- isTRUE(input[[toggle_id]])
+      print(paste("Toggle state:", checked_input))
+    } else {
+      checked_input <- FALSE
+    }
+
+    get_gene_choices(gene_data()$genes, checked_input, reverse = FALSE)
+  })
+
+
+
+
 
   ## add button (click_add_btn from js)
   counter <- reactiveVal(0)
@@ -282,7 +298,7 @@ server <- function(input, output, session) {
     btn_id <- input$click_add_btn
     id <- as.numeric(gsub("add_btn_?", "", btn_id))
     shinyjs::hide(paste0("add_btn_", id))
-    df_exp_i <- generate_df_exp(id, input, gene_data, get_gene_id)
+    df_exp_i <- df_expi(id, input, gene_data, get_gene_id)
 
     if (id == 0) {
       id <- id + 1
@@ -299,7 +315,7 @@ server <- function(input, output, session) {
         updateSelectizeInput(
           session,
           inputId = paste0("genes_exp_", id),
-          choices = choice_exp(),
+          choices = choice_expi(),
           server = TRUE
         )
       })
@@ -311,7 +327,7 @@ server <- function(input, output, session) {
       })
     } else {
       id <- id + 1
-      newBlock(id, counter, choice_exp(), subBlock, session)
+      newBlock(id, counter, choice_expi(), subBlock, session)
       output[[paste0("gene_exp_plotly_", id)]] <- renderPlotly({
         plot_gene_expression(
           df_exp_i(),
@@ -343,16 +359,7 @@ server <- function(input, output, session) {
     ignoreNULL = TRUE
   )
 
-  choice_exp1 <- eventReactive(input$click_toggle_exp, {
-    is_checked <- input[[input$click_toggle_exp]]
-    if (!is_checked) {
-      gene_data()$genes$gene
-    } else {
-      gene_data()$genes %>%
-        filter(!str_detect(name, "^PVP01")) %>%
-        pull(name)
-    }
-  })
+
 
   observeEvent(list(input$click_toggle_exp, input$data_type_exp), {
     req(gene_data())
@@ -368,7 +375,7 @@ server <- function(input, output, session) {
         session,
         paste0("genes_exp_", id),
         label = if (isTRUE(is_checked)) "Gene name" else "Gene ID",
-        choices = choice_exp1(),
+        choices = choice_expi(),
         server = TRUE
       )
     }
@@ -378,26 +385,20 @@ server <- function(input, output, session) {
     id <- input$change_gene_exp
     id <- as.numeric(gsub("genes_exp_", "", id))
     gene_id <- get_gene_id(input[[paste0("genes_exp_", id)]], gene_data()$genes)
-    update_gene_links(gene_id)
+    gene_links(gene_id)
   })
 
-  # selectinput genes
+  # Embedding tabset ---
   observeEvent(input$genes_n, {
     req(input$genes_n)
     if (input$color == "genes") {
       gene_id <- get_gene_id(input$genes_n, gene_data()$genes)
-      update_gene_links(gene_id)
+      gene_links(gene_id)
     }
   })
 
   choice <- eventReactive(list(input$check, input$data_type), {
-    if (input$check) {
-      gene_data()$genes$gene
-    } else {
-      gene_data()$genes %>%
-        filter(!str_detect(name, "^PVP01")) %>%
-        pull(name)
-    }
+    get_gene_choices(gene_data()$genes, input$check, reverse = FALSE)
   })
 
   ## dynamic UI for gene and cca_snn selection
@@ -432,7 +433,7 @@ server <- function(input, output, session) {
     }
   })
 
-  ## hide tab_swithch for tsne
+  ## hide switch for tsne
   observeEvent(input$embedding, {
     if (input$embedding == "tsne") {
       runjs('$("#tab_switch").css("visibility", "hidden");')
@@ -441,13 +442,12 @@ server <- function(input, output, session) {
     }
   })
 
-  ## get x- and y-axis selections for 2D plots
+  ## get x- and y- axis selections for 2D plots
   observeEvent(list(
     input$embedding, input$plot, input$xaxis, input$check_all
   ), {
     if (input$plot == "2d") {
       shinyjs::show("axis")
-
       x_choices <- switch(input$embedding,
         "umap" = if (isTRUE(input$check_all)) umap_uint_columns else umap_columns,
         "pca" = if (isTRUE(input$check_all)) pc_columns else pc_int_columns,
@@ -477,7 +477,16 @@ server <- function(input, output, session) {
     }
   })
 
-  ## schedule update after 1 second
+  ## select data based on input color
+  data <- reactive({
+    if (input$color == "genes") {
+      gene_data()$data
+    } else {
+      filtered_data()
+    }
+  })
+
+  ## update after 1 sec
   observe({
     list(
       input$embedding, input$plot, input$xaxis, input$yaxis, input$color,
@@ -504,7 +513,7 @@ server <- function(input, output, session) {
     )
   })
 
-  ## generate plotly plot
+  ## generate pca, umap and tsne plot
   output$all_plotly <- renderPlotly({
     req(data(), input$xaxis, input$yaxis, autoUpdatePlot())
     isolate({
@@ -514,11 +523,11 @@ server <- function(input, output, session) {
         input$color
       )
       data <- data()
-      actual_plot_type <- get_plot_type()
-      generate_plotly(
+      plot_type <- get_plot_type()
+      embedding_plot(
         data, input$xaxis, input$yaxis,
         color_column, input$genes_n, input$size,
-        plot_type = actual_plot_type, plot_dim = input$plot
+        plot_type = plot_type, plot_dim = input$plot
       )
     })
   })
@@ -537,9 +546,13 @@ server <- function(input, output, session) {
     }
   )
 
-  # clear memory on session end (review scope as needed)
+  # clear memory on session end
   onSessionEnded(function() {
-    rm(list = ls(envir = sessionData), envir = sessionData)
+    message("Session ended. Cleaning up memory...")
+    if (exists("sessionData", envir = .GlobalEnv)) {
+      rm(list = ls(envir = sessionData), envir = sessionData)
+    }
+    rm(list = ls(envir = .GlobalEnv, pattern = "^temp_"), envir = .GlobalEnv)
     gc()
   })
 }

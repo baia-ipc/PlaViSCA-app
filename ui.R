@@ -343,10 +343,6 @@ ui <- fluidPage(
                 column(width = 6, plotlyOutput("data_pca_stdv_plotly")),
                 column(width = 6, plotlyOutput("variable_genes_plotly"))
               )
-              # br(),
-              # fluidRow(
-              #   column(width = 12, plotlyOutput("top_genes_exp_plotly"))
-              # )
             ),
             div(
               id = "source_section",

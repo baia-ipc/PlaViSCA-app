@@ -1,4 +1,4 @@
-# function to get gene name
+# Get genes annotation
 genes <- function(data, gff_data, pattern = "pvp") {
   data %>%
     colnames() %>%
@@ -10,7 +10,32 @@ genes <- function(data, gff_data, pattern = "pvp") {
     select(gene, name)
 }
 
-# function get gene name
+# Get gene column
+get_gene_choices <- function(genes_df, checked, reverse = FALSE) {
+  if (checked) {
+    genes_df$gene
+  } else {
+    genes_df %>%
+      filter(!str_detect(name, "^PVP01")) %>%
+      pull(name)
+  }
+}
+
+# get_gene_choices <- function(genes_df, checked, reverse = FALSE) {
+#   is_active <- if (reverse) !checked else checked
+#
+#   print(paste("is_active:", is_active))
+#
+#   if (is_active) {
+#     genes_df$gene
+#   } else {
+#     genes_df %>%
+#       filter(!str_detect(name, "^PVP01")) %>%
+#       pull(name)
+#   }
+# }
+
+# Get gene id
 get_gene_id <- function(gene_name, gene_names) {
   if (gene_name %in% gene_names$name) {
     return(gene_names$gene[gene_names$name == gene_name])
@@ -19,8 +44,7 @@ get_gene_id <- function(gene_name, gene_names) {
   }
 }
 
-
-# function to generate subBlock for gene expression
+# Generate UI subBlock in gene expression
 subBlock <- function(i) {
   tagList(
     fluidRow(
@@ -90,9 +114,8 @@ subBlock <- function(i) {
   )
 }
 
-# function for creating right block
-newBlock <- function(new_count, counter, choice_exp, dynamicBlock,
-                     session) {
+# Create new block
+newBlock <- function(new_count, counter, choice_exp, dynamicBlock, session) {
   counter(new_count)
   insertUI(
     selector = "#gene_exp_container",
@@ -114,8 +137,30 @@ newBlock <- function(new_count, counter, choice_exp, dynamicBlock,
   })
 }
 
-# function to generate df for gene expression
-generate_df_exp <- function(new_count, input, gene_data, get_gene_id) {
+# Generate df for gene_exp0
+df_exp0 <- function(gene_data, gene_input, group_input, check_exp) {
+  df <- gene_data$data
+  genes <- gene_data$genes
+  gene_exp <- if (!check_exp) {
+    get_gene_id(gene_input, genes)
+  } else {
+    gene_input
+  }
+
+  if (!(gene_exp %in% colnames(df))) {
+    df$gene_expr <- NA
+  } else {
+    df <- df %>% mutate(gene_expr = .data[[gene_exp]])
+  }
+
+  if (!(tolower(group_input) %in% colnames(df))) {
+    df[[group_input]] <- NA
+  }
+  return(df)
+}
+
+# Generate df for gene_expi
+df_expi <- function(new_count, input, gene_data, get_gene_id) {
   reactive({
     req(
       input[[paste0("genes_exp_", new_count)]],
@@ -144,11 +189,10 @@ generate_df_exp <- function(new_count, input, gene_data, get_gene_id) {
   })
 }
 
-
-# set color pallet
+# Set color pallet
 colors <- RColorBrewer::brewer.pal(12, "Set3")
 
-# function to generate metadata plot
+# Generate metadata plot
 meta_plotly <- function(data, x_var, x_label, y_label, plt_type = "bar") {
   data_summary <- data %>%
     group_by(.data[[x_var]]) %>%
@@ -178,8 +222,8 @@ meta_plotly <- function(data, x_var, x_label, y_label, plt_type = "bar") {
     )
 }
 
-# function to generate plot for for RNA and feature count
-rna_feature_plot <- function(df, x, y, color, y_title, title) {
+# Generate plot for RNA and feature count
+feature_plot <- function(df, x, y, color, y_title, title) {
   req(df)
   plot_ly(
     data = df,
@@ -199,7 +243,7 @@ rna_feature_plot <- function(df, x, y, color, y_title, title) {
     )
 }
 
-# Elbow plot for PCA
+# Generate Elbow plot for PCA
 elbow_plot <- function(pca_std_df) {
   req(pca_std_df)
   plot_ly(
@@ -220,7 +264,7 @@ elbow_plot <- function(pca_std_df) {
     )
 }
 
-# function to plot the variable genes
+# Generate plot for top variable genes
 var_genes_plot <- function(df, top_n = 10) {
   req(df)
 
@@ -281,8 +325,8 @@ var_genes_plot <- function(df, top_n = 10) {
 }
 
 
-# function to plot the gene expression
-plot_gene_expression <- function(data, x_col) {
+# Generate violine gene exp plot
+gene_exp_plot <- function(data, x_col) {
   plot_ly(
     data = data,
     x = ~ .data[[x_col]],
@@ -299,8 +343,8 @@ plot_gene_expression <- function(data, x_col) {
 }
 
 
-# function to update PlasmoDB and NCBI links
-update_gene_links <- function(gene_id) {
+# Generate PlasmoDB and NCBI links
+gene_links <- function(gene_id) {
   plasmo_url <- paste0("https://plasmodb.org/plasmo/app/record/gene/", gene_id)
   ncbi_url <- paste0("https://www.ncbi.nlm.nih.gov/protein/", gene_id)
 
@@ -327,7 +371,7 @@ y_col <- function(check_input, x_col, unintegrated, integrated) {
 }
 
 
-# color column based on input
+# Generate color column based on input option
 get_color_column <- function(color_type, gene_input, gene_data_obj) {
   switch(color_type,
     "genes" = get_gene_id(gene_input, gene_data_obj),
@@ -336,7 +380,7 @@ get_color_column <- function(color_type, gene_input, gene_data_obj) {
   )
 }
 
-# Function to assign colors based on the number of categories
+# Assign colors based on the number of categories
 assign_colors <- function(num_categories) {
   if (num_categories <= 12) {
     return(RColorBrewer::brewer.pal(
@@ -344,23 +388,13 @@ assign_colors <- function(num_categories) {
       name = "Set3"
     )[1:num_categories])
   } else {
-    return(rep(RColorBrewer::brewer.pal(12, "Set3"), length.out = num_categories))
+    return(rep(RColorBrewer::brewer.pal(12, "Set3"),
+      length.out = num_categories
+    ))
   }
 }
 
-
-# colors
-assign_colors <- function(num_categories) {
-  if (num_categories <= 12) {
-    return(RColorBrewer::brewer.pal(
-      n = max(num_categories, 3),
-      name = "Set3"
-    )[1:num_categories])
-  } else {
-    return(rep(RColorBrewer::brewer.pal(12, "Set3"), length.out = num_categories))
-  }
-}
-
+# check if the data is categorical
 is_categorical_data <- function(x) {
   is.character(x) || is.factor(x)
 }
@@ -371,14 +405,14 @@ prepare_categorical_colors <- function(df, color) {
   unique_categories <- unique(df[[color]])
 
   if ("NA (missing)" %in% unique_categories) {
-    non_missing <- unique_categories[unique_categories != "NA (missing)"]
-    assigned <- if (length(non_missing) > 0) {
-      assign_colors(length(non_missing))
+    none_missing <- unique_categories[unique_categories != "NA (missing)"]
+    assigned <- if (length(none_missing) > 0) {
+      assign_colors(length(none_missing))
     } else {
       character(0)
     }
-    colors <- setNames(c("#A9A9A94D", assigned), c("NA (missing)", non_missing))
-    df[[color]] <- factor(df[[color]], levels = c("NA (missing)", non_missing))
+    colors <- setNames(c("#A9A9A94D", assigned), c("NA (missing)", none_missing))
+    df[[color]] <- factor(df[[color]], levels = c("NA (missing)", none_missing))
   } else {
     assigned <- assign_colors(length(unique_categories))
     colors <- setNames(assigned, unique_categories)
@@ -388,8 +422,8 @@ prepare_categorical_colors <- function(df, color) {
   return(list(df = df, colors = colors))
 }
 
-# plot dimention
-get_dim_map <- function(plot_type) {
+# Get plot dimension
+get_dim <- function(plot_type) {
   list(
     PCA = c("pc_1", "pc_2", "pc_3"),
     PCA_integrated = c(
@@ -404,8 +438,7 @@ get_dim_map <- function(plot_type) {
   )[[plot_type]]
 }
 
-
-
+# Get legend and format chart
 get_legend_layout <- function(legend_title) {
   list(
     title = list(text = legend_title),
@@ -416,7 +449,7 @@ get_legend_layout <- function(legend_title) {
   )
 }
 
-# 2D Plot
+# Generate 2d plot
 plot_2d <- function(df, x, y, color, legend_title, size,
                     is_categorical, selected_color, colors) {
   hover_text <- ~ paste(
@@ -466,7 +499,7 @@ plot_2d <- function(df, x, y, color, legend_title, size,
   }
 }
 
-# 3D Plot
+# Generate 3d plot
 plot_3d <- function(df, color, legend_title, size, selected_color,
                     is_categorical, colors, coords) {
   x_col <- coords[1]
@@ -531,10 +564,9 @@ plot_3d <- function(df, color, legend_title, size, selected_color,
   }
 }
 
-
-# main pca, umap and tsne plotting function
-generate_plotly <- function(df, xaxis_input, yaxis_input, color, legend_title,
-                            size, plot_type = "PCA", plot_dim = "2d") {
+# Main pca, umap and tsne plotting function
+embedding_plot <- function(df, xaxis_input, yaxis_input, color, legend_title,
+                           size, plot_type = "PCA", plot_dim = "2d") {
   x <- df[[xaxis_input]]
   y <- df[[yaxis_input]]
   selected_color <- df[[color]]
@@ -551,17 +583,17 @@ generate_plotly <- function(df, xaxis_input, yaxis_input, color, legend_title,
   }
 
   if (plot_dim == "2d") {
-    return(plot_2d(
+    plot_2d(
       df, x, y, color, legend_title, size, is_categorical, selected_color,
       colors
     ) %>%
-      config(displaylogo = FALSE, scrollZoom = TRUE))
+      config(displaylogo = FALSE, scrollZoom = TRUE)
   } else {
-    coords <- get_dim_map(plot_type)
-    return(plot_3d(
+    coords <- get_dim(plot_type)
+    plot_3d(
       df, color, legend_title, size, selected_color,
       is_categorical, colors, coords
     ) %>%
-      config(displaylogo = FALSE, scrollZoom = TRUE))
+      config(displaylogo = FALSE, scrollZoom = TRUE)
   }
 }
