@@ -266,31 +266,15 @@ server <- function(input, output, session) {
     gene_links(gene_id)
   })
 
+  choice_expi_val <- reactiveVal()
+  observeEvent(input$click_toggle_exp, {
+    toggle_value <- input$click_toggle_exp$value
+    toggle_value <- if (!is.null(toggle_value)) toggle_value else FALSE
 
-  # choice_expi <- eventReactive(input$click_toggle_exp, {
-  #   checked_input <- input[[input$click_toggle_exp]]
-  #   get_gene_choices(gene_data()$genes, checked_input, reverse = TRUE)
-  # })
-
-  choice_expi <- reactive({
-    toggle_id <- input$click_toggle_exp
-
-    if (!is.null(toggle_id) &&
-      is.character(toggle_id) &&
-      length(toggle_id) == 1 &&
-      !is.null(input[[toggle_id]])) {
-      checked_input <- isTRUE(input[[toggle_id]])
-      print(paste("Toggle state:", checked_input))
-    } else {
-      checked_input <- FALSE
-    }
-
-    get_gene_choices(gene_data()$genes, checked_input, reverse = FALSE)
+    choice_expi_val(
+      get_gene_choices(gene_data()$genes, toggle_value)
+    )
   })
-
-
-
-
 
   ## add button (click_add_btn from js)
   counter <- reactiveVal(0)
@@ -299,6 +283,10 @@ server <- function(input, output, session) {
     id <- as.numeric(gsub("add_btn_?", "", btn_id))
     shinyjs::hide(paste0("add_btn_", id))
     df_exp_i <- df_expi(id, input, gene_data, get_gene_id)
+
+    choice_expi_val(
+      get_gene_choices(gene_data()$genes, FALSE)
+    )
 
     if (id == 0) {
       id <- id + 1
@@ -315,21 +303,21 @@ server <- function(input, output, session) {
         updateSelectizeInput(
           session,
           inputId = paste0("genes_exp_", id),
-          choices = choice_expi(),
+          choices = choice_expi_val(),
           server = TRUE
         )
       })
       output[[paste0("gene_exp_plotly_", id)]] <- renderPlotly({
-        plot_gene_expression(
+        gene_exp_plot(
           df_exp_i(),
           tolower(input[[paste0("group_exp_", id)]])
         )
       })
     } else {
       id <- id + 1
-      newBlock(id, counter, choice_expi(), subBlock, session)
+      newBlock(id, counter, choice_expi_val(), subBlock, session)
       output[[paste0("gene_exp_plotly_", id)]] <- renderPlotly({
-        plot_gene_expression(
+        gene_exp_plot(
           df_exp_i(),
           tolower(input[[paste0("group_exp_", id)]])
         )
@@ -365,17 +353,17 @@ server <- function(input, output, session) {
     req(gene_data())
     req(input$click_toggle_exp)
 
-    btn_id <- input$click_toggle_exp
+    btn_id <- input$click_toggle_exp$id
     id <- as.numeric(gsub("check_exp_", "", btn_id))
 
-    if (is.character(input$click_toggle_exp)) {
-      is_checked <- input[[input$click_toggle_exp]]
+    if (is.character(input$click_toggle_exp$id)) {
+      is_checked <- input$click_toggle_exp$value
 
       updateSelectizeInput(
         session,
         paste0("genes_exp_", id),
-        label = if (isTRUE(is_checked)) "Gene name" else "Gene ID",
-        choices = choice_expi(),
+        label = if (isTRUE(is_checked)) "Gene ID" else "Gene name",
+        choices = choice_expi_val(),
         server = TRUE
       )
     }
@@ -398,7 +386,7 @@ server <- function(input, output, session) {
   })
 
   choice <- eventReactive(list(input$check, input$data_type), {
-    get_gene_choices(gene_data()$genes, input$check, reverse = FALSE)
+    get_gene_choices(gene_data()$genes, input$check)
   })
 
   ## dynamic UI for gene and cca_snn selection

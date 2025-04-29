@@ -11,7 +11,7 @@ genes <- function(data, gff_data, pattern = "pvp") {
 }
 
 # Get gene column
-get_gene_choices <- function(genes_df, checked, reverse = FALSE) {
+get_gene_choices <- function(genes_df, checked) {
   if (checked) {
     genes_df$gene
   } else {

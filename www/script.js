@@ -82,7 +82,11 @@ $(document).on('click', '.btn_remove', function() {
     
 $(document).on('click', '.toggle_exp', function(){
       var btn_id = this.id; 
-      Shiny.setInputValue('click_toggle_exp', btn_id, {priority: 'event'});
+      var is_checked = this.checked;
+      Shiny.setInputValue('click_toggle_exp', {
+        id: btn_id,
+        value: is_checked
+      }, {priority: 'event'});
 });
     
 $(document).on('change', '[id^="genes_exp_"]', function() {
