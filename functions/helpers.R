@@ -21,20 +21,6 @@ get_gene_choices <- function(genes_df, checked) {
   }
 }
 
-# get_gene_choices <- function(genes_df, checked, reverse = FALSE) {
-#   is_active <- if (reverse) !checked else checked
-#
-#   print(paste("is_active:", is_active))
-#
-#   if (is_active) {
-#     genes_df$gene
-#   } else {
-#     genes_df %>%
-#       filter(!str_detect(name, "^PVP01")) %>%
-#       pull(name)
-#   }
-# }
-
 # Get gene id
 get_gene_id <- function(gene_name, gene_names) {
   if (gene_name %in% gene_names$name) {
@@ -394,7 +380,7 @@ assign_colors <- function(num_categories) {
   }
 }
 
-# check if the data is categorical
+# Check if the data is categorical
 is_categorical_data <- function(x) {
   is.character(x) || is.factor(x)
 }
@@ -453,10 +439,10 @@ get_legend_layout <- function(legend_title) {
 plot_2d <- function(df, x, y, color, legend_title, size,
                     is_categorical, selected_color, colors) {
   hover_text <- ~ paste(
-    "Cell:", id,
-    "<br>Cluster:", ident,
+    "Cell:", df$id,
+    "<br>Cluster:", df$ident,
     "<br>Color by", legend_title, ":", selected_color,
-    "<br>n_Features_RNA:", n_feature_rna,
+    "<br>n_Features_RNA:", df$n_feature_rna,
     "<br>X:", x,
     "<br>Y:", y
   )
@@ -464,14 +450,16 @@ plot_2d <- function(df, x, y, color, legend_title, size,
   legend_layout <- get_legend_layout(legend_title)
 
   if (is_categorical) {
-    plot_ly(
+    p <- plot_ly(
       data = df, x = x, y = y,
       type = "scatter", mode = "markers",
       color = ~ factor(df[[color]]),
       marker = list(size = size),
       text = hover_text, hoverinfo = "text",
       colors = colors,
-      width = 1000, height = 750
+      width = 1000, height = 750,
+      source = "embedding",
+      key = ~id
     ) %>%
       layout(
         xaxis = list(title = paste("X-", x)),
@@ -479,7 +467,7 @@ plot_2d <- function(df, x, y, color, legend_title, size,
         legend = legend_layout
       )
   } else {
-    plot_ly(
+    p <- plot_ly(
       data = df, x = x, y = y,
       type = "scatter", mode = "markers",
       marker = list(
@@ -490,14 +478,18 @@ plot_2d <- function(df, x, y, color, legend_title, size,
         colorbar = legend_layout
       ),
       text = hover_text, hoverinfo = "text",
-      width = 1000, height = 750
+      width = 1000, height = 750,
+      source = "embedding",
+      key = ~id
     ) %>%
       layout(
         xaxis = list(title = paste("X-", x)),
         yaxis = list(title = paste("Y-", y))
       )
   }
+  return(p)
 }
+
 
 # Generate 3d plot
 plot_3d <- function(df, color, legend_title, size, selected_color,
@@ -523,14 +515,16 @@ plot_3d <- function(df, color, legend_title, size, selected_color,
   legend_layout <- get_legend_layout(legend_title)
 
   if (is_categorical) {
-    plot_ly(
+    p <- plot_ly(
       x = x_vals, y = y_vals, z = z_vals,
       type = "scatter3d", mode = "markers",
       color = factor(df[[color]]),
       marker = list(size = as.numeric(size) * 0.4),
       colors = colors,
       text = hover_text, hoverinfo = "text",
-      width = 1000, height = 750
+      width = 1000, height = 750,
+      source = "embedding",
+      key = ~ df$id
     ) %>%
       layout(
         scene = list(
@@ -541,7 +535,7 @@ plot_3d <- function(df, color, legend_title, size, selected_color,
         legend = legend_layout
       )
   } else {
-    plot_ly(
+    p <- plot_ly(
       x = x_vals, y = y_vals, z = z_vals,
       type = "scatter3d", mode = "markers",
       marker = list(
@@ -552,7 +546,9 @@ plot_3d <- function(df, color, legend_title, size, selected_color,
         colorbar = legend_layout
       ),
       text = hover_text, hoverinfo = "text",
-      width = 1000, height = 750
+      width = 1000, height = 750,
+      source = "embedding",
+      key = ~ df$id
     ) %>%
       layout(
         scene = list(
@@ -562,7 +558,9 @@ plot_3d <- function(df, color, legend_title, size, selected_color,
         )
       )
   }
+  return(p)
 }
+
 
 # Main pca, umap and tsne plotting function
 embedding_plot <- function(df, xaxis_input, yaxis_input, color, legend_title,
@@ -583,17 +581,19 @@ embedding_plot <- function(df, xaxis_input, yaxis_input, color, legend_title,
   }
 
   if (plot_dim == "2d") {
-    plot_2d(
+    p <- plot_2d(
       df, x, y, color, legend_title, size, is_categorical, selected_color,
       colors
-    ) %>%
-      config(displaylogo = FALSE, scrollZoom = TRUE)
+    )
   } else {
     coords <- get_dim(plot_type)
-    plot_3d(
+    p <- plot_3d(
       df, color, legend_title, size, selected_color,
       is_categorical, colors, coords
-    ) %>%
-      config(displaylogo = FALSE, scrollZoom = TRUE)
+    )
   }
+  p <- p %>%
+    config(displaylogo = FALSE, scrollZoom = TRUE) %>%
+    event_register("plotly_click")
+  return(p)
 }

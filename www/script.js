@@ -36,7 +36,6 @@ $(document).ready(function() {
     tooltip({ placement: 'right' });
   }
 
-  // Initialize styles and tooltips
   $('input[type="checkbox"], input[type="radio"]').each(function() {
     var $input = $(this);
     updateLabelStyles($input);

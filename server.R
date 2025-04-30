@@ -347,15 +347,11 @@ server <- function(input, output, session) {
     ignoreNULL = TRUE
   )
 
-
-
   observeEvent(list(input$click_toggle_exp, input$data_type_exp), {
     req(gene_data())
     req(input$click_toggle_exp)
-
     btn_id <- input$click_toggle_exp$id
     id <- as.numeric(gsub("check_exp_", "", btn_id))
-
     if (is.character(input$click_toggle_exp$id)) {
       is_checked <- input$click_toggle_exp$value
 
@@ -465,7 +461,7 @@ server <- function(input, output, session) {
     }
   })
 
-  ## select data based on input color
+  ## choose data based on input color
   data <- reactive({
     if (input$color == "genes") {
       gene_data()$data
@@ -519,6 +515,55 @@ server <- function(input, output, session) {
       )
     })
   })
+
+  selected_table <- reactiveVal(NULL)
+  observeEvent(req(event_data("plotly_click", source = "embedding")), {
+    event <- event_data("plotly_click", source = "embedding")
+
+    data <- gene_data()$data
+    cell_id <- event$key
+    cols <- c("id", colnames(data)[str_detect(colnames(data), "^PVP01")])
+    selected_df <- data[data$id == cell_id, cols, drop = FALSE]
+
+    selected_df <- selected_df %>%
+      as.data.frame() %>%
+      pivot_longer(
+        cols = -id,
+        names_to = "gene_id",
+        values_to = "expression"
+      ) %>%
+      filter(expression > 0) %>%
+      left_join(gff_data, by = c("gene_id" = "id")) %>%
+      arrange(desc(expression)) %>%
+      rename(
+        cell_id = id,
+        gene_name = name,
+        exp_value = expression,
+        gene_annotation = description
+      ) %>%
+      select(gene_id, gene_name, exp_value, gene_annotation)
+
+    selected_table(selected_df)
+
+    showModal(modalDialog(
+      title = paste("Selected Cell ID:", cell_id),
+      DT::DTOutput("cell_expression_table"),
+      size = "xl",
+      easyClose = TRUE,
+      footer = NULL
+    ))
+  })
+
+  # Render the DT table
+  output$cell_expression_table <- DT::renderDT({
+    req(selected_table())
+    datatable(selected_table(),
+      options = list(pageLength = 10),
+      rownames = FALSE,
+      selection = "single"
+    )
+  })
+
 
   # handle download data
   output$download_data <- downloadHandler(

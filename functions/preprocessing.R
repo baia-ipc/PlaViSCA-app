@@ -100,17 +100,14 @@ sort_scale_exp <- names(sort(scale_exp, decreasing = TRUE))
 scale_exp <- FetchData(so, vars = c(sort_scale_exp)) %>% rownames_to_column("id")
 scale_df <- left_join(red_df, scale_exp, by = "id")
 
-# exp_df <- list(
-#   normalize_df = normalize_df,
-#   raw_df = raw_df,
-#   scale_df = scale_df
-# )
-#
-# saveRDS(exp_df, "data/expression_data.rds")
+exp_df <- list(
+  normalize_df = normalize_df,
+  raw_df = raw_df,
+  scale_df = scale_df
+)
 
-saveRDS(normalize_df, "data/normalize_df.rds")
-saveRDS(raw_df, "data/raw_df.rds")
-saveRDS(scale_df, "data/scale_df.rds")
+saveRDS(exp_df, "data/expression_data.rds")
+
 
 # Extract PCA standard deviation
 pca_std_df <- so@reductions$pca@stdev
@@ -157,12 +154,8 @@ save_data <- list(
 # save list of data
 saveRDS(save_data, "data/cleaned_dataset.rds")
 
-# differential expression genes
-# de_genes <- FindAllMarkers(so)
-#
-# de_genes <- left_join(de_genes, gff_data, by = c("gene" = "id")) %>%
-#   select(gene, name, everything())
-# saveRDS(de_genes, "data/de_genes.rds")
-
 # clear objects
 rm(list = ls())
+
+
+GetAssayData(so, assay = "RNA", layer = "data")

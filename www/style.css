@@ -481,6 +481,12 @@ input:checked + .slider:before {
   font-style: italic;
 }
 
+
+/* modal size */
+.modal-xl {
+  max-width: 90% !important;
+}
+
 /* Responsive design */
 @media screen and (max-width: 768px) {
   .menu-bar {
