@@ -547,20 +547,30 @@ server <- function(input, output, session) {
 
     showModal(modalDialog(
       title = paste("Selected Cell ID:", cell_id),
-      DT::DTOutput("cell_expression_table"),
+      div(
+        style = "width: 100%;",
+        DT::DTOutput("cell_expression_table")
+      ),
       size = "xl",
       easyClose = TRUE,
       footer = NULL
     ))
   })
 
-  # Render the DT table
+  # Render the cell_expression_table
   output$cell_expression_table <- DT::renderDT({
     req(selected_table())
     datatable(selected_table(),
-      options = list(pageLength = 10),
+      options = list(
+        pageLength = 10,
+        scrollY = "400px",
+        scrollCollapse = TRUE,
+        paging = FALSE,
+        authoWidth = TRUE
+      ),
       rownames = FALSE,
-      selection = "single"
+      selection = "single",
+      width = "100%"
     )
   })
 
