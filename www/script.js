@@ -1,6 +1,7 @@
 $(document).ready(function() {
   $("#home_section").show();
   $("#data_sets_section").hide();
+  $("#about_section").hide();
   
   function updateLabelStyles($input) {
     var $label = $input.closest('label');

@@ -15,19 +15,26 @@ server <- function(input, output, session) {
   autoUpdatePlot <- reactiveVal(FALSE)
 
   # navigate home and data section
+  observeEvent(input$about, {
+    shinyjs::hide("home_section")
+    shinyjs::hide("data_sets_section")
+    shinyjs::show("about_section")
+  })
+  observeEvent(input$home, {
+    shinyjs::hide("data_sets_section")
+    shinyjs::hide("about_section")
+    shinyjs::show("home_section")
+  })
+
   observeEvent(input$explore_data, {
     shinyjs::hide("home_section")
+    shinyjs::hide("about_section")
     shinyjs::show("data_sets_section")
   })
 
   observeEvent(input$data, {
     shinyjs::hide("home_section")
     shinyjs::show("data_sets_section")
-  })
-
-  observeEvent(input$home, {
-    shinyjs::hide("data_sets_section")
-    shinyjs::show("home_section")
   })
 
   # adjust css class for data and Gene Exp tabset
@@ -538,10 +545,9 @@ server <- function(input, output, session) {
       rename(
         cell_id = id,
         gene_name = name,
-        exp_value = expression,
-        gene_annotation = description
+        exp_value = expression
       ) %>%
-      select(gene_id, gene_name, exp_value, gene_annotation)
+      select(gene_id, gene_name, exp_value, description)
 
     selected_table(selected_df)
 

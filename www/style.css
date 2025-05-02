@@ -67,9 +67,37 @@
 }
 
 .introduction p,
+.about p,
 #data_sets_section {
-  padding: 15px;
+ padding: 15px;
+  margin-bottom: 10px;
+  line-height: 1.5; 
 }
+
+
+#about_section {
+  background-color: #f4f4f9;
+  padding: 40px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+#about_section a {
+  color: #3498db; 
+  text-decoration: none;
+}
+
+#about_section a:hover {
+  text-decoration: underline;
+}
+
+.about p {
+  font-size: 18px;
+  color: #2c3e50;
+  margin-bottom: 20px;
+  font-weight: bold;
+}
+
 
 #stagei,
 #stagelr,

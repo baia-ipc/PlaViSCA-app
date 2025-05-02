@@ -18,6 +18,11 @@ ui <- fluidPage(
     ),
     div(
       class = "menu-items",
+      actionLink("about",
+        label = tagList(icon("info-circle"), " About"),
+        class = "menu-link"
+      ),
+      span("|"),
       actionLink("home",
         label = tagList(icon("home"), " Home"),
         class = "menu-link"
@@ -26,6 +31,48 @@ ui <- fluidPage(
       actionLink("data",
         label = tagList(icon("table"), " Explore data"),
         class = "menu-link"
+      )
+    )
+  ),
+  # About Section
+  div(
+    id = "about_section",
+    fluidRow(
+      class = "about",
+      p("The application was created by the team at the Bioinformatics and
+        Artificial Intelligence Applications (BAIA) Unit at the Institut Pasteur
+        du Cambodge, in collaboration with the Malaria Unit at the same
+        institution and with partners in the USA."),
+      p("The team can be contacted at the following:"),
+      tags$ul(
+        tags$li(
+          strong("Dr. Giorgio GONNELLA"), " - Unit Head, email: ",
+          a(
+            href = "mailto:ggonella@pasteur-kh.org",
+            "ggonella@pasteur-kh.org"
+          )
+        ),
+        tags$li(
+          strong("Sopheap OENG"), " - System Engineer, email: ",
+          a(
+            href = "mailto:osopheap@pasteur-kh.org",
+            "osopheap@pasteur-kh.org"
+          )
+        ),
+        tags$li(
+          strong("Anthony Ruberto"), " - [Position], email: ",
+          a(
+            href = "mailto:aruberto@uga.edu",
+            "aruberto@uga.edu"
+          )
+        ),
+        tags$li(
+          strong("Jean Popovici"), " - Head, Malaria Research Unit, email: ",
+          a(
+            href = "mailto:jpopovici@pasteur-kh.org",
+            "jpopovici@pasteur-kh.org"
+          )
+        )
       )
     )
   ),
@@ -59,14 +106,15 @@ ui <- fluidPage(
       requires a collective effort to standardize, centralize, and
       share knowledge."),
       p(
-        "To address these challenges, we have developed a platform
-      dedicated to facilitating the sharing of Plasmodium
-      vivax-related data and knowledge. This innovative solution
+        "To address these challenges, we have developed a web application
+      designed to facilitate the exploration and visualization of
+      single-cell Plasmodium vivax data. The application provides an
+      interactive platform for researchers and healthcare professionals to
+      analyze and interpret complex datasets. This innovative solution
       seeks to bridge gaps in global collaboration by integrating
-      diverse datasets, promoting transparency, and offering advanced
-      tools for data analysis and visualization. By empowering
-      researchers and policymakers with centralized access to
-      critical information, the platform fosters a culture of open
+      diverse datasets, and offering advanced tools for data analysis and
+      visualization. By empowering researchers and policymakers with centralized
+      access to critical information, the platform fosters a culture of open
       data sharing. Our goal is to accelerate scientific discoveries,
       refine treatment protocols, and contribute meaningfully to the
       global fight against P. vivax malaria, paving the way for its
