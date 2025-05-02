@@ -93,6 +93,10 @@ $(document).on('change', '[id^="genes_exp_"]', function() {
       Shiny.setInputValue('change_gene_exp', id, {priority: 'event'});
 });
 
+$(document).on('change', 'input[name="data_type"], input[name="data_type_exp"]',
+function() {
+  Shiny.setInputValue('last_type_input', this.name, {priority: 'event'});
+});
 
 
 

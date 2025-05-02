@@ -7,12 +7,7 @@ library(RColorBrewer)
 library(tidyverse)
 library(later)
 
-# read expression data
-exp_df <- readRDS("data/expression_data.rds")
-norm_df <- exp_df$normalize_df
-raw_df <- exp_df$raw_df
-scale_df <- exp_df$scale_df
-rm(exp_df)
+norm_df <- readRDS("data/normalize_df.rds")
 
 
 server <- function(input, output, session) {
@@ -46,34 +41,43 @@ server <- function(input, output, session) {
     }
   })
 
-  # select and filter data (raw, normalized and scaled)
-  last_input <- reactiveVal(NULL)
-  observeEvent(input$data_type, {
-    last_input("data_type")
+  # update input of data type
+  selected_data_type <- reactive({
+    type_input <- input$last_type_input %||% "data_type"
+    selected <- switch(type_input,
+      "data_type" = input$data_type,
+      "data_type_exp" = input$data_type_exp,
+    )
+
+    if (!is.null(selected)) {
+      return(selected)
+    }
   })
 
-  observeEvent(input$data_type_exp, {
-    last_input("data_type_exp")
-  })
+
+  raw_df_cached <- reactiveVal()
+  scale_df_cached <- reactiveVal()
 
   gene_data <- eventReactive(list(
     input$stagei, input$data_type, input$data_type_exp
   ), {
     req(input$stagei)
-    current_input <- last_input()
-    if (current_input == "data_type") {
-      dataset <- switch(input$data_type,
-        "raw" = raw_df,
-        "normalize" = norm_df,
-        "scale" = scale_df
-      )
-    } else {
-      dataset <- switch(input$data_type_exp,
-        "raw" = raw_df,
-        "normalize" = norm_df,
-        "scale" = scale_df
-      )
-    }
+
+    dataset <- switch(selected_data_type(),
+      "raw" = {
+        if (is.null(raw_df_cached())) {
+          raw_df_cached(readRDS("data/raw_df.rds"))
+        }
+        raw_df_cached()
+      },
+      "normalize" = norm_df,
+      "scale" = {
+        if (is.null(scale_df_cached())) {
+          scale_df_cached(readRDS("data/scale_df.rds"))
+        }
+        scale_df_cached()
+      }
+    )
 
     list(
       data = dataset %>% filter(stage %in% input$stagei),
@@ -231,22 +235,27 @@ server <- function(input, output, session) {
     }, 1)
   })
 
-  choice_exp0 <- eventReactive(input$check_exp_0, {
-    get_gene_choices(gene_data()$genes, input$check_exp_0)
+  choice_exp <- reactiveVal()
+  observeEvent(list(input$click_toggle_exp), {
+    toggle_value <- input$click_toggle_exp$value
+    toggle_value <- if (!is.null(toggle_value)) toggle_value else FALSE
+
+    choice_exp(
+      get_gene_choices(gene_data()$genes, toggle_value)
+    )
   })
 
   observeEvent(list(input$check_exp_0, input$data_type_exp), {
     req(gene_data())
     updateSelectizeInput(session, "genes_exp_0",
       label = if (isTRUE(input$check_exp_0)) "Gene ID" else "Gene name",
-      choices = choice_exp0(),
+      choices = choice_exp(),
       server = TRUE
     )
   })
 
   df_exp <- reactive({
     req(autoUpdateExp(), gene_data(), input$genes_exp_0, input$group_exp)
-
     df_exp0(
       gene_data = gene_data(), gene_input = input$genes_exp_0,
       group_input = input$group_exp,
@@ -266,15 +275,6 @@ server <- function(input, output, session) {
     gene_links(gene_id)
   })
 
-  choice_expi_val <- reactiveVal()
-  observeEvent(input$click_toggle_exp, {
-    toggle_value <- input$click_toggle_exp$value
-    toggle_value <- if (!is.null(toggle_value)) toggle_value else FALSE
-
-    choice_expi_val(
-      get_gene_choices(gene_data()$genes, toggle_value)
-    )
-  })
 
   ## add button (click_add_btn from js)
   counter <- reactiveVal(0)
@@ -282,9 +282,9 @@ server <- function(input, output, session) {
     btn_id <- input$click_add_btn
     id <- as.numeric(gsub("add_btn_?", "", btn_id))
     shinyjs::hide(paste0("add_btn_", id))
-    df_exp_i <- df_expi(id, input, gene_data, get_gene_id)
+    df_exp_i <- df_expi(id, input, gene_data(), get_gene_id)
 
-    choice_expi_val(
+    choice_exp(
       get_gene_choices(gene_data()$genes, FALSE)
     )
 
@@ -303,7 +303,7 @@ server <- function(input, output, session) {
         updateSelectizeInput(
           session,
           inputId = paste0("genes_exp_", id),
-          choices = choice_expi_val(),
+          choices = choice_exp(),
           server = TRUE
         )
       })
@@ -315,7 +315,7 @@ server <- function(input, output, session) {
       })
     } else {
       id <- id + 1
-      newBlock(id, counter, choice_expi_val(), subBlock, session)
+      newBlock(id, counter, choice_exp(), subBlock, session)
       output[[paste0("gene_exp_plotly_", id)]] <- renderPlotly({
         gene_exp_plot(
           df_exp_i(),
@@ -359,7 +359,7 @@ server <- function(input, output, session) {
         session,
         paste0("genes_exp_", id),
         label = if (isTRUE(is_checked)) "Gene ID" else "Gene name",
-        choices = choice_expi_val(),
+        choices = choice_exp(),
         server = TRUE
       )
     }
@@ -557,7 +557,7 @@ server <- function(input, output, session) {
     ))
   })
 
-  # Render the cell_expression_table
+  # render the cell_expression_table
   output$cell_expression_table <- DT::renderDT({
     req(selected_table())
     datatable(selected_table(),

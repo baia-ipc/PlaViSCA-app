@@ -100,14 +100,17 @@ sort_scale_exp <- names(sort(scale_exp, decreasing = TRUE))
 scale_exp <- FetchData(so, vars = c(sort_scale_exp)) %>% rownames_to_column("id")
 scale_df <- left_join(red_df, scale_exp, by = "id")
 
-exp_df <- list(
-  normalize_df = normalize_df,
-  raw_df = raw_df,
-  scale_df = scale_df
-)
+# exp_df <- list(
+#   normalize_df = normalize_df,
+#   raw_df = raw_df,
+#   scale_df = scale_df
+# )
+#
+# saveRDS(exp_df, "data/expression_data.rds")
 
-saveRDS(exp_df, "data/expression_data.rds")
-
+saveRDS(normalize_df, "data/normalize_df.rds")
+saveRDS(raw_df, "data/raw_df.rds")
+saveRDS(scale_df, "data/scale_df.rds")
 
 # Extract PCA standard deviation
 pca_std_df <- so@reductions$pca@stdev

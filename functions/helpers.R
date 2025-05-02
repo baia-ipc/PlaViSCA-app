@@ -123,6 +123,7 @@ newBlock <- function(new_count, counter, choice_exp, dynamicBlock, session) {
   })
 }
 
+
 # Generate df for gene_exp0
 df_exp0 <- function(gene_data, gene_input, group_input, check_exp) {
   df <- gene_data$data
@@ -146,34 +147,35 @@ df_exp0 <- function(gene_data, gene_input, group_input, check_exp) {
 }
 
 # Generate df for gene_expi
-df_expi <- function(new_count, input, gene_data, get_gene_id) {
+df_expi <- function(id, input, gene_data, get_gene_id) {
   reactive({
     req(
-      input[[paste0("genes_exp_", new_count)]],
-      input[[paste0("group_exp_", new_count)]]
+      input[[paste0("genes_exp_", id)]],
+      input[[paste0("group_exp_", id)]]
     )
 
-    data <- gene_data()$data
-    gene_exp <- if (!input[[paste0("check_exp_", new_count)]]) {
-      get_gene_id(input[[paste0("genes_exp_", new_count)]], gene_data()$genes)
+    df <- gene_data$data
+    gene_exp <- if (!input[[paste0("check_exp_", id)]]) {
+      get_gene_id(input[[paste0("genes_exp_", id)]], gene_data$genes)
     } else {
-      input[[paste0("genes_exp_", new_count)]]
+      input[[paste0("genes_exp_", id)]]
     }
 
-    if (!(gene_exp %in% colnames(data))) {
-      data$gene_expr <- NA
+    if (!(gene_exp %in% colnames(df))) {
+      df$gene_expr <- NA
     } else {
-      data <- data %>% mutate(gene_expr = .data[[gene_exp]])
+      df <- df %>% mutate(gene_expr = .data[[gene_exp]])
     }
 
-    group_col <- input[[paste0("group_exp_", new_count)]]
-    if (!(tolower(group_col) %in% colnames(data))) {
-      data[[group_col]] <- NA
+    group_col <- input[[paste0("group_exp_", id)]]
+    if (!(tolower(group_col) %in% colnames(df))) {
+      df[[group_col]] <- NA
     }
 
-    return(data)
+    return(df)
   })
 }
+
 
 # Set color pallet
 colors <- RColorBrewer::brewer.pal(12, "Set3")
@@ -324,7 +326,14 @@ gene_exp_plot <- function(data, x_col) {
   ) %>%
     layout(
       xaxis = list(title = x_col),
-      yaxis = list(title = "Expression")
+      yaxis = list(title = "Expression"),
+      legend = list(
+        orientation = "h",
+        x = 0.5,
+        xanchor = "center",
+        y = 1.1,
+        yanchor = "bottom"
+      )
     )
 }
 
