@@ -23,12 +23,17 @@ get_gene_choices <- function(genes_df, checked) {
 
 # Get gene id
 get_gene_id <- function(gene_name, gene_names) {
+  if (is.null(gene_name) || is.na(gene_name) || gene_name == "") {
+    return(NA)
+  }
+
   if (gene_name %in% gene_names$name) {
     return(gene_names$gene[gene_names$name == gene_name])
   } else {
-    return(gene_name)
+    return(NA)
   }
 }
+
 
 # Generate UI subBlock in gene expression
 subBlock <- function(i) {
