@@ -9,10 +9,13 @@ library(later)
 
 norm_df <- readRDS("data/normalize_df.rds")
 
-
 server <- function(input, output, session) {
   sessionData <- new.env(parent = emptyenv())
   autoUpdatePlot <- reactiveVal(FALSE)
+
+  observeEvent(input$stage_click, {
+    cat("Clicked stage: ", input$stage_click, "\n")
+  })
 
   # navigate home and data section
   observeEvent(input$about, {
@@ -282,7 +285,6 @@ server <- function(input, output, session) {
     gene_id <- get_gene_id(input$genes_exp_0, gene_data()$genes)
     gene_links(gene_id)
   })
-
 
   ## add button (click_add_btn from js)
   counter <- reactiveVal(0)

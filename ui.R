@@ -4,11 +4,14 @@ library(plotly)
 library(shinycssloaders)
 
 ui <- fluidPage(
-  useShinyjs(),
-  includeCSS("www/style.css"),
-  tags$script(src = "script.js"),
+  tags$head(
+    useShinyjs(),
+    includeCSS("www/style.css"),
+    tags$script(src = "script.js"),
+    tags$script(src = "jquery.rwdImageMaps.min.js")
+  ),
 
-  # Menu Bar
+  # Menubar
   div(
     class = "menu-bar",
     div(class = "logo", img(src = "Pvivax.jpeg", height = "60px")),
@@ -34,24 +37,26 @@ ui <- fluidPage(
       )
     )
   ),
-  # About Section
+
+  # About section
   div(
     id = "about_section",
     fluidRow(
       class = "about",
       h2("Requirements"),
       p(
-        "This application is built using the R Shiny framework to provide an ",
-        "interactive and dynamic web interface. It uses several R packages for ",
-        "data analysis and visualization, including ", tags$b("Seurat v5"), ", ",
-        tags$b("tidyverse"), ", and other supporting libraries. "
+        "This application is built using the R Shiny framework to provide an
+        interactive and dynamic web interface. It uses several R packages for
+        data analysis and visualization, including Seurat v5, tidyverse and
+        other supporting libraries."
       ),
       p(
         "For more detailed information, please visit the project's GitHub ",
         "repository at ",
         a(
-          href = "https://github.com/Sopheap15/pvsca", "Sopheap15/pvsca",
-          target = "_blank"
+          href = "https://github.com/Sopheap15/pvsca",
+          HTML('https://github.com/Sopheap15/pvsca
+               <span class="point-emoji">👈 </span>'), target = "_blank"
         ), "."
       ),
       h2("Contact"),
@@ -60,34 +65,32 @@ ui <- fluidPage(
         "Intelligence Applications (BAIA) Unit at the Institut Pasteur du ",
         "Cambodge (IPC), in collaboration with the Malaria Unit at IPC and ",
         "the Center for Tropical and Emerging Global Diseases at the University ",
-        "of Georgia."
+        "of Georgia, USA."
       ),
       p("The team can be contacted at the following:"),
       tags$ul(
         tags$li(
-          strong("Mr. Sopheap OENG"), " - System Engineer (IPC), email: ",
+          strong("Mr. Sopheap OENG"), " - Bioinformatic System Engineer, IPC, email: ",
           a(href = "mailto:osopheap@pasteur-kh.org", "osopheap@pasteur-kh.org")
         ),
         tags$li(
-          strong("Dr. Anthony Ruberto"), " - Postdoctoral researcher at the Center ",
+          strong("Dr. Anthony RUBERTO"), " - Postdoctoral researcher at the Center ",
           "for Tropical and Emerging Global Diseases, University of Georgia, USA, email: ",
           a(href = "mailto:aruberto@uga.edu", "aruberto@uga.edu")
         ),
         tags$li(
-          strong("Dr. Jean Popovici"), " - Head, Malaria Research Unit (IPC), email: ",
+          strong("Dr. Jean POPOVICI"), " - Head, Malaria Research Unit, IPC, email: ",
           a(href = "mailto:jpopovici@pasteur-kh.org", "jpopovici@pasteur-kh.org")
         ),
         tags$li(
-          strong("Dr. Giorgio GONNELLA"), " - Head, BAIA (IPC), email: ",
+          strong("Dr. Giorgio GONNELLA"), " - Head, BAIA Unit, IPC, email: ",
           a(href = "mailto:ggonella@pasteur-kh.org", "ggonella@pasteur-kh.org")
         )
       )
     )
   ),
 
-
-
-  # Home Section
+  # Home section
   div(
     id = "home_section",
     fluidRow(
@@ -132,10 +135,68 @@ ui <- fluidPage(
         actionLink("explore_data", "Explore data >>")
       )
     ),
-    div(class = "img", img(src = "pvivax.jpg"))
+    div(class = "img", img(
+      src = "pvivax.jpg", usemap = "#malariaMap",
+      style = "width: 100%; height: auto;"
+    )),
+    tags$map(
+      name = "malariaMap",
+      tags$area(
+        shape = "rect", coords = "1090, 1774, 1408, 1843",
+        href = "javascript:void(0)", alt = "hypnozoite", title = "hypnozoite"
+      ),
+      tags$area(
+        shape = "rect", coords = "677, 2037, 1006, 2190",
+        href = "javascript:void(0)", alt = "merozoite", title = "merozoite"
+      ),
+      tags$area(
+        shape = "rect", coords = "1021, 2205, 1416, 2348",
+        href = "javascript:void(0)", alt = "merozoite", title = "merozoite"
+      ),
+      tags$area(
+        shape = "rect", coords = "1639, 2041, 1778, 2143",
+        href = "javascript:void(0)", alt = "ring", title = "ring"
+      ),
+      tags$area(
+        shape = "rect", coords = "1767, 1902, 2100, 1956",
+        href = "javascript:void(0)", alt = "trophozoite", title = "trophozoite"
+      ),
+      tags$area(
+        shape = "rect", coords = "2173, 2121, 1946, 2048",
+        href = "javascript:void(0)", alt = "schizont", title = "schizont"
+      ),
+      tags$area(
+        shape = "rect", coords = "2122, 2370, 1895, 2234",
+        href = "javascript:void(0)", alt = "schizont", title = "schizont"
+      ),
+      tags$area(
+        shape = "rect", coords = "2381, 1810, 3142, 1894",
+        href = "javascript:void(0)", alt = "gametocyte", title = "gametocyte"
+      ),
+      tags$area(
+        shape = "rect", coords = "2466, 2179, 3080, 2242",
+        href = "javascript:void(0)", alt = "gametocyte", title = "gametocyte"
+      ),
+      tags$area(
+        shape = "rect", coords = "3011, 1298, 3278, 1375",
+        href = "javascript:void(0)", alt = "gametocyte", title = "gametocyte"
+      ),
+      tags$area(
+        shape = "rect", coords = "3007, 325, 3424, 413",
+        href = "javascript:void(0)", alt = "Oocyst", title = "Oocyst"
+      ),
+      tags$area(
+        shape = "rect", coords = "2016, 790, 2330, 878",
+        href = "javascript:void(0)", alt = "sporozoite", title = "sporozoite"
+      ),
+      tags$area(
+        shape = "rect", coords = "779, 1232, 1094, 1305",
+        href = "javascript:void(0)", alt = "sporozoite", title = "sporozoite"
+      )
+    )
   ),
 
-  # Explore data Section
+  # Explore data section
   div(
     id = "data_sets_section",
     fluidRow(
