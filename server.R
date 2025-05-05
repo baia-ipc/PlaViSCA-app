@@ -34,6 +34,7 @@ server <- function(input, output, session) {
 
   observeEvent(input$data, {
     shinyjs::hide("home_section")
+    shinyjs::hide("about_section")
     shinyjs::show("data_sets_section")
   })
 

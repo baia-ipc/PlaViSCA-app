@@ -39,43 +39,53 @@ ui <- fluidPage(
     id = "about_section",
     fluidRow(
       class = "about",
-      p("The application was created by the team at the Bioinformatics and
-        Artificial Intelligence Applications (BAIA) Unit at the Institut Pasteur
-        du Cambodge, in collaboration with the Malaria Unit at the same
-        institution and with partners in the USA."),
+      h2("Requirements"),
+      p(
+        "This application is built using the R Shiny framework to provide an ",
+        "interactive and dynamic web interface. It uses several R packages for ",
+        "data analysis and visualization, including ", tags$b("Seurat v5"), ", ",
+        tags$b("tidyverse"), ", and other supporting libraries. "
+      ),
+      p(
+        "For more detailed information, please visit the project's GitHub ",
+        "repository at ",
+        a(
+          href = "https://github.com/Sopheap15/pvsca", "Sopheap15/pvsca",
+          target = "_blank"
+        ), "."
+      ),
+      h2("Contact"),
+      p(
+        "This application was developed by the Bioinformatics and Artificial ",
+        "Intelligence Applications (BAIA) Unit at the Institut Pasteur du ",
+        "Cambodge (IPC), in collaboration with the Malaria Unit at IPC and ",
+        "the Center for Tropical and Emerging Global Diseases at the University ",
+        "of Georgia."
+      ),
       p("The team can be contacted at the following:"),
       tags$ul(
         tags$li(
-          strong("Dr. Giorgio GONNELLA"), " - Unit Head, email: ",
-          a(
-            href = "mailto:ggonella@pasteur-kh.org",
-            "ggonella@pasteur-kh.org"
-          )
+          strong("Mr. Sopheap OENG"), " - System Engineer (IPC), email: ",
+          a(href = "mailto:osopheap@pasteur-kh.org", "osopheap@pasteur-kh.org")
         ),
         tags$li(
-          strong("Sopheap OENG"), " - System Engineer, email: ",
-          a(
-            href = "mailto:osopheap@pasteur-kh.org",
-            "osopheap@pasteur-kh.org"
-          )
+          strong("Dr. Anthony Ruberto"), " - Postdoctoral researcher at the Center ",
+          "for Tropical and Emerging Global Diseases, University of Georgia, USA, email: ",
+          a(href = "mailto:aruberto@uga.edu", "aruberto@uga.edu")
         ),
         tags$li(
-          strong("Anthony Ruberto"), " - [Position], email: ",
-          a(
-            href = "mailto:aruberto@uga.edu",
-            "aruberto@uga.edu"
-          )
+          strong("Dr. Jean Popovici"), " - Head, Malaria Research Unit (IPC), email: ",
+          a(href = "mailto:jpopovici@pasteur-kh.org", "jpopovici@pasteur-kh.org")
         ),
         tags$li(
-          strong("Jean Popovici"), " - Head, Malaria Research Unit, email: ",
-          a(
-            href = "mailto:jpopovici@pasteur-kh.org",
-            "jpopovici@pasteur-kh.org"
-          )
+          strong("Dr. Giorgio GONNELLA"), " - Head, BAIA (IPC), email: ",
+          a(href = "mailto:ggonella@pasteur-kh.org", "ggonella@pasteur-kh.org")
         )
       )
     )
   ),
+
+
 
   # Home Section
   div(
