@@ -51,7 +51,7 @@ ui <- fluidPage(
         other supporting libraries."
       ),
       p(
-        "For more detailed information, please visit the project's GitHub ",
+        "For more detailed information, please visit the project's GitHub",
         "repository at ",
         a(
           href = "https://github.com/Sopheap15/pvsca",
@@ -61,11 +61,11 @@ ui <- fluidPage(
       ),
       h2("Contact"),
       p(
-        "This application was developed by the Bioinformatics and Artificial ",
-        "Intelligence Applications (BAIA) Unit at the Institut Pasteur du ",
-        "Cambodge (IPC), in collaboration with the Malaria Unit at IPC and ",
-        "the Center for Tropical and Emerging Global Diseases at the University ",
-        "of Georgia, USA."
+        "This application was developed by the Bioinformatics and Artificial
+        Intelligence Applications (BAIA) Unit at the Institut Pasteur du
+        Cambodge (IPC), in collaboration with the Malaria Unit at IPC and
+        the Center for Tropical and Emerging Global Diseases at the University
+        of Georgia, USA."
       ),
       p("The team can be contacted at the following:"),
       tags$ul(
@@ -74,8 +74,8 @@ ui <- fluidPage(
           a(href = "mailto:osopheap@pasteur-kh.org", "osopheap@pasteur-kh.org")
         ),
         tags$li(
-          strong("Dr. Anthony RUBERTO"), " - Postdoctoral researcher at the Center ",
-          "for Tropical and Emerging Global Diseases, University of Georgia, USA, email: ",
+          strong("Dr. Anthony RUBERTO"), " - Postdoctoral researcher at the Center
+          for Tropical and Emerging Global Diseases, University of Georgia, USA, email: ",
           a(href = "mailto:aruberto@uga.edu", "aruberto@uga.edu")
         ),
         tags$li(

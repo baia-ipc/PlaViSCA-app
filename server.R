@@ -14,7 +14,7 @@ server <- function(input, output, session) {
   autoUpdatePlot <- reactiveVal(FALSE)
 
   observeEvent(input$stage_click, {
-    cat("Clicked stage: ", input$stage_click, "\n")
+    cat("User clicked on:", input$stage_click, "\n")
   })
 
   # navigate home and data section
