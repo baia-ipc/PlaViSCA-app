@@ -16,7 +16,7 @@ type_df <- read.csv("data/pbio_3000711_s034.csv") %>%
   mutate(sample = gsub(".*_", "", sample))
 
 # load seurat object
-so <- readRDS("data/Pv.all.12.Jan2025.rds")
+so <- readRDS("data/original_file/Pv.all.12.Jan2025_os.rds")
 
 # change features from - to _ to match with gff gene_id
 features <- gsub("-", "_", rownames(so[["RNA"]]@features))

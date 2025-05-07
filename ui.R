@@ -43,23 +43,7 @@ ui <- fluidPage(
     id = "about_section",
     fluidRow(
       class = "about",
-      h2("Requirements"),
-      p(
-        "This application is built using the R Shiny framework to provide an
-        interactive and dynamic web interface. It uses several R packages for
-        data analysis and visualization, including Seurat v5, tidyverse and
-        other supporting libraries."
-      ),
-      p(
-        "For more detailed information, please visit the project's GitHub",
-        "repository at ",
-        a(
-          href = "https://github.com/Sopheap15/pvsca",
-          HTML('https://github.com/Sopheap15/pvsca
-               <span class="point-emoji">👈 </span>'), target = "_blank"
-        ), "."
-      ),
-      h2("Contact"),
+      h2("About the team"),
       p(
         "This application was developed by the Bioinformatics and Artificial
         Intelligence Applications (BAIA) Unit at the Institut Pasteur du
@@ -86,6 +70,21 @@ ui <- fluidPage(
           strong("Dr. Giorgio GONNELLA"), " - Head, BAIA Unit, IPC, email: ",
           a(href = "mailto:ggonella@pasteur-kh.org", "ggonella@pasteur-kh.org")
         )
+      ),
+      p(
+        "This application is built using the R Shiny framework to provide an
+        interactive and dynamic web interface. It uses several R packages for
+        data analysis and visualization, including Seurat v5, tidyverse and
+        other supporting libraries."
+      ),
+      p(
+        "For more detailed information, please visit the project's GitHub",
+        "repository at ",
+        a(
+          href = "https://github.com/Sopheap15/pvsca",
+          HTML('https://github.com/Sopheap15/pvsca
+               <span class="point-emoji">👈 </span>'), target = "_blank"
+        ), "."
       )
     )
   ),
@@ -95,45 +94,32 @@ ui <- fluidPage(
     id = "home_section",
     fluidRow(
       class = "introduction",
-      p("Malaria caused by Plasmodium vivax remains a significant
-      public health challenge in many parts of the world. While
-      less lethal than Plasmodium falciparum, P. vivax infections
-      are more widespread and persistent, causing recurrent relapses
-      that complicate elimination efforts. Its ability to remain
-      dormant in the liver for prolonged periods and resurface
-      months or even years later makes it uniquely difficult to treat
-      and eradicate. Despite its global burden, our understanding of
-      P. vivax biology, epidemiology, and treatment lags behind,
-      partly due to limited data sharing and collaboration across
-      research communities."),
-      p("One of the critical barriers in combating P. vivax malaria is
-      the fragmented nature of data collection and knowledge sharing.
-      Key datasets on genetic diversity, drug resistance, and disease
-      patterns are often siloed within institutions, limiting
-      comprehensive analyses and insights. This lack of coordination
-      hampers progress in developing robust strategies to tackle
-      P. vivax infections. Furthermore, regions most affected by
-      P. vivax, such as South Asia, Southeast Asia, and South America,
-      often have limited resources to gather and analyze the data
-      necessary for actionable interventions. Bridging these gaps
-      requires a collective effort to standardize, centralize, and
-      share knowledge."),
+      p("The Plasmodium vivax Single Cell Analysis (PvSCA) platform is an interactive
+      web resource designed to make single-cell RNA sequencing (scRNA-seq) data
+      from P. vivax more accessible and impactful for the broader scientific and
+      public health communities. Although scRNA-seq has transformed malaria
+      research, these datasets have often been confined to supplementary materials
+      or required advanced computational expertise to interpret. PvSCA lowers this
+      barrier by providing a user-friendly, code-free interface for exploring gene
+      expression across diverse P. vivax genes expression."),
+      p("The platform features dynamic visualizations that allow users to identify
+      stage-specific genes, compare expression across conditions, and extract
+      meaningful biological insights. By harmonizing data from multiple
+      collaborative projects, PvSCA fosters open science, enhances
+      cross-study comparability, and supports reproducibility."),
       p(
-        "To address these challenges, we have developed a web application
-      designed to facilitate the exploration and visualization of
-      single-cell Plasmodium vivax data. The application provides an
-      interactive platform for researchers and healthcare professionals to
-      analyze and interpret complex datasets. This innovative solution
-      seeks to bridge gaps in global collaboration by integrating
-      diverse datasets, and offering advanced tools for data analysis and
-      visualization. By empowering researchers and policymakers with centralized
-      access to critical information, the platform fosters a culture of open
-      data sharing. Our goal is to accelerate scientific discoveries,
-      refine treatment protocols, and contribute meaningfully to the
-      global fight against P. vivax malaria, paving the way for its
-      eventual elimination.",
+        "PvSCA is designed to support a broad audience — from molecular biologists
+      and parasitologists investigating P. vivax biology and gene regulation,
+      to translational researchers developing diagnostics, treatments, or vaccines.
+      By simplifying access to complex datasets, PvSCA encourages hypothesis
+      generation and the discovery of new biological patterns. It also serves as an
+      educational tool for students, educators, and public health professionals,
+      helping to deepen understanding of P. vivax infections and malaria control
+      strategies.",
         actionLink("explore_data", "Explore data >>")
-      )
+      ),
+      p("To better understand the context, users can explore the Plasmodium vivax
+      life cycle in the image below.")
     ),
     div(class = "img", img(
       src = "pvivax.jpg", usemap = "#malariaMap",
