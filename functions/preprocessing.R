@@ -159,6 +159,3 @@ saveRDS(save_data, "data/cleaned_dataset.rds")
 
 # clear objects
 rm(list = ls())
-
-
-GetAssayData(so, assay = "RNA", layer = "data")

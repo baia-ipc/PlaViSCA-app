@@ -45,37 +45,35 @@ ui <- fluidPage(
       class = "about",
       h2("About the team"),
       p(
-        "This application was developed by the Bioinformatics and Artificial
-        Intelligence Applications (BAIA) Unit at the Institut Pasteur du
-        Cambodge (IPC), in collaboration with the Malaria Unit at IPC and
-        the Center for Tropical and Emerging Global Diseases at the University
-        of Georgia, USA."
+        "Plasmodium vivax Single Cell Analysis (PvSCA) Platform was developed by
+        the Bioinformatics and Artificial Intelligence Applications (BAIA) Unit
+        at the Institut Pasteur du Cambodge (IPC), in collaboration with the
+        Malaria Unit at IPC and the Center for Tropical and Emerging Global
+        Diseases at the University of Georgia, USA."
       ),
       p("The team can be contacted at the following:"),
       tags$ul(
         tags$li(
-          strong("Mr. Sopheap OENG"), " - Bioinformatic System Engineer, IPC, email: ",
+          strong("Sopheap OENG"), " - Bioinformatic System Engineer, IPC, email: ",
           a(href = "mailto:osopheap@pasteur-kh.org", "osopheap@pasteur-kh.org")
         ),
         tags$li(
-          strong("Dr. Anthony RUBERTO"), " - Postdoctoral researcher at the Center
-          for Tropical and Emerging Global Diseases, University of Georgia, USA, email: ",
-          a(href = "mailto:aruberto@uga.edu", "aruberto@uga.edu")
+          strong("Anthony RUBERTO"), " - Postdoctoral researcher at the Center
+          for Tropical and Emerging Global Diseases, University of Georgia, USA,
+          email: ", a(href = "mailto:aruberto@uga.edu", "aruberto@uga.edu")
         ),
         tags$li(
-          strong("Dr. Jean POPOVICI"), " - Head, Malaria Research Unit, IPC, email: ",
+          strong("Jean POPOVICI"), " - Head, Malaria Research Unit, IPC, email: ",
           a(href = "mailto:jpopovici@pasteur-kh.org", "jpopovici@pasteur-kh.org")
         ),
         tags$li(
-          strong("Dr. Giorgio GONNELLA"), " - Head, BAIA Unit, IPC, email: ",
+          strong("Giorgio GONNELLA"), " - Head, BAIA Unit, IPC, email: ",
           a(href = "mailto:ggonella@pasteur-kh.org", "ggonella@pasteur-kh.org")
         )
       ),
       p(
-        "This application is built using the R Shiny framework to provide an
-        interactive and dynamic web interface. It uses several R packages for
-        data analysis and visualization, including Seurat v5, tidyverse and
-        other supporting libraries."
+        "This web application is built using the R Shiny framework to provide an
+        interactive and dynamic web interface."
       ),
       p(
         "For more detailed information, please visit the project's GitHub",
@@ -85,7 +83,8 @@ ui <- fluidPage(
           HTML('https://github.com/Sopheap15/pvsca
                <span class="point-emoji">👈 </span>'), target = "_blank"
         ), "."
-      )
+      ),
+      p("© 2025 BAIA Team. All rights reserved.")
     )
   ),
 
@@ -94,28 +93,30 @@ ui <- fluidPage(
     id = "home_section",
     fluidRow(
       class = "introduction",
-      p("The Plasmodium vivax Single Cell Analysis (PvSCA) platform is an interactive
-      web resource designed to make single-cell RNA sequencing (scRNA-seq) data
-      from P. vivax more accessible and impactful for the broader scientific and
-      public health communities. Although scRNA-seq has transformed malaria
-      research, these datasets have often been confined to supplementary materials
-      or required advanced computational expertise to interpret. PvSCA lowers this
-      barrier by providing a user-friendly, code-free interface for exploring gene
-      expression across diverse P. vivax genes expression."),
-      p("The platform features dynamic visualizations that allow users to identify
-      stage-specific genes, compare expression across conditions, and extract
-      meaningful biological insights. By harmonizing data from multiple
-      collaborative projects, PvSCA fosters open science, enhances
-      cross-study comparability, and supports reproducibility."),
+      p("The Plasmodium vivax Single Cell Analysis (PvSCA) platform is a web-based
+        application developed to unlock the full potential of single-cell RNA
+        sequencing (scRNA-seq) data in malaria research. Traditionally, accessing
+        and interpreting these datasets required specialized bioinformatics skills,
+        limiting their utility to a subset of researchers. PvSCA addresses this
+        challenge by offering an easy-to-use, interactive interface that provides
+        free access to high-resolution transcriptomic data from P. vivax,
+        empowering scientists to explore parasite biology at the single-cell
+        level—without writing any code."),
+      p("More than just a data viewer, PvSCA offers a suite of analytical tools
+        that allow users to examine P. vivax gene expression across developmental
+        stages and experimental conditions. Through dynamic dimensional reduction
+        visualizations, researchers can identify specific transcriptomic expression
+        patterns, track parasite differentiation stages—such as rings,
+        trophozoites, and others—and compare trends across multiple studies.
+        The platform also enables users to harmonize and share data for downstream
+        analysis and collaboration."),
       p(
-        "PvSCA is designed to support a broad audience — from molecular biologists
-      and parasitologists investigating P. vivax biology and gene regulation,
-      to translational researchers developing diagnostics, treatments, or vaccines.
-      By simplifying access to complex datasets, PvSCA encourages hypothesis
-      generation and the discovery of new biological patterns. It also serves as an
-      educational tool for students, educators, and public health professionals,
-      helping to deepen understanding of P. vivax infections and malaria control
-      strategies.",
+        "PvSCA is designed to serve a multidisciplinary community—from basic
+        scientists investigating parasite gene regulation to translational
+        researchers developing diagnostics and vaccines. It also supports
+        educational and public health efforts, providing a clear and visual
+        introduction to P. vivax biology for students, educators, and
+        policymakers.",
         actionLink("explore_data", "Explore data >>")
       ),
       p("To better understand the context, users can explore the Plasmodium vivax
