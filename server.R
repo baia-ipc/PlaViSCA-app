@@ -562,7 +562,9 @@ server <- function(input, output, session) {
       ),
       size = "xl",
       easyClose = TRUE,
-      footer = NULL
+      footer = tagList(
+        downloadButton("export_data", "Expert .csv")
+      )
     ))
   })
 
@@ -582,6 +584,20 @@ server <- function(input, output, session) {
       width = "100%"
     )
   })
+
+  # handle export data
+  output$export_data <- downloadHandler(
+    filename = function() {
+      paste("cell_expression_data", Sys.Date(), ".csv")
+    },
+    content = function(file) {
+      withProgress(message = "Processing Data", value = 0, {
+        incProgress(0.4, detail = "Saving file...")
+        write.csv(selected_table(), file, row.names = FALSE)
+        incProgress(1, detail = "Download complete")
+      })
+    }
+  )
 
 
   # handle download data

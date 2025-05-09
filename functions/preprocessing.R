@@ -16,14 +16,24 @@ type_df <- read.csv("data/pbio_3000711_s034.csv") %>%
   mutate(sample = gsub(".*_", "", sample))
 
 # load seurat object
-so <- readRDS("data/original_file/Pv.all.12.Jan2025_os.rds")
+so <- readRDS("data/original_file/Pv.all.12.Jan2025.rds")
 
 # change features from - to _ to match with gff gene_id
 features <- gsub("-", "_", rownames(so[["RNA"]]@features))
 rownames(so[["RNA"]]@features) <- features
 
 # add column type as parasite sex to metadata
-so@meta.data$cleaned_barcode <- sub("_.*", "", so@meta.data$Barcode)
+col <- colnames(so)
+cell_id_af_ <- gsub(".*_", "", col)
+cell_id_af_[nchar(cell_id_af_) < 10] <- NA
+
+cell_id_bf_ <- gsub("_.*", "", col)
+cell_id_bf_[nchar(cell_id_bf_) < 10] <- NA
+
+cell_id_clean <- coalesce(cell_id_af_, cell_id_bf_)
+so@meta.data$cleaned_barcode <- cell_id_clean
+
+
 so@meta.data$type <- type_df$type[match(
   so@meta.data$cleaned_barcode,
   type_df$sample
@@ -83,31 +93,24 @@ red_df <- mr_data %>%
   )
 
 # Extract genes for normalize data in average of expression
-norm_exp <- rowMeans(GetAssayData(so, assay = "RNA", layer = "data"))
-sort_norm_exp <- names(sort(norm_exp, decreasing = TRUE))
-norm_exp <- FetchData(so, vars = c(sort_norm_exp)) %>% rownames_to_column("id")
+norm_exp <- GetAssayData(so, layer = "data")
+norm_exp <- as.data.frame(t(as.matrix(norm_exp))) %>%
+  tibble::rownames_to_column("id")
 normalize_df <- left_join(red_df, norm_exp, by = "id")
 
 # Extract genes for raw count data
-raw_exp <- rowMeans(GetAssayData(so, assay = "RNA", layer = "count"))
-sort_raw_exp <- names(sort(raw_exp, decreasing = TRUE))
-raw_exp <- FetchData(so, vars = c(sort_raw_exp)) %>% rownames_to_column("id")
+raw_exp <- GetAssayData(so, layer = "counts")
+raw_exp <- as.data.frame(t(as.matrix(raw_exp))) %>%
+  tibble::rownames_to_column("id")
 raw_df <- left_join(red_df, raw_exp, by = "id")
 
 # Extract genes for scale data
-scale_exp <- rowMeans(GetAssayData(so, assay = "RNA", layer = "scale.data"))
-sort_scale_exp <- names(sort(scale_exp, decreasing = TRUE))
-scale_exp <- FetchData(so, vars = c(sort_scale_exp)) %>% rownames_to_column("id")
+scale_exp <- GetAssayData(so, layer = "scale")
+scale_exp <- as.data.frame(t(as.matrix(scale_exp))) %>%
+  tibble::rownames_to_column("id")
 scale_df <- left_join(red_df, scale_exp, by = "id")
 
-# exp_df <- list(
-#   normalize_df = normalize_df,
-#   raw_df = raw_df,
-#   scale_df = scale_df
-# )
-#
-# saveRDS(exp_df, "data/expression_data.rds")
-
+# save normalized, raw and scaled data
 saveRDS(normalize_df, "data/normalize_df.rds")
 saveRDS(raw_df, "data/raw_df.rds")
 saveRDS(scale_df, "data/scale_df.rds")
