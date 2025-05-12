@@ -7,12 +7,15 @@ library(RColorBrewer)
 library(tidyverse)
 library(later)
 
+# load normalized data
 norm_df <- readRDS("data/normalize_df.rds")
 
 server <- function(input, output, session) {
   sessionData <- new.env(parent = emptyenv())
   autoUpdatePlot <- reactiveVal(FALSE)
 
+  # not yet implemented. This part user click on stages on image it
+  # will get info for filter data
   observeEvent(input$stage_click, {
     cat("User clicked on:", input$stage_click, "\n")
   })
@@ -41,7 +44,7 @@ server <- function(input, output, session) {
     shinyjs::show("data_sets_section")
   })
 
-  # adjust css class for data and Gene Exp tabset
+  # larger screen with adjust css class for data and Gene Exp tabset
   observe({
     if (input$tabset == "Data" || input$tabset == "Gene Exp") {
       shinyjs::removeClass("sidebar", "visible")
@@ -52,27 +55,27 @@ server <- function(input, output, session) {
     }
   })
 
-  # update input of data type
-  selected_data_type <- reactive({
+  # update input data
+  selected_data_type_raw <- reactive({
     type_input <- input$last_type_input %||% "data_type"
     selected <- switch(type_input,
       "data_type" = input$data_type,
       "data_type_exp" = input$data_type_exp,
+      NULL
     )
-
-    if (!is.null(selected)) {
-      return(selected)
-    }
+    selected
   })
 
+  # Add debounce to let JS inputs settle
+  selected_data_type <- debounce(selected_data_type_raw, 100)
 
+  # load raw and scale data
   raw_df_cached <- reactiveVal()
   scale_df_cached <- reactiveVal()
-
   gene_data <- eventReactive(list(
     input$stagei, input$data_type, input$data_type_exp
   ), {
-    req(input$stagei)
+    req(input$stagei, input$data_type, input$data_type_exp)
 
     dataset <- switch(selected_data_type(),
       "raw" = {
@@ -256,8 +259,10 @@ server <- function(input, output, session) {
     )
   })
 
-  observeEvent(list(input$check_exp_0, input$data_type_exp), {
+  # inialize gene_exp_0
+  observeEvent(list(input$data_type_exp), {
     req(gene_data())
+
     updateSelectizeInput(session, "genes_exp_0",
       label = if (isTRUE(input$check_exp_0)) "Gene ID" else "Gene name",
       choices = choice_exp(),
@@ -265,6 +270,25 @@ server <- function(input, output, session) {
     )
   })
 
+  # update change from js
+  observeEvent(input$data_type_exp_change, {
+    req(gene_data(), input$data_type_exp_change)
+
+    for (id in input$data_type_exp_change) {
+      check_id <- sub("genes_exp_", "check_exp_", id)
+
+      updateSelectizeInput(
+        session,
+        inputId = id,
+        label = if (isTRUE(input[[check_id]])) "Gene ID" else "Gene name",
+        choices = choice_exp(),
+        server = TRUE
+      )
+    }
+  })
+
+
+  # df_exp data for genes_exp_0
   df_exp <- reactive({
     req(autoUpdateExp(), gene_data(), input$genes_exp_0, input$group_exp)
     df_exp0(
@@ -274,6 +298,7 @@ server <- function(input, output, session) {
     )
   })
 
+  # plot for genes_exp_0
   output$gene_exp_plotly <- renderPlotly({
     req(df_exp())
     gene_exp_plot(df_exp(), tolower(input$group_exp))
@@ -286,7 +311,7 @@ server <- function(input, output, session) {
     gene_links(gene_id)
   })
 
-  ## add button (click_add_btn from js)
+  ## add button from js
   counter <- reactiveVal(0)
   observeEvent(input$click_add_btn, {
     btn_id <- input$click_add_btn
@@ -298,6 +323,7 @@ server <- function(input, output, session) {
       get_gene_choices(gene_data()$genes, FALSE)
     )
 
+    # add ui block to the right after gene_exp_tar
     if (id == 0) {
       id <- id + 1
       insertUI(
@@ -318,15 +344,18 @@ server <- function(input, output, session) {
         )
       })
       output[[paste0("gene_exp_plotly_", id)]] <- renderPlotly({
+        req(df_exp_i())
         gene_exp_plot(
           df_exp_i(),
           tolower(input[[paste0("group_exp_", id)]])
         )
       })
     } else {
+      # add ui block to button
       id <- id + 1
       newBlock(id, counter, choice_exp(), subBlock, session)
       output[[paste0("gene_exp_plotly_", id)]] <- renderPlotly({
+        req(df_exp_i())
         gene_exp_plot(
           df_exp_i(),
           tolower(input[[paste0("group_exp_", id)]])
@@ -334,6 +363,7 @@ server <- function(input, output, session) {
       })
     }
   })
+
 
   ## remove button (click_remove_btn from js)
   observeEvent(input$click_remove_btn,
@@ -357,7 +387,7 @@ server <- function(input, output, session) {
     ignoreNULL = TRUE
   )
 
-  observeEvent(list(input$click_toggle_exp, input$data_type_exp), {
+  observeEvent(list(input$click_toggle_exp), {
     req(gene_data())
     req(input$click_toggle_exp)
     btn_id <- input$click_toggle_exp$id
@@ -617,6 +647,12 @@ server <- function(input, output, session) {
   # clear memory on session end
   onSessionEnded(function() {
     message("Session ended. Cleaning up memory...")
+    removeUI(selector = "#dynamic_col_*")
+    raw_df_cached(NULL)
+    scale_df_cached(NULL)
+    choice_exp(NULL)
+    selected_table(NULL)
+
     if (exists("sessionData", envir = .GlobalEnv)) {
       rm(list = ls(envir = sessionData), envir = sessionData)
     }

@@ -107,6 +107,23 @@ $(document).ready(function () {
 
   $(document).on('change', 'input[name^="data_type"]', function () {
   Shiny.setInputValue('last_type_input', this.name, { priority: 'event' });
-});
+  });
+
+
+ $(document).on('change', 'input[name^="data_type_exp"]', function () {
+  var dataTypeExpId = this.value;
+  var genesExpIdList = [];
+
+  $('[id^="genes_exp_"]').each(function () {
+    var id = this.id;
+    if (id.endsWith('-label') || id.endsWith('-selectized')) return;
+    if (!genesExpIdList.includes(id)) {
+      genesExpIdList.push(id);
+    }
+  });
+
+  Shiny.setInputValue('data_type_exp_change', genesExpIdList, { priority: 'event' });
+  });
+
 
 });

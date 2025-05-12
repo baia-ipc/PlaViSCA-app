@@ -1,6 +1,10 @@
 # source function
 source("functions/helpers.R")
 
+# Define variable for selectInput in gene Exp
+group_choices <- c("Stage", "Species", "Condition", "Sample", "Type", "Ident")
+
+
 # read gff data
 gff_data <- read.table("ref/PvivaxP01_gff_data.tsv", sep = "\t", header = TRUE)
 

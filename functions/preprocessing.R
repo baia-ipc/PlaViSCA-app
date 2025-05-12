@@ -33,7 +33,6 @@ cell_id_bf_[nchar(cell_id_bf_) < 10] <- NA
 cell_id_clean <- coalesce(cell_id_af_, cell_id_bf_)
 so@meta.data$cleaned_barcode <- cell_id_clean
 
-
 so@meta.data$type <- type_df$type[match(
   so@meta.data$cleaned_barcode,
   type_df$sample
@@ -84,7 +83,7 @@ mr_data <- mr_data %>%
 # Extract reduction data from mr_data
 red_df <- mr_data %>%
   select(
-    id, stage, species, ident, n_feature_rna,
+    id, stage, species, condition, sample, type, ident, n_feature_rna,
     any_of(make_clean_names(umap)),
     any_of(make_clean_names(umap_int)),
     any_of(make_clean_names(pca)),

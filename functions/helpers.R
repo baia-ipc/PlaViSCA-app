@@ -82,7 +82,7 @@ subBlock <- function(i) {
         selectInput(
           paste0("group_exp_", i),
           "Group by",
-          choices = c("Stage", "Species"),
+          choices = group_choices,
           selected = "Stage"
         )
       )

@@ -523,7 +523,7 @@ ui <- fluidPage(
                   column(
                     width = 6,
                     selectInput("group_exp", "Group by",
-                      choices = c("Stage", "Species"),
+                      choices = group_choices,
                       selected = "Stage"
                     )
                   )
