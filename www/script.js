@@ -106,13 +106,13 @@ $(document).ready(function () {
   });
 
   $(document).on('change', 'input[name^="data_type"]', function () {
-  Shiny.setInputValue('last_type_input', this.name, { priority: 'event' });
+    Shiny.onInputChange('last_type_input', this.name);
   });
 
 
  $(document).on('change', 'input[name^="data_type_exp"]', function () {
-  var dataTypeExpId = this.value;
-  var genesExpIdList = [];
+    var dataTypeExpId = this.value;
+    var genesExpIdList = [];
 
   $('[id^="genes_exp_"]').each(function () {
     var id = this.id;

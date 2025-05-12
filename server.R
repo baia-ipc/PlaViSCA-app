@@ -56,7 +56,7 @@ server <- function(input, output, session) {
   })
 
   # update input data
-  selected_data_type_raw <- reactive({
+  selected_data_type <- reactive({
     type_input <- input$last_type_input %||% "data_type"
     selected <- switch(type_input,
       "data_type" = input$data_type,
@@ -66,9 +66,6 @@ server <- function(input, output, session) {
     selected
   })
 
-  # Add debounce to let JS inputs settle
-  selected_data_type <- debounce(selected_data_type_raw, 100)
-
   # load raw and scale data
   raw_df_cached <- reactiveVal()
   scale_df_cached <- reactiveVal()
@@ -76,7 +73,6 @@ server <- function(input, output, session) {
     input$stagei, input$data_type, input$data_type_exp
   ), {
     req(input$stagei, input$data_type, input$data_type_exp)
-
     dataset <- switch(selected_data_type(),
       "raw" = {
         if (is.null(raw_df_cached())) {
