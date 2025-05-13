@@ -109,26 +109,27 @@ $(document).ready(function () {
     Shiny.onInputChange('last_type_input', this.name);
   });
 
+   $(document).on('change', 'input[name^="data_type_exp"]', function () {
+    var dataTypeExpId = this.value;
+    var genesExpIdList = [];
 
-$(document).on('change', 'input[name^="data_type_exp"]', function () {
-  var dataTypeExpId = this.value;
-  var genesExpIdList = [];
+    $('[id^="genes_exp_"]').each(function () {
+      var id = this.id;
+      if (id.endsWith('-label') || id.endsWith('-selectized')) return;
+      if (!genesExpIdList.includes(id)) {
+        genesExpIdList.push(id);
+      }
+    });
 
-  $('[id^="genes_exp_"]').each(function () {
-    var id = this.id;
-    if (id.endsWith('-label') || id.endsWith('-selectized')) return;
-    if (!genesExpIdList.includes(id)) {
-      genesExpIdList.push(id);
-    }
+    Shiny.setInputValue('data_type_exp_change', {
+      ids: genesExpIdList,
+      nonce: new Date().getTime() 
+    }, { priority: 'event' });
   });
 
-  
-  Shiny.setInputValue('data_type_exp_change', {
-    ids: genesExpIdList,
-    nonce: new Date().getTime() 
-  }, { priority: 'event' });
 });
 
 
 
-});
+
+

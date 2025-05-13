@@ -88,7 +88,7 @@ server <- function(input, output, session) {
   scale_df_cached <- reactiveVal()
   gene_data <- eventReactive(
     list(
-      input$stagei, input$data_type, input$data_type_exp, data_type_exp_change
+      input$stagei, input$data_type, input$data_type_exp
     ),
     {
       req(input$stagei, selected_data_type())
