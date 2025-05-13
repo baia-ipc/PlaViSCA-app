@@ -110,9 +110,9 @@ $(document).ready(function () {
   });
 
 
- $(document).on('change', 'input[name^="data_type_exp"]', function () {
-    var dataTypeExpId = this.value;
-    var genesExpIdList = [];
+$(document).on('change', 'input[name^="data_type_exp"]', function () {
+  var dataTypeExpId = this.value;
+  var genesExpIdList = [];
 
   $('[id^="genes_exp_"]').each(function () {
     var id = this.id;
@@ -122,8 +122,13 @@ $(document).ready(function () {
     }
   });
 
-  Shiny.setInputValue('data_type_exp_change', genesExpIdList, { priority: 'event' });
-  });
+  
+  Shiny.setInputValue('data_type_exp_change', {
+    ids: genesExpIdList,
+    nonce: new Date().getTime() 
+  }, { priority: 'event' });
+});
+
 
 
 });

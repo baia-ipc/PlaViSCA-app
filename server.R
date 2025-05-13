@@ -51,49 +51,69 @@ server <- function(input, output, session) {
       shinyjs::runjs('$("#main").removeClass("col-sm-8").addClass("col-sm-11");')
     } else {
       shinyjs::addClass("sidebar", "visible")
-      shinyjs::runjs('$("#main").removeClass("col-sm-11").addClass("col-sm-8");')
+      shinyjs::runjs('$("#main").removeClass("col-sm-10").addClass("col-sm-8");')
     }
   })
 
   # update input data
+  last_type_input <- reactiveVal("data_type")
+
+  observeEvent(input$data_type, {
+    last_type_input("data_type")
+  })
+
+  observeEvent(input$data_type_exp, {
+    last_type_input("data_type_exp")
+  })
+
+  # change to "normalize" when tabset switch
+  override_data_type <- reactiveVal(NULL)
+  observeEvent(input$tabset, {
+    override_data_type("normalize")
+    updateRadioButtons(session, "data_type", selected = "normalize")
+    updateRadioButtons(session, "data_type_exp", selected = "normalize")
+  })
+
+  # unified selected data type
   selected_data_type <- reactive({
-    type_input <- input$last_type_input %||% "data_type"
-    selected <- switch(type_input,
+    override_data_type() %||% switch(last_type_input(),
       "data_type" = input$data_type,
       "data_type_exp" = input$data_type_exp,
       NULL
     )
-    selected
   })
 
   # load raw and scale data
   raw_df_cached <- reactiveVal()
   scale_df_cached <- reactiveVal()
-  gene_data <- eventReactive(list(
-    input$stagei, input$data_type, input$data_type_exp
-  ), {
-    req(input$stagei, input$data_type, input$data_type_exp)
-    dataset <- switch(selected_data_type(),
-      "raw" = {
-        if (is.null(raw_df_cached())) {
-          raw_df_cached(readRDS("data/raw_df.rds"))
-        }
-        raw_df_cached()
-      },
-      "normalize" = norm_df,
-      "scale" = {
-        if (is.null(scale_df_cached())) {
-          scale_df_cached(readRDS("data/scale_df.rds"))
-        }
-        scale_df_cached()
-      }
-    )
-
+  gene_data <- eventReactive(
     list(
-      data = dataset %>% filter(stage %in% input$stagei),
-      genes = genes(dataset, gff_data)
-    )
-  })
+      input$stagei, input$data_type, input$data_type_exp, data_type_exp_change
+    ),
+    {
+      req(input$stagei, selected_data_type())
+      dataset <- switch(selected_data_type(),
+        "raw" = {
+          if (is.null(raw_df_cached())) {
+            raw_df_cached(readRDS("data/raw_df.rds"))
+          }
+          raw_df_cached()
+        },
+        "normalize" = norm_df,
+        "scale" = {
+          if (is.null(scale_df_cached())) {
+            scale_df_cached(readRDS("data/scale_df.rds"))
+          }
+          scale_df_cached()
+        }
+      )
+      override_data_type(NULL)
+      list(
+        data = dataset %>% filter(stage %in% input$stagei),
+        genes = genes(dataset, gff_data)
+      )
+    }
+  )
 
   # metadata filter
   filtered_data <- eventReactive(input$stagei, {
@@ -255,7 +275,7 @@ server <- function(input, output, session) {
     )
   })
 
-  # inialize gene_exp_0
+  # initialize gene_exp_0
   observeEvent(list(input$data_type_exp), {
     req(gene_data())
 
@@ -265,24 +285,6 @@ server <- function(input, output, session) {
       server = TRUE
     )
   })
-
-  # update change from js
-  observeEvent(input$data_type_exp_change, {
-    req(gene_data(), input$data_type_exp_change)
-
-    for (id in input$data_type_exp_change) {
-      check_id <- sub("genes_exp_", "check_exp_", id)
-
-      updateSelectizeInput(
-        session,
-        inputId = id,
-        label = if (isTRUE(input[[check_id]])) "Gene ID" else "Gene name",
-        choices = choice_exp(),
-        server = TRUE
-      )
-    }
-  })
-
 
   # df_exp data for genes_exp_0
   df_exp <- reactive({
@@ -307,6 +309,8 @@ server <- function(input, output, session) {
     gene_links(gene_id)
   })
 
+
+
   ## add button from js
   counter <- reactiveVal(0)
   observeEvent(input$click_add_btn, {
@@ -315,9 +319,7 @@ server <- function(input, output, session) {
     shinyjs::hide(paste0("add_btn_", id))
     df_exp_i <- df_expi(id, input, gene_data(), get_gene_id)
 
-    choice_exp(
-      get_gene_choices(gene_data()$genes, FALSE)
-    )
+    choice_exp(get_gene_choices(gene_data()$genes, FALSE))
 
     # add ui block to the right after gene_exp_tar
     if (id == 0) {
@@ -383,7 +385,8 @@ server <- function(input, output, session) {
     ignoreNULL = TRUE
   )
 
-  observeEvent(list(input$click_toggle_exp), {
+  # update base on toggle
+  observeEvent(list(input$click_toggle_exp, input$data_type_exp_change), {
     req(gene_data())
     req(input$click_toggle_exp)
     btn_id <- input$click_toggle_exp$id
@@ -407,6 +410,57 @@ server <- function(input, output, session) {
     gene_id <- get_gene_id(input[[paste0("genes_exp_", id)]], gene_data()$genes)
     gene_links(gene_id)
   })
+
+  # update base on data_type_exp
+  observeEvent(input$data_type_exp_change, {
+    req(gene_data(), input$data_type_exp_change$ids)
+
+    for (full_id in input$data_type_exp_change$ids) {
+      clean_id <- sub("^genes_exp_", "", full_id)
+      check_id <- paste0("check_exp_", clean_id)
+      group_id <- paste0("group_exp_", clean_id)
+
+      # Only update if that checkbox input exists
+      if (!is.null(input[[check_id]])) {
+        label_val <- if (isTRUE(input[[check_id]])) "Gene ID" else "Gene name"
+
+        updateSelectizeInput(
+          session,
+          inputId = full_id,
+          label   = label_val,
+          choices = choice_exp(),
+          server  = TRUE
+        )
+      }
+
+      # Re-render the plot for this panel
+      local({
+        local_clean <- clean_id
+        local_full <- full_id
+        local_group <- group_id
+
+        output[[paste0("gene_exp_plotly_", local_clean)]] <- renderPlotly({
+          req(
+            gene_data(),
+            input[[local_full]],
+            input[[local_group]]
+          )
+
+          df <- df_expi(
+            id = local_clean,
+            input = input,
+            gene_data = gene_data(),
+            get_gene_id = get_gene_id
+          )
+          gene_exp_plot(df(), tolower(input[[local_group]]))
+        })
+      })
+    }
+  })
+
+
+
+
 
   # Embedding tabset ---
   observeEvent(input$genes_n, {
@@ -589,7 +643,7 @@ server <- function(input, output, session) {
       size = "xl",
       easyClose = TRUE,
       footer = tagList(
-        downloadButton("export_data", "Expert .csv")
+        downloadButton("export_data", "Export .csv")
       )
     ))
   })

@@ -176,7 +176,6 @@ df_expi <- function(id, input, gene_data, get_gene_id) {
     if (!(tolower(group_col) %in% colnames(df))) {
       df[[group_col]] <- NA
     }
-
     return(df)
   })
 }
