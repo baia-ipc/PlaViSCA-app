@@ -424,15 +424,12 @@ prepare_categorical_colors <- function(df, color) {
 # Get plot dimension
 get_dim <- function(plot_type) {
   list(
-    PCA = c("pc_1", "pc_2", "pc_3"),
-    PCA_integrated = c(
-      "integratedrpca_1", "integratedrpca_2", "integratedrpca_3"
+    pca_u = c("pca_u_1", "pca_u_2", "pca_u_3"),
+    pca_i = c(
+      "pca_i_1", "pca_i_2", "pca_i_3"
     ),
-    UMAP = c("umap_1", "umap_2", "umap_3"),
-    UMAP_unintegrated = c(
-      "umapunintegrated_1", "umapunintegrated_2",
-      "umapunintegrated_3"
-    ),
+    umap_i = c("umap_i_1", "umap_i_2", "umap_i_3"),
+    umap_u = c("umap_u_1", "umap_u_2", "umap_u_3"),
     tSNE = c("t_sne_1", "t_sne_2", "t_sne_3")
   )[[plot_type]]
 }
@@ -577,7 +574,7 @@ plot_3d <- function(df, color, legend_title, size, selected_color,
 
 # Main pca, umap and tsne plotting function
 embedding_plot <- function(df, xaxis_input, yaxis_input, color, legend_title,
-                           size, plot_type = "PCA", plot_dim = "2d") {
+                           size, plot_type = "pca_u", plot_dim = "2d") {
   x <- df[[xaxis_input]]
   y <- df[[yaxis_input]]
   selected_color <- df[[color]]

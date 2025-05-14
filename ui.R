@@ -404,12 +404,6 @@ ui <- fluidPage(
                   )
                 )
               ),
-              fluidRow(withSpinner(
-                type = 6,
-                size = 0.5,
-                color = "#3498db",
-                DT::DTOutput("data_table")
-              )),
               br(),
               fluidRow(
                 column(width = 4, plotlyOutput("stage_plotly")),
@@ -422,6 +416,13 @@ ui <- fluidPage(
                 column(width = 4, plotlyOutput("location_plotly"))
               )
             ),
+            br(),
+            fluidRow(withSpinner(
+              type = 6,
+              size = 0.5,
+              color = "#3498db",
+              DT::DTOutput("data_table")
+            )),
             div(
               id = "qual_section",
               fluidRow(
@@ -530,7 +531,7 @@ ui <- fluidPage(
                 ),
                 fluidRow(
                   width = 12,
-                  plotlyOutput("gene_exp_plotly"),
+                  plotlyOutput("gene_exp_plotly_0"),
                   fluidRow(
                     class = "btn-add-rm-container",
                     actionButton("add_btn_0",
@@ -549,13 +550,13 @@ ui <- fluidPage(
               column(
                 id = "tab_switch",
                 width = 5,
-                tags$span(class = "left-label", "Integrated"),
+                tags$span(class = "left-label", "Unintegrated"),
                 tags$label(
                   class = "switch",
                   tags$input(id = "check_all", type = "checkbox"),
                   tags$span(class = "slider")
                 ),
-                tags$span(class = "right-label", "Unintegrated")
+                tags$span(class = "right-label", "Integrated")
               ),
               column(
                 width = 6,

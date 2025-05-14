@@ -20,19 +20,19 @@ vf_data <- list_data$vf_data
 rm(list_data)
 
 # select columns for 2D plots
-pc_columns <- grep("^pc_\\d+", colnames(mr_data),
+pca_u <- grep("^pca_u_\\d+", colnames(mr_data),
   ignore.case = TRUE, value = TRUE
 )
-pc_int_columns <- grep("^int.*pca.*", colnames(mr_data),
+pca_i <- grep("^pca_i_\\d+", colnames(mr_data),
   ignore.case = TRUE, value = TRUE
 )
-umap_columns <- grep("^umap_\\d+$", colnames(mr_data),
+umap_i <- grep("^umap_i_\\d+", colnames(mr_data),
   ignore.case = TRUE, value = TRUE
 )
-umap_uint_columns <- grep("^umapunint.*", colnames(mr_data),
+umap_u <- grep("^umap_u_\\d+", colnames(mr_data),
   ignore.case = TRUE, value = TRUE
 )
-tsne_columns <- grep("t_sne", colnames(mr_data),
+tsne <- grep("t_sne", colnames(mr_data),
   ignore.case = TRUE, value = TRUE
 )
 cca_snn <- grep("CCA_snn", colnames(mr_data),

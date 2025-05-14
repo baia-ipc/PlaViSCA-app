@@ -16,7 +16,7 @@ type_df <- read.csv("data/pbio_3000711_s034.csv") %>%
   mutate(sample = gsub(".*_", "", sample))
 
 # load seurat object
-so <- readRDS("data/original_file/Pv.all.12.Jan2025.rds")
+so <- readRDS("data/Pv.all.12.Jan2025.rds")
 
 # change features from - to _ to match with gff gene_id
 features <- gsub("-", "_", rownames(so[["RNA"]]@features))
@@ -62,7 +62,21 @@ mr_data <- FetchData(so, vars = c(
   metadata, "ident", umap, umap_int, pca,
   pca_int, tsne
 )) %>%
-  clean_names()
+  clean_names() %>%
+  rename(
+    umap_i_1 = umap_1,
+    umap_i_2 = umap_2,
+    umap_i_3 = umap_3,
+    umap_u_1 = umapunintegrated_1,
+    umap_u_2 = umapunintegrated_2,
+    umap_u_3 = umapunintegrated_3,
+    pca_i_1 = integratedrpca_1,
+    pca_i_2 = integratedrpca_2,
+    pca_i_3 = integratedrpca_3,
+    pca_u_1 = pc_1,
+    pca_u_2 = pc_2,
+    pca_u_3 = pc_3
+  )
 
 # clean mr_data
 mr_data <- mr_data %>%
