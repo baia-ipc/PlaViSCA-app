@@ -18,7 +18,6 @@ $(document).ready(function () {
     bindImageMapEvents();
   });
 
-
   function updateLabelStyles($input) {
     var $label = $input.closest('label');
     var inputName = $input.attr('name');
@@ -105,11 +104,7 @@ $(document).ready(function () {
     Shiny.setInputValue('change_gene_exp', id, { priority: 'event' });
   });
 
-  $(document).on('change', 'input[name^="data_type"]', function () {
-    Shiny.onInputChange('last_type_input', this.name);
-  });
-
-   $(document).on('change', 'input[name^="data_type_exp"]', function () {
+ $(document).on('change', 'input[name^="data_type_exp"]', function () {
     var dataTypeExpId = this.value;
     var genesExpIdList = [];
 
@@ -127,9 +122,5 @@ $(document).ready(function () {
     }, { priority: 'event' });
   });
 
+  
 });
-
-
-
-
-

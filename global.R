@@ -1,6 +1,9 @@
 # source function
 source("functions/helpers.R")
 
+# load normalized data
+norm_df <- readRDS("data/normalize_df.rds")
+
 # Define variable for selectInput in gene Exp
 group_choices <- c("Stage", "Species", "Condition", "Sample", "Type", "Ident")
 

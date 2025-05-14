@@ -7,8 +7,9 @@ library(RColorBrewer)
 library(tidyverse)
 library(later)
 
-# load normalized data
-norm_df <- readRDS("data/normalize_df.rds")
+# load raw and scale data
+raw_df <- readRDS("data/raw_df.rds")
+scale_df <- readRDS("data/scale_df.rds")
 
 server <- function(input, output, session) {
   sessionData <- new.env(parent = emptyenv())
@@ -21,15 +22,16 @@ server <- function(input, output, session) {
   })
 
   # navigate home and data section
-  observeEvent(input$about, {
-    shinyjs::hide("home_section")
-    shinyjs::hide("data_sets_section")
-    shinyjs::show("about_section")
-  })
   observeEvent(input$home, {
     shinyjs::hide("data_sets_section")
     shinyjs::hide("about_section")
     shinyjs::show("home_section")
+  })
+
+  observeEvent(input$about, {
+    shinyjs::hide("home_section")
+    shinyjs::hide("data_sets_section")
+    shinyjs::show("about_section")
   })
 
   observeEvent(input$explore_data, {
@@ -55,59 +57,30 @@ server <- function(input, output, session) {
     }
   })
 
-  # update input data
-  last_type_input <- reactiveVal("data_type")
 
-  observeEvent(input$data_type, {
-    last_type_input("data_type")
-  })
-
-  observeEvent(input$data_type_exp, {
-    last_type_input("data_type_exp")
-  })
-
-  # change to "normalize" when tabset switch
-  override_data_type <- reactiveVal(NULL)
-  observeEvent(input$tabset, {
-    override_data_type("normalize")
-    updateRadioButtons(session, "data_type", selected = "normalize")
-    updateRadioButtons(session, "data_type_exp", selected = "normalize")
-  })
-
-  # unified selected data type
-  selected_data_type <- reactive({
-    override_data_type() %||% switch(last_type_input(),
-      "data_type" = input$data_type,
-      "data_type_exp" = input$data_type_exp,
-      NULL
-    )
-  })
-
-  # load raw and scale data
-  raw_df_cached <- reactiveVal()
-  scale_df_cached <- reactiveVal()
+  # select data
   gene_data <- eventReactive(
-    list(
-      input$stagei, input$data_type, input$data_type_exp
-    ),
+    list(input$tabset, input$stagei, input$data_type, input$data_type_exp),
     {
-      req(input$stagei, selected_data_type())
-      dataset <- switch(selected_data_type(),
-        "raw" = {
-          if (is.null(raw_df_cached())) {
-            raw_df_cached(readRDS("data/raw_df.rds"))
-          }
-          raw_df_cached()
-        },
-        "normalize" = norm_df,
-        "scale" = {
-          if (is.null(scale_df_cached())) {
-            scale_df_cached(readRDS("data/scale_df.rds"))
-          }
-          scale_df_cached()
-        }
-      )
-      override_data_type(NULL)
+      dataset <- if (input$tabset == "Gene Exp") {
+        switch(input$data_type_exp,
+          raw = raw_df,
+          normalize = norm_df,
+          scale = scale_df,
+          NULL
+        )
+      } else if (input$tabset == "Embeddings") {
+        switch(input$data_type,
+          raw = raw_df,
+          normalize = norm_df,
+          scale = scale_df,
+          NULL
+        )
+      } else {
+        NULL
+      }
+
+      req(dataset, input$stagei)
       list(
         data = dataset %>% filter(stage %in% input$stagei),
         genes = genes(dataset, gff_data)
@@ -265,30 +238,23 @@ server <- function(input, output, session) {
     }, 1)
   })
 
-  choice_exp <- reactiveVal()
-  observeEvent(list(input$click_toggle_exp), {
-    toggle_value <- input$click_toggle_exp$value
-    toggle_value <- if (!is.null(toggle_value)) toggle_value else FALSE
-
-    choice_exp(
-      get_gene_choices(gene_data()$genes, toggle_value)
-    )
+  choice_exp_0 <- reactive({
+    get_gene_choices(gene_data()$genes, input$check_exp_0)
   })
 
-  # initialize gene_exp_0
-  observeEvent(list(input$data_type_exp), {
-    req(gene_data())
-
+  observe({
+    req(choice_exp_0())
+    label_text <- if (isTRUE(input$check_exp_0)) "Gene ID" else "Gene name"
     updateSelectizeInput(session, "genes_exp_0",
-      label = if (isTRUE(input$check_exp_0)) "Gene ID" else "Gene name",
-      choices = choice_exp(),
+      label = label_text,
+      choices = choice_exp_0(),
       server = TRUE
     )
   })
 
   # df_exp data for genes_exp_0
   df_exp <- reactive({
-    req(autoUpdateExp(), gene_data(), input$genes_exp_0, input$group_exp)
+    req(gene_data(), input$genes_exp_0, input$group_exp)
     df_exp0(
       gene_data = gene_data(), gene_input = input$genes_exp_0,
       group_input = input$group_exp,
@@ -310,8 +276,8 @@ server <- function(input, output, session) {
   })
 
 
-
   ## add button from js
+  choice_exp <- reactiveVal()
   counter <- reactiveVal(0)
   observeEvent(input$click_add_btn, {
     btn_id <- input$click_add_btn
@@ -386,22 +352,22 @@ server <- function(input, output, session) {
   )
 
   # update base on toggle
-  observeEvent(list(input$click_toggle_exp, input$data_type_exp_change), {
-    req(gene_data())
+  observeEvent(list(input$click_toggle_exp), {
     req(input$click_toggle_exp)
-    btn_id <- input$click_toggle_exp$id
-    id <- as.numeric(gsub("check_exp_", "", btn_id))
-    if (is.character(input$click_toggle_exp$id)) {
-      is_checked <- input$click_toggle_exp$value
 
-      updateSelectizeInput(
-        session,
-        paste0("genes_exp_", id),
-        label = if (isTRUE(is_checked)) "Gene ID" else "Gene name",
-        choices = choice_exp(),
-        server = TRUE
-      )
-    }
+    tg_id <- input$click_toggle_exp$id
+    id <- as.numeric(gsub("check_exp_", "", tg_id))
+    is_checked <- input$click_toggle_exp$value
+
+    choice_exp(get_gene_choices(gene_data()$genes, is_checked))
+
+    updateSelectizeInput(
+      session,
+      paste0("genes_exp_", id),
+      label = if (is_checked) "Gene ID" else "Gene name",
+      choices = choice_exp(),
+      server = TRUE
+    )
   })
 
   observeEvent(input$change_gene_exp, {
@@ -411,43 +377,24 @@ server <- function(input, output, session) {
     gene_links(gene_id)
   })
 
-  # update base on data_type_exp
+
+
   observeEvent(input$data_type_exp_change, {
-    req(gene_data(), input$data_type_exp_change$ids)
+    req(gene_data(), input$data_type_exp_change)
 
     for (full_id in input$data_type_exp_change$ids) {
-      clean_id <- sub("^genes_exp_", "", full_id)
-      check_id <- paste0("check_exp_", clean_id)
-      group_id <- paste0("group_exp_", clean_id)
+      id <- sub("^genes_exp_", "", full_id)
+      group_id <- paste0("group_exp_", id)
 
-      # Only update if that checkbox input exists
-      if (!is.null(input[[check_id]])) {
-        label_val <- if (isTRUE(input[[check_id]])) "Gene ID" else "Gene name"
-
-        updateSelectizeInput(
-          session,
-          inputId = full_id,
-          label   = label_val,
-          choices = choice_exp(),
-          server  = TRUE
-        )
-      }
-
-      # Re-render the plot for this panel
       local({
-        local_clean <- clean_id
+        local_id <- id
         local_full <- full_id
         local_group <- group_id
-
-        output[[paste0("gene_exp_plotly_", local_clean)]] <- renderPlotly({
-          req(
-            gene_data(),
-            input[[local_full]],
-            input[[local_group]]
-          )
+        output[[paste0("gene_exp_plotly_", local_id)]] <- renderPlotly({
+          req(gene_data(), input[[local_full]], input[[local_group]])
 
           df <- df_expi(
-            id = local_clean,
+            id = local_id,
             input = input,
             gene_data = gene_data(),
             get_gene_id = get_gene_id
@@ -457,9 +404,6 @@ server <- function(input, output, session) {
       })
     }
   })
-
-
-
 
 
   # Embedding tabset ---
@@ -696,10 +640,7 @@ server <- function(input, output, session) {
 
   # clear memory on session end
   onSessionEnded(function() {
-    message("Session ended. Cleaning up memory...")
     removeUI(selector = "#dynamic_col_*")
-    raw_df_cached(NULL)
-    scale_df_cached(NULL)
     choice_exp(NULL)
     selected_table(NULL)
 
@@ -708,5 +649,6 @@ server <- function(input, output, session) {
     }
     rm(list = ls(envir = .GlobalEnv, pattern = "^temp_"), envir = .GlobalEnv)
     gc()
+    message("Session ended. Memory cleanup completed.")
   })
 }
