@@ -244,7 +244,7 @@ server <- function(input, output, session) {
   })
 
   ## df_exp data for genes_exp_0
-  df_exp <- reactive({
+  df_exp_0 <- reactive({
     req(gene_data(), input$genes_exp_0, input$group_exp)
     df_exp0(
       gene_data = gene_data(), gene_input = input$genes_exp_0,
@@ -254,9 +254,9 @@ server <- function(input, output, session) {
   })
 
   ## plot for genes_exp_0
-  output$gene_exp_plotly_0 <- renderPlotly({
-    req(df_exp())
-    gene_exp_plot(df_exp(), tolower(input$group_exp))
+  output$gene_exp_plotly <- renderPlotly({
+    req(df_exp_0())
+    gene_exp_plot(df_exp_0(), tolower(input$group_exp))
   })
 
   ## gene expression link
