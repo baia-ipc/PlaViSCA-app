@@ -62,21 +62,7 @@ mr_data <- FetchData(so, vars = c(
   metadata, "ident", umap, umap_int, pca,
   pca_int, tsne
 )) %>%
-  clean_names() %>%
-  rename(
-    umap_i_1 = umap_1,
-    umap_i_2 = umap_2,
-    umap_i_3 = umap_3,
-    umap_u_1 = umapunintegrated_1,
-    umap_u_2 = umapunintegrated_2,
-    umap_u_3 = umapunintegrated_3,
-    pca_i_1 = integratedrpca_1,
-    pca_i_2 = integratedrpca_2,
-    pca_i_3 = integratedrpca_3,
-    pca_u_1 = pc_1,
-    pca_u_2 = pc_2,
-    pca_u_3 = pc_3
-  )
+  clean_names()
 
 # clean mr_data
 mr_data <- mr_data %>%
@@ -92,17 +78,30 @@ mr_data <- mr_data %>%
       stage == "Sporozoite" ~ "sporozoite",
       TRUE ~ stage
     )
+  ) %>%
+  rename(
+    umap_i_1 = umap_1,
+    umap_i_2 = umap_2,
+    umap_i_3 = umap_3,
+    umap_u_1 = umapunintegrated_1,
+    umap_u_2 = umapunintegrated_2,
+    umap_u_3 = umapunintegrated_3,
+    pca_i_1 = integratedrpca_1,
+    pca_i_2 = integratedrpca_2,
+    pca_i_3 = integratedrpca_3,
+    pca_u_1 = pc_1,
+    pca_u_2 = pc_2,
+    pca_u_3 = pc_3
   )
+
 
 # Extract reduction data from mr_data
 red_df <- mr_data %>%
   select(
     id, stage, species, condition, sample, type, ident, n_feature_rna,
-    any_of(make_clean_names(umap)),
-    any_of(make_clean_names(umap_int)),
-    any_of(make_clean_names(pca)),
-    any_of(make_clean_names(pca_int)),
-    any_of(make_clean_names(tsne))
+    any_of(contains("umap")),
+    any_of(contains("pca")),
+    any_of(contains("tsne"))
   )
 
 # Extract genes for normalize data in average of expression

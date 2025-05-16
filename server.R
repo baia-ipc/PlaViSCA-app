@@ -320,7 +320,6 @@ server <- function(input, output, session) {
     }
   })
 
-
   ## observe remove button click from js
   observeEvent(input$click_remove_btn,
     {
@@ -515,6 +514,7 @@ server <- function(input, output, session) {
     )
   })
 
+
   ## generate pca, umap and tsne plot
   output$all_plotly <- renderPlotly({
     req(data(), input$xaxis, input$yaxis, autoUpdatePlot())
@@ -524,12 +524,11 @@ server <- function(input, output, session) {
         "cca_snn" = input$genes_n,
         input$color
       )
-      data <- data()
-      plot_type <- get_plot_type()
+
       embedding_plot(
-        data, input$xaxis, input$yaxis,
+        data(), input$xaxis, input$yaxis,
         color_column, input$genes_n, input$size,
-        plot_type = plot_type, plot_dim = input$plot
+        plot_type = get_plot_type(), plot_dim = input$plot
       )
     })
   })

@@ -425,9 +425,7 @@ prepare_categorical_colors <- function(df, color) {
 get_dim <- function(plot_type) {
   list(
     pca_u = c("pca_u_1", "pca_u_2", "pca_u_3"),
-    pca_i = c(
-      "pca_i_1", "pca_i_2", "pca_i_3"
-    ),
+    pca_i = c("pca_i_1", "pca_i_2", "pca_i_3"),
     umap_i = c("umap_i_1", "umap_i_2", "umap_i_3"),
     umap_u = c("umap_u_1", "umap_u_2", "umap_u_3"),
     tSNE = c("t_sne_1", "t_sne_2", "t_sne_3")
