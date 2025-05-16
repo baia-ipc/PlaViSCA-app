@@ -235,9 +235,8 @@ server <- function(input, output, session) {
 
   observe({
     req(choice_exp_0())
-    label_text <- if (isTRUE(input$check_exp_0)) "Gene ID" else "Gene name"
     updateSelectizeInput(session, "genes_exp_0",
-      label = label_text,
+      label = if (isTRUE(input$check_exp_0)) "Gene ID" else "Gene name",
       choices = choice_exp_0(),
       server = TRUE
     )
@@ -247,17 +246,21 @@ server <- function(input, output, session) {
   df_exp_0 <- reactive({
     req(gene_data(), input$genes_exp_0, input$group_exp)
     df_exp0(
-      gene_data = gene_data(), gene_input = input$genes_exp_0,
+      gene_data = gene_data(),
+      gene_input = input$genes_exp_0,
       group_input = input$group_exp,
       check_exp = input$check_exp_0
     )
   })
 
+
   ## plot for genes_exp_0
   output$gene_exp_plotly <- renderPlotly({
     req(df_exp_0())
-    gene_exp_plot(df_exp_0(), tolower(input$group_exp))
+    group <- isolate(tolower(input$group_exp))
+    gene_exp_plot(df_exp_0(), group)
   })
+
 
   ## gene expression link
   observeEvent(input$genes_exp_0, {
