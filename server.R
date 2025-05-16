@@ -549,7 +549,6 @@ server <- function(input, output, session) {
         names_to = "gene_id",
         values_to = "expression"
       ) %>%
-      filter(expression > 0) %>%
       left_join(gff_data, by = c("gene_id" = "id")) %>%
       arrange(desc(expression)) %>%
       rename(

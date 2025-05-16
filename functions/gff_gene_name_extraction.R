@@ -7,15 +7,13 @@ library("rtracklayer")
 library("tidyverse")
 library("janitor")
 
-gff <- import("ref/PlasmoDB-68_PvivaxP01.gff")
+gff <- import("data/original_file/PlasmoDB-68_PvivaxP01.gff")
 
 gff_data <- as.data.frame(mcols(gff)) %>%
   select("ID", "Name", "description") %>%
   filter(str_detect(ID, "^PVP01_\\d{7}$")) %>%
   clean_names()
 
-write.table(gff_data, "ref/PvivaxP01_gff_data.tsv",
-  sep = "\t", quote = FALSE, row.names = FALSE
-)
+saveRDS(gff_data, "ref/gff_data.rds")
 
 rm(list = ls())
