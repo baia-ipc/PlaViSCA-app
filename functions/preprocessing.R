@@ -6,8 +6,7 @@ library(tidyverse)
 library(janitor)
 
 # load gff data
-gff_data <- read_tsv("ref/PvivaxP01_gff_data.tsv") %>%
-  clean_names()
+gff_data <- readRDS("ref/PvivaxP01_gff_data.rds")
 
 # load parasite sex data
 type_df <- read.csv("data/pbio_3000711_s034.csv") %>%
@@ -79,7 +78,7 @@ mr_data <- mr_data %>%
       TRUE ~ stage
     )
   ) %>%
-  rename(
+  dplyr::rename(
     umap_i_1 = umap_1,
     umap_i_2 = umap_2,
     umap_i_3 = umap_3,
