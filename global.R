@@ -9,9 +9,7 @@ group_choices <- c("Stage", "Species", "Condition", "Sample", "Type", "Ident")
 
 
 # read gff data
-# gff_data <- read.table("ref/PvivaxP01_gff_data.tsv", sep = "\t", header = TRUE)
-
-gff_data <- readRDS("ref/gff_data.rds")
+gff_data <- readRDS("ref/PvivaxP01_gff_data.rds")
 
 # read metadata and reduction data
 list_data <- readRDS("data/cleaned_dataset.rds")

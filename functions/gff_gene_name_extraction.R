@@ -7,7 +7,7 @@ library("rtracklayer")
 library("tidyverse")
 library("janitor")
 
-gff <- import("data/original_file/PlasmoDB-68_PvivaxP01.gff")
+gff <- import("data/PlasmoDB-68_PvivaxP01.gff")
 
 gff_data <- as.data.frame(mcols(gff)) %>%
   select("ID", "Name", "description") %>%
