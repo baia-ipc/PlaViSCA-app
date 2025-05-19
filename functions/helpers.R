@@ -478,17 +478,17 @@ plot_2d <- function(df, x, y, color, legend_title, size,
     p <- plot_ly(
       data = df, x = x, y = y,
       type = "scatter", mode = "markers",
+      text = hover_text, hoverinfo = "text",
+      width = 1000, height = 750,
+      key = ~id,
+      source = "embedding",
       marker = list(
         size = size,
         color = selected_color,
         colorscale = list(c(0, "#0000FF4C"), c(1, "red")),
         showscale = TRUE,
         colorbar = legend_layout
-      ),
-      text = hover_text, hoverinfo = "text",
-      width = 1000, height = 750,
-      source = "embedding",
-      key = ~id
+      )
     ) %>%
       layout(
         xaxis = list(title = paste("X-", x)),
@@ -497,7 +497,6 @@ plot_2d <- function(df, x, y, color, legend_title, size,
   }
   return(p)
 }
-
 
 # Generate 3d plot
 plot_3d <- function(df, color, legend_title, size, selected_color,
@@ -527,12 +526,12 @@ plot_3d <- function(df, color, legend_title, size, selected_color,
       x = x_vals, y = y_vals, z = z_vals,
       type = "scatter3d", mode = "markers",
       color = factor(df[[color]]),
+      key = ~ df$id,
+      source = "embedding",
       marker = list(size = as.numeric(size) * 0.4),
       colors = colors,
       text = hover_text, hoverinfo = "text",
-      width = 1000, height = 750,
-      source = "embedding",
-      key = ~ df$id
+      width = 1000, height = 750
     ) %>%
       layout(
         scene = list(
@@ -600,8 +599,6 @@ embedding_plot <- function(df, xaxis_input, yaxis_input, color, legend_title,
       is_categorical, colors, coords
     )
   }
-  p <- p %>%
-    config(displaylogo = FALSE, scrollZoom = TRUE) %>%
-    event_register("plotly_click")
+
   return(p)
 }

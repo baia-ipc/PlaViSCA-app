@@ -503,7 +503,7 @@ server <- function(input, output, session) {
     }, 1)
   })
 
-  # update plots when toggles change
+  ## update plots when toggles change
   observeEvent(list(input$check, input$check_all), {
     autoUpdatePlot(TRUE)
   })
@@ -519,6 +519,7 @@ server <- function(input, output, session) {
 
 
   ## generate pca, umap and tsne plot
+  embplot <- reactiveVal(FALSE)
   output$all_plotly <- renderPlotly({
     req(data(), input$xaxis, input$yaxis, autoUpdatePlot())
     isolate({
@@ -527,26 +528,40 @@ server <- function(input, output, session) {
         "cca_snn" = input$genes_n,
         input$color
       )
-
-      embedding_plot(
+      p <- embedding_plot(
         data(), input$xaxis, input$yaxis,
         color_column, input$genes_n, input$size,
         plot_type = get_plot_type(), plot_dim = input$plot
       )
+      p <- p %>%
+        event_register("plotly_click") %>%
+        config(displaylogo = FALSE, scrollZoom = TRUE)
+      embplot(TRUE)
+      return(p)
     })
   })
 
-  selected_table <- reactiveVal(NULL)
-  observeEvent(req(event_data("plotly_click", source = "embedding")), {
-    event <- event_data("plotly_click", source = "embedding")
+  ## click event: after plot is ready
+  click_event <- reactive({
+    req(embplot())
+    ed <- event_data("plotly_click", source = "embedding")
+    if (is.null(ed) || is.null(ed$key)) {
+      return(NULL)
+    }
+    return(ed)
+  })
 
+  ## table on cell click
+  selected_table <- reactiveVal(NULL)
+  observeEvent(click_event(), {
+    event <- click_event()
+    req(event)
     data <- gene_data()$data
     cell_id <- event$key
     cols <- c("id", colnames(data)[str_detect(colnames(data), "^PVP01")])
     selected_df <- data[data$id == cell_id, cols, drop = FALSE]
 
     selected_df <- selected_df %>%
-      as.data.frame() %>%
       pivot_longer(
         cols = -id,
         names_to = "gene_id",
@@ -560,15 +575,11 @@ server <- function(input, output, session) {
         exp_value = expression
       ) %>%
       select(gene_id, gene_name, exp_value, description)
-
     selected_table(selected_df)
 
     showModal(modalDialog(
       title = paste("Selected Cell ID:", cell_id),
-      div(
-        style = "width: 100%;",
-        DT::DTOutput("cell_expression_table")
-      ),
+      div(style = "width: 100%;", DT::DTOutput("cell_expression_table")),
       size = "xl",
       easyClose = TRUE,
       footer = tagList(
@@ -594,7 +605,7 @@ server <- function(input, output, session) {
     )
   })
 
-  # handle export data
+  ## handle export data
   output$export_data <- downloadHandler(
     filename = function() {
       paste("cell_expression_data", Sys.Date(), ".csv")
@@ -607,7 +618,6 @@ server <- function(input, output, session) {
       })
     }
   )
-
 
   # handle download data
   output$download_data <- downloadHandler(
