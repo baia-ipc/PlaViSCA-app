@@ -414,15 +414,15 @@ ui <- fluidPage(
                 column(width = 4, plotlyOutput("species_plotly")),
                 column(width = 4, plotlyOutput("type_plotly")),
                 column(width = 4, plotlyOutput("location_plotly"))
-              )
+              ),
+              br(),
+              fluidRow(withSpinner(
+                type = 6,
+                size = 0.5,
+                color = "#3498db",
+                DT::DTOutput("data_table")
+              ))
             ),
-            br(),
-            fluidRow(withSpinner(
-              type = 6,
-              size = 0.5,
-              color = "#3498db",
-              DT::DTOutput("data_table")
-            )),
             div(
               id = "qual_section",
               fluidRow(
