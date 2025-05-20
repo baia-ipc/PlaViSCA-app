@@ -532,6 +532,11 @@ input:checked + .slider:before {
   max-width: 1000px;
 }
 
+/* modal move */
+.modal-header {
+  cursor: move;
+}
+
 /* Responsive design */
 @media screen and (max-width: 768px) {
   .menu-bar {
