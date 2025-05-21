@@ -4,7 +4,12 @@ source("functions/helpers.R")
 # load normalized data
 norm_df <- readRDS("data/normalize_df.rds")
 
-# Define variable for selectInput in gene Exp
+# load publication data
+pub_data <- read.csv("data/publication.csv")
+pub_data$DOI <-
+  paste0("<a href='", pub_data$DOI, "' target='_blank'>", pub_data$DOI, "</a>")
+
+# define variable for selectInput in gene Exp
 group_choices <- c("Stage", "Species", "Condition", "Sample", "Type", "Ident")
 
 

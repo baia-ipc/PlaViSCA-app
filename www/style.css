@@ -77,8 +77,6 @@
   }
 }
 
-
-
 .introduction p,
 .about p,
 #data_sets_section {
@@ -87,9 +85,7 @@
   line-height: 1.5; 
 }
 
-
 #about_section {
-
   padding: 40px;
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
@@ -114,7 +110,6 @@
   font-size: 16px;
 }
 
-
 #stagei,
 #stagelr,
 #size,
@@ -123,7 +118,6 @@
   width: 100%;
   display: block;
 }
-
 
 /* Inputs label */
 #stagei-label,
@@ -293,7 +287,6 @@
   border-color: #3498db;
   font-weight: bold;
 }
-
 
 /* Sidebar layout */
 #sidebar {

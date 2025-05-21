@@ -224,6 +224,22 @@ server <- function(input, output, session) {
       shinyjs::hide("qual_section")
       shinyjs::hide("meta_section")
       # ! further implementation with data sources
+
+      output$data_source <- renderDT({
+        DT::datatable(pub_data,
+          escape = FALSE,
+          options = list(
+            pageLength = 10,
+            scrollX = TRUE,
+            autoWidth = FALSE,
+            columnDefs = list(
+              list(width = "500px", targets = 3, className = "dt-left")
+            )
+          ),
+          selection = "single",
+          rownames = FALSE
+        )
+      })
     }
   })
 

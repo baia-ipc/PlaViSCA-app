@@ -458,15 +458,18 @@ ui <- fluidPage(
             ),
             div(
               id = "source_section",
-              fluidRow(
-                h3("Table of data sources in here"),
-                column(
-                  width = 12,
-                  actionLink(
-                    "toggle_source",
-                    HTML("<span id='arrow_source'>&#9656;</span> Data sources")
-                  )
-                )
+              # fluidRow(
+              #   h3("Table of data sources in here"),
+              #   column(
+              #     width = 12,
+              #     actionLink(
+              #       "toggle_source",
+              #       HTML("<span id='arrow_source'>&#9656;</span> Data sources")
+              #     )
+              #   ),
+              column(
+                width = 12,
+                DT::DTOutput("data_source")
               )
             )
           ),
