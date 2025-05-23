@@ -233,7 +233,7 @@ server <- function(input, output, session) {
             scrollX = TRUE,
             autoWidth = FALSE,
             columnDefs = list(
-              list(width = "500px", targets = 3, className = "dt-left")
+              list(width = "800px", targets = 2, className = "dt-left")
             )
           ),
           selection = "single",
@@ -510,18 +510,13 @@ server <- function(input, output, session) {
   observe({
     list(
       input$embedding, input$plot, input$xaxis, input$yaxis, input$color,
-      input$size, input$genes_n, input$data_type, data(), input$check,
+      input$size, input$genes_n, input$data_type, input$check,
       input$check_all
     )
     autoUpdatePlot(FALSE)
     later(function() {
       autoUpdatePlot(TRUE)
     }, 1)
-  })
-
-  ## update plots when toggles change
-  observeEvent(list(input$check, input$check_all), {
-    autoUpdatePlot(TRUE)
   })
 
   ## determine plot type
@@ -613,9 +608,10 @@ server <- function(input, output, session) {
         scrollY = "400px",
         scrollCollapse = TRUE,
         paging = FALSE,
-        authoWidth = TRUE
+        autoWidth = TRUE
       ),
       rownames = FALSE,
+      filter = "top",
       selection = "single",
       width = "100%"
     )

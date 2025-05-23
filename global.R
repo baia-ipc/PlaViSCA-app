@@ -1,4 +1,4 @@
-# source function
+# sourcer function
 source("functions/helpers.R")
 
 # load normalized data

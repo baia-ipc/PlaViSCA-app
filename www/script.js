@@ -17,20 +17,27 @@ function updateLabelStyles($input) {
 // function to update tooltips on all checkboxes and radios
 function updateTooltips() {
   $('input[type="checkbox"], input[type="radio"]').each(function () {
-    const $i = $(this);
-    const txt = $i.parent().text().trim();
-    const tip = $i.is(':checked')
-      ? `${txt} is selected`
-      : `Click to select ${txt}`;
-    $i.parent().attr('title', tip);
-  }).tooltip({ placement: 'right' });
+    const $input = $(this);
+    const $label = $input.closest('label');
+    
+    if ($label.length) {
+      const txt = $label.text().trim();
+      const tip = $input.is(':checked')
+        ? `${txt} is selected`
+        : `Click to select ${txt}`;
+      $label.attr('title', tip);
+    }
+  });
+
+  $('label[title]').tooltip({ placement: 'right' });
 }
 
 // function to bind image map events
 function bindImageMapEvents() {
   $('img[usemap]').rwdImageMaps();
   $("area").off('click').on('click', function () {
-    Shiny.setInputValue('stage_click', $(this).attr('alt'), { priority: 'event' });
+    Shiny.setInputValue('stage_click', $(this).attr('alt'),
+    { priority: 'event' });
   });
 }
 
