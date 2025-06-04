@@ -13,84 +13,55 @@ ui <- fluidPage(
       rel = "stylesheet",
       href = "https://code.jquery.com/ui/1.13.2/themes/smoothness/jquery-ui.css"
     ),
-    tags$script(src = "https://code.jquery.com/ui/1.13.2/jquery-ui.min.js")
+    tags$link(rel = "preconnect", href = "https://fonts.googleapis.com"),
+    tags$link(rel = "preconnect", href = "https://fonts.gstatic.com"),
+    tags$link(
+      href = "https://fonts.googleapis.com/css2?family=Roboto:wght@900&display=swap",
+      rel = "stylesheet"
+    ),
+    tags$script(src = "https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"),
+    tags$script(src = "particles.min.js"),
+    tags$script(src = "particles-config.js")
   ),
 
   # Menubar
   div(
     class = "menu-bar",
-    div(class = "logo", img(src = "Pvivax.jpeg", height = "60px")),
+    div(
+      class = "logo ipc",
+      a(
+        href = "https://www.pasteur-kh.org/",
+        target = "_blank",
+        img(src = "ipc_logo.png", alt = "IPC Logo")
+      )
+    ),
     div(
       class = "menu-title",
-      span("🦟 Plasmodium vivax 🦟")
+      div(class = "logo mosquito", img(src = "mosquito-top.png", alt = "mosquito")),
+      div(
+        class = "title-text",
+        h1("PlaViSca"),
+        span("Plasmodium vivax Single Cell Analysis Platform")
+      )
     ),
     div(
       class = "menu-items",
+      actionLink("home",
+        label = tagList(icon("home"), " Home"),
+        class = "menu-link active"
+      ),
+      span("|"),
+      actionLink("data",
+        label = tagList(icon("table"), " Analysis"),
+        class = "menu-link"
+      ),
+      span("|"),
       actionLink("about",
         label = tagList(icon("info-circle"), " About"),
         class = "menu-link"
       ),
-      span("|"),
-      actionLink("home",
-        label = tagList(icon("home"), " Home"),
-        class = "menu-link"
-      ),
-      span("|"),
-      actionLink("data",
-        label = tagList(icon("table"), " Explore data"),
-        class = "menu-link"
-      )
-    )
-  ),
-
-  # About section
-  div(
-    id = "about_section",
-    fluidRow(
-      class = "about",
-      h2("About the team"),
-      p(
-        "Plasmodium vivax Single Cell Analysis (PvSCA) Platform was developed by
-        the Bioinformatics and Artificial Intelligence Applications (BAIA) Unit
-        at the Institut Pasteur du Cambodge (IPC), in collaboration with the
-        Malaria Unit at IPC and the Center for Tropical and Emerging Global
-        Diseases at the University of Georgia, USA."
-      ),
-      p("The team can be contacted at the following:"),
-      tags$ul(
-        tags$li(
-          strong("Sopheap OENG"), " - Bioinformatic System Engineer, IPC, email: ",
-          a(href = "mailto:osopheap@pasteur-kh.org", "osopheap@pasteur-kh.org")
-        ),
-        tags$li(
-          strong("Anthony RUBERTO"), " - Postdoctoral researcher at the Center
-          for Tropical and Emerging Global Diseases, University of Georgia, USA,
-          email: ", a(href = "mailto:aruberto@uga.edu", "aruberto@uga.edu")
-        ),
-        tags$li(
-          strong("Jean POPOVICI"), " - Head, Malaria Research Unit, IPC, email: ",
-          a(href = "mailto:jpopovici@pasteur-kh.org", "jpopovici@pasteur-kh.org")
-        ),
-        tags$li(
-          strong("Giorgio GONNELLA"), " - Head, BAIA Unit, IPC, email: ",
-          a(href = "mailto:ggonella@pasteur-kh.org", "ggonella@pasteur-kh.org")
-        )
-      ),
-      p(
-        "This web application is built using the R Shiny framework to provide an
-        interactive and dynamic web interface."
-      ),
-      p(
-        "For more detailed information, please visit the project's GitHub",
-        "repository at ",
-        a(
-          href = "https://github.com/Sopheap15/pvsca",
-          HTML('https://github.com/Sopheap15/pvsca
-               <span class="point-emoji">👈 </span>'), target = "_blank"
-        ), "."
-      ),
-      p("© 2025 BAIA Team. All rights reserved.")
-    )
+    ),
+    div(class = "logo baia", img(src = "baia_logo.png"))
   ),
 
   # Home section
@@ -98,39 +69,34 @@ ui <- fluidPage(
     id = "home_section",
     fluidRow(
       class = "introduction",
-      p("The Plasmodium vivax Single Cell Analysis (PvSCA) platform is a web-based
-        application developed to unlock the full potential of single-cell RNA
-        sequencing (scRNA-seq) data in malaria research. Traditionally, accessing
-        and interpreting these datasets required specialized bioinformatics skills,
-        limiting their utility to a subset of researchers. PvSCA addresses this
-        challenge by offering an easy-to-use, interactive interface that provides
-        free access to high-resolution transcriptomic data from P. vivax,
-        empowering scientists to explore parasite biology at the single-cell
-        level—without writing any code."),
-      p("More than just a data viewer, PvSCA offers a suite of analytical tools
-        that allow users to examine P. vivax gene expression across developmental
-        stages and experimental conditions. Through dynamic dimensional reduction
-        visualizations, researchers can identify specific transcriptomic expression
-        patterns, track parasite differentiation stages—such as rings,
-        trophozoites, and others—and compare trends across multiple studies.
-        The platform also enables users to harmonize and share data for downstream
-        analysis and collaboration."),
-      p(
-        "PvSCA is designed to serve a multidisciplinary community—from basic
-        scientists investigating parasite gene regulation to translational
-        researchers developing diagnostics and vaccines. It also supports
-        educational and public health efforts, providing a clear and visual
-        introduction to P. vivax biology for students, educators, and
-        policymakers.",
-        actionLink("explore_data", "Explore data >>")
+      column(
+        width = 6, class = "intro-left",
+        h2("PlaViSca Platform"),
+        p("PlaViSCA is a platform designed to support the malaria research community
+        in analyzing and visualizing single-cell RNA sequencing (scRNA-seq) data.
+        PvSCA provides a user friendly interface for exploring
+        metadata and gene expression across various parasite life cycle stages
+        using interactive tables and 2D or 3D visualizations with customizable
+        filters and coloring.The platform also allows users to download data for
+        further analysis. PlaViSCA empowers researchers to explore complex scRNA-seq for
+        P. vivax without requiring any programming skills."),
+        actionLink("explore_data",
+          label = tagList(icon("hand-point-right"), "Explore data"),
+          class = "btn btn-outline-light btn-sm explore-btn"
+        ),
+        div(class = "logo mosquito-bottom", img(
+          src = "mosquito-bottom.png",
+          alt = "mosquito"
+        ))
       ),
-      p("To better understand the context, users can explore the Plasmodium vivax
-      life cycle in the image below.")
+      column(
+        width = 6, class = "intro-right",
+        h2("Plasmodium vivax life cycle"),
+        div(class = "img", img(src = "pvivax.jpg", usemap = "#malariaMap"))
+      )
     ),
-    div(class = "img", img(
-      src = "pvivax.jpg", usemap = "#malariaMap",
-      style = "width: 100%; height: auto;"
-    )),
+    fluidRow(id = "particles-js-home", class = "particles-js"),
+    fluidRow(p(class = "copyright", "© 2025 BAIA Team. All rights reserved.")),
     tags$map(
       name = "malariaMap",
       tags$area(
@@ -458,15 +424,6 @@ ui <- fluidPage(
             ),
             div(
               id = "source_section",
-              # fluidRow(
-              #   h3("Table of data sources in here"),
-              #   column(
-              #     width = 12,
-              #     actionLink(
-              #       "toggle_source",
-              #       HTML("<span id='arrow_source'>&#9656;</span> Data sources")
-              #     )
-              #   ),
               column(
                 width = 12,
                 DT::DTOutput("data_source")
@@ -594,5 +551,61 @@ ui <- fluidPage(
         )
       )
     )
+  ),
+  # About section
+  div(
+    id = "about_section",
+    fluidRow(
+      class = "about",
+      column(
+        width = 8,
+        h2("Collaborators"),
+        p("PlaViSca was developed by the Bioinformatics and Artificial Intelligence
+       Applications (BAIA) Unit at the Institut Pasteur du Cambodge (IPC),
+       in collaboration with the Malaria Unit at IPC and the Center for Tropical
+       and Emerging Global Diseases at the University of Georgia, USA."),
+        p("We are open to collaboration and welcome opportunities to integrate
+       additional relevant data into this platform. Please reach out to us
+       using following contact.")
+      ),
+      column(
+        width = 4,
+        id = "colab-particles",
+        class = "collab-particles"
+      )
+    ),
+    fluidRow(
+      class = "contact",
+      h2("Contact detail:"),
+      tags$ul(
+        tags$li(
+          strong("Sopheap OENG"), " - Bioinformatic System Engineer, IPC, email: ",
+          a(href = "mailto:osopheap@pasteur-kh.org", "osopheap@pasteur-kh.org")
+        ),
+        tags$li(
+          strong("Anthony RUBERTO"), " - Postdoctoral researcher at the Center
+          for Tropical and Emerging Global Diseases, University of Georgia, USA,
+          email: ", a(href = "mailto:aruberto@uga.edu", "aruberto@uga.edu")
+        ),
+        tags$li(
+          strong("Jean POPOVICI"), " - Head, Malaria Research Unit, IPC, email: ",
+          a(href = "mailto:jpopovici@pasteur-kh.org", "jpopovici@pasteur-kh.org")
+        ),
+        tags$li(
+          strong("Giorgio GONNELLA"), " - Head, BAIA Unit, IPC, email: ",
+          a(href = "mailto:ggonella@pasteur-kh.org", "ggonella@pasteur-kh.org")
+        )
+      ),
+      p(
+        "PlaViSca is built using the R Shiny framework. For more detail, please
+        visit GitHub repo:", a(
+          href = "https://github.com/Sopheap15/pvsca",
+          HTML('https://github.com/Sopheap15/pvsca
+               <span class="point-emoji">👈 </span>'), target = "_blank"
+        ), "."
+      )
+    ),
+    fluidRow(id = "particles-js-about", class = "particles-js"),
+    fluidRow(p(class = "copyright", "© 2025 BAIA Team. All rights reserved."))
   )
 )

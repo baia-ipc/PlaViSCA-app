@@ -26,24 +26,51 @@ server <- function(input, output, session) {
     shinyjs::hide("data_sets_section")
     shinyjs::hide("about_section")
     shinyjs::show("home_section")
+
+    # shinyjs::runjs("location.reload();")
+    # runjs("initParticles('particles-js-home');")
+
+    shinyjs::runjs("
+    $('.menu-link').removeClass('active');
+    $('#home').addClass('active');
+  ")
   })
 
   observeEvent(input$about, {
     shinyjs::hide("home_section")
     shinyjs::hide("data_sets_section")
     shinyjs::show("about_section")
+
+    runjs("initParticles('colab-particles');")
+    runjs("initParticles('particles-js-about');")
+
+
+    shinyjs::runjs("
+    $('.menu-link').removeClass('active');
+    $('#about').addClass('active');
+  ")
   })
 
   observeEvent(input$explore_data, {
     shinyjs::hide("home_section")
     shinyjs::hide("about_section")
     shinyjs::show("data_sets_section")
+
+    shinyjs::runjs("
+    $('.menu-link').removeClass('active');
+    $('#data').addClass('active');
+  ")
   })
 
   observeEvent(input$data, {
     shinyjs::hide("home_section")
     shinyjs::hide("about_section")
     shinyjs::show("data_sets_section")
+
+    shinyjs::runjs("
+    $('.menu-link').removeClass('active');
+    $('#data').addClass('active');
+  ")
   })
 
   # Larger screen adjustment
