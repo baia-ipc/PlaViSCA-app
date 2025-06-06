@@ -51,7 +51,7 @@ ui <- fluidPage(
         class = "menu-link active"
       ),
       span("|"),
-      actionLink("data",
+      actionLink("analysis",
         label = tagList(icon("table"), " Analysis"),
         class = "menu-link"
       ),
@@ -71,7 +71,7 @@ ui <- fluidPage(
       class = "introduction",
       column(
         width = 6, class = "intro-left",
-        h2("PlaViSca Platform"),
+        # h2("PlaViSca Platform"),
         p("PlaViSCA is a platform designed to support the malaria research community
         in analyzing and visualizing single-cell RNA sequencing (scRNA-seq) data.
         PvSCA provides a user friendly interface for exploring
@@ -80,10 +80,11 @@ ui <- fluidPage(
         filters and coloring.The platform also allows users to download data for
         further analysis. PlaViSCA empowers researchers to explore complex scRNA-seq for
         P. vivax without requiring any programming skills."),
-        actionLink("explore_data",
-          label = tagList(icon("hand-point-right"), "Explore data"),
-          class = "btn btn-outline-light btn-sm explore-btn"
-        ),
+        # actionLink("explore_data",
+        #   label = tagList(icon("hand-point-right"), "Explore data"),
+        #   class = "btn btn-outline-light btn-sm explore-btn"
+        # ),
+
         div(class = "logo mosquito-bottom", img(
           src = "mosquito-bottom.png",
           alt = "mosquito"
@@ -91,8 +92,62 @@ ui <- fluidPage(
       ),
       column(
         width = 6, class = "intro-right",
-        h2("Plasmodium vivax life cycle"),
-        div(class = "img", img(src = "pvivax.jpg", usemap = "#malariaMap"))
+        div(
+          class = "pages_link",
+          actionLink("metadata-link", tagList(
+            img(src = "metadata.png", alt = "Metadata"),
+            span("Metadata")
+          )),
+          actionLink("analysis-link", tagList(
+            img(src = "umap.png", alt = "Analysis"),
+            span("Analysis")
+          )),
+          actionLink("qc-link", tagList(
+            img(src = "qc.png", alt = "Quality control"),
+            span("Quality control")
+          ))
+        ),
+        div(
+          class = "pages_link",
+          actionLink("sources-link", tagList(
+            img(src = "data_sources.png", alt = "Data sources"),
+            span("Data sources")
+          )),
+          actionLink("gene_exp-link", tagList(
+            img(src = "gene_exp.png", alt = "Gene Expression"),
+            span("Gene exp")
+          )),
+          actionLink("contribute-link", tagList(
+            img(src = "contribute.png", alt = "Contribute"),
+            span("Contribute")
+          ))
+        ),
+        div(
+          class = "pages_link",
+          actionLink("usermanual-link", tagList(
+            img(src = "usermanual.png", alt = "User Manual"),
+            span("User Manual")
+          )),
+          actionLink("sources-code-link", tagList(
+            img(src = "sources_code.png", alt = "Sources code"),
+            span("Source code")
+          )),
+          actionLink("about-link", tagList(
+            img(src = "about.png", alt = "About"),
+            span("About")
+          ))
+        )
+
+
+
+
+
+
+
+
+
+        # h2("Plasmodium vivax life cycle"),
+        # div(class = "img", img(src = "pvivax.jpg", usemap = "#malariaMap"))
       )
     ),
     fluidRow(id = "particles-js-home", class = "particles-js"),
@@ -128,7 +183,7 @@ ui <- fluidPage(
         href = "javascript:void(0)", alt = "schizont", title = "schizont"
       ),
       tags$area(
-        shape = "rect", coords = "2381, 1810, 3142, 1894",
+        shape = "rect", coords = "2382, 1810, 3142, 1894",
         href = "javascript:void(0)", alt = "gametocyte", title = "gametocyte"
       ),
       tags$area(
@@ -154,8 +209,9 @@ ui <- fluidPage(
     )
   ),
 
-  # Explore data section
+  # Analysis section
   div(
+    style = "margin-top: 32px",
     id = "data_sets_section",
     fluidRow(
       column(

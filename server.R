@@ -62,14 +62,14 @@ server <- function(input, output, session) {
   ")
   })
 
-  observeEvent(input$data, {
+  observeEvent(input$analysis, {
     shinyjs::hide("home_section")
     shinyjs::hide("about_section")
     shinyjs::show("data_sets_section")
 
     shinyjs::runjs("
     $('.menu-link').removeClass('active');
-    $('#data').addClass('active');
+    $('#analysis').addClass('active');
   ")
   })
 
