@@ -17,13 +17,13 @@ server <- function(input, output, session) {
 
   # ! not yet implemented. This part user click on stages on image it
   # ! will get info for filter data
-  observeEvent(input$stage_click, {
-    cat("User clicked on:", input$stage_click, "\n")
-  })
+  # observeEvent(input$stage_click, {
+  #   cat("User clicked on:", input$stage_click, "\n")
+  # })
 
   # Navigate home and data section
   observeEvent(input$home, {
-    shinyjs::hide("data_sets_section")
+    shinyjs::hide("analysis_section")
     shinyjs::hide("about_section")
     shinyjs::show("home_section")
 
@@ -38,7 +38,7 @@ server <- function(input, output, session) {
 
   observeEvent(input$about, {
     shinyjs::hide("home_section")
-    shinyjs::hide("data_sets_section")
+    shinyjs::hide("analysis_section")
     shinyjs::show("about_section")
 
     runjs("initParticles('colab-particles');")
@@ -54,7 +54,7 @@ server <- function(input, output, session) {
   observeEvent(input$explore_data, {
     shinyjs::hide("home_section")
     shinyjs::hide("about_section")
-    shinyjs::show("data_sets_section")
+    shinyjs::show("analysis_section")
 
     shinyjs::runjs("
     $('.menu-link').removeClass('active');
@@ -65,7 +65,7 @@ server <- function(input, output, session) {
   observeEvent(input$analysis, {
     shinyjs::hide("home_section")
     shinyjs::hide("about_section")
-    shinyjs::show("data_sets_section")
+    shinyjs::show("analysis_section")
 
     shinyjs::runjs("
     $('.menu-link').removeClass('active');
@@ -75,12 +75,14 @@ server <- function(input, output, session) {
 
   # Larger screen adjustment
   observe({
-    if (input$tabset == "Data" || input$tabset == "Gene Exp") {
+    if (input$tabset == "Metadata" ||
+      input$tabset == "Quality control" || input$tabset == "Data sources" ||
+      input$tabset == "Gene expression") {
       shinyjs::removeClass("sidebar", "visible")
-      shinyjs::runjs('$("#main").removeClass("col-sm-8").addClass("col-sm-11");')
+      shinyjs::runjs('$("#main").removeClass("col-sm-8").addClass("col-sm-12");')
     } else {
       shinyjs::addClass("sidebar", "visible")
-      shinyjs::runjs('$("#main").removeClass("col-sm-10").addClass("col-sm-8");')
+      shinyjs::runjs('$("#main").removeClass("col-sm-12").addClass("col-sm-8");')
     }
   })
 
@@ -88,7 +90,7 @@ server <- function(input, output, session) {
   gene_data <- eventReactive(
     list(input$tabset, input$stagei, input$data_type, input$data_type_exp),
     {
-      dataset <- if (input$tabset == "Gene Exp") {
+      dataset <- if (input$tabset == "Gene expression") {
         switch(input$data_type_exp,
           raw = raw_df,
           normalize = norm_df,
@@ -120,9 +122,12 @@ server <- function(input, output, session) {
     mr_data %>% filter(stage %in% input$stagei)
   })
 
-  # Manipulation tabset "Data"
+
+
+
+  # Manipulation tabset "metadata"
   observeEvent(input$tabset, {
-    if (input$tabset == "Data") {
+    if (input$tabset == "Metadata") {
       filt_data <- filtered_data()
       updateSelectInput(session, "ident", choices = unique(filt_data$ident))
       updateSelectInput(session, "species", choices = unique(filt_data$species))
@@ -158,68 +163,179 @@ server <- function(input, output, session) {
         )
     }
 
-    if (input$data_opt == "meta") {
-      shinyjs::show("meta_section")
-      shinyjs::hide("qual_section")
-      shinyjs::hide("source_section")
+    output$data_table <- renderDT(
+      {
+        ## data in table
+        DT::datatable(
+          filt_data %>%
+            rename_with(~ str_to_title(.),
+              .cols = any_of(c(
+                "id", "ident", "seurat_clusters",
+                "species", "type", "condition", "stage",
+                "sample", "day", "replicate", "location",
+                "vivax_strain"
+              ))
+            ) %>%
+            rename(nCount_RNA = n_count_rna, nFeature_RNA = n_feature_rna) %>%
+            arrange(desc(nCount_RNA)),
+          options = list(pageLength = 10, scrollX = TRUE),
+          selection = "single",
+          rownames = FALSE
+        )
+      },
+      server = TRUE
+    )
 
-      output$data_table <- renderDT(
-        {
-          ## data in table
-          DT::datatable(
-            filt_data %>%
-              rename_with(~ str_to_title(.),
-                .cols = any_of(c(
-                  "id", "ident", "seurat_clusters",
-                  "species", "type", "condition", "stage",
-                  "sample", "day", "replicate", "location",
-                  "vivax_strain"
-                ))
-              ) %>%
-              rename(nCount_RNA = n_count_rna, nFeature_RNA = n_feature_rna) %>%
-              arrange(desc(nCount_RNA)),
-            options = list(pageLength = 10, scrollX = TRUE),
-            selection = "single",
-            rownames = FALSE
-          )
-        },
-        server = TRUE
-      )
+    ## plot stage vs count
+    output$stage_plotly <- renderPlotly({
+      meta_plotly(filt_data, "stage", "Count", "Stage", "bar")
+    })
 
-      ## plot stage vs count
-      output$stage_plotly <- renderPlotly({
-        meta_plotly(filt_data, "stage", "Count", "Stage", "bar")
-      })
+    ## plot sample vs count
+    output$sample_plotly <- renderPlotly({
+      meta_plotly(filt_data, "sample", "Count", "Sample", "bar")
+    })
 
-      ## plot sample vs count
-      output$sample_plotly <- renderPlotly({
-        meta_plotly(filt_data, "sample", "Count", "Sample", "bar")
-      })
+    ## plot strain vs count
+    output$strain_plotly <- renderPlotly({
+      meta_plotly(filt_data, "vivax_strain", "Count", "Strain", "bar")
+    })
 
-      ## plot strain vs count
-      output$strain_plotly <- renderPlotly({
-        meta_plotly(filt_data, "vivax_strain", "Count", "Strain", "bar")
-      })
+    ## plot species vs count
+    output$species_plotly <- renderPlotly({
+      meta_plotly(filt_data, "species", "Count", "Species", "bar")
+    })
 
-      ## plot species vs count
-      output$species_plotly <- renderPlotly({
-        meta_plotly(filt_data, "species", "Count", "Species", "bar")
-      })
+    ## plot type vs count
+    output$type_plotly <- renderPlotly({
+      meta_plotly(filt_data, "type", "Count", "Type", "bar")
+    })
 
-      ## plot type vs count
-      output$type_plotly <- renderPlotly({
-        meta_plotly(filt_data, "type", "Count", "Type", "bar")
-      })
+    ## plot type vs count
+    output$location_plotly <- renderPlotly({
+      meta_plotly(filt_data, "location", "Count", "Location", "bar")
+    })
 
-      ## plot type vs count
-      output$location_plotly <- renderPlotly({
-        meta_plotly(filt_data, "location", "Count", "Location", "bar")
-      })
-    } else if (input$data_opt == "qual") {
-      shinyjs::show("qual_section")
-      shinyjs::hide("meta_section")
-      shinyjs::hide("source_section")
 
+
+
+    # if (input$data_opt == "meta") {
+    #   shinyjs::show("meta_section")
+    #   shinyjs::hide("qual_section")
+    #   shinyjs::hide("source_section")
+    #
+    #   output$data_table <- renderDT(
+    #     {
+    #       ## data in table
+    #       DT::datatable(
+    #         filt_data %>%
+    #           rename_with(~ str_to_title(.),
+    #             .cols = any_of(c(
+    #               "id", "ident", "seurat_clusters",
+    #               "species", "type", "condition", "stage",
+    #               "sample", "day", "replicate", "location",
+    #               "vivax_strain"
+    #             ))
+    #           ) %>%
+    #           rename(nCount_RNA = n_count_rna, nFeature_RNA = n_feature_rna) %>%
+    #           arrange(desc(nCount_RNA)),
+    #         options = list(pageLength = 10, scrollX = TRUE),
+    #         selection = "single",
+    #         rownames = FALSE
+    #       )
+    #     },
+    #     server = TRUE
+    #   )
+    #
+    #   ## plot stage vs count
+    #   output$stage_plotly <- renderPlotly({
+    #     meta_plotly(filt_data, "stage", "Count", "Stage", "bar")
+    #   })
+    #
+    #   ## plot sample vs count
+    #   output$sample_plotly <- renderPlotly({
+    #     meta_plotly(filt_data, "sample", "Count", "Sample", "bar")
+    #   })
+    #
+    #   ## plot strain vs count
+    #   output$strain_plotly <- renderPlotly({
+    #     meta_plotly(filt_data, "vivax_strain", "Count", "Strain", "bar")
+    #   })
+    #
+    #   ## plot species vs count
+    #   output$species_plotly <- renderPlotly({
+    #     meta_plotly(filt_data, "species", "Count", "Species", "bar")
+    #   })
+    #
+    #   ## plot type vs count
+    #   output$type_plotly <- renderPlotly({
+    #     meta_plotly(filt_data, "type", "Count", "Type", "bar")
+    #   })
+    #
+    #   ## plot type vs count
+    #   output$location_plotly <- renderPlotly({
+    #     meta_plotly(filt_data, "location", "Count", "Location", "bar")
+    #   })
+    # } else if (input$data_opt == "qual") {
+    #   shinyjs::show("qual_section")
+    #   shinyjs::hide("meta_section")
+    #   shinyjs::hide("source_section")
+    #
+    #   ## plot nCount in qual tabset
+    #   output$data_count_plotly <- renderPlotly({
+    #     feature_plot(filtered_data(),
+    #       x = "sample", y = "n_count_rna",
+    #       color = "ident", y_title = "RNA count", title = "RNA Count"
+    #     )
+    #   })
+    #
+    #   ## plot nFeature in qual tabset
+    #   output$data_feature_plotly <- renderPlotly({
+    #     feature_plot(filtered_data(),
+    #       x = "sample", y = "n_feature_rna",
+    #       color = "ident", y_title = "nFeature count",
+    #       title = "Feature Count"
+    #     )
+    #   })
+    #
+    #   ## plot elbow
+    #   output$data_pca_stdv_plotly <- renderPlotly({
+    #     elbow_plot(pca_std_df)
+    #   })
+    #
+    #   ## plot variable genes
+    #   output$variable_genes_plotly <- renderPlotly({
+    #     var_genes_plot(vf_data, top_n = 15)
+    #   })
+    # } else {
+    #   shinyjs::show("source_section")
+    #   shinyjs::hide("qual_section")
+    #   shinyjs::hide("meta_section")
+    #   # ! further implementation with data sources
+    #
+    #   output$data_source <- renderDT({
+    #     DT::datatable(pub_data,
+    #       escape = FALSE,
+    #       options = list(
+    #         pageLength = 10,
+    #         scrollX = TRUE,
+    #         autoWidth = FALSE,
+    #         columnDefs = list(
+    #           list(width = "800px", targets = 2, className = "dt-left")
+    #         )
+    #       ),
+    #       selection = "single",
+    #       rownames = FALSE
+    #     )
+    #   })
+    # }
+  })
+
+
+
+  # Quality control tabset
+  observeEvent(input$tabset, {
+    if (input$tabset == "Quality control") {
       ## plot nCount in qual tabset
       output$data_count_plotly <- renderPlotly({
         feature_plot(filtered_data(),
@@ -246,12 +362,13 @@ server <- function(input, output, session) {
       output$variable_genes_plotly <- renderPlotly({
         var_genes_plot(vf_data, top_n = 15)
       })
-    } else {
-      shinyjs::show("source_section")
-      shinyjs::hide("qual_section")
-      shinyjs::hide("meta_section")
-      # ! further implementation with data sources
+    }
+  })
 
+
+  # Data sources tabset
+  observeEvent(input$tabset, {
+    if (input$tabset == "Data sources") {
       output$data_source <- renderDT({
         DT::datatable(pub_data,
           escape = FALSE,
@@ -269,6 +386,19 @@ server <- function(input, output, session) {
       })
     }
   })
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   # Manipulation tabset "Gene Exp"
   ## gene_exp_0 block

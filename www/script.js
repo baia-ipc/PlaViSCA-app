@@ -33,13 +33,13 @@ function updateTooltips() {
 }
 
 // function to bind image map events
-function bindImageMapEvents() {
-  $('img[usemap]').rwdImageMaps();
-  $("area").off('click').on('click', function () {
-    Shiny.setInputValue('stage_click', $(this).attr('alt'),
-    { priority: 'event' });
-  });
-}
+// function bindImageMapEvents() {
+//   $('img[usemap]').rwdImageMaps();
+//   $("area").off('click').on('click', function () {
+//     Shiny.setInputValue('stage_click', $(this).attr('alt'),
+//     { priority: 'event' });
+//   });
+// }
 
 // Function to add highlight on Plotly 2D points
 function setupPlotlyHighlight() {
@@ -103,14 +103,14 @@ function setupPlotlyHighlight() {
 $(document).ready(function () {
   // Show/hide initial sections
   $("#home_section").show();
-  $("#data_sets_section").hide();
+  $("#analysis_section").hide();
   $("#about_section").hide();
 
   // Bind image map events
-  bindImageMapEvents();
+  // bindImageMapEvents();
 
   // Setup shiny:value event to rebind image map events when needed
-  $(document).on('shiny:value', bindImageMapEvents);
+  // $(document).on('shiny:value', bindImageMapEvents);
 
   // Initial update of label styles and tooltips
   $('input[type="checkbox"], input[type="radio"]').each(function () {

@@ -138,82 +138,74 @@ ui <- fluidPage(
           ))
         )
 
-
-
-
-
-
-
-
-
         # h2("Plasmodium vivax life cycle"),
         # div(class = "img", img(src = "pvivax.jpg", usemap = "#malariaMap"))
       )
     ),
     fluidRow(id = "particles-js-home", class = "particles-js"),
-    fluidRow(p(class = "copyright", "© 2025 BAIA Team. All rights reserved.")),
-    tags$map(
-      name = "malariaMap",
-      tags$area(
-        shape = "rect", coords = "1090, 1774, 1408, 1843",
-        href = "javascript:void(0)", alt = "hypnozoite", title = "hypnozoite"
-      ),
-      tags$area(
-        shape = "rect", coords = "677, 2037, 1006, 2190",
-        href = "javascript:void(0)", alt = "merozoite", title = "merozoite"
-      ),
-      tags$area(
-        shape = "rect", coords = "1021, 2205, 1416, 2348",
-        href = "javascript:void(0)", alt = "merozoite", title = "merozoite"
-      ),
-      tags$area(
-        shape = "rect", coords = "1639, 2041, 1778, 2143",
-        href = "javascript:void(0)", alt = "ring", title = "ring"
-      ),
-      tags$area(
-        shape = "rect", coords = "1767, 1902, 2100, 1956",
-        href = "javascript:void(0)", alt = "trophozoite", title = "trophozoite"
-      ),
-      tags$area(
-        shape = "rect", coords = "2173, 2121, 1946, 2048",
-        href = "javascript:void(0)", alt = "schizont", title = "schizont"
-      ),
-      tags$area(
-        shape = "rect", coords = "2122, 2370, 1895, 2234",
-        href = "javascript:void(0)", alt = "schizont", title = "schizont"
-      ),
-      tags$area(
-        shape = "rect", coords = "2382, 1810, 3142, 1894",
-        href = "javascript:void(0)", alt = "gametocyte", title = "gametocyte"
-      ),
-      tags$area(
-        shape = "rect", coords = "2466, 2179, 3080, 2242",
-        href = "javascript:void(0)", alt = "gametocyte", title = "gametocyte"
-      ),
-      tags$area(
-        shape = "rect", coords = "3011, 1298, 3278, 1375",
-        href = "javascript:void(0)", alt = "gametocyte", title = "gametocyte"
-      ),
-      tags$area(
-        shape = "rect", coords = "3007, 325, 3424, 413",
-        href = "javascript:void(0)", alt = "Oocyst", title = "Oocyst"
-      ),
-      tags$area(
-        shape = "rect", coords = "2016, 790, 2330, 878",
-        href = "javascript:void(0)", alt = "sporozoite", title = "sporozoite"
-      ),
-      tags$area(
-        shape = "rect", coords = "779, 1232, 1094, 1305",
-        href = "javascript:void(0)", alt = "sporozoite", title = "sporozoite"
-      )
-    )
+    fluidRow(p(class = "copyright", "© 2025 BAIA Team. All rights reserved."))
+    # tags$map(
+    #   name = "malariaMap",
+    #   tags$area(
+    #     shape = "rect", coords = "1090, 1774, 1408, 1843",
+    #     href = "javascript:void(0)", alt = "hypnozoite", title = "hypnozoite"
+    #   ),
+    #   tags$area(
+    #     shape = "rect", coords = "677, 2037, 1006, 2190",
+    #     href = "javascript:void(0)", alt = "merozoite", title = "merozoite"
+    #   ),
+    #   tags$area(
+    #     shape = "rect", coords = "1021, 2205, 1416, 2348",
+    #     href = "javascript:void(0)", alt = "merozoite", title = "merozoite"
+    #   ),
+    #   tags$area(
+    #     shape = "rect", coords = "1639, 2041, 1778, 2143",
+    #     href = "javascript:void(0)", alt = "ring", title = "ring"
+    #   ),
+    #   tags$area(
+    #     shape = "rect", coords = "1767, 1902, 2100, 1956",
+    #     href = "javascript:void(0)", alt = "trophozoite", title = "trophozoite"
+    #   ),
+    #   tags$area(
+    #     shape = "rect", coords = "2173, 2121, 1946, 2048",
+    #     href = "javascript:void(0)", alt = "schizont", title = "schizont"
+    #   ),
+    #   tags$area(
+    #     shape = "rect", coords = "2122, 2370, 1895, 2234",
+    #     href = "javascript:void(0)", alt = "schizont", title = "schizont"
+    #   ),
+    #   tags$area(
+    #     shape = "rect", coords = "2382, 1810, 3142, 1894",
+    #     href = "javascript:void(0)", alt = "gametocyte", title = "gametocyte"
+    #   ),
+    #   tags$area(
+    #     shape = "rect", coords = "2466, 2179, 3080, 2242",
+    #     href = "javascript:void(0)", alt = "gametocyte", title = "gametocyte"
+    #   ),
+    #   tags$area(
+    #     shape = "rect", coords = "3011, 1298, 3278, 1375",
+    #     href = "javascript:void(0)", alt = "gametocyte", title = "gametocyte"
+    #   ),
+    #   tags$area(
+    #     shape = "rect", coords = "3007, 325, 3424, 413",
+    #     href = "javascript:void(0)", alt = "Oocyst", title = "Oocyst"
+    #   ),
+    #   tags$area(
+    #     shape = "rect", coords = "2016, 790, 2330, 878",
+    #     href = "javascript:void(0)", alt = "sporozoite", title = "sporozoite"
+    #   ),
+    #   tags$area(
+    #     shape = "rect", coords = "779, 1232, 1094, 1305",
+    #     href = "javascript:void(0)", alt = "sporozoite", title = "sporozoite"
+    #   )
+    # )
   ),
 
   # Analysis section
   div(
-    style = "margin-top: 32px",
-    id = "data_sets_section",
+    id = "analysis_section",
     fluidRow(
+      class = "analysis-container",
       column(
         width = 4, id = "sidebar", class = "sidebar",
         column(
@@ -345,22 +337,9 @@ ui <- fluidPage(
         width = 8, id = "main", class = "main",
         tabsetPanel(
           id = "tabset",
+          # Metadata tab
           tabPanel(
-            "Data",
-            br(),
-            fluidRow(
-              column(
-                width = 12,
-                radioButtons("data_opt", NULL,
-                  choices = list(
-                    "Metadata" = "meta",
-                    "Quality" = "qual",
-                    "Sources" = "source"
-                  ),
-                  selected = "meta"
-                )
-              )
-            ),
+            "Metadata",
             div(
               id = "meta_section",
               fluidRow(
@@ -449,7 +428,10 @@ ui <- fluidPage(
                 color = "#3498db",
                 DT::DTOutput("data_table")
               ))
-            ),
+            )
+          ),
+          tabPanel(
+            "Quality control",
             div(
               id = "qual_section",
               fluidRow(
@@ -477,7 +459,10 @@ ui <- fluidPage(
                 column(width = 6, plotlyOutput("data_pca_stdv_plotly")),
                 column(width = 6, plotlyOutput("variable_genes_plotly"))
               )
-            ),
+            )
+          ),
+          tabPanel(
+            "Data sources",
             div(
               id = "source_section",
               column(
@@ -486,8 +471,10 @@ ui <- fluidPage(
               )
             )
           ),
+
+          # gene expression section
           tabPanel(
-            "Gene Exp",
+            "Gene expression",
             br(),
             fluidRow(
               column(
@@ -565,6 +552,8 @@ ui <- fluidPage(
             ),
             div(id = "gene_exp_container")
           ),
+
+          # embedding section
           tabPanel(
             "Embeddings",
             fluidRow(
@@ -608,6 +597,8 @@ ui <- fluidPage(
       )
     )
   ),
+
+
   # About section
   div(
     id = "about_section",
