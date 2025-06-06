@@ -471,33 +471,49 @@
   height: 100%;
 }
 
-
-
-#stagei,
-#stagelr,
-#size,
-#color,
-#plot {
-  width: 100%;
-  display: block;
+.meta-filter {
+  margin-top: 10px;
 }
 
-/* Inputs label */
-#stagei-label,
-#size-label,
-#color-label,
-#plot-label {
-  background-color: #c8e6c9 !important;
+.analysis-container {
+  margin-left: 0;
+}
+
+.analysis-container .col-sm-4 {
+  padding: 0 0 15px 0;
+}
+
+.col-12 {
+  margin: 0;
+  padding: 0;
+}
+
+.col-12 .shiny-input-checkboxgroup, 
+.col-12 .shiny-input-radiogroup {
+  width: 100%;
+}
+
+
+
+.col-12 .control-label {
+ background-color: #c8e6c9 !important;
   width: 100%;
   margin-bottom: 5px;
   color: #2e7d32;
   font-weight: bold;
   font-size: 18px;
+
 }
 
-#data_opt-label {
-  display: none !important;
+/* Gene expression */
+.gene-exp-row {
+  margin: 0 15px;
 }
+
+
+/* #data_opt-label {
+  display: none !important;
+} */
 
 #stagei-label:hover,
 #stagelr-label:hover,
@@ -651,20 +667,6 @@
   font-weight: bold;
 }
 
-/* Sidebar layout */
-/* #sidebar {
-  width: 0;
-  opacity: 0;
-  visibility: hidden;
-  transition: width 0.5s ease, opacity 0.5s ease, visibility 0.8s;
-} */
-
-/* #sidebar.visible {
-  width: 25%;
-  opacity: 1;
-  visibility: visible;
-  transition: width 0.5s ease, opacity 0.5s ease;
-} */
 
 /* Data type option */
 #data_type .shiny-options-group,

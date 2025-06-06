@@ -39,6 +39,7 @@ get_gene_id <- function(gene_name, gene_names) {
 subBlock <- function(i) {
   tagList(
     fluidRow(
+      class = "gene-select-input",
       column(
         width = 6,
         selectizeInput(

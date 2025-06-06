@@ -79,10 +79,10 @@ server <- function(input, output, session) {
       input$tabset == "Quality control" || input$tabset == "Data sources" ||
       input$tabset == "Gene expression") {
       shinyjs::removeClass("sidebar", "visible")
-      shinyjs::runjs('$("#main").removeClass("col-sm-8").addClass("col-sm-12");')
+      shinyjs::runjs('$("#main").addClass("col-sm-12");')
     } else {
       shinyjs::addClass("sidebar", "visible")
-      shinyjs::runjs('$("#main").removeClass("col-sm-12").addClass("col-sm-8");')
+      shinyjs::runjs('$("#main").removeClass("col-sm-12");')
     }
   })
 

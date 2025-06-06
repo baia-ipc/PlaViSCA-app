@@ -115,7 +115,7 @@ ui <- fluidPage(
           )),
           actionLink("gene_exp-link", tagList(
             img(src = "gene_exp.png", alt = "Gene Expression"),
-            span("Gene exp")
+            span("Gene expression")
           )),
           actionLink("contribute-link", tagList(
             img(src = "contribute.png", alt = "Contribute"),
@@ -209,7 +209,7 @@ ui <- fluidPage(
       column(
         width = 4, id = "sidebar", class = "sidebar",
         column(
-          width = 12,
+          width = 12, class = "col-12",
           checkboxGroupInput(
             "stagei", "Infection stage",
             choices = list(
@@ -221,7 +221,7 @@ ui <- fluidPage(
           )
         ),
         column(
-          width = 12,
+          width = 12, class = "col-12",
           checkboxGroupInput(
             "stagelr", "Parasite stage",
             choices = list(
@@ -239,24 +239,30 @@ ui <- fluidPage(
             selected = list()
           )
         ),
-        column(width = 12, radioButtons("size", "Size",
-          choices = list("S" = 2, "M" = 4, "L" = 6),
-          selected = 4
-        )),
-        column(width = 12, radioButtons("color", "Color",
-          choices = list(
-            "Identity" = "ident",
-            "Stage" = "stage",
-            "Strain" = "vivax_strain",
-            "Day" = "day",
-            "Condition" = "condition",
-            "Replicate" = "replicate",
-            "Species" = "species",
-            "CCA_snn" = "cca_snn",
-            "Genes" = "genes"
-          ),
-          selected = "ident"
-        )),
+        column(
+          width = 12, class = "col-12",
+          radioButtons("size", "Size",
+            choices = list("S" = 2, "M" = 4, "L" = 6),
+            selected = 4
+          )
+        ),
+        column(
+          width = 12, class = "col-12",
+          radioButtons("color", "Color",
+            choices = list(
+              "Identity" = "ident",
+              "Stage" = "stage",
+              "Strain" = "vivax_strain",
+              "Day" = "day",
+              "Condition" = "condition",
+              "Replicate" = "replicate",
+              "Species" = "species",
+              "CCA_snn" = "cca_snn",
+              "Genes" = "genes"
+            ),
+            selected = "ident"
+          )
+        ),
         column(
           width = 12,
           fluidRow(
@@ -292,7 +298,7 @@ ui <- fluidPage(
             column(
               width = 5,
               tags$div(
-                id = "gene_link_ui",
+                id = "gene_link_ui", class = "col-12",
                 tags$a(
                   id = "plasmo_link", href = "#",
                   target = "_blank", "🔬 PlasmoDB"
@@ -305,12 +311,15 @@ ui <- fluidPage(
             )
           )
         ),
-        column(width = 12, radioButtons("plot", "Plot",
-          choices = list("2D" = "2d", "3D" = "3d"),
-          selected = "2d"
-        )),
         column(
-          width = 12,
+          width = 12, class = "col-12",
+          radioButtons("plot", "Plot",
+            choices = list("2D" = "2d", "3D" = "3d"),
+            selected = "2d"
+          )
+        ),
+        column(
+          width = 12, class = "col-12",
           fluidRow(
             id = "axis",
             column(
@@ -329,12 +338,15 @@ ui <- fluidPage(
             )
           )
         ),
-        column(width = 12, downloadButton("download_data", "Download",
-          class = "bt-download"
-        ))
+        column(
+          width = 12, class = "col-12",
+          downloadButton("download_data", "Download",
+            class = "bt-download"
+          )
+        )
       ),
       column(
-        width = 8, id = "main", class = "main",
+        width = 12, id = "main", class = "main",
         tabsetPanel(
           id = "tabset",
           # Metadata tab
@@ -343,6 +355,7 @@ ui <- fluidPage(
             div(
               id = "meta_section",
               fluidRow(
+                class = "meta-filter",
                 column(
                   width = 2,
                   selectizeInput("ident", "Ident:",
@@ -410,7 +423,6 @@ ui <- fluidPage(
                   )
                 )
               ),
-              br(),
               fluidRow(
                 column(width = 4, plotlyOutput("stage_plotly")),
                 column(width = 4, plotlyOutput("sample_plotly")),
@@ -491,6 +503,7 @@ ui <- fluidPage(
               )
             ),
             fluidRow(
+              class = "gene-exp-row",
               column(
                 id = "gene_exp_tar",
                 width = 6,
@@ -550,7 +563,7 @@ ui <- fluidPage(
                 )
               )
             ),
-            div(id = "gene_exp_container")
+            div(id = "gene_exp_container", class = "gene-exp-row")
           ),
 
           # embedding section
@@ -563,7 +576,7 @@ ui <- fluidPage(
                 tags$span(class = "left-label", "Unintegrated"),
                 tags$label(
                   class = "switch",
-                  tags$input(id = "check_all", type = "checkbox"),
+                  tags$input(id = "check_all", type = "checkbox", checked = TRUE),
                   tags$span(class = "slider")
                 ),
                 tags$span(class = "right-label", "Integrated")
@@ -579,7 +592,7 @@ ui <- fluidPage(
                     "UMAP" = "umap",
                     "tSNE" = "tsne"
                   ),
-                  selected = "pca"
+                  selected = "umap"
                 )
               )
             ),
