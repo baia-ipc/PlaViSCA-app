@@ -180,8 +180,7 @@ $(document).ready(function () {
     });
   });
   
-  
-  
+
 });
 
 

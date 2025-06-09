@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>PlaViSca User Manual</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      line-height: 1.6;
+      margin: 20px;
+      max-width: 900px;
+      color: #333;
+    }
+    h1, h2, h3 {
+      color: #0056b3;
+    }
+    ul {
+      margin-top: 0;
+    }
+    code {
+      background-color: #f4f4f4;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-family: monospace;
+    }
+    .section {
+      margin-bottom: 40px;
+    }
+    a {
+      color: #0077cc;
+      text-decoration: none;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>PlaViSca Platform User Manual</h1>
+  <p>Welcome to PlaViSca, a user-friendly platform for analyzing and visualizing Plasmodium vivax single-cell RNA sequencing data.
+     This manual guides you through the platform's main features and usage.</p>
+
+  <div class="section" id="home-section">
+    <h2>Home</h2>
+    <p>The Home page provides an introduction to PlaViSca and quick links to main features:</p>
+    <img src = "pictures_usermanual/home_page.png" alt="Home Page Screenshot" style="max-width: 80%; height: auto;" />
+    <img src = "pictures_usermanual/metadata_charts.png" alt="Metadata Charts Screenshot" style="max-width: 80%; height: auto;" />
+    <img src = "pictures_usermanual/metadata_table.png" alt="Metadata Table Screenshot" style="max-width: 80%; height: auto;" />
+    <ul>
+      <li><strong>Metadata:</strong> Explore metadata with filter options, charts and table are interactive and respond to the filters.</li>
+      <li><strong>Analysis:</strong> Perform customized data filtering and visualization.</li>
+      <li><strong>Quality Control:</strong> View data quality metrics.</li>
+      <li><strong>Data Sources:</strong> Access original datasets used in PlaViSca.</li>
+      <li><strong>Gene Expression:</strong> Investigate expression levels of genes across samples.</li>
+      <li><strong>User Manual:</strong> Access this manual.</li>
+      <li><strong>Source Code:</strong> View the code repository.</li>
+      <li><strong>About:</strong> Learn about the development team and collaborators.</li>
+    </ul>
+  </div>
+
+
+
+
+  <div class="section" id="analysis-section">
+    <h2>Analysis</h2>
+    <p>The Analysis section allows you to filter and visualize single-cell data interactively:</p>
+    <h3>Filters:</h3>
+    <ul>
+      <li><strong>Infection stage:</strong> Select from Blood, Liver, Sporozoite.</li>
+      <li><strong>Parasite stage:</strong> Choose specific life stages (e.g., Trophozoite, Ring, Schizont, etc.).</li>
+      <li><strong>Size:</strong> Adjust point sizes in plots (Small, Medium, Large).</li>
+      <li><strong>Color:</strong> Choose how cells are colored by metadata (Identity, Stage, Strain, etc.).</li>
+      <li><strong>Data Type:</strong> Choose raw, normalized, or scaled expression data.</li>
+      <li><strong>Gene Selection:</strong> Pick genes to highlight with links to PlasmoDB and NCBI databases.</li>
+      <li><strong>Plot Type:</strong> Toggle between 2D and 3D plots.</li>
+      <li><strong>X-axis and Y-axis:</strong> Select principal components or other dimensions for plotting.</li>
+    </ul>
+    <h3>Visualization:</h3>
+    <p>The main panel shows interactive plots and metadata tables with options to download data.</p>
+  </div>
+
+  <div class="section" id="metadata-section">
+    <h2>Metadata</h2>
+    <p>Within the Analysis section, the Metadata tab lets you filter samples by various criteria such as Ident, Species, Type, Condition, Stage, and Sample. It provides:</p>
+    <ul>
+      <li>Interactive plots summarizing selected metadata categories.</li>
+      <li>A searchable and sortable table of metadata records.</li>
+    </ul>
+  </div>
+
+  <div class="section" id="quality-control-section">
+    <h2>Quality Control</h2>
+    <p>View plots summarizing data quality:</p>
+    <ul>
+      <li>Cell counts and detected features per cell.</li>
+      <li>PCA standard deviation and variable genes analysis.</li>
+    </ul>
+  </div>
+
+  <div class="section" id="data-sources-section">
+    <h2>Data Sources</h2>
+    <p>This tab lists the original datasets and sources used to build PlaViSca, providing transparency and citation information.</p>
+  </div>
+
+  <div class="section" id="gene-expression-section">
+    <h2>Gene Expression</h2>
+    <p>Investigate expression patterns of specific genes:</p>
+    <ul>
+      <li>Select genes to visualize expression profiles.</li>
+      <li>Toggle normalization types: raw, normalized, or scaled.</li>
+      <li>Group expression data by categories such as Stage.</li>
+      <li>Access external gene databases directly via links.</li>
+      <li>Add or remove genes dynamically for multi-gene comparison.</li>
+    </ul>
+  </div>
+
+  <div class="section" id="embeddings-section">
+    <h2>Embeddings</h2>
+    <p>Explore dimensionality reduction plots:</p>
+    <ul>
+      <li>Toggle between integrated and unintegrated data.</li>
+      <li>Choose embedding types: PCA, UMAP, or tSNE.</li>
+      <li>View interactive plots visualizing cellular heterogeneity.</li>
+    </ul>
+  </div>
+
+  <div class="section" id="about-section">
+    <h2>About</h2>
+    <p>Learn about the team and collaborators behind PlaViSca:</p>
+    <ul>
+      <li>Developed by the Bioinformatics and Artificial Intelligence Applications Unit (BAIA), Institut Pasteur du Cambodge (IPC).</li>
+      <li>Collaborations with the Malaria Unit at IPC and University of Georgia, USA.</li>
+      <li>Contact details for key contributors are provided for support and collaboration.</li>
+    </ul>
+  </div>
+
+  <hr />
+
+  <p>For more information, please visit the <a href="https://www.pasteur-kh.org/" target="_blank">Institut Pasteur du Cambodge</a> website or contact the development team.</p>
+
+</body>
+</html>

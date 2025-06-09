@@ -37,7 +37,10 @@ ui <- fluidPage(
     ),
     div(
       class = "menu-title",
-      div(class = "logo mosquito", img(src = "mosquito-top.png", alt = "mosquito")),
+      div(class = "logo mosquito", img(
+        src = "mosquito-top.png",
+        alt = "mosquito"
+      )),
       div(
         class = "title-text",
         h1("PlaViSca"),
@@ -94,45 +97,45 @@ ui <- fluidPage(
         width = 6, class = "intro-right",
         div(
           class = "pages_link",
-          actionLink("metadata-link", tagList(
+          actionLink("metadata_link", tagList(
             img(src = "metadata.png", alt = "Metadata"),
             span("Metadata")
           )),
-          actionLink("analysis-link", tagList(
+          actionLink("analysis_link", tagList(
             img(src = "umap.png", alt = "Analysis"),
             span("Analysis")
           )),
-          actionLink("qc-link", tagList(
+          actionLink("qc_link", tagList(
             img(src = "qc.png", alt = "Quality control"),
             span("Quality control")
           ))
         ),
         div(
           class = "pages_link",
-          actionLink("sources-link", tagList(
+          actionLink("sources_link", tagList(
             img(src = "data_sources.png", alt = "Data sources"),
             span("Data sources")
           )),
-          actionLink("gene_exp-link", tagList(
+          actionLink("gene_exp_link", tagList(
             img(src = "gene_exp.png", alt = "Gene Expression"),
             span("Gene expression")
           )),
-          actionLink("contribute-link", tagList(
+          actionLink("contribute_link", tagList(
             img(src = "contribute.png", alt = "Contribute"),
             span("Contribute")
           ))
         ),
         div(
           class = "pages_link",
-          actionLink("usermanual-link", tagList(
+          actionLink("usermanual_link", tagList(
             img(src = "usermanual.png", alt = "User Manual"),
             span("User Manual")
           )),
-          actionLink("sources-code-link", tagList(
+          actionLink("sources_code_link", tagList(
             img(src = "sources_code.png", alt = "Sources code"),
             span("Source code")
           )),
-          actionLink("about-link", tagList(
+          actionLink("about_link", tagList(
             img(src = "about.png", alt = "About"),
             span("About")
           ))

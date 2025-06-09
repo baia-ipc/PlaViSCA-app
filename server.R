@@ -36,31 +36,35 @@ server <- function(input, output, session) {
   ")
   })
 
-  observeEvent(input$about, {
-    shinyjs::hide("home_section")
-    shinyjs::hide("analysis_section")
-    shinyjs::show("about_section")
+  observeEvent(list(input$about, input$contribute_link, input$about_link),
+    {
+      shinyjs::hide("home_section")
+      shinyjs::hide("analysis_section")
+      shinyjs::show("about_section")
 
-    runjs("initParticles('colab-particles');")
-    runjs("initParticles('particles-js-about');")
+      runjs("initParticles('colab-particles');")
+      runjs("initParticles('particles-js-about');")
 
 
-    shinyjs::runjs("
+      shinyjs::runjs("
     $('.menu-link').removeClass('active');
     $('#about').addClass('active');
   ")
-  })
+    },
+    ignoreInit = TRUE
+  )
 
-  observeEvent(input$explore_data, {
-    shinyjs::hide("home_section")
-    shinyjs::hide("about_section")
-    shinyjs::show("analysis_section")
 
-    shinyjs::runjs("
-    $('.menu-link').removeClass('active');
-    $('#data').addClass('active');
-  ")
-  })
+  # observeEvent(input$explore_data, {
+  #   shinyjs::hide("home_section")
+  #   shinyjs::hide("about_section")
+  #   shinyjs::show("analysis_section")
+  #
+  #   shinyjs::runjs("
+  #   $('.menu-link').removeClass('active');
+  #   $('#data').addClass('active');
+  # ")
+  # })
 
   observeEvent(input$analysis, {
     shinyjs::hide("home_section")
@@ -72,6 +76,34 @@ server <- function(input, output, session) {
     $('#analysis').addClass('active');
   ")
   })
+
+  # Navigate tabsetPannel
+  observeEvent(input$metadata_link, {
+    navigate_tabset(session, "analysis", "Metadata")
+  })
+
+  observeEvent(input$analysis_link, {
+    navigate_tabset(session, "analysis", "Embeddings")
+  })
+
+  observeEvent(input$qc_link, {
+    navigate_tabset(session, "analysis", "Quality control")
+  })
+
+  observeEvent(input$sources_link, {
+    navigate_tabset(session, "analysis", "Data sources")
+  })
+
+  observeEvent(input$gene_exp_link, {
+    navigate_tabset(session, "analysis", "Gene expression")
+  })
+
+  observeEvent(input$usermanual_link, {
+    runjs("window.open('usermanual.html', '_blank')")
+  })
+
+
+
 
   # Larger screen adjustment
   observe({

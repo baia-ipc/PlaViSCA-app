@@ -1,3 +1,21 @@
+# Navigate tabsetpanel
+navigate_tabset <- function(session, menu_id, tab_name = NULL) {
+  shinyjs::hide("home_section")
+  shinyjs::hide("about_section")
+  shinyjs::show("analysis_section")
+
+  js_code <- sprintf("
+    $('.menu-link').removeClass('active');
+    $('#%s').addClass('active');
+  ", menu_id)
+  shinyjs::runjs(js_code)
+
+  if (!is.null(tab_name)) {
+    updateTabsetPanel(session, inputId = "tabset", selected = tab_name)
+  }
+}
+
+
 # Get genes annotation
 genes <- function(data, gff_data, pattern = "pvp") {
   data %>%
