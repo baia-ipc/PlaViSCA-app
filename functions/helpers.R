@@ -15,6 +15,25 @@ navigate_tabset <- function(session, menu_id, tab_name = NULL) {
   }
 }
 
+# Filter data
+fun_filter_df <- function(data, selections) {
+  if (is.null(selections)) {
+    return(data.frame())
+  }
+
+  parts <- strsplit(selections, "__")
+  filter_list <- lapply(split(parts, sapply(parts, `[[`, 1)), function(lst) {
+    sapply(lst, `[[`, 2)
+  })
+
+  keep_rows <- rep(TRUE, nrow(data))
+  for (colname in names(filter_list)) {
+    keep_rows <- keep_rows & data[[colname]] %in% filter_list[[colname]]
+  }
+
+  data[keep_rows, , drop = FALSE]
+}
+
 
 # Get genes annotation
 genes <- function(data, gff_data, pattern = "pvp") {
@@ -30,6 +49,10 @@ genes <- function(data, gff_data, pattern = "pvp") {
 
 # Get gene column
 get_gene_choices <- function(genes_df, checked) {
+  if (is.null(genes_df) || nrow(genes_df) == 0) {
+    return(NULL)
+  }
+
   if (checked) {
     genes_df$gene
   } else {
@@ -591,6 +614,10 @@ plot_3d <- function(df, color, legend_title, size, selected_color,
 # Main pca, umap and tsne plotting function
 embedding_plot <- function(df, xaxis_input, yaxis_input, color, legend_title,
                            size, plot_type = "pca_u", plot_dim = "2d") {
+  # if (is.null(df) || nrow(df) == 0) {
+  #   return(NULL)
+  # }
+
   x <- df[[xaxis_input]]
   y <- df[[yaxis_input]]
   selected_color <- df[[color]]

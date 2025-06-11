@@ -15,20 +15,11 @@ server <- function(input, output, session) {
   sessionData <- new.env(parent = emptyenv())
   autoUpdatePlot <- reactiveVal(FALSE)
 
-  # ! not yet implemented. This part user click on stages on image it
-  # ! will get info for filter data
-  # observeEvent(input$stage_click, {
-  #   cat("User clicked on:", input$stage_click, "\n")
-  # })
-
   # Navigate home and data section
   observeEvent(input$home, {
     shinyjs::hide("analysis_section")
     shinyjs::hide("about_section")
     shinyjs::show("home_section")
-
-    # shinyjs::runjs("location.reload();")
-    # runjs("initParticles('particles-js-home');")
 
     shinyjs::runjs("
     $('.menu-link').removeClass('active');
@@ -53,18 +44,6 @@ server <- function(input, output, session) {
     },
     ignoreInit = TRUE
   )
-
-
-  # observeEvent(input$explore_data, {
-  #   shinyjs::hide("home_section")
-  #   shinyjs::hide("about_section")
-  #   shinyjs::show("analysis_section")
-  #
-  #   shinyjs::runjs("
-  #   $('.menu-link').removeClass('active');
-  #   $('#data').addClass('active');
-  # ")
-  # })
 
   observeEvent(input$analysis, {
     shinyjs::hide("home_section")
@@ -103,8 +82,6 @@ server <- function(input, output, session) {
   })
 
 
-
-
   # Larger screen adjustment
   observe({
     if (input$tabset == "Metadata" ||
@@ -118,9 +95,12 @@ server <- function(input, output, session) {
     }
   })
 
+
   # Select raw, normalize or scale data
+  default_df_filter <- reactiveVal(NULL)
+
   gene_data <- eventReactive(
-    list(input$tabset, input$stagei, input$data_type, input$data_type_exp),
+    list(input$tabset, input$apply_filter, input$data_type, input$data_type_exp),
     {
       dataset <- if (input$tabset == "Gene expression") {
         switch(input$data_type_exp,
@@ -140,27 +120,90 @@ server <- function(input, output, session) {
         NULL
       }
 
-      req(dataset, input$stagei)
+      req(dataset)
+      selections <- input$apply_filter
+
+      if (user_interact() && (is.null(selections) || length(selections) == 0)) {
+        return(
+          NULL
+        )
+      }
+
+      if (is.null(selections)) {
+        selections <- default_df_filter()
+      }
+      req(selections)
+
       list(
-        data = dataset %>% filter(stage %in% input$stagei),
+        data = fun_filter_df(dataset, selections),
         genes = genes(dataset, gff_data)
       )
     }
   )
 
   # Metadata filter
-  filtered_data <- eventReactive(input$stagei, {
-    req(input$stagei)
-    mr_data %>% filter(stage %in% input$stagei)
+  # choose columns for filter data
+  grouped_choices <- list(
+    stage = setNames(
+      paste0("stage__", unique(mr_data$stage)),
+      unique(mr_data$stage)
+    ),
+    species = setNames(
+      paste0("species__", unique(mr_data$species)),
+      unique(mr_data$species)
+    ),
+    type = setNames(
+      paste0("type__", unique(mr_data$type)),
+      unique(mr_data$type)
+    ),
+    condition = setNames(
+      paste0("condition__", unique(mr_data$condition)),
+      unique(mr_data$condition)
+    )
+  )
+
+  observe({
+    first_group <- names(grouped_choices)[1]
+    default_values <- grouped_choices[[first_group]]
+
+    if (is.null(default_df_filter())) {
+      default_df_filter(default_values)
+    }
+
+    updateSelectInput(session, "apply_filter",
+      choices = grouped_choices,
+      selected = default_values
+    )
+  })
+
+  user_interact <- reactiveVal(FALSE)
+  observeEvent(input$apply_filter, {
+    user_interact(TRUE)
+  })
+
+  # Reactive filtered data
+  filtered_data <- reactive({
+    selections <- input$apply_filter
+
+    if (user_interact() && (is.null(selections) || length(selections) == 0)) {
+      return(data.frame())
+    }
+
+    if (is.null(selections)) {
+      selections <- default_df_filter()
+    }
+
+    req(selections)
+    fun_filter_df(mr_data, selections)
   })
 
 
-
-
   # Manipulation tabset "metadata"
-  observeEvent(input$tabset, {
+  observe({
+    filt_data <- filtered_data()
+    req(nrow(filt_data) > 0)
+
     if (input$tabset == "Metadata") {
-      filt_data <- filtered_data()
       updateSelectInput(session, "ident", choices = unique(filt_data$ident))
       updateSelectInput(session, "species", choices = unique(filt_data$species))
       updateSelectInput(session, "type", choices = unique(filt_data$type))
@@ -169,6 +212,7 @@ server <- function(input, output, session) {
       updateSelectInput(session, "sample", choices = unique(filt_data$sample))
     }
   })
+
 
   observeEvent(list(
     input$data_opt, input$ident, input$species, input$type,
@@ -247,123 +291,7 @@ server <- function(input, output, session) {
     output$location_plotly <- renderPlotly({
       meta_plotly(filt_data, "location", "Count", "Location", "bar")
     })
-
-
-
-
-    # if (input$data_opt == "meta") {
-    #   shinyjs::show("meta_section")
-    #   shinyjs::hide("qual_section")
-    #   shinyjs::hide("source_section")
-    #
-    #   output$data_table <- renderDT(
-    #     {
-    #       ## data in table
-    #       DT::datatable(
-    #         filt_data %>%
-    #           rename_with(~ str_to_title(.),
-    #             .cols = any_of(c(
-    #               "id", "ident", "seurat_clusters",
-    #               "species", "type", "condition", "stage",
-    #               "sample", "day", "replicate", "location",
-    #               "vivax_strain"
-    #             ))
-    #           ) %>%
-    #           rename(nCount_RNA = n_count_rna, nFeature_RNA = n_feature_rna) %>%
-    #           arrange(desc(nCount_RNA)),
-    #         options = list(pageLength = 10, scrollX = TRUE),
-    #         selection = "single",
-    #         rownames = FALSE
-    #       )
-    #     },
-    #     server = TRUE
-    #   )
-    #
-    #   ## plot stage vs count
-    #   output$stage_plotly <- renderPlotly({
-    #     meta_plotly(filt_data, "stage", "Count", "Stage", "bar")
-    #   })
-    #
-    #   ## plot sample vs count
-    #   output$sample_plotly <- renderPlotly({
-    #     meta_plotly(filt_data, "sample", "Count", "Sample", "bar")
-    #   })
-    #
-    #   ## plot strain vs count
-    #   output$strain_plotly <- renderPlotly({
-    #     meta_plotly(filt_data, "vivax_strain", "Count", "Strain", "bar")
-    #   })
-    #
-    #   ## plot species vs count
-    #   output$species_plotly <- renderPlotly({
-    #     meta_plotly(filt_data, "species", "Count", "Species", "bar")
-    #   })
-    #
-    #   ## plot type vs count
-    #   output$type_plotly <- renderPlotly({
-    #     meta_plotly(filt_data, "type", "Count", "Type", "bar")
-    #   })
-    #
-    #   ## plot type vs count
-    #   output$location_plotly <- renderPlotly({
-    #     meta_plotly(filt_data, "location", "Count", "Location", "bar")
-    #   })
-    # } else if (input$data_opt == "qual") {
-    #   shinyjs::show("qual_section")
-    #   shinyjs::hide("meta_section")
-    #   shinyjs::hide("source_section")
-    #
-    #   ## plot nCount in qual tabset
-    #   output$data_count_plotly <- renderPlotly({
-    #     feature_plot(filtered_data(),
-    #       x = "sample", y = "n_count_rna",
-    #       color = "ident", y_title = "RNA count", title = "RNA Count"
-    #     )
-    #   })
-    #
-    #   ## plot nFeature in qual tabset
-    #   output$data_feature_plotly <- renderPlotly({
-    #     feature_plot(filtered_data(),
-    #       x = "sample", y = "n_feature_rna",
-    #       color = "ident", y_title = "nFeature count",
-    #       title = "Feature Count"
-    #     )
-    #   })
-    #
-    #   ## plot elbow
-    #   output$data_pca_stdv_plotly <- renderPlotly({
-    #     elbow_plot(pca_std_df)
-    #   })
-    #
-    #   ## plot variable genes
-    #   output$variable_genes_plotly <- renderPlotly({
-    #     var_genes_plot(vf_data, top_n = 15)
-    #   })
-    # } else {
-    #   shinyjs::show("source_section")
-    #   shinyjs::hide("qual_section")
-    #   shinyjs::hide("meta_section")
-    #   # ! further implementation with data sources
-    #
-    #   output$data_source <- renderDT({
-    #     DT::datatable(pub_data,
-    #       escape = FALSE,
-    #       options = list(
-    #         pageLength = 10,
-    #         scrollX = TRUE,
-    #         autoWidth = FALSE,
-    #         columnDefs = list(
-    #           list(width = "800px", targets = 2, className = "dt-left")
-    #         )
-    #       ),
-    #       selection = "single",
-    #       rownames = FALSE
-    #     )
-    #   })
-    # }
   })
-
-
 
   # Quality control tabset
   observeEvent(input$tabset, {
@@ -418,17 +346,6 @@ server <- function(input, output, session) {
       })
     }
   })
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -722,6 +639,13 @@ server <- function(input, output, session) {
   embplot <- reactiveVal(FALSE)
   output$all_plotly <- renderPlotly({
     req(data(), input$xaxis, input$yaxis, autoUpdatePlot())
+
+
+    if (is.null(data()) || nrow(data()) == 0) {
+      return(NULL)
+    }
+
+
     isolate({
       color_column <- switch(input$color,
         "genes" = get_gene_id(input$genes_n, gene_data()$genes),

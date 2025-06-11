@@ -13,11 +13,11 @@
 
 /* Menu Bar */
 .menu-bar {
-  height: 80px;
+  height: 90px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px;
+  padding: 0 10px;
   background-color: #f8fbf8;
   overflow: hidden;
   flex-wrap: wrap;
@@ -28,7 +28,6 @@
 
 .logo {
   width: 80px;
-  height: 100%;
   overflow: hidden;
   display: flex;
   align-items: center;
@@ -47,7 +46,6 @@
 }
 
 .logo.baia {
-  margin-top: 5px;
   transform: scale(0.9);  
 }
 
@@ -58,10 +56,10 @@
   align-items: center;
   gap: 15px;
   margin-left: 120px;
+  padding-bottom: 1rem;
 }
 
 .logo.mosquito {
-  position:absolute;
   top: 10px;
   z-index: 1000;
   width: 100px;
@@ -92,6 +90,7 @@
   display: flex;
   flex-direction: column;
   margin-left: 130px;
+  padding-bottom: 1rem;
 }
 
 .title-text h1 {
@@ -99,15 +98,23 @@
   font-weight: bold;
   display: inline-block;
   color: #f44336;
-  font-size: 3.5rem; 
+  font-size: clamp(2rem, 3vw, 4rem);
   margin: 0;
 }
 
 .title-text span {
   display: inline-block;
   color: #2c3e50;
-  font-size: 2.2rem;
+  font-size: clamp(1.5rem, 2vw, 2.5rem);
   margin: 0;
+}
+
+.menu-right {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  margin-top: 0;
+  padding-bottom: 1rem;
 }
 
 .menu-items {
@@ -172,7 +179,7 @@
 #about_section {
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 80px);
+  height: calc(100vh - 90px);
 }
 
 .about {
@@ -200,14 +207,14 @@
 @keyframes colorFadeSmooth {
   0%   { color: white; }
   25%  { color: #cce0ff; }
-  50%  { color: rgb(96, 96, 185); }
+  50%  { color: rgb(172, 171, 125); }
   75%  { color: #cce0ff; }
   100% { color: white; }
 }
 
 .about p:nth-of-type(2) {
   font-size: 2rem;
-  animation: colorFadeSmooth 10s ease-in-out infinite;
+  animation: colorFadeSmooth 15s ease-in-out infinite;
 }
 
 .collab-particles {
@@ -223,7 +230,7 @@
   background-color: #fff;
   display: flex;          
   flex-direction: column;  
-  padding: 20px 150px;  
+  padding: 20px 0 0 150px;  
 }
 
 @keyframes colorFadeContact {
@@ -443,7 +450,7 @@
 
 /* analysis page */
 #analysis_section {
-  margin-top: 30px;
+  margin-top: 25px;
 }
 
 .analysis-container {
@@ -467,7 +474,7 @@
 
 .main {
   padding: 20px;
-  transition: width 0.5s ease;
+  width: 100%;
   height: 100%;
 }
 
@@ -483,27 +490,119 @@
   padding: 0 0 15px 0;
 }
 
+
 .col-12 {
   margin: 0;
   padding: 0;
 }
 
 .col-12 .shiny-input-checkboxgroup, 
-.col-12 .shiny-input-radiogroup {
+.col-12 .shiny-input-radiogroup,
+.col-12 .shiny-input-container {
   width: 100%;
 }
 
+.col-12 .form-group {
+  margin-bottom: 6px;
+}
 
 
-.col-12 .control-label {
-background-color: #c8e6c9 !important;
+/* -label is for group */
+.col-12 .control-label,
+.col-12 .shiny-input-container .control-label {
+  background-color: #c8e6c9;
+  border: 1px solid #ccc;
+  border-radius: 4px;
   width: 100%;
   margin-bottom: 5px;
   color: #2e7d32;
   font-weight: bold;
   font-size: 18px;
-
+  padding: 10px;
 }
+
+.col-12 .row .control-label {
+  all:unset
+}
+
+
+/* Remove background color */
+#stagelr label {
+  background-color: transparent;
+  border: none;
+  margin-top: 0;
+  margin-bottom: 10px;
+}
+.shiny-options-group .checkbox {
+  min-height: 4rem;
+  margin: 0;
+  padding: 0;
+}
+
+/* Style multi .dropdown */
+#apply_filter + .selectize-control .item {
+  background-color: #e0f0ff;
+  border-radius: 4px;
+  padding: 4px 8px;
+  margin-right: 6px;
+  margin-top: 4px;
+  font-size: 1.5rem;
+  text-transform: capitalize;
+  font-weight: bold;
+  }
+
+.selectize-dropdown .optgroup-header {
+  font-weight: bold;
+  text-transform: uppercase;
+  font-size: 1.5rem;
+  color: #2909e2;
+  background-color: #eef1f4;
+  padding: 6px 10px;
+  border-top: 1px solid #ccc;
+  }
+
+
+.selectize-dropdown .option {
+  text-transform: capitalize;
+  font-size: 1.2rem; 
+}
+
+
+/* Add padding so text doesn't overlap arrow */
+#apply_filter_wrapper .selectize-input {
+  position: relative;
+  padding-right: 30px !important;
+}
+
+/* Position the dropdown arrow */
+#apply_filter_wrapper .dropdown-arrow {
+  position: absolute;
+  top: 75%;
+  right: 12px;
+  transform: translateY(-50%);
+  pointer-events: none;
+  font-size: 1.5rem;
+  color: #754242;
+  z-index: 10;
+  cursor: pointer;      
+  pointer-events: auto; 
+}
+
+
+#size label,
+#color label,
+#plot label {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  text-align: center;
+  width: 100%;
+}
+
 
 /* Gene expression */
 .gene-exp-row {
@@ -511,11 +610,6 @@ background-color: #c8e6c9 !important;
 }
 
 
-/* #data_opt-label {
-  display: none !important;
-} */
-
-#stagei-label:hover,
 #stagelr-label:hover,
 #size-label:hover,
 #color-label:hover,
@@ -539,7 +633,6 @@ background-color: #c8e6c9 !important;
 }
 
 /* Checkbox and Radio button */
-#stagei .shiny-options-group .checkbox,
 #size .shiny-options-group .radio,
 #data_opt .shiny-options-group .radio,
 #plot .shiny-options-group .radio {
@@ -552,7 +645,6 @@ background-color: #c8e6c9 !important;
 
 #color .shiny-options-group .radio,
 #stagelr .shiny-options-group .checkbox,
-#stagei .shiny-options-group .checkbox,
 #size .shiny-options-group .radio {
   flex: 1 0 31%;
 }
@@ -564,20 +656,6 @@ background-color: #c8e6c9 !important;
   font-style: italic;
 }
 
-#stagei label,
-#size label,
-#color label,
-#plot label {
-  display: flex;
-  flex: 1;
-  align-items: center;
-  justify-content: center;
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  text-align: center;
-  width: 100%;
-}
 
 /* Data options */
 #data_opt {
@@ -626,10 +704,6 @@ background-color: #c8e6c9 !important;
   left: -40px;
 }
 
-/* Remove background color */
-#stagelr label {
-  background-color: transparent !important;
-}
 
 /* Hide default checkbox and radio */
 #stagei input[type="checkbox"],
@@ -684,7 +758,7 @@ background-color: #c8e6c9 !important;
 
 #switch_id {
   position: absolute;
-  top: 5px;
+  top: 2px;
   left: 100px;
   padding: 0;
 }
@@ -780,12 +854,6 @@ input:checked + .slider:before {
 
 #yaxis-container .shiny-input-container {
   padding-left: 2.5px;
-}
-
-/* Data section layout */
-#data_sets_section .col-sm-8 {
-  width: 75%;
-  transition: width 0.1s ease;
 }
 
 /* Tab switch */
@@ -895,85 +963,196 @@ input:checked + .slider:before {
   cursor: move;
 }
 
-/* Responsive design */
-@media (max-width: 768px) {
+/* Mobile & Tablet: Up to 1024px */
+@media screen and (max-width: 1024px) {
   .menu-bar {
     flex-direction: column;
-    align-items: flex-start;
     height: auto;
-    padding: 5px;
-  }
-
-  .logo {
-    width: 60px;
-    margin-bottom: 5px;
   }
 
   .menu-title {
     margin-left: 0;
-    flex-direction: row;          
-    align-items: center;         
-    width: 100%;  
-    gap: 5px;
+    justify-content: center;
+    gap: 10px;
   }
 
   .title-text {
-    flex-grow: 1; 
+    margin-left: 0;
+    align-items: center;
+    text-align: center;
   }
 
-  .title-text h1 {
-    font-size: 1.3rem;
-    margin: 0;
-  }
-
+  .title-text h1,
   .title-text span {
-    font-size: 1rem;
-    margin: 0;
+    font-size: 2rem;
   }
 
   .menu-items {
-    display: flex;
+    flex-wrap: wrap;
     justify-content: center;
-    gap: 5px;
-    margin-top: 5px;
-    width: 100%;
+    font-size: 1.2rem;
   }
 
   .menu-items a {
-    min-width: 90px;  
-    flex: 1 1 auto;
-    text-align: center;
-    padding: 6px 10px;
-    font-size: 1rem;
+    width: 100px;
+    font-size: 1.3rem;
   }
 
-.intro-left h2 {
-  font-size: 1.5rem;
-  padding: 5px;
+  .introduction {
+    margin-top: 5px;
+    margin-right: 15px;
+  }
+
+  .intro-left,
+  .intro-right {
+    width: 100%;
+    height: auto;
+    padding: 20px;
+  }
+
+  .intro-left h2,
+  .intro-right h2 {
+    padding: 10px;
+    font-size: 2rem;
+    text-align: center;
+  }
+
+  .intro-left p,
+  .intro-right p,
+  .intro-left a {
+    padding: 10px;
+    font-size: 1.5rem;
+  }
+
+  .logo,
+  .mosquito-bottom {
+    display: none;
+  }
+
+  .pages_link {
+    flex-wrap: wrap;
+    justify-content: center;
+    column-gap: 20px;
+    row-gap: 20px;
+    margin: 20px auto;
+  }
+
+  .pages_link a {
+    width: 120px;
+    height: 120px;
+  }
+
+  .pages_link span {
+    font-size: 1.2rem;
+  }
+
+  #about_section {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 100px);
+  }
+  .about {
+    margin-top: 5px;
+  }
+
+  .about h2,
+  .contact h2,
+  .contact,
+  .about p:nth-of-type(2),
+  .about ol, ul {
+    font-size: 1.5rem;
+    padding-left: 15px;
+    padding-right: 0;
+    margin-top: 0;
+  }
+
+  .about p,
+  .contact p,
+  .about ol,
+  .about ul {
+    font-size: 1.5rem;
+    padding-left: 20px;
+  }
+
+  .analysis-container {
+    flex-direction: column;
+  }
+
+  #stagelr .shiny-options-group,
+  #size .shiny-options-group,
+  #color .shiny-options-group,
+  #data_type .shiny-options-group,
+  #data_type_exp .shiny-options-group,
+  #plot .shiny-options-group,
+  #embedding .shiny-options-group{
+    display: flex;
+    flex-direction: row;
+    flex-grow: 1;
+  }
+
+  #gene_snn_ui {
+    position: relative;
+  }
+
+    #gene_snn_ui .col-sm-2 {
+    position: absolute;
+    top: 12px;
+    
+  }
+
+  #gene_snn_ui .col-sm-5{
+    position: absolute;
+    top: 25px;
+    right: 20px;
+  }
+
+  .sidebar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  position: absolute !important;
+  top: 0;
+  left: 0;
+  z-index: -1;
+  opacity: 0;
 }
 
-.intro-left p {
-  font-size: 1rem;
-  line-height: 1;
-  padding: 5px;
+/* When .visible is added */
+.sidebar.visible {
+  display: block !important;
+  position: relative !important;
+  width: 100% !important;
+  height: auto !important;
+  opacity: 1 !important;
+  z-index: 1 !important;
+  margin-bottom: 20px !important;
 }
 
-.intro-left a {
-  padding: 0 5px;
-} 
 
+  .main {
+    width: 100%;
+    padding: 10px;
+  }
 
-/* @media (max-width: 480px) {
-  .menu-title {
+  .shiny-options-group {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  #data_opt .radio label {
+    width: 100%;
+    font-size: 1.4rem;
+  }
+
+  #gene_snn_ui {
     flex-direction: column;
     align-items: flex-start;
-  }
-  
-  .title-text h1 {
-    font-size: 1rem;
+    gap: 10px;
   }
 
-  .menu-items a {
-    min-width: 80px;
-  }*/
-} 
+  #switch_id,
+  .switch_exp {
+    position: static;
+  }
+}
+

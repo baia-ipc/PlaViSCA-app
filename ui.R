@@ -44,27 +44,30 @@ ui <- fluidPage(
       div(
         class = "title-text",
         h1("PlaViSca"),
-        span("Plasmodium vivax Single Cell Analysis Platform")
+        span(tags$i("Plasmodium vivax"), " Single Cell Analysis Platform")
       )
     ),
     div(
-      class = "menu-items",
-      actionLink("home",
-        label = tagList(icon("home"), " Home"),
-        class = "menu-link active"
+      class = "menu-right",
+      div(
+        class = "menu-items",
+        actionLink("home",
+          label = tagList(icon("home"), " Home"),
+          class = "menu-link active"
+        ),
+        span("|"),
+        actionLink("analysis",
+          label = tagList(icon("table"), " Analysis"),
+          class = "menu-link"
+        ),
+        span("|"),
+        actionLink("about",
+          label = tagList(icon("info-circle"), " About"),
+          class = "menu-link"
+        ),
       ),
-      span("|"),
-      actionLink("analysis",
-        label = tagList(icon("table"), " Analysis"),
-        class = "menu-link"
-      ),
-      span("|"),
-      actionLink("about",
-        label = tagList(icon("info-circle"), " About"),
-        class = "menu-link"
-      ),
-    ),
-    div(class = "logo baia", img(src = "baia_logo.png"))
+      div(class = "logo baia", img(src = "baia_logo.png"))
+    )
   ),
 
   # Home section
@@ -74,7 +77,6 @@ ui <- fluidPage(
       class = "introduction",
       column(
         width = 6, class = "intro-left",
-        # h2("PlaViSca Platform"),
         p("PlaViSCA is a platform designed to support the malaria research community
         in analyzing and visualizing single-cell RNA sequencing (scRNA-seq) data.
         PvSCA provides a user friendly interface for exploring
@@ -83,11 +85,6 @@ ui <- fluidPage(
         filters and coloring.The platform also allows users to download data for
         further analysis. PlaViSCA empowers researchers to explore complex scRNA-seq for
         P. vivax without requiring any programming skills."),
-        # actionLink("explore_data",
-        #   label = tagList(icon("hand-point-right"), "Explore data"),
-        #   class = "btn btn-outline-light btn-sm explore-btn"
-        # ),
-
         div(class = "logo mosquito-bottom", img(
           src = "mosquito-bottom.png",
           alt = "mosquito"
@@ -140,68 +137,10 @@ ui <- fluidPage(
             span("About")
           ))
         )
-
-        # h2("Plasmodium vivax life cycle"),
-        # div(class = "img", img(src = "pvivax.jpg", usemap = "#malariaMap"))
       )
     ),
     fluidRow(id = "particles-js-home", class = "particles-js"),
     fluidRow(p(class = "copyright", "© 2025 BAIA Team. All rights reserved."))
-    # tags$map(
-    #   name = "malariaMap",
-    #   tags$area(
-    #     shape = "rect", coords = "1090, 1774, 1408, 1843",
-    #     href = "javascript:void(0)", alt = "hypnozoite", title = "hypnozoite"
-    #   ),
-    #   tags$area(
-    #     shape = "rect", coords = "677, 2037, 1006, 2190",
-    #     href = "javascript:void(0)", alt = "merozoite", title = "merozoite"
-    #   ),
-    #   tags$area(
-    #     shape = "rect", coords = "1021, 2205, 1416, 2348",
-    #     href = "javascript:void(0)", alt = "merozoite", title = "merozoite"
-    #   ),
-    #   tags$area(
-    #     shape = "rect", coords = "1639, 2041, 1778, 2143",
-    #     href = "javascript:void(0)", alt = "ring", title = "ring"
-    #   ),
-    #   tags$area(
-    #     shape = "rect", coords = "1767, 1902, 2100, 1956",
-    #     href = "javascript:void(0)", alt = "trophozoite", title = "trophozoite"
-    #   ),
-    #   tags$area(
-    #     shape = "rect", coords = "2173, 2121, 1946, 2048",
-    #     href = "javascript:void(0)", alt = "schizont", title = "schizont"
-    #   ),
-    #   tags$area(
-    #     shape = "rect", coords = "2122, 2370, 1895, 2234",
-    #     href = "javascript:void(0)", alt = "schizont", title = "schizont"
-    #   ),
-    #   tags$area(
-    #     shape = "rect", coords = "2382, 1810, 3142, 1894",
-    #     href = "javascript:void(0)", alt = "gametocyte", title = "gametocyte"
-    #   ),
-    #   tags$area(
-    #     shape = "rect", coords = "2466, 2179, 3080, 2242",
-    #     href = "javascript:void(0)", alt = "gametocyte", title = "gametocyte"
-    #   ),
-    #   tags$area(
-    #     shape = "rect", coords = "3011, 1298, 3278, 1375",
-    #     href = "javascript:void(0)", alt = "gametocyte", title = "gametocyte"
-    #   ),
-    #   tags$area(
-    #     shape = "rect", coords = "3007, 325, 3424, 413",
-    #     href = "javascript:void(0)", alt = "Oocyst", title = "Oocyst"
-    #   ),
-    #   tags$area(
-    #     shape = "rect", coords = "2016, 790, 2330, 878",
-    #     href = "javascript:void(0)", alt = "sporozoite", title = "sporozoite"
-    #   ),
-    #   tags$area(
-    #     shape = "rect", coords = "779, 1232, 1094, 1305",
-    #     href = "javascript:void(0)", alt = "sporozoite", title = "sporozoite"
-    #   )
-    # )
   ),
 
   # Analysis section
@@ -213,14 +152,12 @@ ui <- fluidPage(
         width = 4, id = "sidebar", class = "sidebar",
         column(
           width = 12, class = "col-12",
-          checkboxGroupInput(
-            "stagei", "Infection stage",
-            choices = list(
-              "Blood" = "blood",
-              "Liver" = "liver",
-              "Sporozoite" = "sporozoite"
+          div(
+            id = "apply_filter_wrapper", class = "dropdown-container",
+            selectInput("apply_filter", "Data filters:",
+              choices = NULL, multiple = TRUE
             ),
-            selected = list("blood", "liver", "sporozoite")
+            tags$div(class = "dropdown-arrow", title = "Open dropdown", "▼")
           )
         ),
         column(
@@ -268,6 +205,7 @@ ui <- fluidPage(
         ),
         column(
           width = 12,
+          class = "col-12",
           fluidRow(
             column(
               width = 12,

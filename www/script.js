@@ -180,6 +180,14 @@ $(document).ready(function () {
     });
   });
   
+  // Dropdown arrow click to open selectize
+  $(document).on('click', '.dropdown-arrow', function(e) {
+  const $wrapper = $(this).closest('#apply_filter_wrapper');
+  const $selectizeInput = $wrapper.find('.selectize-input');
+
+  $selectizeInput.trigger('mousedown');
+});
+
 
 });
 
