@@ -6,7 +6,6 @@ library(RColorBrewer)
 library(tidyverse)
 library(later)
 
-# Functions and some global data load in Global.R
 # Load raw and scale data.
 raw_df <- readRDS("data/raw_df.rds")
 scale_df <- readRDS("data/scale_df.rds")
@@ -96,6 +95,30 @@ server <- function(input, output, session) {
   })
 
 
+  # Change to normalize when change tabset
+  observeEvent(input$tabset, {
+    if (input$tabset == "Gene expression") {
+      updateRadioButtons(session, "data_type_exp",
+        choices = list(
+          "Raw" = "raw",
+          "Normalized" = "normalize",
+          "Scaled" = "scale"
+        ),
+        selected = "normalize"
+      )
+    } else if (input$tabset == "Embeddings") {
+      updateRadioButtons(session, "data_type",
+        choices = list(
+          "Raw" = "raw",
+          "Normalized" = "normalize",
+          "Scaled" = "scale"
+        ),
+        selected = "normalize"
+      )
+    }
+  })
+
+
   # Select raw, normalize or scale data
   default_df_filter <- reactiveVal(NULL)
 
@@ -103,21 +126,19 @@ server <- function(input, output, session) {
     list(input$tabset, input$apply_filter, input$data_type, input$data_type_exp),
     {
       dataset <- if (input$tabset == "Gene expression") {
+        req(input$data_type_exp)
         switch(input$data_type_exp,
           raw = raw_df,
           normalize = norm_df,
-          scale = scale_df,
-          NULL
+          scale = scale_df
         )
       } else if (input$tabset == "Embeddings") {
+        req(input$data_type)
         switch(input$data_type,
           raw = raw_df,
           normalize = norm_df,
-          scale = scale_df,
-          NULL
+          scale = scale_df
         )
-      } else {
-        NULL
       }
 
       req(dataset)
@@ -152,9 +173,9 @@ server <- function(input, output, session) {
       paste0("species__", unique(mr_data$species)),
       unique(mr_data$species)
     ),
-    type = setNames(
-      paste0("type__", unique(mr_data$type)),
-      unique(mr_data$type)
+    reproductive_form = setNames(
+      paste0("type__", unique(mr_data$reproductive_form)),
+      unique(mr_data$reproductive_form)
     ),
     condition = setNames(
       paste0("condition__", unique(mr_data$condition)),
@@ -206,7 +227,7 @@ server <- function(input, output, session) {
     if (input$tabset == "Metadata") {
       updateSelectInput(session, "ident", choices = unique(filt_data$ident))
       updateSelectInput(session, "species", choices = unique(filt_data$species))
-      updateSelectInput(session, "type", choices = unique(filt_data$type))
+      updateSelectInput(session, "repro_form", choices = unique(filt_data$reproductive_form))
       updateSelectInput(session, "condition", choices = unique(filt_data$condition))
       updateSelectInput(session, "stage", choices = unique(filt_data$stage))
       updateSelectInput(session, "sample", choices = unique(filt_data$sample))
@@ -215,24 +236,24 @@ server <- function(input, output, session) {
 
 
   observeEvent(list(
-    input$data_opt, input$ident, input$species, input$type,
+    input$data_opt, input$ident, input$species, input$repro_form,
     input$condition, input$stage, input$sample
   ), {
     filt_data <- filtered_data() %>%
       select(any_of(c(
-        "id", "ident", "seurat_clusters", "species", "type",
+        "id", "ident", "seurat_clusters", "species", "reproductive_form",
         "condition", "stage", "sample", "day", "replicate",
         "location", "vivax_strain", "n_count_rna", "n_feature_rna"
       )))
 
     if (!is.null(input$ident) || !is.null(input$species) ||
-      !is.null(input$type) || !is.null(input$condition) ||
+      !is.null(input$repro_form) || !is.null(input$condition) ||
       !is.null(input$stage) || !is.null(input$sample)) {
       filt_data <- filt_data %>%
         filter(
           if (!is.null(input$ident)) ident %in% input$ident else TRUE,
           if (!is.null(input$species)) species %in% input$species else TRUE,
-          if (!is.null(input$type)) type %in% input$type else TRUE,
+          if (!is.null(input$repro_form)) reproductive_form %in% input$repro_form else TRUE,
           if (!is.null(input$condition)) condition %in% input$condition else TRUE,
           if (!is.null(input$stage)) stage %in% input$stage else TRUE,
           if (!is.null(input$sample)) sample %in% input$sample else TRUE
@@ -247,7 +268,7 @@ server <- function(input, output, session) {
             rename_with(~ str_to_title(.),
               .cols = any_of(c(
                 "id", "ident", "seurat_clusters",
-                "species", "type", "condition", "stage",
+                "species", "reproductive_form", "condition", "stage",
                 "sample", "day", "replicate", "location",
                 "vivax_strain"
               ))
@@ -282,12 +303,12 @@ server <- function(input, output, session) {
       meta_plotly(filt_data, "species", "Count", "Species", "bar")
     })
 
-    ## plot type vs count
+    ## plot reproductive_form vs count
     output$type_plotly <- renderPlotly({
-      meta_plotly(filt_data, "type", "Count", "Type", "bar")
+      meta_plotly(filt_data, "reproductive_form", "Count", "Reproductive Form", "bar")
     })
 
-    ## plot type vs count
+    ## plot location vs count
     output$location_plotly <- renderPlotly({
       meta_plotly(filt_data, "location", "Count", "Location", "bar")
     })
@@ -337,7 +358,7 @@ server <- function(input, output, session) {
             scrollX = TRUE,
             autoWidth = FALSE,
             columnDefs = list(
-              list(width = "800px", targets = 2, className = "dt-left")
+              list(width = "800px", targets = 3, className = "dt-left")
             )
           ),
           selection = "single",
@@ -707,7 +728,8 @@ server <- function(input, output, session) {
       size = "xl",
       easyClose = TRUE,
       footer = tagList(
-        downloadButton("export_data", "Export .csv")
+        downloadButton("export_data", "Export .csv", class = "btn-success"),
+        modalButton(label = tagList(icon("times")))
       )
     ))
   })

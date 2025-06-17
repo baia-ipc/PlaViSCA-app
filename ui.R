@@ -47,27 +47,27 @@ ui <- fluidPage(
         span(tags$i("Plasmodium vivax"), " Single Cell Analysis Platform")
       )
     ),
+    # div(
+    #  class = "menu-right",
     div(
-      class = "menu-right",
-      div(
-        class = "menu-items",
-        actionLink("home",
-          label = tagList(icon("home"), " Home"),
-          class = "menu-link active"
-        ),
-        span("|"),
-        actionLink("analysis",
-          label = tagList(icon("table"), " Analysis"),
-          class = "menu-link"
-        ),
-        span("|"),
-        actionLink("about",
-          label = tagList(icon("info-circle"), " About"),
-          class = "menu-link"
-        ),
+      class = "menu-items",
+      actionLink("home",
+        label = tagList(icon("home"), " Home"),
+        class = "menu-link active"
       ),
-      div(class = "logo baia", img(src = "baia_logo.png"))
-    )
+      span("|"),
+      actionLink("analysis",
+        label = tagList(icon("table"), " Analysis"),
+        class = "menu-link"
+      ),
+      span("|"),
+      actionLink("about",
+        label = tagList(icon("info-circle"), " About"),
+        class = "menu-link"
+      ),
+    ),
+    div(class = "logo baia", img(src = "baia_logo.png"))
+    # )
   ),
 
   # Home section
@@ -128,10 +128,14 @@ ui <- fluidPage(
             img(src = "usermanual.png", alt = "User Manual"),
             span("User Manual")
           )),
-          actionLink("sources_code_link", tagList(
-            img(src = "sources_code.png", alt = "Sources code"),
-            span("Source code")
-          )),
+          tags$a(
+            href = "https://github.com/Sopheap15/pvsca",
+            target = "_blank",
+            tagList(
+              img(src = "sources_code.png", alt = "Source code", height = "20px"),
+              span("Source code")
+            )
+          ),
           actionLink("about_link", tagList(
             img(src = "about.png", alt = "About"),
             span("About")
@@ -153,39 +157,38 @@ ui <- fluidPage(
         column(
           width = 12, class = "col-12",
           div(
-            id = "apply_filter_wrapper", class = "dropdown-container",
-            selectInput("apply_filter", "Data filters:",
-              choices = NULL, multiple = TRUE
-            ),
-            tags$div(class = "dropdown-arrow", title = "Open dropdown", "▼")
+            class = "form-group shiny-input-container",
+            id = "apply_filter",
+            tags$label("Data filters:", `for` = "apply_filter"),
+            div(
+              id = "apply_filter_wrapper", class = "dropdown-container",
+              selectizeInput("apply_filter",
+                label = NULL,
+                choices = NULL, multiple = TRUE
+              ),
+              tags$div(class = "dropdown-arrow", title = "Open dropdown", "▼")
+            )
           )
         ),
-        column(
-          width = 12, class = "col-12",
-          checkboxGroupInput(
-            "stagelr", "Parasite stage",
-            choices = list(
-              "Trophozoite" = "trophozoite",
-              "Ring" = "ring",
-              "Schizont" = "schizont",
-              "Gametocyte" = "gametocyte",
-              "Hypnozoite" = "hypnozoite",
-              "Hepatic schizont" = "hepatic_schizont",
-              "Zygot" = "zygot",
-              "Ookinete" = "ookinete",
-              "Oocyst" = "oocyst",
-              "Sporozoite" = "sporozoite"
-            ),
-            selected = list()
-          )
-        ),
-        column(
-          width = 12, class = "col-12",
-          radioButtons("size", "Size",
-            choices = list("S" = 2, "M" = 4, "L" = 6),
-            selected = 4
-          )
-        ),
+        # column(
+        #   width = 12, class = "col-12",
+        #   checkboxGroupInput(
+        #     "stagelr", "Parasite stage",
+        #     choices = list(
+        #       "Trophozoite" = "trophozoite",
+        #       "Ring" = "ring",
+        #       "Schizont" = "schizont",
+        #       "Gametocyte" = "gametocyte",
+        #       "Hypnozoite" = "hypnozoite",
+        #       "Hepatic schizont" = "hepatic_schizont",
+        #       "Zygot" = "zygot",
+        #       "Ookinete" = "ookinete",
+        #       "Oocyst" = "oocyst",
+        #       "Sporozoite" = "sporozoite"
+        #     ),
+        #     selected = list()
+        #   )
+        # ),
         column(
           width = 12, class = "col-12",
           radioButtons("color", "Color",
@@ -254,9 +257,16 @@ ui <- fluidPage(
         ),
         column(
           width = 12, class = "col-12",
+          radioButtons("size", "Size",
+            choices = list("S" = 2, "M" = 4, "L" = 6),
+            selected = 4
+          )
+        ),
+        column(
+          width = 12, class = "col-12",
           radioButtons("plot", "Plot",
             choices = list("2D" = "2d", "3D" = "3d"),
-            selected = "2d"
+            selected = "3d"
           )
         ),
         column(
@@ -321,7 +331,7 @@ ui <- fluidPage(
                 ),
                 column(
                   width = 2,
-                  selectizeInput("type", "Type:",
+                  selectizeInput("repro_form", "Reproductive Form:",
                     choices = c(""),
                     multiple = TRUE,
                     options = list(
@@ -428,7 +438,6 @@ ui <- fluidPage(
           # gene expression section
           tabPanel(
             "Gene expression",
-            br(),
             fluidRow(
               column(
                 width = 12,
@@ -537,7 +546,6 @@ ui <- fluidPage(
                 )
               )
             ),
-            br(),
             fluidRow(
               withSpinner(
                 type = 6,
@@ -594,7 +602,7 @@ ui <- fluidPage(
         ),
         tags$li(
           strong("Giorgio GONNELLA"), " - Head, BAIA Unit, IPC, email: ",
-          a(href = "mailto:ggonella@pasteur-kh.org", "ggonella@pasteur-kh.org")
+          a(href = "mailto:ggonnella@pasteur-kh.org", "ggonnella@pasteur-kh.org")
         )
       ),
       p(

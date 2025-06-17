@@ -32,17 +32,17 @@ cell_id_bf_[nchar(cell_id_bf_) < 10] <- NA
 cell_id_clean <- coalesce(cell_id_af_, cell_id_bf_)
 so@meta.data$cleaned_barcode <- cell_id_clean
 
-so@meta.data$type <- type_df$type[match(
+so@meta.data$reproductive_form <- type_df$type[match(
   so@meta.data$cleaned_barcode,
   type_df$sample
 )]
 so@meta.data$cleaned_barcode <- NULL
 
-# saveRDS(so, "data/Pv.all.12.Jan2025.modified.rds")
+saveRDS(so, "data/Pv.all.12.Jan2025.modified.rds")
 
 # subset columns from metadata
 metadata <- c(
-  "species", "day", "condition", "Stage", "Replicate", "type",
+  "species", "day", "condition", "Stage", "Replicate", "reproductive_form",
   "location", "Vivax_strain", "nCount_RNA", "nFeature_RNA",
   "Sample", "seurat_clusters", grep("CCA_snn", colnames(so@meta.data),
     ignore.case = TRUE, value = TRUE
@@ -97,7 +97,7 @@ mr_data <- mr_data %>%
 # Extract reduction data from mr_data
 red_df <- mr_data %>%
   select(
-    id, stage, species, condition, sample, type, ident, n_feature_rna,
+    id, stage, species, condition, sample, reproductive_form, ident, n_feature_rna,
     any_of(contains("umap")),
     any_of(contains("pca")),
     any_of(contains("tsne"))
