@@ -164,7 +164,10 @@ ui <- fluidPage(
               id = "apply_filter_wrapper", class = "dropdown-container",
               selectizeInput("apply_filter",
                 label = NULL,
-                choices = NULL, multiple = TRUE
+                choices = NULL, multiple = TRUE,
+                options = list(
+                  placeholder = "No filter applied"
+                )
               ),
               tags$div(class = "dropdown-arrow", title = "Open dropdown", "▼")
             )
@@ -568,7 +571,7 @@ ui <- fluidPage(
       class = "about",
       column(
         width = 8,
-        h2("Collaborators"),
+        # h2("Collaborators"),
         p("PlaViSca was developed by the Bioinformatics and Artificial Intelligence
        Applications (BAIA) Unit at the Institut Pasteur du Cambodge (IPC),
        in collaboration with the Malaria Unit at IPC and the Center for Tropical

@@ -145,16 +145,15 @@ server <- function(input, output, session) {
       selections <- input$apply_filter
 
       if (user_interact() && (is.null(selections) || length(selections) == 0)) {
-        return(
-          NULL
-        )
+        return(NULL)
       }
 
       if (is.null(selections)) {
         selections <- default_df_filter()
       }
-      req(selections)
 
+
+      req(selections)
       list(
         data = fun_filter_df(dataset, selections),
         genes = genes(dataset, gff_data)
@@ -219,6 +218,7 @@ server <- function(input, output, session) {
   })
 
 
+
   # Manipulation tabset "metadata"
   observe({
     filt_data <- filtered_data()
@@ -277,6 +277,7 @@ server <- function(input, output, session) {
             arrange(desc(nCount_RNA)),
           options = list(pageLength = 10, scrollX = TRUE),
           selection = "single",
+          filter = "top",
           rownames = FALSE
         )
       },
@@ -638,7 +639,7 @@ server <- function(input, output, session) {
     list(
       input$embedding, input$plot, input$xaxis, input$yaxis, input$color,
       input$size, input$genes_n, input$data_type, input$check,
-      input$check_all
+      input$check_all, input$apply_filter
     )
     autoUpdatePlot(FALSE)
     later(function() {

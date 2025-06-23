@@ -15,7 +15,6 @@
 .menu-bar {
   height: 90px;
   display: flex;
-  /* align-items: center; */
   justify-content: space-between;
   padding: 0 5px;
   background-color: #f8fbf8;
@@ -83,7 +82,6 @@
 
 .title-text h1 {
   font-family: Roboto, sans-serif;
-  /* font-weight: bold; */
   display: inline-block;
   color: #ce26b7;
   font-size: clamp(2rem, 3vw, 4rem);
@@ -177,13 +175,10 @@
   background: linear-gradient(to right, #a168e8, #cdb8e7);
 }
 
-.about h2 {
-  font-family: 'Fira Sans', sans-serif;
-  font-size: 2.5rem;
-  color: #fff; 
-  padding: 40px 0 20px 150px;
-  text-transform: uppercase;
+.about .col-sm-8 {
+  margin-top: 80px;
 }
+
 
 .about p {
   font-family: 'Fira Sans', sans-serif;
@@ -255,21 +250,13 @@
 
 /* Home section */
 .intro-left {
-  height: calc(100vh - 160px);
+  height: calc(100vh - 170px);
   background: linear-gradient(to bottom, #a168e8, #cdb8e7);
   margin-left: 15px;
   padding-top: 60px;
   width: 48%;
   position: relative;
 }
-
-/* .intro-left h2 {
-  color: #fff;
-  font-family: 'Fira Sans', sans-serif;
-  text-transform: uppercase;
-  font-size: 3rem;
-  padding: 50px 140px 20px 140px;
-} */
 
 .intro-left p {
   color: #fff;
@@ -279,22 +266,6 @@
   line-height: 1.8;
   padding: 20px 150px;
 }
-
-/* .intro-left a {
-  color: #fff;
-  text-decoration: underline;
-  font-family: 'Fira Sans', sans-serif;
-  font-size: 2rem;
-  font-weight: bold;
-  font-size:  2rem;
-  transition: color 0.3s ease, text-decoration 0.3s ease;
-  padding: 0 150px;
-}  */
-
-/* .intro-left a:hover {
-  color: #ffdd57;
-  text-decoration: none;
-} */
 
 .mosquito-bottom {
   position: absolute;
@@ -315,7 +286,8 @@
   width: 400px;  
   height: 300px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0) 70%);
+  background: radial-gradient(circle, rgba(255,255,255,0.5) 0%,
+                              rgba(255,255,255,0) 70%);
   z-index: 0;
   transform: translate(-50%, -50%);
   top: 50%;
@@ -345,28 +317,12 @@
 }
 
 .intro-right {
-  height: calc(100vh - 160px);
+  height: calc(100vh - 170px);
   background-color: #fff;
   padding-top: 50px;
   width: 50%;
 }
 
-/* .intro-right h2 {
-  color: #000;
-  font-family: 'Fira Sans', sans-serif;
-  text-transform: uppercase;
-  font-size: 3rem;
-  padding: 50px 140px 20px 140px;
-} */
-
-/* .intro-right p {
-  color: #000;
-  text-align: justify;
-  font-family: 'Fira Sans', sans-serif;
-  font-size: 2rem;
-  line-height: 1.6;
-  padding: 20px 150px;
-} */
 
 .pages_link {
   display: flex;
@@ -415,7 +371,6 @@
   color: #8d55e7;
   font-family: 'Fira Sans', sans-serif;
   font-size: 2rem;
-  /* text-transform: uppercase; */
   font-weight: bold;
   text-align: center;
 }
@@ -436,7 +391,6 @@
   justify-content: center;
   margin: 0;
 }
-
 
 /* analysis page */
 #analysis_section {
@@ -476,6 +430,13 @@
   margin-left: 0;
 }
 
+#apply_filter-selectized::placeholder {
+  color: #999;     
+  font-style: italic; 
+  opacity: 1;  
+  font-size: 1.5rem;
+}
+
 .analysis-container .col-sm-4 {
   padding: 10px 0 15px 0;
   display: flex;
@@ -493,10 +454,6 @@
 .col-12 .shiny-input-container {
   width: 100%;
 }
-
-/* .col-12 .form-group {
-  margin-bottom: 6px;
-} */
 
 
 /* -label is for group */
@@ -986,7 +943,7 @@ input:checked + .slider:before {
 
   .menu-items a {
     width: 100px;
-    font-size: 1.3rem;
+    font-size: 1.5rem;
   }
 
   .logo.mosquito img {
@@ -1106,14 +1063,16 @@ input:checked + .slider:before {
 
     #gene_snn_ui .col-sm-2 {
     position: absolute;
-    top: 12px;
     
   }
 
-  #gene_snn_ui .col-sm-5{
-    position: absolute;
-    top: 25px;
-    right: 20px;
+  #gene_snn_ui .col-sm-7 {
+    width: 70%;
+  }
+
+
+  #data_type .shiny-options-group {
+    width: 300px
   }
 
   .sidebar {
