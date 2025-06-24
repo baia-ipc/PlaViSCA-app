@@ -42,6 +42,18 @@ function updateTooltips() {
 // }
 
 // Function to add highlight on Plotly 2D points
+(function() {
+  const originalGetContext = HTMLCanvasElement.prototype.getContext;
+  HTMLCanvasElement.prototype.getContext = function(type, options) {
+    if (type === '2d') {
+      options = options || {};
+      options.willReadFrequently = true;
+    }
+    return originalGetContext.call(this, type, options);
+  };
+})();
+
+
 function setupPlotlyHighlight() {
   const el = document.getElementById('all_plotly');
   if (!el) return;
@@ -106,7 +118,7 @@ $(document).ready(function () {
   $("#analysis_section").hide();
   $("#about_section").hide();
 
-  
+
   $(document).ready(function() {
     $('.hamburger').on('click', function() {
       $('.menu-items').toggleClass('active');
