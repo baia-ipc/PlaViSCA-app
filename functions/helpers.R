@@ -507,7 +507,7 @@ plot_2d <- function(df, x, y, color, legend_title, size,
       marker = list(size = size),
       text = hover_text, hoverinfo = "text",
       colors = colors,
-      width = 1000, height = 750,
+      width = 900, height = 600,
       source = "embedding",
       key = ~id
     ) %>%
@@ -521,7 +521,7 @@ plot_2d <- function(df, x, y, color, legend_title, size,
       data = df, x = x, y = y,
       type = "scatter", mode = "markers",
       text = hover_text, hoverinfo = "text",
-      width = 1000, height = 750,
+      width = 900, height = 600,
       key = ~id,
       source = "embedding",
       marker = list(
@@ -573,7 +573,7 @@ plot_3d <- function(df, color, legend_title, size, selected_color,
       marker = list(size = as.numeric(size) * 0.4),
       colors = colors,
       text = hover_text, hoverinfo = "text",
-      width = 1000, height = 750
+      width = 900, height = 600
     ) %>%
       layout(
         scene = list(
@@ -595,7 +595,7 @@ plot_3d <- function(df, color, legend_title, size, selected_color,
         colorbar = legend_layout
       ),
       text = hover_text, hoverinfo = "text",
-      width = 1000, height = 750,
+      width = 900, height = 600,
       source = "embedding",
       key = ~ df$id
     ) %>%
@@ -614,10 +614,6 @@ plot_3d <- function(df, color, legend_title, size, selected_color,
 # Main pca, umap and tsne plotting function
 embedding_plot <- function(df, xaxis_input, yaxis_input, color, legend_title,
                            size, plot_type = "pca_u", plot_dim = "2d") {
-  # if (is.null(df) || nrow(df) == 0) {
-  #   return(NULL)
-  # }
-
   x <- df[[xaxis_input]]
   y <- df[[yaxis_input]]
   selected_color <- df[[color]]

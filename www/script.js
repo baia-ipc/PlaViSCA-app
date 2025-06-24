@@ -106,6 +106,14 @@ $(document).ready(function () {
   $("#analysis_section").hide();
   $("#about_section").hide();
 
+  
+  $(document).ready(function() {
+    $('.hamburger').on('click', function() {
+      $('.menu-items').toggleClass('active');
+    });
+  });
+
+
   // Bind image map events
   // bindImageMapEvents();
 

@@ -5,7 +5,7 @@ source("functions/helpers.R")
 norm_df <- readRDS("data/normalize_df.rds")
 
 # load publication data
-pub_data <- read_csv("data/data_source.csv")
+pub_data <- readr::read_csv("data/data_source.csv")
 pub_data$DOI <-
   paste0("<a href='", pub_data$DOI, "' target='_blank'>", pub_data$DOI, "</a>")
 

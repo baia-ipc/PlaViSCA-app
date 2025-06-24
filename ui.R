@@ -47,8 +47,6 @@ ui <- fluidPage(
         span(tags$i("Plasmodium vivax"), " Single Cell Analysis Platform")
       )
     ),
-    # div(
-    #  class = "menu-right",
     div(
       class = "menu-items",
       actionLink("home",
@@ -67,7 +65,6 @@ ui <- fluidPage(
       ),
     ),
     div(class = "logo baia", img(src = "baia_logo.png"))
-    # )
   ),
 
   # Home section
@@ -77,14 +74,17 @@ ui <- fluidPage(
       class = "introduction",
       column(
         width = 6, class = "intro-left",
-        p("PlaViSCA is a platform designed to support the malaria research community
-        in analyzing and visualizing single-cell RNA sequencing (scRNA-seq) data.
-        PvSCA provides a user friendly interface for exploring
-        metadata and gene expression across various parasite life cycle stages
-        using interactive tables and 2D or 3D visualizations with customizable
-        filters and coloring.The platform also allows users to download data for
-        further analysis. PlaViSCA empowers researchers to explore complex scRNA-seq for
-        P. vivax without requiring any programming skills."),
+        p(
+          "PlaViSCA is a platform designed to support the malaria research
+        community in analyzing and visualizing single-cell RNA sequencing
+        (scRNA-seq) data. PlaViSca provides a user friendly interface for
+        exploring metadata and gene expression across various parasite life
+        cycle stages using interactive tables and 2D or 3D visualizations with
+        customizable filters and coloring. The platform also allows users to
+        download data for further analysis. PlaViSCA empowers researchers to
+        explore complex scRNA-seq for ", em("P. vivax"),
+          " without requiring any programming skills."
+        ),
         div(class = "logo mosquito-bottom", img(
           src = "mosquito-bottom.png",
           alt = "mosquito"

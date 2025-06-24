@@ -42,7 +42,7 @@
   flex-wrap: wrap;
   align-items: center;
   gap: 15px;
-  margin-left: 120px;
+  /* margin-left: 120px; */
   height: 100%;
   
 }
@@ -110,8 +110,6 @@
   font-size: 1.8rem;
   gap: 5px;
   color: black;
-  text-transform: uppercase;
-  height: 100%; 
   padding-bottom: 10px;
 }
 
@@ -121,9 +119,14 @@
   display: flex;
   justify-content: center;
   align-items: center; 
-  gap: 10px;
   border-radius: 20px;
 }
+
+.menu-items a .fas {
+  padding-right: 5px;
+}
+
+
 
 .menu-items span {
   color: #553333;
@@ -262,9 +265,9 @@
   color: #fff;
   text-align: justify;
   font-family: 'Fira Sans', sans-serif;
-  font-size: 2.5rem;
+  font-size: clamp(1rem, 2.5vw, 2.5rem);
   line-height: 1.8;
-  padding: 20px 150px;
+  padding: 20px 15px;
 }
 
 .mosquito-bottom {
@@ -319,20 +322,20 @@
 .intro-right {
   height: calc(100vh - 170px);
   background-color: #fff;
-  padding-top: 50px;
+  padding-top: 30px;
   width: 50%;
 }
 
 
 .pages_link {
   display: flex;
-  margin: 20px 0 40px 100px;
+  margin: 20px 0 0 50px;
   padding: 0;
   display: flex;
   justify-content: flex-start;
   align-items: flex-end;
   row-gap: 5px;
-  column-gap: 80px;
+  column-gap: 60px;
 }
 
 .pages_link a {
@@ -404,6 +407,7 @@
 
 .sidebar {
   width: 0;
+  margin-top: 10px;
   opacity: 0;
   visibility: hidden;
   transition: width 0.5s ease, opacity 0.5s ease, visibility 0.8s;
@@ -418,7 +422,7 @@
 
 .main {
   padding: 5px 10px 5px 25px;
-  width: 100%;
+  /* width: 100%; */
   height: 100%;
 }
 
@@ -489,15 +493,16 @@
   padding: 4px 8px;
   margin-right: 6px;
   margin-top: 4px;
-  font-size: 1.5rem;
+  font-size: clamp(1rem, 2vw, 1.5rem); 
   text-transform: capitalize;
   font-weight: bold;
+  
 }
 
 .selectize-dropdown .optgroup-header {
   font-weight: bold;
   text-transform: uppercase;
-  font-size: 1.5rem;
+  font-size: clamp(1rem, 2vw, 1.5rem); 
   color: #2909e2;
   background-color: #eef1f4;
   padding: 6px 10px;
@@ -506,17 +511,18 @@
 
 .selectize-dropdown .option {
   text-transform: capitalize;
-  font-size: 1.2rem; 
+  font-size: clamp(1rem, 1.5vw, 1.5rem); 
 }
 
 #apply_filter_wrapper {
   position: relative;
 }
 
-#apply_filter_wrapper .selectize-input {
+/* #apply_filter_wrapper .selectize-input {
   padding-right: 30px !important;
   height: 80px;
-}
+  overflow: hidden;
+} */
 
 #apply_filter_wrapper .dropdown-arrow {
   position: absolute;
@@ -911,18 +917,21 @@ input:checked + .slider:before {
   right: 15px;
 }
 
-/* Mobile & Tablet: Up to 1024px */
-@media screen and (max-width: 1580px) {
+
+/* Mobile & Tablet: Up to 1400px */
+@media screen and (max-width: 1430px) {
   .menu-bar {
     flex-direction: column;
     padding: 0;
     height: auto;
     align-items: center;
+    position: relative;
   }
 
   .menu-title {
     margin-left: 0;
     justify-content: center;
+    margin-left: 0px;
   }
 
   .title-text {
@@ -936,11 +945,7 @@ input:checked + .slider:before {
     font-size: 2rem;
   }
 
-  .menu-items {
-    width: 50%;
-    
-  }
-
+  
   .menu-items a {
     width: 100px;
     font-size: 1.5rem;
@@ -969,7 +974,11 @@ input:checked + .slider:before {
   object-fit: contain;
   }
 
-  .introduction {
+.intro-left p{
+    font-size: clamp(1rem, 2vw, 2rem);
+  }
+
+  /* .introduction {
     margin-top: 5px;
     margin-right: 15px;
   }
@@ -981,22 +990,12 @@ input:checked + .slider:before {
     padding: 20px;
   }
 
-  .intro-left h2,
-  .intro-right h2 {
-    padding: 10px;
-    font-size: 2rem;
-    text-align: center;
-  }
 
-  .intro-left p,
-  .intro-right p {
-    padding: 5px;
-    font-size: 2rem;
-  }
+  
 
   .mosquito-bottom {
     display: none;
-  }
+  } */
 
   .pages_link {
     display: flex;
@@ -1041,7 +1040,7 @@ input:checked + .slider:before {
     padding-left: 20px;
   }
 
-  .analysis-container {
+  /* .analysis-container {
     flex-direction: column;
   }
 
@@ -1086,7 +1085,7 @@ input:checked + .slider:before {
   opacity: 0;
 }
 
-/* When .visible is added */
+
 .sidebar.visible {
   display: block !important;
   position: relative !important;
@@ -1097,9 +1096,6 @@ input:checked + .slider:before {
   margin-bottom: 20px !important;
 }
 
-
-  
-
   .shiny-options-group {
     flex-direction: column;
     gap: 8px;
@@ -1109,9 +1105,9 @@ input:checked + .slider:before {
     width: 100%;
     font-size: 1.4rem;
   }
-}
+} */
 
-/* Mobile & Tablet: Up to 780px */
+
 @media screen and (max-width: 780px) {
   .logo{
     display: none;
