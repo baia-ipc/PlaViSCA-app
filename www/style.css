@@ -216,7 +216,7 @@
   background-color: #fff;
   display: flex;          
   flex-direction: column;  
-  padding: 20px 0 0 150px;  
+  padding: 20px 0 0 15px;  
 }
 
 @keyframes colorFadeContact {
@@ -917,8 +917,8 @@ input:checked + .slider:before {
 }
 
 
-/* Mobile & Tablet: Up to 1400px */
-@media screen and (max-width: 1430px) {
+/* Mobile & Tablet: Up to 1430px */
+@media screen and (max-width: 1300px) {
   .menu-bar {
     flex-direction: column;
     padding: 0;
