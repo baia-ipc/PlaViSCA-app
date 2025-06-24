@@ -179,15 +179,14 @@
 }
 
 .about .col-sm-8 {
-  margin-top: 80px;
+  margin-top: 40px;
 }
-
 
 .about p {
   font-family: 'Fira Sans', sans-serif;
   font-size: 2rem;
   color:#fff; 
-  padding-left: 150px;
+  padding-left: 15px;
   line-height: 2;
 }
 

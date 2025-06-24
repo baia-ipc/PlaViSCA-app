@@ -588,7 +588,7 @@ ui <- fluidPage(
     ),
     fluidRow(
       class = "contact",
-      h2("Contact detail:"),
+      #h2("Contact detail:"),
       tags$ul(
         tags$li(
           strong("Sopheap OENG"), " - Bioinformatic System Engineer, IPC, email: ",
