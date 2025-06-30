@@ -76,8 +76,9 @@ server <- function(input, output, session) {
     navigate_tabset(session, "analysis", "Gene expression")
   })
 
+  addResourcePath("manual", "manual/docs/build/html")
   observeEvent(input$usermanual_link, {
-    runjs("window.open('usermanual.html', '_blank')")
+    runjs("window.open('manual/index.html', '_blank')")
   })
 
 
@@ -173,7 +174,7 @@ server <- function(input, output, session) {
       unique(mr_data$species)
     ),
     reproductive_form = setNames(
-      paste0("type__", unique(mr_data$reproductive_form)),
+      paste0("reproductive_form__", unique(mr_data$reproductive_form)),
       unique(mr_data$reproductive_form)
     ),
     condition = setNames(
