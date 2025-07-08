@@ -1,0 +1,65 @@
+
+# Installation
+
+PlaViSca supports multiple operating systems, including macOS, Windows, and Linux.
+
+## Requirements
+ - R = 4.5 or later
+ - RStudio = 2025 or later
+ - git = 2.43 or later
+ - Recommended RAM: 8GB+
+
+## Clone source code from the Repository
+
+```bash
+git clone https://github.com/Sopheap15/pvsca.git
+```
+
+Struture of the project directory:
+```
+.
+├── app.R              # Main entry point, sources ui.R and server.R
+├── data/              # Directory to store input datasets
+├── functions/         # Custom functions and preprocessing scripts
+├── global.R           # Loads data and functions into the global environment
+├── pvsca.Rproj        # RStudio project file
+├── README.md          # Project overview and installation instructions
+├── manual.R           # User manual of the web application
+├── ref/               # Reference data directory
+├── renv/              # R environment directory managed by `renv`
+├── renv.lock          # Snapshot of R packages for reproducibility
+├── server.R           # Shiny server logic
+├── ui.R               # Shiny user interface definition
+└── www/               # Static assets (images, CSS, JavaScript)
+```
+After cloning the repository, open the `PlaViSca` directory or navigate to it using the terminal by running `cd PlaViSca`.
+Next, copy and paste your data files `.rds` into the data folder located inside the project directory. Make sure the data is correctly formatted and named according to the application's requirements.
+
+Once the data is in place, open the `pvsca.Rproj` file. This action will launch RStudio and automatically set the working directory to the appropriate project folder, preparing the environment for running the application.
+
+
+## Install dependencies
+PlaViSca requires several R packages to be installed. There are two options to install the required dependencies in Rstudio console:
+
+### Option A: use `renv`
+```r
+install.packages("renv")
+
+renv::restore()
+```
+
+### Option B: manual installation
+To install specific package version (which is recommended), we have to install `remote` package:
+
+```r
+install.packages("remote")
+
+remote::install_version("shiny", version = "1.10.0")
+remote::install_version("shinyjs", version = "2.1.10")
+remote::install_version("shinycssloaders", version = "1.1.0")
+remote::install_version("plotly", version = "4.10.4")
+remote::install_version("DT", version = "0.33")
+remote::install_version("RColorBrewer", version = "1.1.3")
+remote::install_version("tidyverse", version = "2.0.0")
+remote::install_version("later", version = "1.4.2")
+```

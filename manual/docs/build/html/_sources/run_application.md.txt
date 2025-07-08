@@ -1,0 +1,11 @@
+# Run Application
+![Rstudio image](imgs/Rstudio.png)
+
+## Option A: from RStudio
+- Open either `app.R` or `server.R` or `ui.R`
+- Click the **Run App** button in the top-right of the Rstudio
+
+## Option B: from the command line terminal
+```bash
+R -e "shiny::runApp('app.R', launch.browser = TRUE)"
+```
