@@ -1,0 +1,8 @@
+2025-07-01 14:28:57	2.6s	soggy_gates	ERR	a9ae0616cc85f28ac903632b8875bc7c	99486edc-55b5-4506-8723-b7d722536b7f	nextflow run main.nf
+2025-07-01 14:31:30	4h 22m 25s	nauseous_avogadro	ERR	734dd0c17093619d3daf8b64b611a9e9	e6e53061-883b-497d-a073-6e25c6cec093	nextflow run main.nf
+2025-07-02 08:42:33	7h 27m	pedantic_perlman	ERR	734dd0c17093619d3daf8b64b611a9e9	e6e53061-883b-497d-a073-6e25c6cec093	nextflow run main.nf -resume
+2025-07-03 09:52:53	-	small_brahmagupta	-	818365a6ff686c216dc44182be555779	e6e53061-883b-497d-a073-6e25c6cec093	nextflow run main.nf -resume
+2025-07-03 09:55:11	4.3s	nostalgic_brahmagupta	ERR	b069fefb8811e470dd66baa27b2c4742	e6e53061-883b-497d-a073-6e25c6cec093	nextflow run main.nf -resume
+2025-07-03 09:59:05	3.9s	gloomy_shockley	ERR	2f15c0f6ac9771a156359edd646c6027	e6e53061-883b-497d-a073-6e25c6cec093	nextflow run main.nf -resume
+2025-07-03 10:04:57	4m 27s	friendly_lovelace	OK	2f15c0f6ac9771a156359edd646c6027	e6e53061-883b-497d-a073-6e25c6cec093	nextflow run main.nf -resume
+2025-07-03 10:26:10	8h 29m 8s	marvelous_kay	OK	cbf11553492bfc1831e86b7085b7013f	4d4213e0-0995-476a-ad1d-83bd31dc4370	nextflow run main.nf

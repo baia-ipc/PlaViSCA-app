@@ -75,7 +75,7 @@ ui <- fluidPage(
       column(
         width = 6, class = "intro-left",
         p(
-          "PlaViSCA is a platform designed to support the malaria research
+        "PlaViSCA is a platform designed to support the malaria research
         community in analyzing and visualizing single-cell RNA sequencing
         (scRNA-seq) data. PlaViSca provides a user friendly interface for
         exploring metadata and gene expression across various parasite life
@@ -83,7 +83,7 @@ ui <- fluidPage(
         customizable filters and coloring. The platform also allows users to
         download data for further analysis. PlaViSCA empowers researchers to
         explore complex scRNA-seq for ", em("P. vivax"),
-          " without requiring any programming skills."
+        " without requiring any programming skills."
         ),
         div(class = "logo mosquito-bottom", img(
           src = "mosquito-bottom.png",
@@ -571,15 +571,14 @@ ui <- fluidPage(
       class = "about",
       column(
         width = 8,
-        # h2("Collaborators"),
         p("PlaViSca was developed by the Bioinformatics and Artificial Intelligence
-       Applications (BAIA) Unit at the Institut Pasteur du Cambodge (IPC),
-       in collaboration with the Malaria Unit at IPC and the Center for Tropical
-       and Emerging Global Diseases at the University of Georgia, USA."),
+        Applications (BAIA) Unit at the Institut Pasteur du Cambodge (IPC),
+        in collaboration with the Malaria Unit at IPC and the Center for Tropical
+        and Emerging Global Diseases at the University of Georgia, USA."),
         p("We are open to collaboration and welcome opportunities to integrate
-       additional relevant data into this platform. Please reach out to us
-       using following contact.")
-      ),
+        additional relevant data into this platform. Please reach out to us
+        using following contact.")
+        ),
       column(
         width = 4,
         id = "colab-particles",
@@ -588,23 +587,22 @@ ui <- fluidPage(
     ),
     fluidRow(
       class = "contact",
-      #h2("Contact detail:"),
       tags$ul(
         tags$li(
-          strong("Sopheap OENG"), " - Bioinformatic System Engineer, IPC, email: ",
+          strong("Sopheap Oeng"), " - Bioinformatic System Engineer, IPC, email: ",
           a(href = "mailto:osopheap@pasteur-kh.org", "osopheap@pasteur-kh.org")
         ),
         tags$li(
-          strong("Anthony RUBERTO"), " - Postdoctoral researcher at the Center
+          strong("Anthony Ruberto"), " - Postdoctoral researcher at the Center
           for Tropical and Emerging Global Diseases, University of Georgia, USA,
           email: ", a(href = "mailto:aruberto@uga.edu", "aruberto@uga.edu")
         ),
         tags$li(
-          strong("Jean POPOVICI"), " - Head, Malaria Research Unit, IPC, email: ",
+          strong("Jean Popovici"), " - Head, Malaria Research Unit, IPC, email: ",
           a(href = "mailto:jpopovici@pasteur-kh.org", "jpopovici@pasteur-kh.org")
         ),
-        tags$li(
-          strong("Giorgio GONNELLA"), " - Head, BAIA Unit, IPC, email: ",
+        tags$li( 
+          strong("Giorgio Gonnella"), " - Head, BAIA Unit, IPC, email: ",
           a(href = "mailto:ggonnella@pasteur-kh.org", "ggonnella@pasteur-kh.org")
         )
       ),
@@ -613,7 +611,7 @@ ui <- fluidPage(
         visit GitHub repo:", a(
           href = "https://github.com/Sopheap15/pvsca",
           HTML('https://github.com/Sopheap15/pvsca
-               <span class="point-emoji">👈 </span>'), target = "_blank"
+              <span class="point-emoji">👈 </span>'), target = "_blank"
         ), "."
       )
     ),

@@ -7,5 +7,7 @@
 /data
 /backup
 /Anthony
-PvivaxP01.gff_data.tsv
+/pre_process_data/ref
+/pre_process_data/results
+vivaxP01.gff_data.tsv
 

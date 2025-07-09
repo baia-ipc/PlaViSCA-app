@@ -16,9 +16,15 @@ rRNA <- rtracklayer::import.gff3(ref_file) %>%
 
 # Functions
 remove_rRNA <- function(seurat_obj, rRNA_ids = rRNA$ID) {
-  genes_to_keep <- !(rownames(seurat_obj) %in% rRNA_ids)
-  subset(seurat_obj, features = rownames(seurat_obj)[genes_to_keep])
+  all_genes <- rownames(seurat_obj)
+  mito_genes <- grep("^PVP01-MIT", all_genes, value = TRUE)
+  genes_to_exclude <- c(rRNA_ids, mito_genes)
+  genes_to_keep <- setdiff(all_genes, genes_to_exclude)
+  subset(seurat_obj, features = genes_to_keep)
 }
+
+
+
 
 filter_emptyDrops <- function(seurat_obj, fdr_thresh = 0.001, min_total = 40) {
   ed_out <- emptyDrops(GetAssayData(seurat_obj, layer = "counts"))
@@ -54,21 +60,30 @@ seurat_list <- lapply(seurat_list, remove_rRNA, rRNA_ids = rRNA$ID)
 # Remove emptyDrops filtered cells from all objects
 seurat_list <- lapply(seurat_list, filter_emptyDrops)
 
-# Add metada
-chesson_spz_seurat$dataset <- "Chesson_Spz"
-pvbsa_seurat$dataset <- "PvBSa"
-pvlscamisolate_seurat$dataset <- "PvLSCamIsolate"
-pvspzcamisolate_seurat$dataset <- "PvSPZCamIsolate"
+
+
+# # First make sure each object has a 'study' metadata column
+# for (name in names(seurat_list)) {
+#   seurat_list[[name]]$study <- name
+# }
+#
+# # Then merge all objects
+# combined_seurat <- merge(
+#   x = seurat_list[[1]],
+#   y = seurat_list[-1],
+#   add.cell.ids = names(seurat_list),
+#   project = "combined_study"
+# )
 
 
 
 
 
 # Normalize
-chesson_spz_seurat <- NormalizeData(chesson_spz_seurat)
-pvbsa_seurat <- NormalizeData(pvbsa_seurat)
-pvlscamisolate_seurat <- NormalizeData(pvlscamisolate_seurat)
-pvspzcamisolate_seurat <- NormalizeData(pvspzcamisolate_seurat)
+chesson_spz_seurat <- NormalizeData(seurat_list$Chesson_Spz)
+pvbsa_seurat <- NormalizeData(seurat_list$PvBSa)
+pvlscamisolate_seurat <- NormalizeData(seurat_list$PvLSCamIsolate)
+pvspzcamisolate_seurat <- NormalizeData(seurat_list$PvSPZCamIsolate)
 
 # Scale data
 chesson_spz_seurat <- ScaleData(chesson_spz_seurat, features = VariableFeatures(chesson_spz_seurat))

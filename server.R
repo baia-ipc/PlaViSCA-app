@@ -37,9 +37,9 @@ server <- function(input, output, session) {
 
 
       shinyjs::runjs("
-    $('.menu-link').removeClass('active');
-    $('#about').addClass('active');
-  ")
+      $('.menu-link').removeClass('active');
+      $('#about').addClass('active');
+      ")
     },
     ignoreInit = TRUE
   )
@@ -153,7 +153,6 @@ server <- function(input, output, session) {
         selections <- default_df_filter()
       }
 
-
       req(selections)
       list(
         data = fun_filter_df(dataset, selections),
@@ -219,7 +218,6 @@ server <- function(input, output, session) {
   })
 
 
-
   # Manipulation tabset "metadata"
   observe({
     filt_data <- filtered_data()
@@ -234,7 +232,6 @@ server <- function(input, output, session) {
       updateSelectInput(session, "sample", choices = unique(filt_data$sample))
     }
   })
-
 
   observeEvent(list(
     input$data_opt, input$ident, input$species, input$repro_form,
@@ -276,7 +273,16 @@ server <- function(input, output, session) {
             ) %>%
             rename(nCount_RNA = n_count_rna, nFeature_RNA = n_feature_rna) %>%
             arrange(desc(nCount_RNA)),
-          options = list(pageLength = 10, scrollX = TRUE),
+          extensions = "Buttons",
+          options = list(
+            pageLength = 10, scrollX = TRUE, dom = "frtipB",
+            buttons = list(
+              list(
+                extend = "csv", text = "Export .csv",
+                className = "btn btn-success"
+              )
+            )
+          ),
           selection = "single",
           filter = "top",
           rownames = FALSE
@@ -369,7 +375,6 @@ server <- function(input, output, session) {
       })
     }
   })
-
 
 
   # Manipulation tabset "Gene Exp"
