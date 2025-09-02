@@ -1,8 +1,12 @@
 # sourcer function
 source("functions/helpers.R")
 
-# load normalized data
+# load all data files with caching optimization
 norm_df <- readRDS("data/normalize_df.rds")
+
+# Load raw and scale data for comprehensive coverage
+raw_df <- readRDS("data/raw_df.rds")
+scale_df <- readRDS("data/scale_df.rds")
 
 # load publication data
 pub_data <- readr::read_csv("data/data_source.csv")
@@ -11,7 +15,7 @@ pub_data$DOI <-
 
 # define variable for selectInput in gene Exp
 group_choices <- c("parasite_stage", "host_species", "treatment", "sample_type",
-                   "life_cycle_stage", "study_label", "pub_year", "run_id")
+                  "life_cycle_stage", "study_label", "pub_year", "run_id")
 
 
 # read gff data

@@ -512,7 +512,7 @@ plot_2d <- function(df, x, y, color, legend_title, size,
       marker = list(size = size),
       text = hover_text, hoverinfo = "text",
       colors = colors,
-      width = 900, height = 600,
+      width = 1000, height = 700,
       source = "embedding",
       key = ~plotly_key
     ) %>%
@@ -520,14 +520,15 @@ plot_2d <- function(df, x, y, color, legend_title, size,
         xaxis = list(title = paste("X-", x)),
         yaxis = list(title = paste("Y-", y)),
         legend = legend_layout,
-        font = list(size = 14)
+        font = list(size = 14),
+        margin = list(l = 50, r = 50, t = 25, b = 50)
       )
   } else {
     p <- plot_ly(
       data = df, x = x, y = y,
       type = "scatter", mode = "markers",
       text = hover_text, hoverinfo = "text",
-      width = 900, height = 600,
+      width = 1000, height = 700,
       key = ~plotly_key,
       source = "embedding",
       marker = list(
@@ -541,7 +542,8 @@ plot_2d <- function(df, x, y, color, legend_title, size,
       layout(
         xaxis = list(title = paste("X-", x)),
         yaxis = list(title = paste("Y-", y)),
-        font = list(size = 14)
+        font = list(size = 14),
+        margin = list(l = 50, r = 50, t = 25, b = 50)
       )
   }
   return(p)
@@ -580,7 +582,7 @@ plot_3d <- function(df, color, legend_title, size, selected_color,
       marker = list(size = as.numeric(size) * 0.4),
       colors = colors,
       text = hover_text, hoverinfo = "text",
-      width = 900, height = 600
+      width = 1000, height = 700
     ) %>%
       layout(
         scene = list(
@@ -589,7 +591,8 @@ plot_3d <- function(df, color, legend_title, size, selected_color,
           zaxis = list(title = paste("Z-", z_col))
         ),
         legend = legend_layout,
-        font = list(size = 14)
+        font = list(size = 14),
+        margin = list(l = 50, r = 50, t = 25, b = 50)
       )
   } else {
     p <- plot_ly(
@@ -603,7 +606,7 @@ plot_3d <- function(df, color, legend_title, size, selected_color,
         colorbar = legend_layout
       ),
       text = hover_text, hoverinfo = "text",
-      width = 900, height = 600,
+      width = 1000, height = 700,
       source = "embedding",
       key = ~ df$id
     ) %>%
@@ -613,7 +616,8 @@ plot_3d <- function(df, color, legend_title, size, selected_color,
           yaxis = list(title = paste("Y-", y_col)),
           zaxis = list(title = paste("Z-", z_col))
         ),
-        font = list(size = 14)
+        font = list(size = 14),
+        margin = list(l = 50, r = 50, t = 25, b = 50)
       )
   }
   return(p)

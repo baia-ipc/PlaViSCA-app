@@ -6,10 +6,6 @@ library(RColorBrewer)
 library(tidyverse)
 library(later)
 
-# Load raw and scale data.
-raw_df <- readRDS("data/raw_df.rds")
-scale_df <- readRDS("data/scale_df.rds")
-
 server <- function(input, output, session) {
   sessionData <- new.env(parent = emptyenv())
   autoUpdatePlot <- reactiveVal(FALSE)
@@ -128,6 +124,7 @@ server <- function(input, output, session) {
     {
       dataset <- if (input$tabset == "Gene expression") {
         req(input$data_type_exp)
+        current_type <- input$data_type_exp
         switch(input$data_type_exp,
           raw = raw_df,
           normalize = norm_df,
@@ -135,6 +132,7 @@ server <- function(input, output, session) {
         )
       } else if (input$tabset == "Embeddings") {
         req(input$data_type)
+        current_type <- input$data_type
         switch(input$data_type,
           raw = raw_df,
           normalize = norm_df,
@@ -154,10 +152,23 @@ server <- function(input, output, session) {
       }
 
       req(selections)
-      list(
-        data = fun_filter_df(dataset, selections),
-        genes = genes(dataset, gff_data)
-      )
+      
+      # Show progress bar when loading data
+      withProgress(message = "", value = 0, {
+        # Convert data type to proper display name
+        display_name <- switch(current_type,
+          raw = "Raw",
+          normalize = "Normalized", 
+          scale = "Scaled",
+          current_type
+        )
+        setProgress(0.6, detail = paste("Loading", display_name, "data..."))
+        result <- list(
+          data = fun_filter_df(dataset, selections),
+          genes = genes(dataset, gff_data)
+        )
+        return(result)
+      })
     }
   )
 
@@ -718,12 +729,11 @@ server <- function(input, output, session) {
       p <- p %>%
         event_register("plotly_click") %>%
         config(displaylogo = FALSE, scrollZoom = TRUE)
+      
       embplot(TRUE)
       return(p)
     })
-  })
-
-  ## click event: after plot is ready
+  })  ## click event: after plot is ready
   click_event <- reactive({
     req(embplot())
     ed <- event_data("plotly_click", source = "embedding")
