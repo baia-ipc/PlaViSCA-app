@@ -1,141 +1,133 @@
-# This script is used to pre processing data for pvsca project
+# This script is used to clean and manipulate data for pvsca project
 
 # load library
 library(Seurat)
 library(tidyverse)
 library(janitor)
 
+setwd("/srv/baia/prj/pvsca")
 # load gff data
 gff_data <- readRDS("ref/PvivaxP01_gff_data.rds")
 
-# load parasite sex data
-type_df <- read.csv("data/pbio_3000711_s034.csv") %>%
-  clean_names() %>%
-  select(sample, type) %>%
-  mutate(sample = gsub(".*_", "", sample))
-
 # load seurat object
-so <- readRDS("data/Pv.all.12.Jan2025.rds")
+so <- readRDS("./pre_process_data/pv_all_studies.rds")
 
-# change features from - to _ to match with gff gene_id
-features <- gsub("-", "_", rownames(so[["RNA"]]@features))
-rownames(so[["RNA"]]@features) <- features
-
-# add column type as parasite sex to metadata
-col <- colnames(so)
-cell_id_af_ <- gsub(".*_", "", col)
-cell_id_af_[nchar(cell_id_af_) < 10] <- NA
-
-cell_id_bf_ <- gsub("_.*", "", col)
-cell_id_bf_[nchar(cell_id_bf_) < 10] <- NA
-
-cell_id_clean <- coalesce(cell_id_af_, cell_id_bf_)
-so@meta.data$cleaned_barcode <- cell_id_clean
-
-so@meta.data$reproductive_form <- type_df$type[match(
-  so@meta.data$cleaned_barcode,
-  type_df$sample
-)]
-so@meta.data$cleaned_barcode <- NULL
-
-saveRDS(so, "data/Pv.all.12.Jan2025.modified.rds")
-
-# subset columns from metadata
-metadata <- c(
-  "species", "day", "condition", "Stage", "Replicate", "reproductive_form",
-  "location", "Vivax_strain", "nCount_RNA", "nFeature_RNA",
-  "Sample", "seurat_clusters", grep("CCA_snn", colnames(so@meta.data),
-    ignore.case = TRUE, value = TRUE
-  )
-)
+# metadata <- c(
+#   "nFeature_RNA",
+#   "nCount_RNA",
+#   "study_label",
+#   "num_srr",
+#   "pub_year",
+#   "geographic_location",
+#   "sc_technology",
+#   "sequencer",
+#   "host_species",
+#   "host_id",
+#   "sample_type",
+#   "parasite_stage",
+#   "strain",
+#   "day_post_infection",
+#   "treatment",
+#   "biological_replicate",
+#   "life_cycle_stage",
+#   str_extract(colnames(so), "RNA_snn_res.*")
+# )
+metadata <- colnames(so@meta.data)
 
 # subset reduction columns from seurat object
-umap <- colnames(so@reductions$umap@cell.embeddings)
-umap_int <- colnames(so@reductions$umap.unintegrated@cell.embeddings)
-pca <- colnames(so@reductions$pca@cell.embeddings)[1:3]
-pca_int <- colnames(so@reductions$integrated.rpca@cell.embeddings)[1:3]
-tsne <- colnames(so@reductions$tsne@cell.embeddings)
+umap <- colnames(so@reductions$umap_unintegrated@cell.embeddings)
+umap_int <- colnames(so@reductions$umap_integrated@cell.embeddings)
+pca <- colnames(so@reductions$pca_unintegrated@cell.embeddings)[1:3]
+pca_int <- colnames(so@reductions$pca_integrated@cell.embeddings)[1:3]
+tsne <- colnames(so@reductions$tsne_integrated@cell.embeddings)
 
 # Extract metadata and reduction data
-mr_data <- FetchData(so, vars = c(
-  metadata, "ident", umap, umap_int, pca,
-  pca_int, tsne
-)) %>%
+mr_data <- FetchData(
+  so,
+  vars = c(
+    metadata,
+    umap,
+    umap_int,
+    pca,
+    pca_int,
+    tsne
+  )
+) %>%
   clean_names()
 
 # clean mr_data
 mr_data <- mr_data %>%
-  rownames_to_column("id") %>%
-  mutate(
-    species = case_when(
-      species == "vivax" ~ "Vivax",
-      TRUE ~ species
-    ),
-    stage = case_when(
-      stage == "BloodStage" ~ "blood",
-      stage == "Liver Stage" ~ "liver",
-      stage == "Sporozoite" ~ "sporozoite",
-      TRUE ~ stage
-    )
-  ) %>%
   dplyr::rename(
-    umap_i_1 = umap_1,
-    umap_i_2 = umap_2,
-    umap_i_3 = umap_3,
-    umap_u_1 = umapunintegrated_1,
-    umap_u_2 = umapunintegrated_2,
-    umap_u_3 = umapunintegrated_3,
-    pca_i_1 = integratedrpca_1,
-    pca_i_2 = integratedrpca_2,
-    pca_i_3 = integratedrpca_3,
+    umap_i_1 = ytdeh_1,
+    umap_i_2 = ytdeh_2,
+    umap_i_3 = ytdeh_3,
+    umap_u_1 = umap_1,
+    umap_u_2 = umap_2,
+    umap_u_3 = umap_3,
+    pca_i_1 = harmony_1,
+    pca_i_2 = harmony_2,
+    pca_i_3 = harmony_3,
     pca_u_1 = pc_1,
     pca_u_2 = pc_2,
     pca_u_3 = pc_3
   )
 
 
-# Extract reduction data from mr_data
+# reduction and metadata
 red_df <- mr_data %>%
   select(
-    id, stage, species, condition, sample, reproductive_form, ident, n_feature_rna,
+    any_of(metadata),
     any_of(contains("umap")),
     any_of(contains("pca")),
     any_of(contains("tsne"))
   )
+# sort by row names
+red_df <- red_df[order(rownames(red_df)), ]
 
-# Extract genes for normalize data in average of expression
-norm_exp <- GetAssayData(so, layer = "data")
-norm_exp <- as.data.frame(t(as.matrix(norm_exp))) %>%
-  tibble::rownames_to_column("id")
-normalize_df <- left_join(red_df, norm_exp, by = "id")
+# normalized data
+norm_exp <- GetAssayData(so, slot = "data")
+norm_exp <- Matrix::t(norm_exp)
+norm_exp <- norm_exp[order(rownames(norm_exp)), ]
 
-# Extract genes for raw count data
+# combined normalized data
+normalize_df <- cbind(red_df, as.matrix(norm_exp))
+
+
+# raw data
 raw_exp <- GetAssayData(so, layer = "counts")
-raw_exp <- as.data.frame(t(as.matrix(raw_exp))) %>%
-  tibble::rownames_to_column("id")
-raw_df <- left_join(red_df, raw_exp, by = "id")
+raw_exp <- Matrix::t(raw_exp)
+raw_exp <- raw_exp[order(rownames(raw_exp)), ]
 
-# Extract genes for scale data
+# combined raw data
+raw_df <- cbind(red_df, as.matrix(raw_exp))
+
+# scale data
 scale_exp <- GetAssayData(so, layer = "scale")
-scale_exp <- as.data.frame(t(as.matrix(scale_exp))) %>%
-  tibble::rownames_to_column("id")
-scale_df <- left_join(red_df, scale_exp, by = "id")
+scale_exp <- Matrix::t(scale_exp)
+scale_exp <- scale_exp[order(rownames(scale_exp)), ]
+
+# combined raw data
+scale_df <- cbind(red_df, as.matrix(scale_exp))
 
 # save normalized, raw and scaled data
 saveRDS(normalize_df, "data/normalize_df.rds")
 saveRDS(raw_df, "data/raw_df.rds")
 saveRDS(scale_df, "data/scale_df.rds")
 
+
 # Extract PCA standard deviation
-pca_std_df <- so@reductions$pca@stdev
+pca_std_df <- so@reductions$pca_unintegrated@stdev
+
 pca_std_df <- data.frame(
   pc = 1:length(pca_std_df),
   std = pca_std_df
 )
 
 # variable genes expression
-so <- FindVariableFeatures(so,
-  assay = "RNA", selection.method = "vst",
+so <- FindVariableFeatures(
+  so,
+  assay = "RNA",
+  selection.method = "vst",
   nfeatures = 2000
 )
 vf_data <- HVFInfo(object = so, assay = "RNA", method = "vst", status = TRUE)
@@ -153,7 +145,8 @@ top_genes <- names(sort(top_genes, decreasing = TRUE)[1:10])
 # top expression genes with cluster information
 top_genes_exp <- FetchData(so, vars = c(top_genes, "ident")) %>%
   rownames_to_column("id") %>%
-  pivot_longer(any_of(top_genes),
+  pivot_longer(
+    any_of(top_genes),
     names_to = "gene",
     values_to = "expression"
   ) %>%

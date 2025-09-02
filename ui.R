@@ -173,40 +173,26 @@ ui <- fluidPage(
             )
           )
         ),
-        # column(
-        #   width = 12, class = "col-12",
-        #   checkboxGroupInput(
-        #     "stagelr", "Parasite stage",
-        #     choices = list(
-        #       "Trophozoite" = "trophozoite",
-        #       "Ring" = "ring",
-        #       "Schizont" = "schizont",
-        #       "Gametocyte" = "gametocyte",
-        #       "Hypnozoite" = "hypnozoite",
-        #       "Hepatic schizont" = "hepatic_schizont",
-        #       "Zygot" = "zygot",
-        #       "Ookinete" = "ookinete",
-        #       "Oocyst" = "oocyst",
-        #       "Sporozoite" = "sporozoite"
-        #     ),
-        #     selected = list()
-        #   )
-        # ),
         column(
           width = 12, class = "col-12",
           radioButtons("color", "Color",
             choices = list(
-              "Identity" = "ident",
-              "Stage" = "stage",
-              "Strain" = "vivax_strain",
-              "Day" = "day",
-              "Condition" = "condition",
-              "Replicate" = "replicate",
-              "Species" = "species",
-              "CCA_snn" = "cca_snn",
+              "Study" = "study_label",
+              "Life cycle" = "life_cycle_stage",
+              "Stage" = "parasite_stage",
+              "Strain" = "strain",
+              "Bio.replicate" = "biological_replicate",
+              "Treatment" = "treatment",
+              "Sample" = "sample_type",
+              "Host Species" = "host_species",
+              "Sequencer" = "sequencer",
+              "SC Technology" = "sc_technology",
+              "Geo location" = "geographic_location",
+              "DPI" = "day_post_infection",
+              "RNA_snn" = "RNA_snn",
               "Genes" = "genes"
             ),
-            selected = "ident"
+            selected = "study_label"
           )
         ),
         column(
@@ -312,7 +298,7 @@ ui <- fluidPage(
                 class = "meta-filter",
                 column(
                   width = 2,
-                  selectizeInput("ident", "Ident:",
+                  selectizeInput("study_label", "Study label:",
                     choices = c(""),
                     multiple = TRUE,
                     options = list(
@@ -323,7 +309,18 @@ ui <- fluidPage(
                 ),
                 column(
                   width = 2,
-                  selectizeInput("species", "Species:",
+                  selectizeInput("sample_type", "Sample type:",
+                                 choices = c(""),
+                                 multiple = TRUE,
+                                 options = list(
+                                   placeholder = "Select options...",
+                                   onInitialize = I('function() { this.setValue(""); }')
+                                 )
+                  )
+                ),
+                column(
+                  width = 2,
+                  selectizeInput("host_species", "Host species:",
                     choices = c(""),
                     multiple = TRUE,
                     options = list(
@@ -334,7 +331,7 @@ ui <- fluidPage(
                 ),
                 column(
                   width = 2,
-                  selectizeInput("repro_form", "Reproductive Form:",
+                  selectizeInput("life_cycle_stage", "Life cycle stage:",
                     choices = c(""),
                     multiple = TRUE,
                     options = list(
@@ -345,7 +342,7 @@ ui <- fluidPage(
                 ),
                 column(
                   width = 2,
-                  selectizeInput("condition", "Condition:",
+                  selectizeInput("treatment", "Treatment:",
                     choices = c(""),
                     multiple = TRUE,
                     options = list(
@@ -356,18 +353,7 @@ ui <- fluidPage(
                 ),
                 column(
                   width = 2,
-                  selectizeInput("stage", "Stage:",
-                    choices = c(""),
-                    multiple = TRUE,
-                    options = list(
-                      placeholder = "Select options...",
-                      onInitialize = I('function() { this.setValue(""); }')
-                    )
-                  )
-                ),
-                column(
-                  width = 2,
-                  selectizeInput("sample", "Sample:",
+                  selectizeInput("parasite_stage", "Parasite stage:",
                     choices = c(""),
                     multiple = TRUE,
                     options = list(

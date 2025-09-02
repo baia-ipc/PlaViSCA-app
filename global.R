@@ -10,7 +10,8 @@ pub_data$DOI <-
   paste0("<a href='", pub_data$DOI, "' target='_blank'>", pub_data$DOI, "</a>")
 
 # define variable for selectInput in gene Exp
-group_choices <- c("Stage", "Species", "Condition", "Sample", "Reproductive_form", "Ident")
+group_choices <- c("parasite_stage", "host_species", "treatment", "sample_type",
+                   "life_cycle_stage", "study_label", "pub_year", "run_id")
 
 
 # read gff data
@@ -40,6 +41,6 @@ umap_u <- grep("^umap_u_\\d+", colnames(mr_data),
 tsne <- grep("t_sne", colnames(mr_data),
   ignore.case = TRUE, value = TRUE
 )
-cca_snn <- grep("CCA_snn", colnames(mr_data),
+RNA_snn <- grep("RNA_snn", colnames(mr_data),
   ignore.case = TRUE, value = TRUE
 )

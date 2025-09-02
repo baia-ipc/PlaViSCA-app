@@ -26,6 +26,7 @@ fun_filter_df <- function(data, selections) {
     sapply(lst, `[[`, 2)
   })
 
+  
   keep_rows <- rep(TRUE, nrow(data))
   for (colname in names(filter_list)) {
     keep_rows <- keep_rows & data[[colname]] %in% filter_list[[colname]]
@@ -175,12 +176,14 @@ newBlock <- function(new_count, counter, choice_exp, dynamicBlock, session) {
 df_exp0 <- function(gene_data, gene_input, group_input, check_exp) {
   df <- gene_data$data
   genes <- gene_data$genes
+  
+  # Determine the gene column to use
   gene_exp <- if (!check_exp) {
     get_gene_id(gene_input, genes)
   } else {
     gene_input
   }
-
+  
   if (!(gene_exp %in% colnames(df))) {
     df$gene_expr <- NA
   } else {
@@ -423,17 +426,18 @@ get_color_column <- function(color_type, gene_input, gene_data_obj) {
 
 # Assign colors based on the number of categories
 assign_colors <- function(num_categories) {
-  if (num_categories <= 12) {
+  if (num_categories <= 8) {
     return(RColorBrewer::brewer.pal(
       n = max(num_categories, 3),
-      name = "Set3"
+      name = "Set2"
     )[1:num_categories])
   } else {
-    return(rep(RColorBrewer::brewer.pal(12, "Set3"),
-      length.out = num_categories
+    return(rep(RColorBrewer::brewer.pal(8, "Set2"),
+               length.out = num_categories
     ))
   }
 }
+
 
 # Check if the data is categorical
 is_categorical_data <- function(x) {
@@ -498,7 +502,8 @@ plot_2d <- function(df, x, y, color, legend_title, size,
   )
 
   legend_layout <- get_legend_layout(legend_title)
-
+  df$plotly_key <- seq_len(nrow(df)) 
+  
   if (is_categorical) {
     p <- plot_ly(
       data = df, x = x, y = y,
@@ -509,12 +514,13 @@ plot_2d <- function(df, x, y, color, legend_title, size,
       colors = colors,
       width = 900, height = 600,
       source = "embedding",
-      key = ~id
+      key = ~plotly_key
     ) %>%
       layout(
         xaxis = list(title = paste("X-", x)),
         yaxis = list(title = paste("Y-", y)),
-        legend = legend_layout
+        legend = legend_layout,
+        font = list(size = 14)
       )
   } else {
     p <- plot_ly(
@@ -522,7 +528,7 @@ plot_2d <- function(df, x, y, color, legend_title, size,
       type = "scatter", mode = "markers",
       text = hover_text, hoverinfo = "text",
       width = 900, height = 600,
-      key = ~id,
+      key = ~plotly_key,
       source = "embedding",
       marker = list(
         size = size,
@@ -534,7 +540,8 @@ plot_2d <- function(df, x, y, color, legend_title, size,
     ) %>%
       layout(
         xaxis = list(title = paste("X-", x)),
-        yaxis = list(title = paste("Y-", y))
+        yaxis = list(title = paste("Y-", y)),
+        font = list(size = 14)
       )
   }
   return(p)
@@ -581,7 +588,8 @@ plot_3d <- function(df, color, legend_title, size, selected_color,
           yaxis = list(title = paste("Y-", y_col)),
           zaxis = list(title = paste("Z-", z_col))
         ),
-        legend = legend_layout
+        legend = legend_layout,
+        font = list(size = 14)
       )
   } else {
     p <- plot_ly(
@@ -604,7 +612,8 @@ plot_3d <- function(df, color, legend_title, size, selected_color,
           xaxis = list(title = paste("X-", x_col)),
           yaxis = list(title = paste("Y-", y_col)),
           zaxis = list(title = paste("Z-", z_col))
-        )
+        ),
+        font = list(size = 14)
       )
   }
   return(p)

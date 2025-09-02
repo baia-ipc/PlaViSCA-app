@@ -164,24 +164,52 @@ server <- function(input, output, session) {
   # Metadata filter
   # choose columns for filter data
   grouped_choices <- list(
-    stage = setNames(
-      paste0("stage__", unique(mr_data$stage)),
-      unique(mr_data$stage)
+    
+    parasite_stage = setNames(
+      paste0("parasite_stage__", unique(mr_data$parasite_stage)),
+      unique(mr_data$parasite_stage)
     ),
-    species = setNames(
-      paste0("species__", unique(mr_data$species)),
-      unique(mr_data$species)
+    
+    study_label = setNames(
+      paste0("study_label__", unique(mr_data$study_label)),
+      unique(mr_data$study_label)
     ),
-    reproductive_form = setNames(
-      paste0("reproductive_form__", unique(mr_data$reproductive_form)),
-      unique(mr_data$reproductive_form)
+    geographic_location = setNames(
+      paste0("geolocation__", unique(mr_data$geographic_location)),
+      unique(mr_data$geographic_location)
     ),
-    condition = setNames(
-      paste0("condition__", unique(mr_data$condition)),
-      unique(mr_data$condition)
+    
+    sample_type = setNames(
+      paste0("sample_type__", unique(mr_data$sample_type)),
+      unique(mr_data$sample_type)
+    ),
+    
+    sc_technology = setNames(
+      paste0("sc_technology__", unique(mr_data$sc_technology)),
+      unique(mr_data$sc_technology)
+    ),  
+    
+    sequncer = setNames(
+      paste0("sequencer__", unique(mr_data$sequencer)),
+      unique(mr_data$sequencer)
+    ),
+      
+    host_species = setNames(
+      paste0("host_species__", unique(mr_data$host_species)),
+      unique(mr_data$host_species)
+    ),
+    
+    life_cycle_stage = setNames(
+      paste0("life_cycle_stage__", unique(mr_data$life_cycle_stage)),
+      unique(mr_data$life_cycle_stage)
+    ),
+    
+    treatment = setNames(
+      paste0("treatment__", unique(mr_data$treatment)),
+      unique(mr_data$treatment)
     )
   )
-
+  
   observe({
     first_group <- names(grouped_choices)[1]
     default_values <- grouped_choices[[first_group]]
@@ -224,37 +252,40 @@ server <- function(input, output, session) {
     req(nrow(filt_data) > 0)
 
     if (input$tabset == "Metadata") {
-      updateSelectInput(session, "ident", choices = unique(filt_data$ident))
-      updateSelectInput(session, "species", choices = unique(filt_data$species))
-      updateSelectInput(session, "repro_form", choices = unique(filt_data$reproductive_form))
-      updateSelectInput(session, "condition", choices = unique(filt_data$condition))
-      updateSelectInput(session, "stage", choices = unique(filt_data$stage))
-      updateSelectInput(session, "sample", choices = unique(filt_data$sample))
+      updateSelectInput(session, "study_label", choices = unique(filt_data$study_label))
+      updateSelectInput(session, "host_species", choices = unique(filt_data$host_species))
+      updateSelectInput(session, "life_cycle_stage", choices = unique(filt_data$life_cycle_stage))
+      updateSelectInput(session, "treatment", choices = unique(filt_data$treatment))
+      updateSelectInput(session, "parasite_stage", choices = unique(filt_data$parasite_stage))
+      updateSelectInput(session, "sample_type", choices = unique(filt_data$sample_type))
     }
   })
-
+  
+  
   observeEvent(list(
-    input$data_opt, input$ident, input$species, input$repro_form,
-    input$condition, input$stage, input$sample
+    input$data_opt, input$study_label, input$host_species, input$life_cycle_stage,
+    input$treatment, input$parasite_stage, input$sample_type
   ), {
     filt_data <- filtered_data() %>%
       select(any_of(c(
-        "id", "ident", "seurat_clusters", "species", "reproductive_form",
-        "condition", "stage", "sample", "day", "replicate",
-        "location", "vivax_strain", "n_count_rna", "n_feature_rna"
+        "study_label", "host_species", "life_cycle_stage", "treatment",
+        "parasite_stage", "sample_type", "geographic_location", "sc_technology",
+        "sequencer", "strain", "day_post_infection", "biological_replicate", 
+        "n_count_rna", "n_feature_rna"
       )))
+  
 
-    if (!is.null(input$ident) || !is.null(input$species) ||
-      !is.null(input$repro_form) || !is.null(input$condition) ||
-      !is.null(input$stage) || !is.null(input$sample)) {
+    if (!is.null(input$study_label) || !is.null(input$host_species) ||
+      !is.null(input$life_cycle_stage) || !is.null(input$treatment) ||
+      !is.null(input$parasite_stage) || !is.null(input$sample_type)) {
       filt_data <- filt_data %>%
         filter(
-          if (!is.null(input$ident)) ident %in% input$ident else TRUE,
-          if (!is.null(input$species)) species %in% input$species else TRUE,
-          if (!is.null(input$repro_form)) reproductive_form %in% input$repro_form else TRUE,
-          if (!is.null(input$condition)) condition %in% input$condition else TRUE,
-          if (!is.null(input$stage)) stage %in% input$stage else TRUE,
-          if (!is.null(input$sample)) sample %in% input$sample else TRUE
+          if (!is.null(input$study_label)) study_label %in% input$study_label else TRUE,
+          if (!is.null(input$host_species)) host_species %in% input$host_species else TRUE,
+          if (!is.null(input$life_cycle_stage)) life_cycle_stage %in% input$life_cycle_stage else TRUE,
+          if (!is.null(input$treatment)) treatment %in% input$treatment else TRUE,
+          if (!is.null(input$parasite_stage)) parasite_stage %in% input$parasite_stage else TRUE,
+          if (!is.null(input$sample_type)) sample_type %in% input$sample_type else TRUE
         )
     }
 
@@ -265,10 +296,9 @@ server <- function(input, output, session) {
           filt_data %>%
             rename_with(~ str_to_title(.),
               .cols = any_of(c(
-                "id", "ident", "seurat_clusters",
-                "species", "reproductive_form", "condition", "stage",
-                "sample", "day", "replicate", "location",
-                "vivax_strain"
+                "study_label", "host_species", "life_cycle_stage", "treatment",
+                "parasite_stage", "sample_type", "geographic_location", "sc_technology",
+                "sequencer", "strain", "day_post_infection", "biological_replicate"
               ))
             ) %>%
             rename(nCount_RNA = n_count_rna, nFeature_RNA = n_feature_rna) %>%
@@ -293,32 +323,32 @@ server <- function(input, output, session) {
 
     ## plot stage vs count
     output$stage_plotly <- renderPlotly({
-      meta_plotly(filt_data, "stage", "Count", "Stage", "bar")
+      meta_plotly(filt_data, "parasite_stage", "Count", "Parasite stage", "bar")
     })
 
     ## plot sample vs count
     output$sample_plotly <- renderPlotly({
-      meta_plotly(filt_data, "sample", "Count", "Sample", "bar")
+      meta_plotly(filt_data, "sample_type", "Count", "Sample type", "bar")
     })
 
     ## plot strain vs count
     output$strain_plotly <- renderPlotly({
-      meta_plotly(filt_data, "vivax_strain", "Count", "Strain", "bar")
+      meta_plotly(filt_data, "strain", "Count", "Strain", "bar")
     })
 
     ## plot species vs count
     output$species_plotly <- renderPlotly({
-      meta_plotly(filt_data, "species", "Count", "Species", "bar")
+      meta_plotly(filt_data, "host_species", "Count", "Host species", "bar")
     })
 
     ## plot reproductive_form vs count
     output$type_plotly <- renderPlotly({
-      meta_plotly(filt_data, "reproductive_form", "Count", "Reproductive Form", "bar")
+      meta_plotly(filt_data, "life_cycle_stage", "Count", "Life cycle stage", "bar")
     })
 
     ## plot location vs count
     output$location_plotly <- renderPlotly({
-      meta_plotly(filt_data, "location", "Count", "Location", "bar")
+      meta_plotly(filt_data, "geographic_location", "Count", "Geographic location", "bar")
     })
   })
 
@@ -328,16 +358,16 @@ server <- function(input, output, session) {
       ## plot nCount in qual tabset
       output$data_count_plotly <- renderPlotly({
         feature_plot(filtered_data(),
-          x = "sample", y = "n_count_rna",
-          color = "ident", y_title = "RNA count", title = "RNA Count"
+          x = "sample_type", y = "n_count_rna",
+          color = "study_label", y_title = "RNA count", title = "RNA Count"
         )
       })
 
       ## plot nFeature in qual tabset
       output$data_feature_plotly <- renderPlotly({
         feature_plot(filtered_data(),
-          x = "sample", y = "n_feature_rna",
-          color = "ident", y_title = "nFeature count",
+          x = "sample_type", y = "n_feature_rna",
+          color = "study_label", y_title = "nFeature count",
           title = "Feature Count"
         )
       })
@@ -392,7 +422,7 @@ server <- function(input, output, session) {
     )
   })
 
-  ## df_exp data for genes_exp_0
+  # df_exp data for genes_exp_0
   df_exp_0 <- reactive({
     req(gene_data(), input$genes_exp_0, input$group_exp)
     df_exp0(
@@ -404,13 +434,13 @@ server <- function(input, output, session) {
   })
 
 
-  ## plot for genes_exp_0
+  # plot for genes_exp_0
   output$gene_exp_plotly <- renderPlotly({
     req(df_exp_0())
+
     group <- isolate(tolower(input$group_exp))
     gene_exp_plot(df_exp_0(), group)
   })
-
 
   ## gene expression link
   observeEvent(input$genes_exp_0, {
@@ -556,7 +586,7 @@ server <- function(input, output, session) {
     get_gene_choices(gene_data()$genes, input$check)
   })
 
-  ## dynamic UI for gene and cca_snn selection
+  ## dynamic UI for gene and RNA_snn selection
   shinyjs::hide("gene_snn_ui")
   shinyjs::hide("data_type")
   observe({
@@ -570,14 +600,14 @@ server <- function(input, output, session) {
         choices = choice(),
         server = TRUE
       )
-    } else if (input$color == "cca_snn") {
+    } else if (input$color == "RNA_snn") {
       shinyjs::show("gene_snn_ui")
       shinyjs::hide("gene_link_ui")
       shinyjs::hide("data_type")
       shinyjs::hide("switch_id")
       updateSelectizeInput(session, "genes_n",
         label = "Select Resolution",
-        choices = cca_snn,
+        choices = RNA_snn,
         server = TRUE
       )
     } else {
@@ -668,23 +698,23 @@ server <- function(input, output, session) {
   output$all_plotly <- renderPlotly({
     req(data(), input$xaxis, input$yaxis, autoUpdatePlot())
 
-
     if (is.null(data()) || nrow(data()) == 0) {
       return(NULL)
     }
 
-
     isolate({
       color_column <- switch(input$color,
         "genes" = get_gene_id(input$genes_n, gene_data()$genes),
-        "cca_snn" = input$genes_n,
+        "RNA_snn" = input$genes_n,
         input$color
       )
+      
       p <- embedding_plot(
         data(), input$xaxis, input$yaxis,
         color_column, input$genes_n, input$size,
         plot_type = get_plot_type(), plot_dim = input$plot
       )
+      
       p <- p %>%
         event_register("plotly_click") %>%
         config(displaylogo = FALSE, scrollZoom = TRUE)
@@ -709,7 +739,10 @@ server <- function(input, output, session) {
     event <- click_event()
     req(event)
     data <- gene_data()$data
+    
     cell_id <- event$key
+    
+    data$id <- seq_len(nrow(data))
     cols <- c("id", colnames(data)[str_detect(colnames(data), "^PVP01")])
     selected_df <- data[data$id == cell_id, cols, drop = FALSE]
 
