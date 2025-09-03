@@ -294,75 +294,7 @@ ui <- fluidPage(
             "Metadata",
             div(
               id = "meta_section",
-              fluidRow(
-                class = "meta-filter",
-                column(
-                  width = 2,
-                  selectizeInput("study_label", "Study label:",
-                    choices = c(""),
-                    multiple = TRUE,
-                    options = list(
-                      placeholder = "Select options...",
-                      onInitialize = I('function() { this.setValue(""); }')
-                    )
-                  )
-                ),
-                column(
-                  width = 2,
-                  selectizeInput("sample_type", "Sample type:",
-                                 choices = c(""),
-                                 multiple = TRUE,
-                                 options = list(
-                                   placeholder = "Select options...",
-                                   onInitialize = I('function() { this.setValue(""); }')
-                                 )
-                  )
-                ),
-                column(
-                  width = 2,
-                  selectizeInput("host_species", "Host species:",
-                    choices = c(""),
-                    multiple = TRUE,
-                    options = list(
-                      placeholder = "Select options...",
-                      onInitialize = I('function() { this.setValue(""); }')
-                    )
-                  )
-                ),
-                column(
-                  width = 2,
-                  selectizeInput("life_cycle_stage", "Life cycle stage:",
-                    choices = c(""),
-                    multiple = TRUE,
-                    options = list(
-                      placeholder = "Select options...",
-                      onInitialize = I('function() { this.setValue(""); }')
-                    )
-                  )
-                ),
-                column(
-                  width = 2,
-                  selectizeInput("treatment", "Treatment:",
-                    choices = c(""),
-                    multiple = TRUE,
-                    options = list(
-                      placeholder = "Select options...",
-                      onInitialize = I('function() { this.setValue(""); }')
-                    )
-                  )
-                ),
-                column(
-                  width = 2,
-                  selectizeInput("parasite_stage", "Parasite stage:",
-                    choices = c(""),
-                    multiple = TRUE,
-                    options = list(
-                      placeholder = "Select options...",
-                      onInitialize = I('function() { this.setValue(""); }')
-                    )
-                  )
-                )
-              ),
+              create_meta_filter_row(),
               fluidRow(
                 column(width = 4, plotlyOutput("stage_plotly")),
                 column(width = 4, plotlyOutput("sample_plotly")),
@@ -386,6 +318,7 @@ ui <- fluidPage(
             "Quality control",
             div(
               id = "qual_section",
+              create_meta_filter_row("_qc"),
               fluidRow(
                 column(
                   width = 6,

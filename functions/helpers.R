@@ -1,3 +1,90 @@
+# Function that builds the full Metadata tab
+create_meta_filter_row <- function(suffix = "") {
+  fluidRow(
+    class = "meta-filter",
+    column(
+      width = 2,
+      selectizeInput(
+        inputId = paste0("study_label", suffix),
+        "Study label:",
+        choices = c(""),
+        multiple = TRUE,
+        options = list(
+          placeholder = "Select options...",
+          onInitialize = I('function() { this.setValue(""); }')
+        )
+      )
+    ),
+    column(
+      width = 2,
+      selectizeInput(
+        inputId = paste0("sample_type", suffix),
+        "Sample type:",
+        choices = c(""),
+        multiple = TRUE,
+        options = list(
+          placeholder = "Select options...",
+          onInitialize = I('function() { this.setValue(""); }')
+        )
+      )
+    ),
+    column(
+      width = 2,
+      selectizeInput(
+        inputId = paste0("host_species", suffix),
+        "Host species:",
+        choices = c(""),
+        multiple = TRUE,
+        options = list(
+          placeholder = "Select options...",
+          onInitialize = I('function() { this.setValue(""); }')
+        )
+      )
+    ),
+    column(
+      width = 2,
+      selectizeInput(
+        inputId = paste0("life_cycle_stage", suffix),
+        "Life cycle stage:",
+        choices = c(""),
+        multiple = TRUE,
+        options = list(
+          placeholder = "Select options...",
+          onInitialize = I('function() { this.setValue(""); }')
+        )
+      )
+    ),
+    column(
+      width = 2,
+      selectizeInput(
+        inputId = paste0("treatment", suffix),
+        "Treatment:",
+        choices = c(""),
+        multiple = TRUE,
+        options = list(
+          placeholder = "Select options...",
+          onInitialize = I('function() { this.setValue(""); }')
+        )
+      )
+    ),
+    column(
+      width = 2,
+      selectizeInput(
+        inputId = paste0("parasite_stage", suffix),
+        "Parasite stage:",
+        choices = c(""),
+        multiple = TRUE,
+        options = list(
+          placeholder = "Select options...",
+          onInitialize = I('function() { this.setValue(""); }')
+        )
+      )
+    )
+  )
+}
+
+
+
 # Navigate tabsetpanel
 navigate_tabset <- function(session, menu_id, tab_name = NULL) {
   shinyjs::hide("home_section")
@@ -34,6 +121,31 @@ fun_filter_df <- function(data, selections) {
 
   data[keep_rows, , drop = FALSE]
 }
+
+
+# Helper function to apply secondary filters
+apply_secondary_filters <- function(data, inputs) {
+  
+  # Select relevant columns
+  filtered <- data %>%
+    select(any_of(c(
+      "study_label", "host_species", "life_cycle_stage", "treatment",
+      "parasite_stage", "sample_type", "geographic_location", "sc_technology",
+      "sequencer", "strain", "day_post_infection", "biological_replicate", 
+      "n_count_rna", "n_feature_rna"
+    )))
+  
+  # Dynamically apply filters for each non-empty input
+  for (col in names(inputs)) {
+    values <- inputs[[col]]
+    if (!is.null(values) && length(values) > 0) {
+      filtered <- filtered %>% filter(.data[[col]] %in% values)
+    }
+  }
+  
+  return(filtered)
+}
+
 
 
 # Get genes annotation
@@ -261,7 +373,7 @@ meta_plotly <- function(data, x_var, x_label, y_label, plt_type = "bar") {
 
 # Generate plot for RNA and feature count
 feature_plot <- function(df, x, y, color, y_title, title) {
-  req(df)
+  req(df)  
   plot_ly(
     data = df,
     x = ~ get(x),

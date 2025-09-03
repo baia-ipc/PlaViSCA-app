@@ -6,6 +6,7 @@ library(RColorBrewer)
 library(tidyverse)
 library(later)
 
+
 server <- function(input, output, session) {
   sessionData <- new.env(parent = emptyenv())
   autoUpdatePlot <- reactiveVal(FALSE)
@@ -155,7 +156,6 @@ server <- function(input, output, session) {
       
       # Show progress bar when loading data
       withProgress(message = "", value = 0, {
-        # Convert data type to proper display name
         display_name <- switch(current_type,
           raw = "Raw",
           normalize = "Normalized", 
@@ -200,7 +200,7 @@ server <- function(input, output, session) {
       unique(mr_data$sc_technology)
     ),  
     
-    sequncer = setNames(
+    sequencer = setNames(
       paste0("sequencer__", unique(mr_data$sequencer)),
       unique(mr_data$sequencer)
     ),
@@ -257,7 +257,7 @@ server <- function(input, output, session) {
   })
 
 
-  # Manipulation tabset "metadata"
+  # Manipulation tabset
   observe({
     filt_data <- filtered_data()
     req(nrow(filt_data) > 0)
@@ -269,6 +269,14 @@ server <- function(input, output, session) {
       updateSelectInput(session, "treatment", choices = unique(filt_data$treatment))
       updateSelectInput(session, "parasite_stage", choices = unique(filt_data$parasite_stage))
       updateSelectInput(session, "sample_type", choices = unique(filt_data$sample_type))
+    } else if (input$tabset == "Quality control") {
+      # Use the suffixed IDs for the QC tab
+      updateSelectInput(session, "study_label_qc", choices = unique(filt_data$study_label))
+      updateSelectInput(session, "host_species_qc", choices = unique(filt_data$host_species))
+      updateSelectInput(session, "life_cycle_stage_qc", choices = unique(filt_data$life_cycle_stage))
+      updateSelectInput(session, "treatment_qc", choices = unique(filt_data$treatment))
+      updateSelectInput(session, "parasite_stage_qc", choices = unique(filt_data$parasite_stage))
+      updateSelectInput(session, "sample_type_qc", choices = unique(filt_data$sample_type))
     }
   })
   
@@ -277,28 +285,18 @@ server <- function(input, output, session) {
     input$data_opt, input$study_label, input$host_species, input$life_cycle_stage,
     input$treatment, input$parasite_stage, input$sample_type
   ), {
-    filt_data <- filtered_data() %>%
-      select(any_of(c(
-        "study_label", "host_species", "life_cycle_stage", "treatment",
-        "parasite_stage", "sample_type", "geographic_location", "sc_technology",
-        "sequencer", "strain", "day_post_infection", "biological_replicate", 
-        "n_count_rna", "n_feature_rna"
-      )))
-  
+    
+  current_inputs <- list(
+    study_label = input$study_label,
+    host_species = input$host_species,
+    life_cycle_stage = input$life_cycle_stage,
+    treatment = input$treatment,
+    parasite_stage = input$parasite_stage,
+    sample_type = input$sample_type
+  )
 
-    if (!is.null(input$study_label) || !is.null(input$host_species) ||
-      !is.null(input$life_cycle_stage) || !is.null(input$treatment) ||
-      !is.null(input$parasite_stage) || !is.null(input$sample_type)) {
-      filt_data <- filt_data %>%
-        filter(
-          if (!is.null(input$study_label)) study_label %in% input$study_label else TRUE,
-          if (!is.null(input$host_species)) host_species %in% input$host_species else TRUE,
-          if (!is.null(input$life_cycle_stage)) life_cycle_stage %in% input$life_cycle_stage else TRUE,
-          if (!is.null(input$treatment)) treatment %in% input$treatment else TRUE,
-          if (!is.null(input$parasite_stage)) parasite_stage %in% input$parasite_stage else TRUE,
-          if (!is.null(input$sample_type)) sample_type %in% input$sample_type else TRUE
-        )
-    }
+filt_data <- apply_secondary_filters(filtered_data(), current_inputs)
+ 
 
     output$data_table <- renderDT(
       {
@@ -364,36 +362,56 @@ server <- function(input, output, session) {
   })
 
   # Quality control tabset
-  observeEvent(input$tabset, {
-    if (input$tabset == "Quality control") {
-      ## plot nCount in qual tabset
+observeEvent(
+  list(
+    input$data_opt, input$study_label_qc, input$host_species_qc,
+    input$life_cycle_stage_qc, input$treatment_qc,
+    input$parasite_stage_qc, input$sample_type_qc
+  ),{
+  
+    current_inputs <- list(
+    study_label = input$study_label_qc,
+    host_species = input$host_species_qc,
+    life_cycle_stage = input$life_cycle_stage_qc,
+    treatment = input$treatment_qc,
+    parasite_stage = input$parasite_stage_qc,
+    sample_type = input$sample_type_qc
+  )
+
+  filt_data <- apply_secondary_filters(filtered_data(), current_inputs)
+      
+      ## plot nCount in QC tab
       output$data_count_plotly <- renderPlotly({
-        feature_plot(filtered_data(),
-          x = "sample_type", y = "n_count_rna",
-          color = "study_label", y_title = "RNA count", title = "RNA Count"
+        feature_plot(
+          filt_data,
+          x = "study_label", y = "n_count_rna",
+          color = "sample_type", y_title = "RNA count",
+          title = "RNA Count"
         )
       })
-
-      ## plot nFeature in qual tabset
+      
+      ## plot nFeature in QC tab
       output$data_feature_plotly <- renderPlotly({
-        feature_plot(filtered_data(),
-          x = "sample_type", y = "n_feature_rna",
-          color = "study_label", y_title = "nFeature count",
+        feature_plot(
+          filt_data,
+          x = "study_label", y = "n_feature_rna",
+          color = "sample_type", y_title = "nFeature count",
           title = "Feature Count"
         )
       })
-
+      
       ## plot elbow
       output$data_pca_stdv_plotly <- renderPlotly({
         elbow_plot(pca_std_df)
       })
-
+      
       ## plot variable genes
       output$variable_genes_plotly <- renderPlotly({
         var_genes_plot(vf_data, top_n = 15)
       })
-    }
-  })
+  }
+)
+
 
 
   # Data sources tabset
