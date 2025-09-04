@@ -14,9 +14,16 @@ pub_data$DOI <-
   paste0("<a href='", pub_data$DOI, "' target='_blank'>", pub_data$DOI, "</a>")
 
 # define variable for selectInput in gene Exp
-group_choices <- c("parasite_stage", "host_species", "treatment", "sample_type",
-                  "life_cycle_stage", "study_label", "pub_year", "run_id")
-
+group_choices <- c(
+  "parasite_stage",
+  "host_species",
+  "treatment",
+  "sample_type",
+  "life_cycle_stage",
+  "study_label",
+  "pub_year",
+  "run_id"
+)
 
 # read gff data
 gff_data <- readRDS("ref/PvivaxP01_gff_data.rds")
@@ -30,21 +37,29 @@ vf_data <- list_data$vf_data
 rm(list_data)
 
 # select columns for 2D plots
-pca_u <- grep("^pca_u_\\d+", colnames(mr_data),
-  ignore.case = TRUE, value = TRUE
+pca_u <- grep(
+  "^pca_u_\\d+",
+  colnames(mr_data),
+  ignore.case = TRUE,
+  value = TRUE
 )
-pca_i <- grep("^pca_i_\\d+", colnames(mr_data),
-  ignore.case = TRUE, value = TRUE
+pca_i <- grep(
+  "^pca_i_\\d+",
+  colnames(mr_data),
+  ignore.case = TRUE,
+  value = TRUE
 )
-umap_i <- grep("^umap_i_\\d+", colnames(mr_data),
-  ignore.case = TRUE, value = TRUE
+umap_i <- grep(
+  "^umap_i_\\d+",
+  colnames(mr_data),
+  ignore.case = TRUE,
+  value = TRUE
 )
-umap_u <- grep("^umap_u_\\d+", colnames(mr_data),
-  ignore.case = TRUE, value = TRUE
+umap_u <- grep(
+  "^umap_u_\\d+",
+  colnames(mr_data),
+  ignore.case = TRUE,
+  value = TRUE
 )
-tsne <- grep("t_sne", colnames(mr_data),
-  ignore.case = TRUE, value = TRUE
-)
-RNA_snn <- grep("RNA_snn", colnames(mr_data),
-  ignore.case = TRUE, value = TRUE
-)
+tsne <- grep("t_sne", colnames(mr_data), ignore.case = TRUE, value = TRUE)
+RNA_snn <- grep("RNA_snn", colnames(mr_data), ignore.case = TRUE, value = TRUE)

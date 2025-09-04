@@ -17,13 +17,16 @@ server <- function(input, output, session) {
     shinyjs::hide("about_section")
     shinyjs::show("home_section")
 
-    shinyjs::runjs("
+    shinyjs::runjs(
+      "
     $('.menu-link').removeClass('active');
     $('#home').addClass('active');
-  ")
+  "
+    )
   })
 
-  observeEvent(list(input$about, input$contribute_link, input$about_link),
+  observeEvent(
+    list(input$about, input$contribute_link, input$about_link),
     {
       shinyjs::hide("home_section")
       shinyjs::hide("analysis_section")
@@ -32,11 +35,12 @@ server <- function(input, output, session) {
       runjs("initParticles('colab-particles');")
       runjs("initParticles('particles-js-about');")
 
-
-      shinyjs::runjs("
+      shinyjs::runjs(
+        "
       $('.menu-link').removeClass('active');
       $('#about').addClass('active');
-      ")
+      "
+      )
     },
     ignoreInit = TRUE
   )
@@ -46,10 +50,12 @@ server <- function(input, output, session) {
     shinyjs::hide("about_section")
     shinyjs::show("analysis_section")
 
-    shinyjs::runjs("
+    shinyjs::runjs(
+      "
     $('.menu-link').removeClass('active');
     $('#analysis').addClass('active');
-  ")
+  "
+    )
   })
 
   # Navigate tabsetPannel
@@ -78,12 +84,14 @@ server <- function(input, output, session) {
     runjs("window.open('manual/index.html', '_blank')")
   })
 
-
   # Larger screen adjustment
   observe({
-    if (input$tabset == "Metadata" ||
-      input$tabset == "Quality control" || input$tabset == "Data sources" ||
-      input$tabset == "Gene expression") {
+    if (
+      input$tabset == "Metadata" ||
+        input$tabset == "Quality control" ||
+        input$tabset == "Data sources" ||
+        input$tabset == "Gene expression"
+    ) {
       shinyjs::removeClass("sidebar", "visible")
       shinyjs::runjs('$("#main").addClass("col-sm-12");')
     } else {
@@ -92,11 +100,12 @@ server <- function(input, output, session) {
     }
   })
 
-
   # Change to normalize when change tabset
   observeEvent(input$tabset, {
     if (input$tabset == "Gene expression") {
-      updateRadioButtons(session, "data_type_exp",
+      updateRadioButtons(
+        session,
+        "data_type_exp",
         choices = list(
           "Raw" = "raw",
           "Normalized" = "normalize",
@@ -105,7 +114,9 @@ server <- function(input, output, session) {
         selected = "normalize"
       )
     } else if (input$tabset == "Embeddings") {
-      updateRadioButtons(session, "data_type",
+      updateRadioButtons(
+        session,
+        "data_type",
         choices = list(
           "Raw" = "raw",
           "Normalized" = "normalize",
@@ -116,17 +127,22 @@ server <- function(input, output, session) {
     }
   })
 
-
   # Select raw, normalize or scale data
   default_df_filter <- reactiveVal(NULL)
 
   gene_data <- eventReactive(
-    list(input$tabset, input$apply_filter, input$data_type, input$data_type_exp),
+    list(
+      input$tabset,
+      input$apply_filter,
+      input$data_type,
+      input$data_type_exp
+    ),
     {
       dataset <- if (input$tabset == "Gene expression") {
         req(input$data_type_exp)
         current_type <- input$data_type_exp
-        switch(input$data_type_exp,
+        switch(
+          input$data_type_exp,
           raw = raw_df,
           normalize = norm_df,
           scale = scale_df
@@ -134,7 +150,8 @@ server <- function(input, output, session) {
       } else if (input$tabset == "Embeddings") {
         req(input$data_type)
         current_type <- input$data_type
-        switch(input$data_type,
+        switch(
+          input$data_type,
           raw = raw_df,
           normalize = norm_df,
           scale = scale_df
@@ -153,12 +170,13 @@ server <- function(input, output, session) {
       }
 
       req(selections)
-      
+
       # Show progress bar when loading data
       withProgress(message = "", value = 0, {
-        display_name <- switch(current_type,
+        display_name <- switch(
+          current_type,
           raw = "Raw",
-          normalize = "Normalized", 
+          normalize = "Normalized",
           scale = "Scaled",
           current_type
         )
@@ -175,12 +193,11 @@ server <- function(input, output, session) {
   # Metadata filter
   # choose columns for filter data
   grouped_choices <- list(
-    
     parasite_stage = setNames(
       paste0("parasite_stage__", unique(mr_data$parasite_stage)),
       unique(mr_data$parasite_stage)
     ),
-    
+
     study_label = setNames(
       paste0("study_label__", unique(mr_data$study_label)),
       unique(mr_data$study_label)
@@ -189,38 +206,38 @@ server <- function(input, output, session) {
       paste0("geolocation__", unique(mr_data$geographic_location)),
       unique(mr_data$geographic_location)
     ),
-    
+
     sample_type = setNames(
       paste0("sample_type__", unique(mr_data$sample_type)),
       unique(mr_data$sample_type)
     ),
-    
+
     sc_technology = setNames(
       paste0("sc_technology__", unique(mr_data$sc_technology)),
       unique(mr_data$sc_technology)
-    ),  
-    
+    ),
+
     sequencer = setNames(
       paste0("sequencer__", unique(mr_data$sequencer)),
       unique(mr_data$sequencer)
     ),
-      
+
     host_species = setNames(
       paste0("host_species__", unique(mr_data$host_species)),
       unique(mr_data$host_species)
     ),
-    
+
     life_cycle_stage = setNames(
       paste0("life_cycle_stage__", unique(mr_data$life_cycle_stage)),
       unique(mr_data$life_cycle_stage)
     ),
-    
+
     treatment = setNames(
       paste0("treatment__", unique(mr_data$treatment)),
       unique(mr_data$treatment)
     )
   )
-  
+
   observe({
     first_group <- names(grouped_choices)[1]
     default_values <- grouped_choices[[first_group]]
@@ -229,7 +246,9 @@ server <- function(input, output, session) {
       default_df_filter(default_values)
     }
 
-    updateSelectInput(session, "apply_filter",
+    updateSelectInput(
+      session,
+      "apply_filter",
       choices = grouped_choices,
       selected = default_values
     )
@@ -256,169 +275,259 @@ server <- function(input, output, session) {
     fun_filter_df(mr_data, selections)
   })
 
-
   # Manipulation tabset
   observe({
     filt_data <- filtered_data()
     req(nrow(filt_data) > 0)
 
     if (input$tabset == "Metadata") {
-      updateSelectInput(session, "study_label", choices = unique(filt_data$study_label))
-      updateSelectInput(session, "host_species", choices = unique(filt_data$host_species))
-      updateSelectInput(session, "life_cycle_stage", choices = unique(filt_data$life_cycle_stage))
-      updateSelectInput(session, "treatment", choices = unique(filt_data$treatment))
-      updateSelectInput(session, "parasite_stage", choices = unique(filt_data$parasite_stage))
-      updateSelectInput(session, "sample_type", choices = unique(filt_data$sample_type))
+      updateSelectInput(
+        session,
+        "study_label",
+        choices = unique(filt_data$study_label)
+      )
+      updateSelectInput(
+        session,
+        "host_species",
+        choices = unique(filt_data$host_species)
+      )
+      updateSelectInput(
+        session,
+        "life_cycle_stage",
+        choices = unique(filt_data$life_cycle_stage)
+      )
+      updateSelectInput(
+        session,
+        "treatment",
+        choices = unique(filt_data$treatment)
+      )
+      updateSelectInput(
+        session,
+        "parasite_stage",
+        choices = unique(filt_data$parasite_stage)
+      )
+      updateSelectInput(
+        session,
+        "sample_type",
+        choices = unique(filt_data$sample_type)
+      )
     } else if (input$tabset == "Quality control") {
       # Use the suffixed IDs for the QC tab
-      updateSelectInput(session, "study_label_qc", choices = unique(filt_data$study_label))
-      updateSelectInput(session, "host_species_qc", choices = unique(filt_data$host_species))
-      updateSelectInput(session, "life_cycle_stage_qc", choices = unique(filt_data$life_cycle_stage))
-      updateSelectInput(session, "treatment_qc", choices = unique(filt_data$treatment))
-      updateSelectInput(session, "parasite_stage_qc", choices = unique(filt_data$parasite_stage))
-      updateSelectInput(session, "sample_type_qc", choices = unique(filt_data$sample_type))
+      updateSelectInput(
+        session,
+        "study_label_qc",
+        choices = unique(filt_data$study_label)
+      )
+      updateSelectInput(
+        session,
+        "host_species_qc",
+        choices = unique(filt_data$host_species)
+      )
+      updateSelectInput(
+        session,
+        "life_cycle_stage_qc",
+        choices = unique(filt_data$life_cycle_stage)
+      )
+      updateSelectInput(
+        session,
+        "treatment_qc",
+        choices = unique(filt_data$treatment)
+      )
+      updateSelectInput(
+        session,
+        "parasite_stage_qc",
+        choices = unique(filt_data$parasite_stage)
+      )
+      updateSelectInput(
+        session,
+        "sample_type_qc",
+        choices = unique(filt_data$sample_type)
+      )
     }
   })
-  
-  
-  observeEvent(list(
-    input$data_opt, input$study_label, input$host_species, input$life_cycle_stage,
-    input$treatment, input$parasite_stage, input$sample_type
-  ), {
-    
-  current_inputs <- list(
-    study_label = input$study_label,
-    host_species = input$host_species,
-    life_cycle_stage = input$life_cycle_stage,
-    treatment = input$treatment,
-    parasite_stage = input$parasite_stage,
-    sample_type = input$sample_type
-  )
 
-filt_data <- apply_secondary_filters(filtered_data(), current_inputs)
- 
+  observeEvent(
+    list(
+      input$data_opt,
+      input$study_label,
+      input$host_species,
+      input$life_cycle_stage,
+      input$treatment,
+      input$parasite_stage,
+      input$sample_type
+    ),
+    {
+      current_inputs <- list(
+        study_label = input$study_label,
+        host_species = input$host_species,
+        life_cycle_stage = input$life_cycle_stage,
+        treatment = input$treatment,
+        parasite_stage = input$parasite_stage,
+        sample_type = input$sample_type
+      )
 
-    output$data_table <- renderDT(
-      {
-        ## data in table
-        DT::datatable(
-          filt_data %>%
-            rename_with(~ str_to_title(.),
-              .cols = any_of(c(
-                "study_label", "host_species", "life_cycle_stage", "treatment",
-                "parasite_stage", "sample_type", "geographic_location", "sc_technology",
-                "sequencer", "strain", "day_post_infection", "biological_replicate"
-              ))
-            ) %>%
-            rename(nCount_RNA = n_count_rna, nFeature_RNA = n_feature_rna) %>%
-            arrange(desc(nCount_RNA)),
-          extensions = "Buttons",
-          options = list(
-            pageLength = 10, scrollX = TRUE, dom = "frtipB",
-            buttons = list(
-              list(
-                extend = "csv", text = "Export .csv",
-                className = "btn btn-success"
+      filt_data <- apply_secondary_filters(filtered_data(), current_inputs)
+
+      output$data_table <- renderDT(
+        {
+          ## data in table
+          DT::datatable(
+            filt_data %>%
+              rename_with(
+                ~ str_to_title(.),
+                .cols = any_of(c(
+                  "study_label",
+                  "host_species",
+                  "life_cycle_stage",
+                  "treatment",
+                  "parasite_stage",
+                  "sample_type",
+                  "geographic_location",
+                  "sc_technology",
+                  "sequencer",
+                  "strain",
+                  "day_post_infection",
+                  "biological_replicate"
+                ))
+              ) %>%
+              rename(nCount_RNA = n_count_rna, nFeature_RNA = n_feature_rna) %>%
+              arrange(desc(nCount_RNA)),
+            extensions = "Buttons",
+            options = list(
+              pageLength = 10,
+              scrollX = TRUE,
+              dom = "frtipB",
+              buttons = list(
+                list(
+                  extend = "csv",
+                  text = "Export .csv",
+                  className = "btn btn-success"
+                )
               )
-            )
-          ),
-          selection = "single",
-          filter = "top",
-          rownames = FALSE
+            ),
+            selection = "single",
+            filter = "top",
+            rownames = FALSE
+          )
+        },
+        server = TRUE
+      )
+
+      ## plot stage vs count
+      output$stage_plotly <- renderPlotly({
+        meta_plotly(
+          filt_data,
+          "parasite_stage",
+          "Count",
+          "Parasite stage",
+          "bar"
         )
-      },
-      server = TRUE
-    )
+      })
 
-    ## plot stage vs count
-    output$stage_plotly <- renderPlotly({
-      meta_plotly(filt_data, "parasite_stage", "Count", "Parasite stage", "bar")
-    })
+      ## plot sample vs count
+      output$sample_plotly <- renderPlotly({
+        meta_plotly(filt_data, "sample_type", "Count", "Sample type", "bar")
+      })
 
-    ## plot sample vs count
-    output$sample_plotly <- renderPlotly({
-      meta_plotly(filt_data, "sample_type", "Count", "Sample type", "bar")
-    })
+      ## plot strain vs count
+      output$strain_plotly <- renderPlotly({
+        meta_plotly(filt_data, "strain", "Count", "Strain", "bar")
+      })
 
-    ## plot strain vs count
-    output$strain_plotly <- renderPlotly({
-      meta_plotly(filt_data, "strain", "Count", "Strain", "bar")
-    })
+      ## plot species vs count
+      output$species_plotly <- renderPlotly({
+        meta_plotly(filt_data, "host_species", "Count", "Host species", "bar")
+      })
 
-    ## plot species vs count
-    output$species_plotly <- renderPlotly({
-      meta_plotly(filt_data, "host_species", "Count", "Host species", "bar")
-    })
+      ## plot reproductive_form vs count
+      output$type_plotly <- renderPlotly({
+        meta_plotly(
+          filt_data,
+          "life_cycle_stage",
+          "Count",
+          "Life cycle stage",
+          "bar"
+        )
+      })
 
-    ## plot reproductive_form vs count
-    output$type_plotly <- renderPlotly({
-      meta_plotly(filt_data, "life_cycle_stage", "Count", "Life cycle stage", "bar")
-    })
-
-    ## plot location vs count
-    output$location_plotly <- renderPlotly({
-      meta_plotly(filt_data, "geographic_location", "Count", "Geographic location", "bar")
-    })
-  })
+      ## plot location vs count
+      output$location_plotly <- renderPlotly({
+        meta_plotly(
+          filt_data,
+          "geographic_location",
+          "Count",
+          "Geographic location",
+          "bar"
+        )
+      })
+    }
+  )
 
   # Quality control tabset
-observeEvent(
-  list(
-    input$data_opt, input$study_label_qc, input$host_species_qc,
-    input$life_cycle_stage_qc, input$treatment_qc,
-    input$parasite_stage_qc, input$sample_type_qc
-  ),{
-  
-    current_inputs <- list(
-    study_label = input$study_label_qc,
-    host_species = input$host_species_qc,
-    life_cycle_stage = input$life_cycle_stage_qc,
-    treatment = input$treatment_qc,
-    parasite_stage = input$parasite_stage_qc,
-    sample_type = input$sample_type_qc
-  )
+  observeEvent(
+    list(
+      input$data_opt,
+      input$study_label_qc,
+      input$host_species_qc,
+      input$life_cycle_stage_qc,
+      input$treatment_qc,
+      input$parasite_stage_qc,
+      input$sample_type_qc
+    ),
+    {
+      current_inputs <- list(
+        study_label = input$study_label_qc,
+        host_species = input$host_species_qc,
+        life_cycle_stage = input$life_cycle_stage_qc,
+        treatment = input$treatment_qc,
+        parasite_stage = input$parasite_stage_qc,
+        sample_type = input$sample_type_qc
+      )
 
-  filt_data <- apply_secondary_filters(filtered_data(), current_inputs)
-      
+      filt_data <- apply_secondary_filters(filtered_data(), current_inputs)
+
       ## plot nCount in QC tab
       output$data_count_plotly <- renderPlotly({
         feature_plot(
           filt_data,
-          x = "study_label", y = "n_count_rna",
-          color = "sample_type", y_title = "RNA count",
+          x = "study_label",
+          y = "n_count_rna",
+          color = "sample_type",
+          y_title = "RNA count",
           title = "RNA Count"
         )
       })
-      
+
       ## plot nFeature in QC tab
       output$data_feature_plotly <- renderPlotly({
         feature_plot(
           filt_data,
-          x = "study_label", y = "n_feature_rna",
-          color = "sample_type", y_title = "nFeature count",
+          x = "study_label",
+          y = "n_feature_rna",
+          color = "sample_type",
+          y_title = "nFeature count",
           title = "Feature Count"
         )
       })
-      
+
       ## plot elbow
       output$data_pca_stdv_plotly <- renderPlotly({
         elbow_plot(pca_std_df)
       })
-      
+
       ## plot variable genes
       output$variable_genes_plotly <- renderPlotly({
         var_genes_plot(vf_data, top_n = 15)
       })
-  }
-)
-
-
+    }
+  )
 
   # Data sources tabset
   observeEvent(input$tabset, {
     if (input$tabset == "Data sources") {
       output$data_source <- renderDT({
-        DT::datatable(pub_data,
+        DT::datatable(
+          pub_data,
           escape = FALSE,
           options = list(
             pageLength = 10,
@@ -435,7 +544,6 @@ observeEvent(
     }
   })
 
-
   # Manipulation tabset "Gene Exp"
   ## gene_exp_0 block
   choice_exp_0 <- reactive({
@@ -444,7 +552,9 @@ observeEvent(
 
   observe({
     req(choice_exp_0())
-    updateSelectizeInput(session, "genes_exp_0",
+    updateSelectizeInput(
+      session,
+      "genes_exp_0",
       label = if (isTRUE(input$check_exp_0)) "Gene ID" else "Gene name",
       choices = choice_exp_0(),
       server = TRUE
@@ -462,7 +572,6 @@ observeEvent(
     )
   })
 
-
   # plot for genes_exp_0
   output$gene_exp_plotly <- renderPlotly({
     req(df_exp_0())
@@ -477,7 +586,6 @@ observeEvent(
     gene_id <- get_gene_id(input$genes_exp_0, gene_data()$genes)
     gene_links(gene_id)
   })
-
 
   ## gene_exp_i block
   ## observe add button click from js
@@ -533,7 +641,8 @@ observeEvent(
   })
 
   ## observe remove button click from js
-  observeEvent(input$click_remove_btn,
+  observeEvent(
+    input$click_remove_btn,
     {
       rm_btn_id <- input$click_remove_btn$btn_id
       id <- as.numeric(gsub("remove_btn_", "", rm_btn_id))
@@ -624,7 +733,9 @@ observeEvent(
       shinyjs::show("gene_snn_ui")
       shinyjs::show("gene_link_ui")
       shinyjs::show("switch_id")
-      updateSelectizeInput(session, "genes_n",
+      updateSelectizeInput(
+        session,
+        "genes_n",
         label = if (isTRUE(input$check)) "Gene ID" else "Gene name",
         choices = choice(),
         server = TRUE
@@ -634,7 +745,9 @@ observeEvent(
       shinyjs::hide("gene_link_ui")
       shinyjs::hide("data_type")
       shinyjs::hide("switch_id")
-      updateSelectizeInput(session, "genes_n",
+      updateSelectizeInput(
+        session,
+        "genes_n",
         label = "Select Resolution",
         choices = RNA_snn,
         server = TRUE
@@ -657,38 +770,57 @@ observeEvent(
   })
 
   ## get x- and y- axis selections for 2D plots
-  observeEvent(list(
-    input$embedding, input$plot, input$xaxis, input$check_all
-  ), {
-    if (input$plot == "2d") {
-      shinyjs::show("axis")
-      x_choices <- switch(input$embedding,
-        "umap" = if (isTRUE(input$check_all)) umap_i else umap_u,
-        "pca" = if (isTRUE(input$check_all)) pca_i else pca_u,
-        "tsne" = tsne
-      )
+  observeEvent(
+    list(
+      input$embedding,
+      input$plot,
+      input$xaxis,
+      input$check_all
+    ),
+    {
+      if (input$plot == "2d") {
+        shinyjs::show("axis")
+        x_choices <- switch(
+          input$embedding,
+          "umap" = if (isTRUE(input$check_all)) umap_i else umap_u,
+          "pca" = if (isTRUE(input$check_all)) pca_i else pca_u,
+          "tsne" = tsne
+        )
 
-      updateSelectInput(session, "xaxis",
-        choices = x_choices,
-        selected = x_choices[1]
-      )
+        updateSelectInput(
+          session,
+          "xaxis",
+          choices = x_choices,
+          selected = x_choices[1]
+        )
 
-      y_choices <- switch(input$embedding,
-        "umap" = y_col(
-          input$check_all, input$xaxis, umap_i, umap_u
-        ),
-        "pca" = y_col(input$check_all, input$xaxis, pca_i, pca_u),
-        "tsne" = setdiff(tsne, input$xaxis)
-      )
+        y_choices <- switch(
+          input$embedding,
+          "umap" = y_col(
+            input$check_all,
+            input$xaxis,
+            umap_i,
+            umap_u
+          ),
+          "pca" = y_col(input$check_all, input$xaxis, pca_i, pca_u),
+          "tsne" = setdiff(tsne, input$xaxis)
+        )
 
-      updateSelectInput(session, "yaxis",
-        choices = y_choices,
-        selected = if (input$yaxis %in% y_choices) input$yaxis else y_choices[2]
-      )
-    } else {
-      shinyjs::hide("axis")
+        updateSelectInput(
+          session,
+          "yaxis",
+          choices = y_choices,
+          selected = if (input$yaxis %in% y_choices) {
+            input$yaxis
+          } else {
+            y_choices[2]
+          }
+        )
+      } else {
+        shinyjs::hide("axis")
+      }
     }
-  })
+  )
 
   ## choose data based on input color
   data <- reactive({
@@ -702,25 +834,36 @@ observeEvent(
   ## update after 1 sec
   observe({
     list(
-      input$embedding, input$plot, input$xaxis, input$yaxis, input$color,
-      input$size, input$genes_n, input$data_type, input$check,
-      input$check_all, input$apply_filter
+      input$embedding,
+      input$plot,
+      input$xaxis,
+      input$yaxis,
+      input$color,
+      input$size,
+      input$genes_n,
+      input$data_type,
+      input$check,
+      input$check_all,
+      input$apply_filter
     )
     autoUpdatePlot(FALSE)
-    later(function() {
-      autoUpdatePlot(TRUE)
-    }, 1)
+    later(
+      function() {
+        autoUpdatePlot(TRUE)
+      },
+      1
+    )
   })
 
   ## determine plot type
   get_plot_type <- reactive({
-    switch(input$embedding,
+    switch(
+      input$embedding,
       "pca" = if (isTRUE(input$check_all)) "pca_i" else "pca_u",
       "umap" = if (isTRUE(input$check_all)) "umap_i" else "umap_u",
       "tsne" = "tSNE"
     )
   })
-
 
   ## generate pca, umap and tsne plot
   embplot <- reactiveVal(FALSE)
@@ -732,26 +875,43 @@ observeEvent(
     }
 
     isolate({
-      color_column <- switch(input$color,
+      color_column <- switch(
+        input$color,
         "genes" = get_gene_id(input$genes_n, gene_data()$genes),
         "RNA_snn" = input$genes_n,
         input$color
       )
-      
+
+      # df <- data()
+
+      # # check if column is RNA_snn*
+      # if (grepl("^RNA_snn_*", color_column, ignore.case = TRUE)) {
+      #   df[[color_column]] <- factor(
+      #     as.numeric(as.character(df[[color_column]])),
+      #     levels = sort(unique(as.numeric(as.character(df[[color_column]]))))
+      #   )
+      # }
+
       p <- embedding_plot(
-        data(), input$xaxis, input$yaxis,
-        color_column, input$genes_n, input$size,
-        plot_type = get_plot_type(), plot_dim = input$plot
+        data(),
+        input$xaxis,
+        input$yaxis,
+        color_column,
+        input$genes_n,
+        input$size,
+        plot_type = get_plot_type(),
+        plot_dim = input$plot
       )
-      
+
       p <- p %>%
         event_register("plotly_click") %>%
         config(displaylogo = FALSE, scrollZoom = TRUE)
-      
+
       embplot(TRUE)
       return(p)
     })
-  })  ## click event: after plot is ready
+  }) ## click event: after plot is ready
+
   click_event <- reactive({
     req(embplot())
     ed <- event_data("plotly_click", source = "embedding")
@@ -767,9 +927,9 @@ observeEvent(
     event <- click_event()
     req(event)
     data <- gene_data()$data
-    
+
     cell_id <- event$key
-    
+
     data$id <- seq_len(nrow(data))
     cols <- c("id", colnames(data)[str_detect(colnames(data), "^PVP01")])
     selected_df <- data[data$id == cell_id, cols, drop = FALSE]
@@ -805,7 +965,8 @@ observeEvent(
   # render the cell_expression_table
   output$cell_expression_table <- DT::renderDT({
     req(selected_table())
-    datatable(selected_table(),
+    datatable(
+      selected_table(),
       options = list(
         pageLength = 10,
         scrollY = "400px",

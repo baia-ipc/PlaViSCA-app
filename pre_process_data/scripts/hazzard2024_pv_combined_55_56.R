@@ -168,8 +168,8 @@ for (i in 1:length(all_pv)) {
   mat <- counts(sce)
   all_pv[[i]] <- CreateSeuratObject(
     counts = mat,
-    min.cells = 0,
-    min.features = 0
+    min.cells = 1,
+    min.features = 1
   )
 }
 

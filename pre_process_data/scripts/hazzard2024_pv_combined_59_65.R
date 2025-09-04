@@ -145,7 +145,7 @@ rm(bcrank, uniq)
 # method
 # set.seed(123456)
 # all_pv <- lapply(all_pv, function(x) {
-#     e.out <- emptyDrops(x, lower = 1) #change this value if needed
+#     e.out <- emptyDrops(x, lower = 150) #change this value if needed
 #     x <- x[, which(e.out$FDR <= 0.001)]
 # })
 
@@ -167,8 +167,8 @@ for (i in 1:length(all_pv)) {
     mat <- counts(sce)
     all_pv[[i]] <- CreateSeuratObject(
         counts = mat,
-        min.cells = 0,
-        min.features = 0
+        min.cells = 1,
+        min.features = 1
     )
 }
 
@@ -199,7 +199,7 @@ sequencer <- rep("Illumina NovaSeq 6000", length(all_pv))
 host_species <- list(
     "Anopheles stephensi",
     "Saimiri boliviensis",
-    rep("Anopheles stephensi", 4)
+    rep("Anopheles stephensi", 5)
 ) %>%
     unlist()
 host_id <- c(
@@ -208,20 +208,21 @@ host_id <- c(
     "fed animal 5164",
     "fed banimal 5164",
     "fed animal 5736",
+    "fed animal 5164",
     "fed animal 5736"
 )
 
 sample_type <- list(
     "Vector salivary gland",
     "Host blood",
-    rep("Vector salivary gland", 4)
+    rep("Vector salivary gland", 5)
 ) %>%
     unlist()
 
 parasite_stage <- list(
     "Sporozoite stage",
     "Blood stage",
-    rep("Sporozoite stage", 4)
+    rep("Sporozoite stage", 5)
 ) %>%
     unlist()
 
@@ -231,10 +232,11 @@ strain <- c(
     "Chesson&NIH1993",
     "NIH1993-F3&Chesson",
     "Chesson",
+    "NIH1993-F3&Chesson",
     "Chesson"
 )
 
-day_post_infection <- c(18, 26, 20, 19, 17, 18)
+day_post_infection <- c(18, 26, 20, 19, 17, 20, 18)
 treatment <- rep(NA, length(all_pv))
 biological_replicate <- rep(NA, length(all_pv))
 

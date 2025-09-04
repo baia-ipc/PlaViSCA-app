@@ -12,3 +12,21 @@
 vivaxP01.gff_data.tsv
 
 renv.lock
+pre_process_data/32365102_knee_plots.pdf
+pre_process_data/35926062_knee_plots.pdf
+pre_process_data/36093191_knee_plots.pdf
+pre_process_data/36525464_knee_plots.pdf
+pre_process_data/39223117_knee_plots.pdf
+pre_process_data/counts/
+pre_process_data/data/
+pre_process_data/hazzard2022.rds
+pre_process_data/hazzard2024.rds
+pre_process_data/hazzard2024_pv_combined_55_56.rds
+pre_process_data/hazzard2024_pv_combined_66_72.rds
+pre_process_data/hazzard2024_pv_combined_75_76.rds
+pre_process_data/hazzard2024_pv_combined_80_87.rds
+pre_process_data/hazzard2024_pv_combined_91_94.rds
+pre_process_data/ruberto2022_1.rds
+pre_process_data/ruberto2022_2.rds
+pre_process_data/sa2020.rds
+pre_process_data/scripts/ref/

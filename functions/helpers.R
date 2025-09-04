@@ -84,17 +84,19 @@ create_meta_filter_row <- function(suffix = "") {
 }
 
 
-
 # Navigate tabsetpanel
 navigate_tabset <- function(session, menu_id, tab_name = NULL) {
   shinyjs::hide("home_section")
   shinyjs::hide("about_section")
   shinyjs::show("analysis_section")
 
-  js_code <- sprintf("
+  js_code <- sprintf(
+    "
     $('.menu-link').removeClass('active');
     $('#%s').addClass('active');
-  ", menu_id)
+  ",
+    menu_id
+  )
   shinyjs::runjs(js_code)
 
   if (!is.null(tab_name)) {
@@ -113,7 +115,6 @@ fun_filter_df <- function(data, selections) {
     sapply(lst, `[[`, 2)
   })
 
-  
   keep_rows <- rep(TRUE, nrow(data))
   for (colname in names(filter_list)) {
     keep_rows <- keep_rows & data[[colname]] %in% filter_list[[colname]]
@@ -125,16 +126,25 @@ fun_filter_df <- function(data, selections) {
 
 # Helper function to apply secondary filters
 apply_secondary_filters <- function(data, inputs) {
-  
   # Select relevant columns
   filtered <- data %>%
     select(any_of(c(
-      "study_label", "host_species", "life_cycle_stage", "treatment",
-      "parasite_stage", "sample_type", "geographic_location", "sc_technology",
-      "sequencer", "strain", "day_post_infection", "biological_replicate", 
-      "n_count_rna", "n_feature_rna"
+      "study_label",
+      "host_species",
+      "life_cycle_stage",
+      "treatment",
+      "parasite_stage",
+      "sample_type",
+      "geographic_location",
+      "sc_technology",
+      "sequencer",
+      "strain",
+      "day_post_infection",
+      "biological_replicate",
+      "n_count_rna",
+      "n_feature_rna"
     )))
-  
+
   # Dynamically apply filters for each non-empty input
   for (col in names(inputs)) {
     values <- inputs[[col]]
@@ -142,10 +152,9 @@ apply_secondary_filters <- function(data, inputs) {
       filtered <- filtered %>% filter(.data[[col]] %in% values)
     }
   }
-  
+
   return(filtered)
 }
-
 
 
 # Get genes annotation
@@ -207,7 +216,8 @@ subBlock <- function(i) {
           tags$label(
             class = "switch",
             tags$input(
-              id = paste0("check_exp_", i), type = "checkbox",
+              id = paste0("check_exp_", i),
+              type = "checkbox",
               class = "toggle_exp"
             ),
             tags$span(class = "slider")
@@ -221,13 +231,17 @@ subBlock <- function(i) {
             id = paste0("gene_link_ui_exp_", i),
             class = "gene_link_ui_exp",
             tags$a(
-              id = paste0("plasmo_link_exp_", i), href = "#",
-              target = "_blank", "🔬 PlasmoDB"
+              id = paste0("plasmo_link_exp_", i),
+              href = "#",
+              target = "_blank",
+              "🔬 PlasmoDB"
             ),
             span("|"),
             tags$a(
-              id = paste0("ncbi_link_exp_", i), href = "#",
-              target = "_blank", "🧬 NCBI"
+              id = paste0("ncbi_link_exp_", i),
+              href = "#",
+              target = "_blank",
+              "🧬 NCBI"
             )
           )
         )
@@ -247,11 +261,13 @@ subBlock <- function(i) {
       fluidRow(plotlyOutput(paste0("gene_exp_plotly_", i))),
       fluidRow(
         class = "btn-add-rm-container",
-        actionButton(paste0("remove_btn_", i),
+        actionButton(
+          paste0("remove_btn_", i),
           label = icon("minus"),
           class = "btn btn-danger btn_remove"
         ),
-        actionButton(paste0("add_btn_", i),
+        actionButton(
+          paste0("add_btn_", i),
           label = icon("plus"),
           class = "btn btn-success btn_add"
         )
@@ -288,14 +304,14 @@ newBlock <- function(new_count, counter, choice_exp, dynamicBlock, session) {
 df_exp0 <- function(gene_data, gene_input, group_input, check_exp) {
   df <- gene_data$data
   genes <- gene_data$genes
-  
+
   # Determine the gene column to use
   gene_exp <- if (!check_exp) {
     get_gene_id(gene_input, genes)
   } else {
     gene_input
   }
-  
+
   if (!(gene_exp %in% colnames(df))) {
     df$gene_expr <- NA
   } else {
@@ -320,7 +336,8 @@ df_expi <- function(id, input, gene_data, get_gene_id) {
     gene_exp <- if (!input[[paste0("check_exp_", id)]]) {
       get_gene_id(input[[paste0("genes_exp_", id)]], gene_data$genes)
     } else {
-      input[[paste0("genes_exp_", id)]]
+      input[[paste0("genes_exp_", id)]
+      ]
     }
 
     if (!(gene_exp %in% colnames(df))) {
@@ -348,11 +365,13 @@ meta_plotly <- function(data, x_var, x_label, y_label, plt_type = "bar") {
     summarise(count = n(), .groups = "drop") %>%
     arrange(count)
 
-  data_summary[[x_var]] <- factor(data_summary[[x_var]],
+  data_summary[[x_var]] <- factor(
+    data_summary[[x_var]],
     levels = data_summary[[x_var]]
   )
 
-  plot_ly(data_summary,
+  plot_ly(
+    data_summary,
     x = ~count,
     y = as.formula(paste("~", x_var)),
     color = ~ .data[[x_var]],
@@ -373,7 +392,7 @@ meta_plotly <- function(data, x_var, x_label, y_label, plt_type = "bar") {
 
 # Generate plot for RNA and feature count
 feature_plot <- function(df, x, y, color, y_title, title) {
-  req(df)  
+  req(df)
   plot_ly(
     data = df,
     x = ~ get(x),
@@ -462,7 +481,7 @@ var_genes_plot <- function(df, top_n = 10) {
       hovertemplate = paste(
         "Gene: %{text}<br>",
         "Mean: %{x}<br>",
-        "Variance: %{y}<extra></extra>"
+        "Variance: %{y}<extra></extra>",
       ),
       name = paste("Top", top_n, "Variable")
     ) %>%
@@ -504,17 +523,23 @@ gene_links <- function(gene_id) {
   plasmo_url <- paste0("https://plasmodb.org/plasmo/app/record/gene/", gene_id)
   ncbi_url <- paste0("https://www.ncbi.nlm.nih.gov/protein/", gene_id)
 
-  shinyjs::runjs(sprintf("
+  shinyjs::runjs(sprintf(
+    "
     document.querySelectorAll('[id^=plasmo_link]').forEach(function(el) {
       el.href = '%s';
     });
-  ", plasmo_url))
+  ",
+    plasmo_url
+  ))
 
-  shinyjs::runjs(sprintf("
+  shinyjs::runjs(sprintf(
+    "
     document.querySelectorAll('[id^=ncbi_link]').forEach(function(el) {
       el.href = '%s';
     });
-  ", ncbi_url))
+  ",
+    ncbi_url
+  ))
 }
 
 
@@ -529,7 +554,8 @@ y_col <- function(check_input, x_col, unintegrated, integrated) {
 
 # Generate color column based on input option
 get_color_column <- function(color_type, gene_input, gene_data_obj) {
-  switch(color_type,
+  switch(
+    color_type,
     "genes" = get_gene_id(gene_input, gene_data_obj),
     "cca_snn" = gene_input,
     color_type
@@ -544,8 +570,9 @@ assign_colors <- function(num_categories) {
       name = "Set2"
     )[1:num_categories])
   } else {
-    return(rep(RColorBrewer::brewer.pal(8, "Set2"),
-               length.out = num_categories
+    return(rep(
+      RColorBrewer::brewer.pal(8, "Set2"),
+      length.out = num_categories
     ))
   }
 }
@@ -556,25 +583,51 @@ is_categorical_data <- function(x) {
   is.character(x) || is.factor(x)
 }
 
+# Helper function to prepare colors for categorical data
 prepare_categorical_colors <- function(df, color) {
+  # Ensure the column is character for manipulation, and handle NAs
   df[[color]] <- as.character(df[[color]])
   df[[color]][is.na(df[[color]])] <- "NA (missing)"
-  unique_categories <- unique(df[[color]])
 
-  if ("NA (missing)" %in% unique_categories) {
-    none_missing <- unique_categories[unique_categories != "NA (missing)"]
-    assigned <- if (length(none_missing) > 0) {
-      assign_colors(length(none_missing))
-    } else {
-      character(0)
-    }
-    colors <- setNames(c("#A9A9A94D", assigned), c("NA (missing)", none_missing))
-    df[[color]] <- factor(df[[color]], levels = c("NA (missing)", none_missing))
+  unique_values <- unique(df[[color]])
+
+  # Separate "NA (missing)" to keep it at the top of the legend
+  has_na <- "NA (missing)" %in% unique_values
+  if (has_na) {
+    actual_values <- unique_values[unique_values != "NA (missing)"]
   } else {
-    assigned <- assign_colors(length(unique_categories))
-    colors <- setNames(assigned, unique_categories)
-    df[[color]] <- factor(df[[color]], levels = unique_categories)
+    actual_values <- unique_values
   }
+
+  # Sort the actual values
+  if (length(actual_values) > 0) {
+    numeric_values <- suppressWarnings(as.numeric(actual_values))
+    if (all(!is.na(numeric_values))) {
+      # Sort numerically if all are numbers
+      sorted_values <- actual_values[order(numeric_values)]
+    } else {
+      # Otherwise, sort alphabetically
+      sorted_values <- sort(actual_values)
+    }
+  } else {
+    sorted_values <- character(0)
+  }
+
+  # Reconstruct the final sorted levels, with NA first if it exists
+  final_levels <- if (has_na) c("NA (missing)", sorted_values) else sorted_values
+
+  # Assign colors
+  num_actual_colors <- length(sorted_values)
+  palette <- if (num_actual_colors > 0) assign_colors(num_actual_colors) else character(0)
+
+  colors <- if (has_na) {
+    setNames(c("#A9A9A94D", palette), final_levels)
+  } else {
+    setNames(palette, final_levels)
+  }
+
+  # Crucially, create a factor with the correctly ordered levels
+  df[[color]] <- factor(df[[color]], levels = final_levels)
 
   return(list(df = df, colors = colors))
 }
@@ -595,36 +648,60 @@ get_legend_layout <- function(legend_title) {
   list(
     title = list(text = legend_title),
     orientation = "v",
-    x = 1.02, xanchor = "left",
-    y = 1, yanchor = "top",
+    x = 1.02,
+    xanchor = "left",
+    y = 1,
+    yanchor = "top",
     len = 0.5
   )
 }
 
 # Generate 2d plot
-plot_2d <- function(df, x, y, color, legend_title, size,
-                    is_categorical, selected_color, colors) {
+plot_2d <- function(
+  df,
+  x,
+  y,
+  color,
+  legend_title,
+  size,
+  is_categorical,
+  selected_color,
+  colors
+) {
   hover_text <- ~ paste(
-    "Cell:", df$id,
-    "<br>Cluster:", df$ident,
-    "<br>Color by", legend_title, ":", selected_color,
-    "<br>n_Features_RNA:", df$n_feature_rna,
-    "<br>X:", x,
-    "<br>Y:", y
+    "Cell:",
+    df$id,
+    "<br>Cluster:",
+    df$ident,
+    "<br>Color by",
+    legend_title,
+    ":",
+    selected_color,
+    "<br>n_Features_RNA:",
+    df$n_feature_rna,
+    "<br>X:",
+    x,
+    "<br>Y:",
+    y
   )
 
   legend_layout <- get_legend_layout(legend_title)
-  df$plotly_key <- seq_len(nrow(df)) 
-  
+  df$plotly_key <- seq_len(nrow(df))
+
   if (is_categorical) {
     p <- plot_ly(
-      data = df, x = x, y = y,
-      type = "scatter", mode = "markers",
+      data = df,
+      x = x,
+      y = y,
+      type = "scatter",
+      mode = "markers",
       color = ~ factor(df[[color]]),
       marker = list(size = size),
-      text = hover_text, hoverinfo = "text",
+      text = hover_text,
+      hoverinfo = "text",
       colors = colors,
-      width = 1000, height = 700,
+      width = 1000,
+      height = 700,
       source = "embedding",
       key = ~plotly_key
     ) %>%
@@ -637,10 +714,15 @@ plot_2d <- function(df, x, y, color, legend_title, size,
       )
   } else {
     p <- plot_ly(
-      data = df, x = x, y = y,
-      type = "scatter", mode = "markers",
-      text = hover_text, hoverinfo = "text",
-      width = 1000, height = 700,
+      data = df,
+      x = x,
+      y = y,
+      type = "scatter",
+      mode = "markers",
+      text = hover_text,
+      hoverinfo = "text",
+      width = 1000,
+      height = 700,
       key = ~plotly_key,
       source = "embedding",
       marker = list(
@@ -662,8 +744,16 @@ plot_2d <- function(df, x, y, color, legend_title, size,
 }
 
 # Generate 3d plot
-plot_3d <- function(df, color, legend_title, size, selected_color,
-                    is_categorical, colors, coords) {
+plot_3d <- function(
+  df,
+  color,
+  legend_title,
+  size,
+  selected_color,
+  is_categorical,
+  colors,
+  coords
+) {
   x_col <- coords[1]
   y_col <- coords[2]
   z_col <- coords[3]
@@ -673,28 +763,42 @@ plot_3d <- function(df, color, legend_title, size, selected_color,
   z_vals <- df[[z_col]]
 
   hover_text <- paste(
-    "Cell:", df$id,
-    "<br>Cluster:", df$ident,
-    "<br>Color by", legend_title, ":", selected_color,
-    "<br>n_Features_RNA:", df$n_feature_rna,
-    "<br>X:", x_vals,
-    "<br>Y:", y_vals,
-    "<br>Z:", z_vals
+    "Cell:",
+    df$id,
+    "<br>Cluster:",
+    df$ident,
+    "<br>Color by",
+    legend_title,
+    ":",
+    selected_color,
+    "<br>n_Features_RNA:",
+    df$n_feature_rna,
+    "<br>X:",
+    x_vals,
+    "<br>Y:",
+    y_vals,
+    "<br>Z:",
+    z_vals
   )
 
   legend_layout <- get_legend_layout(legend_title)
 
   if (is_categorical) {
     p <- plot_ly(
-      x = x_vals, y = y_vals, z = z_vals,
-      type = "scatter3d", mode = "markers",
+      x = x_vals,
+      y = y_vals,
+      z = z_vals,
+      type = "scatter3d",
+      mode = "markers",
       color = factor(df[[color]]),
       key = ~ df$id,
       source = "embedding",
       marker = list(size = as.numeric(size) * 0.4),
       colors = colors,
-      text = hover_text, hoverinfo = "text",
-      width = 1000, height = 700
+      text = hover_text,
+      hoverinfo = "text",
+      width = 1000,
+      height = 700
     ) %>%
       layout(
         scene = list(
@@ -708,8 +812,11 @@ plot_3d <- function(df, color, legend_title, size, selected_color,
       )
   } else {
     p <- plot_ly(
-      x = x_vals, y = y_vals, z = z_vals,
-      type = "scatter3d", mode = "markers",
+      x = x_vals,
+      y = y_vals,
+      z = z_vals,
+      type = "scatter3d",
+      mode = "markers",
       marker = list(
         size = as.numeric(size) * 0.4,
         color = selected_color,
@@ -717,8 +824,10 @@ plot_3d <- function(df, color, legend_title, size, selected_color,
         showscale = TRUE,
         colorbar = legend_layout
       ),
-      text = hover_text, hoverinfo = "text",
-      width = 1000, height = 700,
+      text = hover_text,
+      hoverinfo = "text",
+      width = 1000,
+      height = 700,
       source = "embedding",
       key = ~ df$id
     ) %>%
@@ -737,14 +846,24 @@ plot_3d <- function(df, color, legend_title, size, selected_color,
 
 
 # Main pca, umap and tsne plotting function
-embedding_plot <- function(df, xaxis_input, yaxis_input, color, legend_title,
-                           size, plot_type = "pca_u", plot_dim = "2d") {
+embedding_plot <- function(
+  df,
+  xaxis_input,
+  yaxis_input,
+  color,
+  legend_title,
+  size,
+  plot_type = "pca_u",
+  plot_dim = "2d"
+) {
   x <- df[[xaxis_input]]
   y <- df[[yaxis_input]]
   selected_color <- df[[color]]
   is_categorical <- is_categorical_data(selected_color)
 
-  if (!is.numeric(selected_color)) legend_title <- color
+  if (!is.numeric(selected_color)) {
+    legend_title <- color
+  }
 
   if (is_categorical) {
     prep <- prepare_categorical_colors(df, color)
@@ -756,14 +875,27 @@ embedding_plot <- function(df, xaxis_input, yaxis_input, color, legend_title,
 
   if (plot_dim == "2d") {
     p <- plot_2d(
-      df, x, y, color, legend_title, size, is_categorical, selected_color,
+      df,
+      x,
+      y,
+      color,
+      legend_title,
+      size,
+      is_categorical,
+      selected_color,
       colors
     )
   } else {
     coords <- get_dim(plot_type)
     p <- plot_3d(
-      df, color, legend_title, size, selected_color,
-      is_categorical, colors, coords
+      df,
+      color,
+      legend_title,
+      size,
+      selected_color,
+      is_categorical,
+      colors,
+      coords
     )
   }
 
