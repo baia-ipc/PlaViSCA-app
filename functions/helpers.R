@@ -481,7 +481,7 @@ var_genes_plot <- function(df, top_n = 10) {
       hovertemplate = paste(
         "Gene: %{text}<br>",
         "Mean: %{x}<br>",
-        "Variance: %{y}<extra></extra>",
+        "Variance: %{y}<extra></extra>"
       ),
       name = paste("Top", top_n, "Variable")
     ) %>%
