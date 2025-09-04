@@ -147,7 +147,7 @@ rm(bcrank, uniq)
 # method
 set.seed(123456)
 all_pv <- lapply(all_pv, function(x) {
-  e.out <- emptyDrops(x, lower = 1) #change this value if needed
+  e.out <- emptyDrops(x, lower = 40) #change this value if needed
   x <- x[, which(e.out$FDR <= 0.001)]
 })
 
@@ -229,13 +229,13 @@ for (i in 1:length(all_pv)) {
   all_pv[[i]]$treatment <- paste0(treatment[[i]])
   all_pv[[i]]$biological_replicate <- paste0(biological_replicate[[i]])
 
-  all_pv[[i]]$Barcode <- paste(
+  all_pv[[i]]$barcode <- paste(
     str_extract(all_pv[[i]]$run_id, "\\d{3}$"),
     "_",
     colnames(all_pv[[i]]),
     sep = ""
   )
-  colnames(all_pv[[i]]) <- all_pv[[i]]$Barcode
+  colnames(all_pv[[i]]) <- all_pv[[i]]$barcode
 }
 
 ##### --------------------------------------------------------------------------

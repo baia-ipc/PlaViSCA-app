@@ -144,11 +144,11 @@ rm(bcrank, uniq)
 # set the seed to obtain reproducible results.
 # see PMID: 30902100 for  rationale and statistical framework underlying this
 # method
-set.seed(123456)
-all_pv <- lapply(all_pv, function(x) {
-  e.out <- emptyDrops(x, lower = 1) #change this value if needed
-  x <- x[, which(e.out$FDR <= 0.001)]
-})
+# set.seed(123456)
+# all_pv <- lapply(all_pv, function(x) {
+#   e.out <- emptyDrops(x, lower = 150) #change this value if needed
+#   x <- x[, which(e.out$FDR <= 0.001)]
+# })
 
 ##### --------------------------------------------------------------------------
 ##### 5. Processing step 2: conversion of dgCMatrix to a Seurat object
@@ -168,8 +168,8 @@ for (i in 1:length(all_pv)) {
   mat <- counts(sce)
   all_pv[[i]] <- CreateSeuratObject(
     counts = mat,
-    min.cells = 1,
-    min.features = 1
+    min.cells = 0,
+    min.features = 0
   )
 }
 

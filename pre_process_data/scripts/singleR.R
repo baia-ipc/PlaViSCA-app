@@ -63,7 +63,6 @@ IDC_cycle <- SummarizedExperiment(
 IDC_cycle$X <- NULL
 
 
-
 # Convert Seurat object to single-cell experiment (sce) object for SingleR mapping
 sce.all <- as.SingleCellExperiment(DietSeurat(
   pv.combined.all,
@@ -95,14 +94,7 @@ pred.IDC.all$pruned.labels <- case_when(
 # add to seurat object
 match_cell <- intersect(colnames(pv.combined.all), rownames(pred.IDC.all))
 
-pv.combined.all$life_cycle_stage <- pred.IDC.all[match_cell,]$pruned.labels
-
-
-
-
-
-
-
+pv.combined.all$life_cycle_stage <- pred.IDC.all[match_cell, ]$pruned.labels
 
 
 plotDeltaDistribution(pred.IDC.all, ncol = 3)
@@ -153,7 +145,11 @@ SCpubr::do_DimPlot(
 #   reduction = "pca_integrated"
 # ) # change as necessary
 
-pv.combined.all <- FindClusters(pv.combined.all, resolution = 0.3, graph_name = "new_clustering") # change as necessary
+pv.combined.all <- FindClusters(
+  pv.combined.all,
+  resolution = 0.3,
+  graph_name = "new_clustering"
+) # change as necessary
 
 # ggarrange(
 #   SCpubr::do_DimPlot(
@@ -185,7 +181,6 @@ pv.combined.all <- FindClusters(pv.combined.all, resolution = 0.3, graph_name = 
 #   ncol = 3,
 #   common.legend = T
 # )
-
 
 # pv.combined.all_stage_stats <- Cluster_Stats_All_Samples(
 #   seurat_object = pv.combined.all,
@@ -304,3 +299,32 @@ DimPlot_scCustom(
   )
 ) +
   NoLegend())
+
+# read gametocyte metadata from Sa et al.
+df <- read_excel("./data/pbio.3000711.s034.xlsx") |>
+  select(sample = Sample, type = Type) |>
+  mutate(
+    prefix = sub("(_[^_]+)$", "", sample),
+    cells = sub("^[^_]+_[^_]+_", "", sample)
+  ) |>
+  select(prefix, cells, type) |>
+  mutate(
+    prefix = case_when(
+      prefix == "AMRU_Ao" ~ "278",
+      prefix == "AMRU_CQ" ~ "277",
+      prefix == "AMRU_Sa" ~ "276",
+      prefix == "Ches_Ao" ~ "275",
+      prefix == "Ches_CQ" ~ "274",
+      prefix == "Ches_Sa" ~ "273",
+      prefix == "NIH_Ao" ~ "269",
+      prefix == "NIH_CQ" ~ "269",
+      prefix == "NIH_Sa" ~ "272",
+    ),
+    new_cells = paste0(prefix, "_", cells)
+  )
+
+# Find indices of Seurat cells that match new_cells
+idx <- match(colnames(so), df$new_cells)
+
+# Assign type using these indices
+pv.combined.all$life_cycle_stage <- df$type[idx]

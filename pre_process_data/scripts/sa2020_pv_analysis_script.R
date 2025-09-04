@@ -172,7 +172,7 @@ for (i in 1:length(all_pv)) {
   all_pv[[i]] <- CreateSeuratObject(
     counts = mat,
     min.cells = 1,
-    min.features = 100
+    min.features = 1
   )
 }
 
@@ -193,16 +193,16 @@ geographic_location <- rep("USA_Rockville", length(all_pv))
 sc_technology <- rep("10x_Chomium_V2", length(all_pv))
 sequencer <- rep("Illumina HiSeq 4000", length(all_pv))
 host_species <- c(
-  "Saimiri_boliviensis",
-  "Aotus_nancymaae",
-  "Aotus_nancymaae",
-  "Saimiri_boliviensis",
-  "Saimiri_boliviensis",
-  "Aotus_nancymaae",
-  "Aotus_nancymaae",
-  "Saimiri_boliviensis",
-  "Aotus_nancymaae",
-  "Aotus_nancymaae"
+  "Saimiri boliviensis",
+  "Aotus nancymaae",
+  "Aotus nancymaae",
+  "Saimiri boliviensis",
+  "Saimiri boliviensis",
+  "Aotus nancymaae",
+  "Aotus nancymaae",
+  "Saimiri boliviensis",
+  "Aotus nancymaae",
+  "Aotus nancymaae"
 )
 host_id <- c(
   "3879",
@@ -263,13 +263,13 @@ for (i in 1:length(all_pv)) {
   all_pv[[i]]$treatment <- paste0(treatment[[i]])
   all_pv[[i]]$biological_replicate <- paste0(biological_replicate[[i]])
 
-  all_pv[[i]]$Barcode <- paste(
+  all_pv[[i]]$barcode <- paste(
     str_extract(all_pv[[i]]$run_id, "\\d{3}$"),
     "_",
     colnames(all_pv[[i]]),
     sep = ""
   )
-  colnames(all_pv[[i]]) <- all_pv[[i]]$Barcode
+  colnames(all_pv[[i]]) <- all_pv[[i]]$barcode
 }
 
 ##### --------------------------------------------------------------------------

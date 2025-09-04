@@ -12,26 +12,6 @@ gff_data <- readRDS("ref/PvivaxP01_gff_data.rds")
 # load seurat object
 so <- readRDS("./pre_process_data/pv_all_studies.rds")
 
-# metadata <- c(
-#   "nFeature_RNA",
-#   "nCount_RNA",
-#   "study_label",
-#   "num_srr",
-#   "pub_year",
-#   "geographic_location",
-#   "sc_technology",
-#   "sequencer",
-#   "host_species",
-#   "host_id",
-#   "sample_type",
-#   "parasite_stage",
-#   "strain",
-#   "day_post_infection",
-#   "treatment",
-#   "biological_replicate",
-#   "life_cycle_stage",
-#   str_extract(colnames(so), "RNA_snn_res.*")
-# )
 metadata <- colnames(so@meta.data)
 
 # subset reduction columns from seurat object

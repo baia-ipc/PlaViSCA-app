@@ -144,11 +144,11 @@ rm(bcrank, uniq)
 # set the seed to obtain reproducible results.
 # see PMID: 30902100 for  rationale and statistical framework underlying this
 # method
-set.seed(123456)
-all_pv <- lapply(all_pv, function(x) {
-  e.out <- emptyDrops(x, lower = 150) #change this value if needed
-  x <- x[, which(e.out$FDR <= 0.001)]
-})
+# set.seed(123456)
+# all_pv <- lapply(all_pv, function(x) {
+#   e.out <- emptyDrops(x, lower = 40) #change this value if needed
+#   x <- x[, which(e.out$FDR <= 0.001)]
+# })
 
 ##### --------------------------------------------------------------------------
 ##### 5. Processing step 2: conversion of dgCMatrix to a Seurat object
@@ -168,8 +168,8 @@ for (i in 1:length(all_pv)) {
   mat <- counts(sce)
   all_pv[[i]] <- CreateSeuratObject(
     counts = mat,
-    min.cells = 1,
-    min.features = 100
+    min.cells = 0,
+    min.features = 0
   )
 }
 
@@ -217,13 +217,13 @@ for (i in 1:length(all_pv)) {
   all_pv[[i]]$treatment <- paste0(treatment[[i]])
   all_pv[[i]]$biological_replicate <- paste0(biological_replicate[[i]])
 
-  all_pv[[i]]$Barcode <- paste(
+  all_pv[[i]]$barcode <- paste(
     str_extract(all_pv[[i]]$run_id, "\\d{3}$"),
     "_",
     colnames(all_pv[[i]]),
     sep = ""
   )
-  colnames(all_pv[[i]]) <- all_pv[[i]]$Barcode
+  colnames(all_pv[[i]]) <- all_pv[[i]]$barcode
 }
 
 ##### --------------------------------------------------------------------------
@@ -278,12 +278,25 @@ pv.combined.all <- Reduce(function(x, y) merge(x, y = y), all_pv)
 
 pv.combined.all <- JoinLayers(pv.combined.all)
 
-# pv.combined.all <- NormalizeData(pv.combined.all)
-# pv.combined.all <- FindVariableFeatures(pv.combined.all, selection.method = "vst",
-#                                         nfeatures = nrow(pv.combined.all) *.3,
-#                                       verbose = FALSE)
-# pv.combined.all <- ScaleData(pv.combined.all)
-# pv.combined.all <- RunPCA(pv.combined.all)
+
+# read data from ruberto2022_2 study
+ruberto2022_2 <- readRDS("data/6_PvSPZ.BS.combined.rds")
+spz_cell_ids <- WhichCells(ruberto2022_2, expression = Stage == "Sporozoite")
+
+cells_to_subset <- data.frame(cells = spz_cell_ids) |>
+  mutate(
+    cells_name = sub("_.*", "", cells),
+    cells_num = sub("^[^_]+_", "", cells),
+    new_cells = case_when(
+      cells_num == "Case_909" ~ "438",
+      cells_num == "Case_922" ~ "439",
+      cells_num == "Case_923" ~ "440"
+    ),
+    new_cells_name = paste0(new_cells, "_", cells_name)
+  ) |>
+  select(cells = new_cells_name)
+
+pv.combined.all <- subset(pv.combined.all, cells = cells_to_subset$cells)
 
 # Save Seurat object
 saveRDS(pv.combined.all, file = "ruberto2022_2.rds")

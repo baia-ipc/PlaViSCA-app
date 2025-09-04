@@ -219,13 +219,13 @@ for (i in 1:length(all_pv)) {
   all_pv[[i]]$treatment <- paste0(treatment[[i]])
   all_pv[[i]]$biological_replicate <- paste0(biological_replicate[[i]])
 
-  all_pv[[i]]$Barcode <- paste(
+  all_pv[[i]]$barcode <- paste(
     str_extract(all_pv[[i]]$run_id, "\\d{3}$"),
     "_",
     colnames(all_pv[[i]]),
     sep = ""
   )
-  colnames(all_pv[[i]]) <- all_pv[[i]]$Barcode
+  colnames(all_pv[[i]]) <- all_pv[[i]]$barcode
 }
 
 ##### --------------------------------------------------------------------------
@@ -287,7 +287,7 @@ pv.combined.all <- JoinLayers(pv.combined.all)
 # pv.combined.all <- RunPCA(pv.combined.all)
 
 # Load label from ruberto2022_1 study
-Hep59.1.2.seu <- readRDS("Hep59.1.2.seu_20aug2025")
+Hep59.1.2.seu <- readRDS("data/Hep59.1.2.seu_20aug2025.rds")
 
 cells_to_subset <- data.frame(
   cells = rownames(Hep59.1.2.seu@meta.data),
@@ -313,7 +313,7 @@ pv.combined.all <- subset(
 )
 
 # subset cells column
-barcode <- data.frame(cells = pv.combined.all$Barcode)
+barcode <- data.frame(cells = pv.combined.all$barcode)
 
 LiverForm <- left_join(barcode, cells_to_subset, by = "cells")
 

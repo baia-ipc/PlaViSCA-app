@@ -19,21 +19,23 @@ for script in "${scripts[@]}"; do
   fi
 done
 
-echo "Individual scripts completed. Now running the combined script."
+echo -e "\nrunning hazzard2024_merge_all..."
 
 Rscript hazzard2024_merge_all.R
 
-echo -e "\nrun hazzard 2022"
+echo -e "\nrunning hazzard 2022..."
 Rscript hazzard2022_pv_analysis_script.R
 
-echo -e "\nrun ruberto2022 1 and 2"
+echo -e "\nrunning ruberto2022 1..."
 Rscript ruberto2022_1_pv_analysis_script.R
+
+echo -e "\nrunning ruberto2022 2..."
 Rscript ruberto2022_2_pv_analysis_script.R
 
-echo -e "\nrun sa2020"
+echo -e "\nrunning sa2020..."
 Rscript sa2020_pv_analysis_script.R
 
-echo -e "\nrun integration"
+echo -e "\nrunning integration..."
 Rscript integration.R
 
 echo "All scripts completed."
