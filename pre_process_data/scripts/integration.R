@@ -100,8 +100,6 @@ for (res in seq(0.01, 0.1, by = 0.01)) {
 }
 
 
-# run tSNE
-
 # Run t-SNE
 pv.combined.all <- RunTSNE(
   object = pv.combined.all,
@@ -130,5 +128,3 @@ pv.combined.all@meta.data$seurat_clusters <- NULL
 pv.combined.all@reductions$tsne <- NULL
 
 saveRDS(pv.combined.all, file = "pv_all_studies.rds")
-
-clustree::clustree(pv.combined.all@meta.data, prefix = "RNA_snn_res.")

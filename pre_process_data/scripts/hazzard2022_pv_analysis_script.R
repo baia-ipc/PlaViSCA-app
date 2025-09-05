@@ -76,8 +76,7 @@ for (sample_id in samples) {
   assign(sample_id, sce)
   all_pv[[sample_id]] <- sce
 }
-rm(list = samples)
-
+#rm(list = samples)
 
 ##### --------------------------------------------------------------------------
 ##### 4. Processing step 1: select droplets containing cells
@@ -147,7 +146,7 @@ rm(bcrank, uniq)
 # method
 set.seed(123456)
 all_pv <- lapply(all_pv, function(x) {
-  e.out <- emptyDrops(x, lower = 40) #change this value if needed
+  e.out <- emptyDrops(x, lower = 1) #change this value if needed
   x <- x[, which(e.out$FDR <= 0.001)]
 })
 
@@ -184,7 +183,8 @@ for (i in 1:length(all_pv)) {
 # Add metadata. Note: the same will need to be done for the other samples that we analyze.
 
 study_pmid <- rep(study_num, length(all_pv))
-run_id <- rep(paste0("SRR20710", 998:501))
+run_id <- samples
+
 study_label <- rep("Hazzard2022", length(all_pv))
 num_srr <- rep(4, length(all_pv))
 pub_year <- rep(2022, length(all_pv))

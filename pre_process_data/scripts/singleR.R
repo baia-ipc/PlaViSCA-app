@@ -147,7 +147,7 @@ SCpubr::do_DimPlot(
 
 pv.combined.all <- FindClusters(
   pv.combined.all,
-  resolution = 0.3,
+  resolution = 0.1,
   graph_name = "new_clustering"
 ) # change as necessary
 
@@ -262,45 +262,62 @@ pv.combined.all <- RenameIdents(
   object = pv.combined.all,
   "0" = "Asexual 1",
   "1" = "Asexual 2",
-  "2" = "Female Gametocyte 1",
+  "2" = "Female gametocyte",
   "3" = "Asexual 3",
   "4" = "Asexual 4",
-  "5" = "Female Gametocyte 2",
-  "6" = "Male Gametocyte"
+  "5" = "Male gametocyte",
+  "6" = "Asexual 5",
+  "7" = "Asexual 6",
+  "8" = "Asexual 7",
+  "9" = "Asexual 8",
+  "10" = "Asexual 9",
+  "11" = "Asexual 10",
+  "12" = "Asexual 11",
+  "13" = "Asexual 12"
 )
 
-pv.combined.all$RenamedClusters1 <- Idents(pv.combined.all)
 
-DimPlot_scCustom(
-  pv.combined.all,
-  group.by = "RenamedClusters1",
-  reduction = "pca_integrated",
-  colors_use = ColorBlind_Pal()
-) +
-  theme_grey() +
-  border()
+pv.combined.all$pred_gametocyte <- as.character(Idents(pv.combined.all))
 
-(SCpubr::do_DimPlot(
-  sample = pv.combined.all,
-  label = TRUE,
-  label.color = "black",
-  repel = T,
-  reduction = "pca_integrated",
-  dims = c(1, 2),
-  pt.size = 0.25,
-  colors.use = c(
-    "Asexual 1" = "orange",
-    "Asexual 2" = "#0072B2",
-    "Female Gametocyte 1" = "#009E73",
-    "Asexual 3" = "#CC79A7",
-    "Asexual 4" = "#F0E442",
-    "Female Gametocyte 2" = "firebrick2",
-    "Male Gametocyte" = "#56B4E9"
-  )
-) +
-  NoLegend())
+# add male and female gametocyte from prediction to life_cycle_stage
+male_female <- pv.combined.all$pred_gametocyte %in%
+  c("Male gametocyte", "Female gametocyte")
 
-# read gametocyte metadata from Sa et al.
+pv.combined.all$life_cycle_stage[
+  male_female
+] <- pv.combined.all$pred_gametocyte[male_female]
+
+
+# DimPlot_scCustom(
+#   pv.combined.all,
+#   group.by = "RenamedClusters1",
+#   reduction = "pca_integrated",
+#   colors_use = ColorBlind_Pal()
+# ) +
+#   theme_grey() +
+#   border()
+
+# (SCpubr::do_DimPlot(
+#   sample = pv.combined.all,
+#   label = TRUE,
+#   label.color = "black",
+#   repel = T,
+#   reduction = "pca_integrated",
+#   dims = c(1, 2),
+#   pt.size = 0.25,
+#   colors.use = c(
+#     "Asexual 1" = "orange",
+#     "Asexual 2" = "#0072B2",
+#     "Female Gametocyte 1" = "#009E73",
+#     "Asexual 3" = "#CC79A7",
+#     "Asexual 4" = "#F0E442",
+#     "Female Gametocyte 2" = "firebrick2",
+#     "Male Gametocyte" = "#56B4E9"
+#   )
+# ) +
+#   NoLegend())
+
+# read gametocyte metadata from Sa et al. and overwrite the life_cylce_stage
 df <- read_excel("./data/pbio.3000711.s034.xlsx") |>
   select(sample = Sample, type = Type) |>
   mutate(
@@ -320,11 +337,50 @@ df <- read_excel("./data/pbio.3000711.s034.xlsx") |>
       prefix == "NIH_CQ" ~ "269",
       prefix == "NIH_Sa" ~ "272",
     ),
-    new_cells = paste0(prefix, "_", cells)
-  )
+    new_cells = paste0(prefix, "_", cells),
+    type = case_when(
+      type == "Female" ~ "Female gametocyte",
+      type == "Male" ~ "Male gametocyte"
+    )
+  ) |>
+  filter(type == c("Male gametocyte", "Female gametocyte"))
 
 # Find indices of Seurat cells that match new_cells
-idx <- match(colnames(so), df$new_cells)
+match_cell <- intersect(pv.combined.all$barcode, df$new_cells)
+
 
 # Assign type using these indices
-pv.combined.all$life_cycle_stage <- df$type[idx]
+pv.combined.all$life_cycle_stage[match_cell] <- df$type[match(
+  match_cell,
+  df$new_cells
+)]
+
+# overwrite life cycle stage with column liver form frm Ruberto2022_1
+pv.combined.all$liver_form[
+  pv.combined.all$liver_form == "Hypnozoites"
+] <- "Hypnozoite"
+
+pv.combined.all$liver_form[
+  pv.combined.all$liver_form == "Schizonts"
+] <- "Schizont"
+
+
+liver_form <- pv.combined.all$liver_form %in% c("Hypnozoite", "Schizont")
+
+pv.combined.all$life_cycle_stage[liver_form] <- pv.combined.all$liver_form[
+  liver_form
+]
+
+# overwrite for the sample type salivary gland to sporozoite. This is for Rubeto2022_2, hazzard2022 498 and 499
+
+ruberto2022_2 <- pv.combined.all$study_label == "Ruberto2022_2"
+pv.combined.all$life_cycle_stage[ruberto2022_2] <- "Sporozoite"
+
+hazzard2022 <- pv.combined.all$run_id %in% c("SRR20710498", "SRR20710499")
+pv.combined.all$life_cycle_stage[hazzard2022] <- "Sporozoite"
+
+# clean up
+
+# change features from - to _ to match with gff gene_id
+features <- gsub("-", "_", rownames(pv.combined.all[["RNA"]]@features))
+rownames(pv.combined.all[["RNA"]]@features) <- features

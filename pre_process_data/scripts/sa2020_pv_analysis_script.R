@@ -67,7 +67,7 @@ for (sample_id in samples) {
       "/srv/baia/prj/pvsca/pre_process_data/counts/",
       study_num,
       "/",
-      samples,
+      sample_id,
       "_solo_out/Solo.out/GeneFull/filtered"
     )
   )
@@ -144,11 +144,11 @@ rm(bcrank, uniq)
 # set the seed to obtain reproducible results.
 # see PMID: 30902100 for  rationale and statistical framework underlying this
 # method
-set.seed(123456)
-all_pv <- lapply(all_pv, function(x) {
-  e.out <- emptyDrops(x, lower = 40) #change this value if needed
-  x <- x[, which(e.out$FDR <= 0.001)]
-})
+# set.seed(123456)
+# all_pv <- lapply(all_pv, function(x) {
+#   e.out <- emptyDrops(x, lower = 40) #change this value if needed
+#   x <- x[, which(e.out$FDR <= 0.001)]
+# })
 
 #all_pv2 <- all_pv
 #all_pv <- all_pv2
