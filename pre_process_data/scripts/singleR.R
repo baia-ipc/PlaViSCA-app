@@ -78,6 +78,9 @@ pred.IDC.all <- SingleR(
   labels = colnames(IDC_cycle)
 )
 
+# add pruned prediction time to seurat
+pv.combined.all$hour_post_invasion <- pred.IDC.all$pruned.labels
+
 # sopheap identify IDC time
 pred.IDC.all$pruned.labels <- as.numeric(pred.IDC.all$pruned.labels)
 pred.IDC.all$pruned.labels <- case_when(
@@ -380,7 +383,14 @@ hazzard2022 <- pv.combined.all$run_id %in% c("SRR20710498", "SRR20710499")
 pv.combined.all$life_cycle_stage[hazzard2022] <- "Sporozoite"
 
 # clean up
-
 # change features from - to _ to match with gff gene_id
 features <- gsub("-", "_", rownames(pv.combined.all[["RNA"]]@features))
 rownames(pv.combined.all[["RNA"]]@features) <- features
+
+
+pv.combined.all$orig.ident <- NULL
+pv.combined.all$femaleGams_module_score1 <- NULL
+pv.combined.all$maleGams_module_score1 <- NULL
+pv.combined.all@project.name <- "PlaViSca"
+
+saveRDS(pv.combined.all, file = "./pv_all_studies.rds")

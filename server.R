@@ -782,9 +782,9 @@ server <- function(input, output, session) {
         shinyjs::show("axis")
         x_choices <- switch(
           input$embedding,
-          "umap" = if (isTRUE(input$check_all)) umap_i() else umap_u(),
-          "pca" = if (isTRUE(input$check_all)) pca_i() else pca_u,
-          "tsne" = tsne()
+          "umap" = if (isTRUE(input$check_all)) umap_i else umap_u,
+          "pca" = if (isTRUE(input$check_all)) pca_i else pca_u,
+          "tsne" = tsne
         )
 
         updateSelectInput(
@@ -799,11 +799,11 @@ server <- function(input, output, session) {
           "umap" = y_col(
             input$check_all,
             input$xaxis,
-            umap_i(),
-            umap_u()
+            umap_i,
+            umap_u
           ),
-          "pca" = y_col(input$check_all, input$xaxis, pca_i(), pca_u),
-          "tsne" = setdiff(tsne(), input$xaxis)
+          "pca" = y_col(input$check_all, input$xaxis, pca_i, pca_u),
+          "tsne" = setdiff(tsne, input$xaxis)
         )
 
         updateSelectInput(

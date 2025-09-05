@@ -38,9 +38,9 @@ mr_data <- FetchData(
 # clean mr_data
 mr_data <- mr_data %>%
   dplyr::rename(
-    umap_i_1 = ytdeh_1,
-    umap_i_2 = ytdeh_2,
-    umap_i_3 = ytdeh_3,
+    umap_i_1 = gbcwm_1,
+    umap_i_2 = gbcwm_2,
+    umap_i_3 = gbcwm_3,
     umap_u_1 = umap_1,
     umap_u_2 = umap_2,
     umap_u_3 = umap_3,
@@ -65,7 +65,7 @@ red_df <- mr_data %>%
 red_df <- red_df[order(rownames(red_df)), ]
 
 # normalized data
-norm_exp <- GetAssayData(so, slot = "data")
+norm_exp <- GetAssayData(so, layer = "data")
 norm_exp <- Matrix::t(norm_exp)
 norm_exp <- norm_exp[order(rownames(norm_exp)), ]
 
