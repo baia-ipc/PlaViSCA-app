@@ -53,16 +53,12 @@
 <li class="toctree-l3"><a class="reference internal" href="#preparing-data">Preparing data</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#install-dependencies">Install dependencies</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#option-a-use-renv">Option A: use <code class="docutils literal notranslate"><span class="pre">renv</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#option-b-manual-installation">Option B: manual installation</a></li>
-</ul>
-</li>
+<li class="toctree-l2"><a class="reference internal" href="#install-dependencies">Install dependencies</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="#run-application">Run Application</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#option-a-from-rstudio">Option A: from RStudio</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#option-b-from-the-command-line-terminal">Option B: from the command line terminal</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#option-b-terminal-command-line">Option B: terminal command line</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="main_page.html">PlaViSca features</a></li>
@@ -101,14 +97,14 @@
 <li><p>Filter and export metadata</p></li>
 <li><p>Dynamic, interactive visualizations with 2D or 3D options</p></li>
 <li><p>Gene expression viewer for stage-specific or gene-specific profiling</p></li>
-<li><p>Filter and subset data by metadata variable such as condition, stage, species, and more</p></li>
+<li><p>Filter and subset data by metadata variable such as study label, parasite stage, sample type, and more</p></li>
 <li><p>Embeddings viewer (PCA, UMAP, t-SNE) for both integrated and unintegrated data</p></li>
 <li><p>Downloadable metadata and plots for downstream analysis</p></li>
 </ul>
 </section>
 <section id="hosting-and-access">
 <h1>Hosting and access<a class="headerlink" href="#hosting-and-access" title="Link to this heading"></a></h1>
-<p>PlaViSca is hosted online, providing users with direct access to the web application via the following website: <a class="reference external" href="https://example.com">PlaViSca Web Application</a>. This platform serves as the central hub for exploring and analyzing scRNA-seq data without requiring local installation.</p>
+<p>PlaViSca is hosted online, providing users with direct access to the web application via the following website: <a class="reference external" href="https://xxxx.com">PlaViSca Web Application</a>. This platform serves as the central hub for exploring and analyzing scRNA-seq of <em>Plasmodium vivax</em> data without requiring local installation.</p>
 <p>For users who prefer to run the application on their local computer, the following steps provide detailed guidance on setting up PlaViSca locally.</p>
 </section>
 <section id="local-installation">
@@ -138,8 +134,6 @@
 ├── README.md          # Project overview and installation instructions
 ├── manual.R           # User manual for effective using PlaViSca web application
 ├── ref/               # Reference data directory such as genome annotation
-├── renv/              # R environment directory managed by `renv`
-├── renv.lock          # Snapshot of R packages used
 ├── server.R           # Shiny server logic
 ├── ui.R               # Shiny user interface definition
 └── www/               # Static assets (images, CSS, JavaScript)
@@ -153,27 +147,47 @@
 <section id="preparing-data">
 <h3>Preparing data<a class="headerlink" href="#preparing-data" title="Link to this heading"></a></h3>
 <ol class="arabic simple">
+<li><p>Place the files in the <code class="docutils literal notranslate"><span class="pre">data/</span></code> directory within the project folder.</p></li>
 <li><p>Ensure the gene expression data is in <code class="docutils literal notranslate"><span class="pre">.rds</span></code> format and save in three files normliazed_df.rds, scale_df.rds, cleaned_dataset.rds</p></li>
 <li><p>Metadata should be provided in a compatible format (e.g., <code class="docutils literal notranslate"><span class="pre">.csv</span></code> or <code class="docutils literal notranslate"><span class="pre">.rds</span></code>).</p></li>
-<li><p>Place the files in the <code class="docutils literal notranslate"><span class="pre">data/</span></code> directory within the project folder.</p></li>
 </ol>
+<p>metadata columns:</p>
+<ul class="simple">
+<li><p>nCount_RNA: Total number of RNA molecules (UMI counts) detected per cell.</p></li>
+<li><p>nFeature_RNA: Number of unique genes detected per cell.</p></li>
+<li><p>study_pmid: PubMed ID of the publication associated with the dataset.</p></li>
+<li><p>study_label: Short identifier for the study (e.g., Hazzard2022).</p></li>
+<li><p>run_id: Identifier of the sequencing run/sample (e.g., SRR11008272).</p></li>
+<li><p>num_srr: Number of sequencing runs (SRA accessions) per sample (e.g., 10 run for Sa2022).</p></li>
+<li><p>pub_year: Year of publication (e.g., Ruberto2022_1 published in 2022).</p></li>
+<li><p>geographic_location: Location where the study was performed (e.g., Modulkiri Cambodia).</p></li>
+<li><p>sc_technology: Single-cell technology used (e.g., 10x Genomics Chromium v3).</p></li>
+<li><p>sequencer: Sequencing platform (e.g., Illumina NovaSeq 6000).</p></li>
+<li><p>host_species: Host species from which the sample was derived (e.g., Anopheles stephensi, Saimiri boliviensis).</p></li>
+<li><p>host_id: Identifier for the individual host organism (Saimiri boliviensis 3879).</p></li>
+<li><p>sample_type: Type of biological material collected (e.g., vector salivary gland, host blood).</p></li>
+<li><p>parasite_stage: Parasite lifecycle stage represented in the sample (e.g., blood stage).</p></li>
+<li><p>strain: Parasite strain or isolate (e.g., Sal1, Sal1/Chesson).</p></li>
+<li><p>day_post_infection: Number of days after infection when the sample was collected.</p></li>
+<li><p>life_cycle_stage: Annotated lifecycle stage of the parasite (e.g., ring, trophozoite, schizont, gametocyte).</p></li>
+<li><p>treatment: Experimental treatment applied to the sample (e.g., drug, control; NA if none).</p></li>
+<li><p>biological_replicate: Replicate number for independent biological samples.</p></li>
+<li><p>barcode: Unique single-cell barcode identifier from the sequencing library.</p></li>
+<li><p>RNA_snn_res.0.01 … RNA_snn_res.0.1: Clustering assignments from Seurat at multiple resolution parameters (0.01–0.1). Each column corresponds to one resolution setting.</p></li>
+</ul>
+<p>There are also columns that were retained in the Seurat object but not used in the analysis, including:</p>
+<ul class="simple">
+<li><p>liver_form: Metadata carried over from the study, indicating whether a cell was annotated as a liver-stage parasite.</p></li>
+<li><p>hour_post_invasion: Number of hours after parasite invasion of host cells, derived from SingleR prediction.</p></li>
+<li><p>pred_gametocyte: Predicted annotation of whether the cell is a gametocyte, based on a module score–based gametocyte prediction.</p></li>
+<li><p>seurat_clusters: Clustering solution generated by Seurat prior to assigning module score–based identities.</p></li>
+</ul>
 <p>Once the data is in place, open the <code class="docutils literal notranslate"><span class="pre">pvsca.Rproj</span></code> file. This action will launch RStudio and automatically set the working directory to the appropriate project folder, preparing the environment for running the application.</p>
 </section>
 </section>
 <section id="install-dependencies">
 <h2>Install dependencies<a class="headerlink" href="#install-dependencies" title="Link to this heading"></a></h2>
-<p>PlaViSca requires several R packages to be installed. There are two options to install the required dependencies in Rstudio console:</p>
-<section id="option-a-use-renv">
-<h3>Option A: use <code class="docutils literal notranslate"><span class="pre">renv</span></code><a class="headerlink" href="#option-a-use-renv" title="Link to this heading"></a></h3>
-<div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="nf">install.packages</span><span class="p">(</span><span class="s">&quot;renv&quot;</span><span class="p">)</span>
-
-<span class="n">renv</span><span class="o">::</span><span class="nf">restore</span><span class="p">()</span>
-</pre></div>
-</div>
-</section>
-<section id="option-b-manual-installation">
-<h3>Option B: manual installation<a class="headerlink" href="#option-b-manual-installation" title="Link to this heading"></a></h3>
-<p>To install specific package version (which is recommended), we have to install <code class="docutils literal notranslate"><span class="pre">remote</span></code> package:</p>
+<p>PlaViSca requires several R packages to be installed. We can install the required dependencies in Rstudio console: <code class="docutils literal notranslate"><span class="pre">install.packages(c(&quot;shiny&quot;,</span> <span class="pre">&quot;shinyjs&quot;,</span> <span class="pre">&quot;shinycssloaders&quot;,</span> <span class="pre">&quot;plotly&quot;,</span> <span class="pre">&quot;DT&quot;,</span> <span class="pre">&quot;RColorBrewer&quot;,</span> <span class="pre">&quot;tidyverse&quot;,</span> <span class="pre">&quot;later&quot;))</span></code>. or in stall the specific version of packages using the following code:</p>
 <div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="nf">install.packages</span><span class="p">(</span><span class="s">&quot;remote&quot;</span><span class="p">)</span>
 
 <span class="n">remote</span><span class="o">::</span><span class="nf">install_version</span><span class="p">(</span><span class="s">&quot;shiny&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">version</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;1.10.0&quot;</span><span class="p">)</span>
@@ -188,10 +202,10 @@
 </div>
 </section>
 </section>
-</section>
 <section id="run-application">
 <h1>Run Application<a class="headerlink" href="#run-application" title="Link to this heading"></a></h1>
-<p><img alt="Figure 1: Rstudio image" src="_images/Rstudio.png" /></p>
+<p><img alt="Figure 1: Rstudio image" src="_images/Rstudio.png" />
+<strong>Figure 1:</strong> Rstudio</p>
 <section id="option-a-from-rstudio">
 <h2>Option A: from RStudio<a class="headerlink" href="#option-a-from-rstudio" title="Link to this heading"></a></h2>
 <ul class="simple">
@@ -199,8 +213,9 @@
 <li><p>Click the <strong>Run App</strong> button in the top-right of the Rstudio see in <strong>Figure 1</strong>.</p></li>
 </ul>
 </section>
-<section id="option-b-from-the-command-line-terminal">
-<h2>Option B: from the command line terminal<a class="headerlink" href="#option-b-from-the-command-line-terminal" title="Link to this heading"></a></h2>
+<section id="option-b-terminal-command-line">
+<h2>Option B: terminal command line<a class="headerlink" href="#option-b-terminal-command-line" title="Link to this heading"></a></h2>
+<p>Navigate to the project directory and run the following command in your terminal:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>R<span class="w"> </span>-e<span class="w"> </span><span class="s2">&quot;shiny::runApp(&#39;app.R&#39;, launch.browser = TRUE)&quot;</span>
 </pre></div>
 </div>

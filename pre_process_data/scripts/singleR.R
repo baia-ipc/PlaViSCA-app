@@ -18,7 +18,7 @@ library(Seurat) # contains scRNA-seq analysis functions
 #library(tidyr) # data wrangling
 library(SingleCellExperiment) # single-cell data storage
 library(SingleR) # single-cell data identification tool
-library(SCpubr) # single-cell data handling and plotting tools
+#library(SCpubr) # single-cell data handling and plotting tools
 library(scCustomize) # single-cell data handling and plotting tools
 library(tidyverse)
 

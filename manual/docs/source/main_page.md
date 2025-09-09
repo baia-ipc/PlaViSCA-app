@@ -31,11 +31,11 @@ The Analysis page is designed to facilitate interactive exploration of both meta
 
 ### Metadata
 
-<iframe width="100%" height="360" src="https://www.youtube.com/embed/OVQYo1mZfok" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+<iframe width="100%" height="360" src="https://www.youtube.com/embed/znUUFwZDzY0" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
 **Video 1:** Metadata filtration
 
-A short video demonstration of the Metadata tab **Video 1**. This video provides an overview of how to filter datasets by biological and experimental attributes, such as species, reproductive form, infection condition, parasite stage, and sample ID. Applying filters dynamically updates both plots and tables, enabling users to focus on relevant data subsets for further analysis.
+A short video demonstration of the Metadata tab **Video 1**. This video provides an overview of how to filter datasets by biological and experimental attributes, such as host species, life cycle stage, treatment, parasite stage, and sample type. Applying filters dynamically updates both plots and tables, enabling users to focus on relevant data subsets for further analysis.
 
 Interactive features include:
 - **Plotly Charts:** Hover to view detailed values. Additional controls (zoom, pan, selection, download) are accessible in the chart's top-right corner.
@@ -63,7 +63,7 @@ The Data Source section provides detailed documentation and attribution for the 
 
 ### Gene expression
 
-<iframe width="100%" height="360" src="https://www.youtube.com/embed/Pqz_eRX3lrg" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+<iframe width="100%" height="360" src="https://www.youtube.com/embed/ehDxOIu3fz0" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
 **Video 2:** Gene expression tab functionality
 
@@ -78,7 +78,7 @@ Each selection generates a dynamic violin plot with interactive filtering, hover
 
 ### Embedding
 
-<iframe width="100%" height="360" src="https://www.youtube.com/embed/8nqulHcMge0" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+<iframe width="100%" height="360" src="https://www.youtube.com/embed/py5oW_ghmqY" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
 **Video 3:** Embedding tab functionality
 
