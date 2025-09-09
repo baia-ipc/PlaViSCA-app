@@ -512,12 +512,28 @@ server <- function(input, output, session) {
 
       ## plot elbow
       output$data_pca_stdv_plotly <- renderPlotly({
-        elbow_plot(pca_std_df)
+        selected_study <- if (!is.null(input$study_label_qc) && length(input$study_label_qc) > 0) {
+          input$study_label_qc[1] 
+        } else {
+          unique(mr_data$study_label)[1]
+        }
+        
+        # Filter PCA data by selected study
+        study_pca_df <- pca_df %>%
+          filter(study == selected_study)
+        
+        elbow_plot(study_pca_df, selected_study)
       })
 
       ## plot variable genes
       output$variable_genes_plotly <- renderPlotly({
-        var_genes_plot(vf_data, top_n = 15)
+        selected_study <- if (!is.null(input$study_label_qc) && length(input$study_label_qc) > 0) {
+          input$study_label_qc[1] 
+        } else {
+          unique(mr_data$study_label)[1]
+        }
+        
+        var_genes_plot(hiv_data, selected_study, top_n = 15)
       })
     }
   )

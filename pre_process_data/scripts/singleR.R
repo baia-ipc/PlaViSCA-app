@@ -1,25 +1,26 @@
 library(DropletUtils) # scRNA-seq empty droplet detection
 library(readxl) # data import
-library(stringr) # data wrangling
-library(tibble) # data wrangling
-library(dplyr) # data wrangling
-library(ggplot2) # visualization
-library(scico) # visualization
-library(scales) # visualization
+#library(stringr) # data wrangling
+#library(tibble) # data wrangling
+#library(dplyr) # data wrangling
+#library(ggplot2) # visualization
+#library(scico) # visualization
+#library(scales) # visualization
 library(rtracklayer) # contains functions to handle gff/gtf files
 library(Seurat) # contains scRNA-seq analysis functions
-library("leiden") # contains data reduction functions
-library(scater) # contains scRNA-seq analysis functions
-library(ggpubr) # visualization
-library(viridis) # visualization - color palettes
-library(EnhancedVolcano) # visualization
-library(pheatmap) # visualization
-library(RColorBrewer) # visualization - color palettes
-library(tidyr) # data wrangling
+#library("leiden") # contains data reduction functions
+#library(scater) # contains scRNA-seq analysis functions
+#library(ggpubr) # visualization
+#library(viridis) # visualization - color palettes
+#library(EnhancedVolcano) # visualization
+#library(pheatmap) # visualization
+#library(RColorBrewer) # visualization - color palettes
+#library(tidyr) # data wrangling
 library(SingleCellExperiment) # single-cell data storage
 library(SingleR) # single-cell data identification tool
 library(SCpubr) # single-cell data handling and plotting tools
 library(scCustomize) # single-cell data handling and plotting tools
+library(tidyverse)
 
 # set current working directory
 setwd("/srv/baia/prj/pvsca/pre_process_data")

@@ -412,17 +412,21 @@ feature_plot <- function(df, x, y, color, y_title, title) {
 }
 
 # Generate Elbow plot for PCA
-elbow_plot <- function(pca_std_df) {
-  req(pca_std_df)
+elbow_plot <- function(pca_df, selected_study) {
+  req(pca_df)
+  
+  pca_df <- pca_df %>%
+      filter(study == !!selected_study)
+
   plot_ly(
-    data = pca_std_df,
+    data = pca_df,
     x = ~pc,
     y = ~std,
     type = "scatter",
     mode = "lines+markers",
     marker = list(size = 8, color = "red"),
     line = list(color = "blue"),
-    text = ~ paste("PCA:", pc, "<br>Stdv:", pca_std_df),
+    text = ~ paste("PCA:", pc, "<br>Stdv:", std),
     hoverinfo = "text"
   ) %>%
     layout(
@@ -433,57 +437,81 @@ elbow_plot <- function(pca_std_df) {
 }
 
 # Generate plot for top variable genes
-var_genes_plot <- function(df, top_n = 10) {
+var_genes_plot <- function(df, study, top_n = 10) {
   req(df)
 
+  df <- df %>%
+    filter(study == !!study)
+
+
+  # Calculate counts AFTER filtering by study
   counts <- table(df$variable)
   var_count <- counts["TRUE"]
   nonvar_count <- counts["FALSE"]
 
-  df$variable_status <- ifelse(
-    df$variable,
-    paste0("Variable (n = ", var_count, ")"),
-    paste0("Non-variable (n = ", nonvar_count, ")")
-  )
-
-  top_hvf <- df %>%
-    filter(variable == TRUE) %>%
+  # Create separate datasets for each category
+  non_variable_genes <- df %>% filter(variable == FALSE)
+  variable_genes <- df %>% filter(variable == TRUE)
+  
+  top_hvf <- variable_genes %>%
     arrange(rank) %>%
     head(top_n)
+  
+  # Remove top genes from regular variable genes to avoid overlap
+  regular_variable_genes <- variable_genes %>%
+    anti_join(top_hvf, by = "name")
 
   plot_ly() %>%
+    # Non-variable genes (black)
     add_trace(
-      data = df,
+      data = non_variable_genes,
       x = ~mean,
       y = ~variance.standardized,
-      color = ~variable_status,
-      colors = c("black", "red"),
       type = "scatter",
       mode = "markers",
-      marker = list(size = 5, opacity = 0.7),
+      marker = list(size = 5, opacity = 0.7, color = "black"),
       text = ~name,
       hovertemplate = paste(
         "Gene: %{text}<br>",
         "Mean: %{x}<br>",
         "Variance: %{y}<extra></extra>"
       ),
-      name = "Variable Genes"
+      name = paste0("Non-variable (n = ", nonvar_count, ")"),
+      showlegend = TRUE
     ) %>%
+    # Regular variable genes (red)
+    add_trace(
+      data = regular_variable_genes,
+      x = ~mean,
+      y = ~variance.standardized,
+      type = "scatter",
+      mode = "markers",
+      marker = list(size = 5, opacity = 0.7, color = "red"),
+      text = ~name,
+      hovertemplate = paste(
+        "Gene: %{text}<br>",
+        "Mean: %{x}<br>",
+        "Variance: %{y}<extra></extra>"
+      ),
+      name = paste0("Variable (n = ", var_count, ")"),
+      showlegend = TRUE
+    ) %>%
+    # Top variable genes (orange)
     add_trace(
       data = top_hvf,
       x = ~mean,
       y = ~variance.standardized,
-      color = I("orange"),
       type = "scatter",
       mode = "markers",
-      marker = list(size = 6, opacity = 1),
+      marker = list(size = 6, opacity = 1, color = "orange"),
       text = ~name,
       hovertemplate = paste(
         "Gene: %{text}<br>",
         "Mean: %{x}<br>",
         "Variance: %{y}<extra></extra>"
       ),
-      name = paste("Top", top_n, "Variable")
+      name = paste("Top", top_n, "Variable"),
+      showlegend = TRUE
     ) %>%
     layout(
       xaxis = list(title = "Mean Expression"),
@@ -516,7 +544,6 @@ gene_exp_plot <- function(data, x_col) {
       )
     )
 }
-
 
 # Generate PlasmoDB and NCBI links
 gene_links <- function(gene_id) {

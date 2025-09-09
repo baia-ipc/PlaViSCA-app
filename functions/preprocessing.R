@@ -94,55 +94,95 @@ saveRDS(normalize_df, "data/normalize_df.rds")
 saveRDS(raw_df, "data/raw_df.rds")
 saveRDS(scale_df, "data/scale_df.rds")
 
+# pca_std_df and hvf_data
+# split data per study
+so_list <- SplitObject(so, split.by = "study_label")
 
-# Extract PCA standard deviation
-pca_std_df <- so@reductions$pca_unintegrated@stdev
+per_study_data <- list()
+for (study_name in names(so_list)) {
+  so_sub <- so_list[[study_name]]
 
-pca_std_df <- data.frame(
-  pc = 1:length(pca_std_df),
-  std = pca_std_df
+  # Normalize
+  so_sub <- NormalizeData(so_sub, assay = "RNA", verbose = FALSE)
+
+  # PCA
+  so_sub <- RunPCA(so_sub, assay = "RNA", verbose = FALSE)
+  pca_std_df <- data.frame(
+    pc = 1:length(so_sub@reductions$pca@stdev),
+    std = so_sub@reductions$pca@stdev
+  )
+
+  # Highly variable genes (2000 by default)
+  so_sub <- FindVariableFeatures(
+    so_sub,
+    assay = "RNA",
+    selection.method = "vst",
+    nfeatures = 2000
+  )
+
+  hiv_data <- HVFInfo(so_sub, assay = "RNA", method = "vst", status = TRUE) %>%
+    rownames_to_column("id") %>%
+    left_join(gff_data, by = "id") %>%
+    select(id, name, mean, variable, rank, variance.standardized) %>%
+    mutate(name = coalesce(name, id))
+
+  # Top expressed genes
+  top_genes <- rowMeans(GetAssayData(so_sub, assay = "RNA", layer = "data"))
+  top_genes <- names(sort(top_genes, decreasing = TRUE)[1:10])
+
+  top_genes_exp <- FetchData(so_sub, vars = c(top_genes)) %>%
+    rownames_to_column("id") %>%
+    pivot_longer(
+      any_of(top_genes),
+      names_to = "gene",
+      values_to = "expression"
+    ) %>%
+    left_join(gff_data, by = c("gene" = "id")) %>%
+    select(id, gene, name, expression) %>%
+    mutate(name = coalesce(name, gene))
+
+  # Store per-study results
+  per_study_data[[study_name]] <- list(
+    pca_std_df = pca_std_df,
+    hiv_data = hiv_data,
+    top_genes_exp = top_genes_exp
+  )
+}
+
+
+pca_df <- bind_rows(
+  lapply(names(per_study_data), function(study_name) {
+    df <- per_study_data[[study_name]]$pca_std_df
+    df$study <- study_name
+    df
+  })
 )
 
-# variable genes expression
-so <- FindVariableFeatures(
-  so,
-  assay = "RNA",
-  selection.method = "vst",
-  nfeatures = 2000
+hiv_df <- bind_rows(
+  lapply(names(per_study_data), function(study_name) {
+    df <- per_study_data[[study_name]]$hiv_data
+    df$study <- study_name
+    df
+  })
 )
-vf_data <- HVFInfo(object = so, assay = "RNA", method = "vst", status = TRUE)
 
-vf_data <- vf_data %>%
-  rownames_to_column("id") %>%
-  left_join(gff_data, by = "id") %>%
-  select(id, name, mean, variable, rank, variance.standardized) %>%
-  mutate(name = coalesce(name, id))
-
-# top expression genes
-top_genes <- rowMeans(GetAssayData(so, assay = "RNA", layer = "data"))
-top_genes <- names(sort(top_genes, decreasing = TRUE)[1:10])
-
-# top expression genes with cluster information
-top_genes_exp <- FetchData(so, vars = c(top_genes, "ident")) %>%
-  rownames_to_column("id") %>%
-  pivot_longer(
-    any_of(top_genes),
-    names_to = "gene",
-    values_to = "expression"
-  ) %>%
-  left_join(gff_data, by = c("gene" = "id")) %>%
-  select(id, gene, name, expression, ident) %>%
-  mutate(name = coalesce(name, gene))
+top_genes_df <- bind_rows(
+  lapply(names(per_study_data), function(study_name) {
+    df <- per_study_data[[study_name]]$top_genes_exp
+    df$study <- study_name
+    df
+  })
+)
 
 save_data <- list(
   mr_data = mr_data,
-  pca_std_df = pca_std_df,
-  vf_data = vf_data,
+  pca_df = pca_df,
+  hiv_data = hiv_df,
   top_genes_exp = top_genes_exp
 )
 
-# save list of data
+# # save list of data
 saveRDS(save_data, "data/cleaned_dataset.rds")
 
 # clear objects
-rm(list = ls())
+# rm(list = ls())

@@ -1,26 +1,26 @@
 library(DropletUtils) # scRNA-seq empty droplet detection
-library(readxl) # data import
-library(stringr) # data wrangling
-library(tibble) # data wrangling
-library(dplyr) # data wrangling
-library(ggplot2) # visualization
-library(scico) # visualization
-library(scales) # visualization
-library(rtracklayer) # contains functions to handle gff/gtf files
+#library(readxl) # data import
+#library(stringr) # data wrangling
+#library(tibble) # data wrangling
+#library(dplyr) # data wrangling
+#library(ggplot2) # visualization
+#library(scico) # visualization
+#library(scales) # visualization
+#library(rtracklayer) # contains functions to handle gff/gtf files
 library(Seurat) # contains scRNA-seq analysis functions
-library("leiden") # contains data reduction functions
-library(scater) # contains scRNA-seq analysis functions
-library(ggpubr) # visualization
-library(viridis) # visualization - color palettes
-library(EnhancedVolcano) # visualization
-library(pheatmap) # visualization
-library(RColorBrewer) # visualization - color palettes
-library(tidyr) # data wrangling
-library(SingleCellExperiment) # single-cell data storage
-library(SingleR) # single-cell data identification tool
-library(SCpubr) # single-cell data handling and plotting tools
-library(scCustomize) # single-cell data handling and plotting tools
-library(clustree)
+#library("leiden") # contains data reduction functions
+#library(scater) # contains scRNA-seq analysis functions
+#library(ggpubr) # visualization
+#library(viridis) # visualization - color palettes
+#library(EnhancedVolcano) # visualization
+#library(pheatmap) # visualization
+#library(RColorBrewer) # visualization - color palettes
+#library(tidyr) # data wrangling
+#library(SingleCellExperiment) # single-cell data storage
+#library(SingleR) # single-cell data identification tool
+#library(SCpubr) # single-cell data handling and plotting tools
+#library(scCustomize) # single-cell data handling and plotting tools
+#library(clustree)
 
 # set current working directory
 setwd("/srv/baia/prj/pvsca/pre_process_data")
@@ -111,15 +111,6 @@ pv.combined.all <- RunTSNE(
   reduction.key = "tSNE_",
   do.fast = TRUE
 )
-
-
-# DimPlot(
-#   pv.combined.all,
-#   reduction = "umap_integrated",
-#   group.by = "RNA_snn_res.0.2"
-# ) +
-#   theme_grey() +
-#   border()
 
 # Remove unneeded data
 pv.combined.all@reductions$pca <- NULL

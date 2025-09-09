@@ -1,7 +1,7 @@
 # sourcer function
 source("functions/helpers.R")
 library(data.table)
-library(memoise) 
+library(memoise)
 
 # Define a function for memoized data loading.
 # This will cache the result of readRDS, so each file is only read once per session.
@@ -19,7 +19,7 @@ DATA_PATHS <- list(
 
 # Load small, non-blocking data at startup
 pub_data <- readr::read_csv("data/data_source.csv", show_col_types = FALSE)
-pub_data$DOI <- paste0("<a href='", pub_data$DOI, "' target='_blank'>", pub_data$DOI, "</a>")
+# pub_data$DOI <- paste0("<a href='", pub_data$DOI, "' target='_blank'>", pub_data$DOI, "</a>")
 
 gff_data <- readRDS("ref/PvivaxP01_gff_data.rds")
 
@@ -28,14 +28,34 @@ gff_data <- readRDS("ref/PvivaxP01_gff_data.rds")
 norm_df <- readRDS(DATA_PATHS$norm_df)
 cleaned_data_list <- readRDS(DATA_PATHS$cleaned_dataset)
 mr_data <- cleaned_data_list$mr_data
-vf_data <- cleaned_data_list$vf_data
-pca_std_df <- cleaned_data_list$pca_std_df
+hiv_data <- cleaned_data_list$hiv_data
+pca_df <- cleaned_data_list$pca_df
 
 # Define column variables based on the pre-loaded metadata
-pca_u <- grep("^pca_u_\\d+", colnames(mr_data), ignore.case = TRUE, value = TRUE)
-pca_i <- grep("^pca_i_\\d+", colnames(mr_data), ignore.case = TRUE, value = TRUE)
-umap_i <- grep("^umap_i_\\d+", colnames(mr_data), ignore.case = TRUE, value = TRUE)
-umap_u <- grep("^umap_u_\\d+", colnames(mr_data), ignore.case = TRUE, value = TRUE)
+pca_u <- grep(
+  "^pca_u_\\d+",
+  colnames(mr_data),
+  ignore.case = TRUE,
+  value = TRUE
+)
+pca_i <- grep(
+  "^pca_i_\\d+",
+  colnames(mr_data),
+  ignore.case = TRUE,
+  value = TRUE
+)
+umap_i <- grep(
+  "^umap_i_\\d+",
+  colnames(mr_data),
+  ignore.case = TRUE,
+  value = TRUE
+)
+umap_u <- grep(
+  "^umap_u_\\d+",
+  colnames(mr_data),
+  ignore.case = TRUE,
+  value = TRUE
+)
 tsne <- grep("t_sne", colnames(mr_data), ignore.case = TRUE, value = TRUE)
 RNA_snn <- grep("RNA_snn", colnames(mr_data), ignore.case = TRUE, value = TRUE)
 
@@ -50,5 +70,3 @@ group_choices <- c(
   "pub_year",
   "run_id"
 )
-
-
