@@ -297,6 +297,24 @@
   width: 30%;
 }
 
+/* Fix particle canvas in about section */
+.collab-particles canvas {
+  display: block !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  pointer-events: none;
+}
+
+/* Ensure particles work when about section becomes visible */
+#about_section:not([style*="display: none"]) .collab-particles canvas,
+#about_section.active .collab-particles canvas {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
 .contact {
   margin: 0;
   background-color: #fff;
@@ -501,6 +519,30 @@ ul li:not(:last-child) {
   z-index: 0;
   background: linear-gradient(to bottom, #6b80df, #ce55da);
   flex-shrink: 0;
+}
+
+/* Fix particle canvas visibility issues */
+.particles-js canvas {
+  display: block !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  pointer-events: none;
+}
+
+/* Ensure particles container is visible when home section is active */
+#home_section .particles-js {
+  visibility: visible;
+  opacity: 1;
+}
+
+/* Force canvas redraw when section becomes visible */
+#home_section.active .particles-js canvas,
+#home_section:not([style*="display: none"]) .particles-js canvas {
+  transform: translateZ(0);
+  backface-visibility: hidden;
 }
 
 .copyright {
