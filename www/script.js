@@ -14,22 +14,48 @@ function updateLabelStyles($input) {
   }
 }
 
-// function to update tooltips on all checkboxes and radios
-function updateTooltips() {
-  $('input[type="checkbox"], input[type="radio"]').each(function () {
-    const $input = $(this);
-    const $label = $input.closest('label');
-    
-    if ($label.length) {
-      const txt = $label.text().trim();
-      const tip = $input.is(':checked')
-        ? `${txt} is selected`
-        : `Click to select ${txt}`;
-      $label.attr('title', tip);
-    }
-  });
+// Optimized tooltip management with caching and throttling
+let tooltipUpdateTimeout;
+const tooltipCache = new Map();
 
-  $('label[title]').tooltip({ placement: 'right' });
+function updateTooltips() {
+  // Throttle tooltip updates to prevent excessive DOM manipulation
+  clearTimeout(tooltipUpdateTimeout);
+  tooltipUpdateTimeout = setTimeout(() => {
+    const $labels = $('label[title]');
+    
+    // Dispose existing tooltips only if they exist
+    if ($labels.length > 0) {
+      $labels.tooltip('dispose');
+    }
+    
+    $('input[type="checkbox"], input[type="radio"]').each(function () {
+      const $input = $(this);
+      const $label = $input.closest('label');
+      
+      if ($label.length) {
+        const txt = $label.text().trim();
+        const cacheKey = `${this.id}_${this.checked}`;
+        
+        let tip = tooltipCache.get(cacheKey);
+        if (!tip) {
+          tip = $input.is(':checked')
+            ? `${txt} is selected`
+            : `Click to select ${txt}`;
+          tooltipCache.set(cacheKey, tip);
+        }
+        
+        $label.attr('title', tip);
+      }
+    });
+
+    // Reinitialize tooltips with better performance options
+    $('label[title]').tooltip({ 
+      placement: 'right',
+      trigger: 'hover',
+      delay: { show: 300, hide: 100 }
+    });
+  }, 100);
 }
 
 // function to bind image map events
@@ -54,92 +80,160 @@ function updateTooltips() {
 })();
 
 
+// Enhanced Plotly highlight with performance optimizations
+let plotlyHighlightSetup = false;
+let plotlyElement = null;
+let lastHighlightTime = 0;
+const HIGHLIGHT_THROTTLE = 100;
+
 function setupPlotlyHighlight() {
-  const el = document.getElementById('all_plotly');
-  if (!el) return;
+  plotlyElement = document.getElementById('all_plotly');
+  if (!plotlyElement || plotlyHighlightSetup) return;
 
-  $(el).on('plotly_click', function (event, data) {
-    if (!data || !data.points || !data.points[0]) {
-      return;
-    }
+  // Use event delegation and throttling for better performance
+  $(plotlyElement).off('plotly_click.highlight').on('plotly_click.highlight', function (event, data) {
+    const now = Date.now();
+    if (now - lastHighlightTime < HIGHLIGHT_THROTTLE) return;
+    lastHighlightTime = now;
+    
+    if (!data || !data.points || !data.points[0]) return;
+    
     const point = data.points[0];
-    if (typeof point.z !== "undefined") {
-      return;
-    }
+    if (typeof point.z !== "undefined") return;
 
-    const selectedSize = $('input[name="size"]:checked').val();
-    const baseSize = parseInt(selectedSize);
-
-    const xVal = point.x;
-    const yVal = point.y;
+    // Cache DOM query
+    const $sizeInput = $('input[name="size"]:checked');
+    if (!$sizeInput.length) return;
+    
+    const baseSize = parseInt($sizeInput.val()) || 5;
     const highlightSize = baseSize * 5;
 
-    const traces = el.data;
-    const highlightIndices = [];
-
-    for (let i = 0; i < traces.length; i++) {
-      if (traces[i].name === "highlight-point") {
-        highlightIndices.push(i);
-      }
-    }
-
-    if (highlightIndices.length > 0) {
-      Plotly.deleteTraces(el, highlightIndices).then(() => {
-        addHighlightTrace();
-      });
-    } else {
-      addHighlightTrace();
-    }
-
-    function addHighlightTrace() {
-      const highlightTrace = {
-        x: [xVal],
-        y: [yVal],
-        mode: "markers",
-        type: "scatter",
-        name: "highlight-point",
-        marker: {
-          size: highlightSize,
-          color: '#ffa629',
-          line: { width: 2, color: 'white' }
-        },
-        showlegend: false,
-        hoverinfo: 'skip'
-      };
-      Plotly.addTraces(el, highlightTrace);
-    }
+    // Use requestAnimationFrame for smooth animations
+    requestAnimationFrame(() => {
+      updateHighlight(point.x, point.y, highlightSize);
+    });
   });
+  
+  plotlyHighlightSetup = true;
+}
+
+function updateHighlight(xVal, yVal, highlightSize) {
+  if (!plotlyElement || !plotlyElement.data) return;
+  
+  const traces = plotlyElement.data;
+  const highlightIndices = traces
+    .map((trace, index) => trace.name === "highlight-point" ? index : -1)
+    .filter(index => index !== -1);
+
+  const highlightTrace = {
+    x: [xVal],
+    y: [yVal],
+    mode: "markers",
+    type: "scatter",
+    name: "highlight-point",
+    marker: {
+      size: highlightSize,
+      color: '#ffa629',
+      line: { width: 2, color: 'white' }
+    },
+    showlegend: false,
+    hoverinfo: 'skip'
+  };
+
+  if (highlightIndices.length > 0) {
+    Plotly.deleteTraces(plotlyElement, highlightIndices)
+      .then(() => Plotly.addTraces(plotlyElement, highlightTrace))
+      .catch(err => console.warn('Plotly highlight error:', err));
+  } else {
+    Plotly.addTraces(plotlyElement, highlightTrace)
+      .catch(err => console.warn('Plotly highlight error:', err));
+  }
+}
+
+
+// Enhanced cleanup with better resource management
+function cleanupResources() {
+  try {
+    if (tooltipUpdateTimeout) {
+      clearTimeout(tooltipUpdateTimeout);
+      tooltipUpdateTimeout = null;
+    }
+    
+    // Clear caches
+    tooltipCache.clear();
+    
+    // Cleanup tooltips with error handling
+    const $tooltips = $('label[title]');
+    if ($tooltips.length > 0) {
+      $tooltips.each(function() {
+        try {
+          $(this).tooltip('dispose');
+        } catch (e) {
+          // Ignore disposal errors
+        }
+      });
+    }
+    
+    // Cleanup plotly events
+    if (plotlyElement) {
+      $(plotlyElement).off('plotly_click.highlight');
+      plotlyElement = null;
+    }
+    plotlyHighlightSetup = false;
+    lastHighlightTime = 0;
+    
+    // Cleanup draggable instances
+    $('.modal-dialog').each(function() {
+      if ($(this).hasClass('ui-draggable')) {
+        try {
+          $(this).draggable('destroy');
+        } catch (e) {
+          // Ignore destruction errors
+        }
+      }
+    });
+    
+    // Force garbage collection hint
+    if (window.gc && typeof window.gc === 'function') {
+      window.gc();
+    }
+    
+  } catch (error) {
+    console.warn('Cleanup error:', error);
+  }
 }
 
 
 $(document).ready(function () {
+  //  Cache frequently used selectors
+  const $homeSection = $("#home_section");
+  const $analysisSection = $("#analysis_section");
+  const $aboutSection = $("#about_section");
+  const $hamburger = $('.hamburger');
+  const $menuItems = $('.menu-items');
+  
   // Show/hide initial sections
-  $("#home_section").show();
-  $("#analysis_section").hide();
-  $("#about_section").hide();
+  $homeSection.show();
+  $analysisSection.hide();
+  $aboutSection.hide();
 
-
-  $(document).ready(function() {
-    $('.hamburger').on('click', function() {
-      $('.menu-items').toggleClass('active');
-    });
+  // Use cached selector and single event handler  
+  $hamburger.on('click', function() {
+    $menuItems.toggleClass('active');
   });
 
-
-  // Bind image map events
-  // bindImageMapEvents();
-
-  // Setup shiny:value event to rebind image map events when needed
-  // $(document).on('shiny:value', bindImageMapEvents);
-
+  // Cache input selectors for performance
+  const $inputs = $('input[type="checkbox"], input[type="radio"]');
+  
   // Initial update of label styles and tooltips
-  $('input[type="checkbox"], input[type="radio"]').each(function () {
+  $inputs.each(function () {
     updateLabelStyles($(this));
   });
   updateTooltips();
 
-  // Update label styles and tooltips on change
-  $('input[type="checkbox"], input[type="radio"]').on('change', function () {
+  // Debounced update for better performance
+  let updateTimeout;
+  $inputs.on('change', function () {
     const $i = $(this);
     if ($i.attr('type') === 'radio') {
       $('input[name="' + $i.attr('name') + '"]')
@@ -148,67 +242,126 @@ $(document).ready(function () {
         .removeClass('checked-label');
     }
     updateLabelStyles($i);
-    updateTooltips();
+    
+    // Debounce tooltip updates
+    clearTimeout(updateTimeout);
+    updateTimeout = setTimeout(() => {
+      updateTooltips();
+    }, 50);
   });
 
-  // Click handlers for buttons
+  // Optimized button handlers with event delegation
   $(document).on('click', '.btn_add', function () {
     Shiny.setInputValue('click_add_btn', this.id, { priority: 'event' });
   });
 
+  // ID collection with caching
   $(document).on('click', '.btn_remove', function () {
     const btn_id = this.id;
-    const ids = $('[id^="dynamic_col_"]').map(function () {
+    const $dynamicCols = $('[id^="dynamic_col_"]');
+    const ids = $dynamicCols.map(function () {
       return parseInt(this.id.replace("dynamic_col_", ""));
     }).get();
+    
+    // Use setTimeout for non-blocking execution
     setTimeout(function () {
       Shiny.setInputValue('click_remove_btn', { btn_id: btn_id, ids: ids },
       { priority: 'event' });
-    }, 100);
+    }, 50);
   });
 
-  // Toggle expression checkboxes change
+  //  Optimized toggle and gene expression handlers
   $(document).on('click', '.toggle_exp', function () {
     Shiny.setInputValue('click_toggle_exp', { id: this.id, value: this.checked },
     { priority: 'event' });
   });
 
-  // Genes expression checkboxes change
   $(document).on('change', '[id^="genes_exp_"]', function () {
     Shiny.setInputValue('change_gene_exp', this.id, { priority: 'event' });
   });
 
-  // Data type expression radio buttons change
+  // More efficient data type change handler with throttling
+  let dataTypeChangeTimeout;
   $(document).on('change', 'input[name^="data_type_exp"]', function () {
-    const ids = [];
-    $('[id^="genes_exp_"]').each(function () {
-      const id = this.id;
-      if (!id.endsWith('-label') && !id.endsWith('-selectized')) ids.push(id);
-    });
-    Shiny.setInputValue('data_type_exp_change', { ids: ids, nonce: Date.now() },
-    { priority: 'event' });
+    clearTimeout(dataTypeChangeTimeout);
+    dataTypeChangeTimeout = setTimeout(() => {
+      const $geneElements = $('[id^="genes_exp_"]');
+      const ids = $geneElements.map(function () {
+        const id = this.id;
+        return (!id.endsWith('-label') && !id.endsWith('-selectized')) ? id : null;
+      }).get().filter(Boolean);
+      
+      Shiny.setInputValue('data_type_exp_change', { ids: ids, nonce: Date.now() },
+      { priority: 'event' });
+    }, 100);
   });
 
   // Setup Plotly 2D highlight feature
   setupPlotlyHighlight();
   
-  // Movable modal
+  // Enhanced modal management with better error handling
+  let modalInstances = new Set();
+  
   $(document).on('shown.bs.modal', '.modal', function () {
-    var $dialog = $(this).find('.modal-dialog');
-    $dialog.draggable({
-      handle: '.modal-header'
-    });
+    const $dialog = $(this).find('.modal-dialog');
+    const modalId = this.id || `modal_${Date.now()}`;
+    
+    // Cleanup existing draggable instance if exists
+    if ($dialog.hasClass('ui-draggable')) {
+      try {
+        $dialog.draggable('destroy');
+      } catch (e) {
+        console.warn('Failed to destroy existing draggable:', e);
+      }
+    }
+    
+    try {
+      $dialog.draggable({
+        handle: '.modal-header',
+        containment: 'window',
+        scroll: false
+      });
+      modalInstances.add(modalId);
+    } catch (e) {
+      console.warn('Failed to create draggable modal:', e);
+    }
   });
   
-  // Dropdown arrow click to open selectize
+  $(document).on('hidden.bs.modal', '.modal', function () {
+    const $dialog = $(this).find('.modal-dialog');
+    const modalId = this.id;
+    
+    if ($dialog.hasClass('ui-draggable')) {
+      try {
+        $dialog.draggable('destroy');
+        modalInstances.delete(modalId);
+      } catch (e) {
+        console.warn('Failed to destroy draggable on hide:', e);
+      }
+    }
+  });
+  
+  // Dropdown handler
   $(document).on('click', '.dropdown-arrow', function(e) {
-  const $wrapper = $(this).closest('#apply_filter_wrapper');
-  const $selectizeInput = $wrapper.find('.selectize-input');
+    e.preventDefault();
+    const $wrapper = $(this).closest('#apply_filter_wrapper');
+    const $selectizeInput = $wrapper.find('.selectize-input');
+    if ($selectizeInput.length) {
+      $selectizeInput.trigger('mousedown');
+    }
+  });
 
-  $selectizeInput.trigger('mousedown');
-});
+  // Enhanced cleanup on page unload
+  $(window).on('beforeunload', function() {
+    cleanupResources();
+    modalInstances.clear();
+  });
 
-
+  // Shiny disconnection handling
+  $(document).on('shiny:disconnected shiny:sessionended', function() {
+    cleanupResources();
+    modalInstances.clear();
+  });
 });
 
 
