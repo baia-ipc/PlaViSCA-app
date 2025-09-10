@@ -68,6 +68,7 @@
 #data_sets_section,
 #about_section {
   display: none;
+  z-index: 10;
 }
 
 /* Menu Bar */
@@ -295,6 +296,7 @@
   z-index: 0;
   height: 200px;
   width: 30%;
+  flex-shrink: 0;
 }
 
 /* Fix particle canvas in about section */
@@ -543,6 +545,17 @@ ul li:not(:last-child) {
 #home_section:not([style*="display: none"]) .particles-js canvas {
   transform: translateZ(0);
   backface-visibility: hidden;
+}
+
+/* Ensure particles are always visible on small screens */
+@media screen and (max-width: 768px) {
+  .particles-js canvas {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    transform: translateZ(0) !important;
+    backface-visibility: hidden !important;
+  }
 }
 
 .copyright {
@@ -1281,9 +1294,13 @@ input:checked+.slider:before {
 
   .particles-js {
     grid-area: particles;
-    position: static !important;
+    position: relative !important;
     margin: 0 !important;
     width: 100% !important;
+    height: 60px !important;
+    flex-shrink: 0 !important;
+    visibility: visible !important;
+    opacity: 1 !important;
   }
 
   .copyright {
@@ -1329,9 +1346,13 @@ input:checked+.slider:before {
 
   .particles-js {
     grid-area: particles;
-    position: static !important;
+    position: relative !important;
     margin: 0 !important;
     width: 100% !important;
+    height: 60px !important;
+    flex-shrink: 0 !important;
+    visibility: visible !important;
+    opacity: 1 !important;
   }
 
   .copyright {
@@ -1365,6 +1386,7 @@ input:checked+.slider:before {
 
   .collab-particles {
     width: 25%;
+    height: 150px;
   }
 
   .contact {
@@ -1381,5 +1403,13 @@ input:checked+.slider:before {
   #data_opt .radio label {
     width: 100%;
     font-size: 1.4rem;
+  }
+}
+
+/* Extra small screens - reduce particle container further */
+@media screen and (max-width: 400px) {
+  .collab-particles {
+    width: 20%;
+    height: 120px;
   }
 }
