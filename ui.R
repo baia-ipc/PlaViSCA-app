@@ -37,10 +37,10 @@ ui <- fluidPage(
     ),
     div(
       class = "menu-title",
-      div(class = "logo mosquito", img(
-        src = "mosquito-top.png",
-        alt = "mosquito"
-      )),
+      # div(class = "logo mosquito", img(
+      #   src = "mosquito-top.png",
+      #   alt = "mosquito"
+      # )),
       div(
         class = "title-text",
         h1("PlaViSca"),
