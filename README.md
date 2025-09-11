@@ -1,11 +1,11 @@
 
-# Plasmodium vivax Single Cell Analysis (PvSCA) Platform
+# Interactive Web Application PlaViSCA for Single-Cell Transcriptomic Analysis and Visualization of Plasmodium vivax
 
-**PvSCA** is an interactive, code-free R Shiny application designed to make  
+**PlaViSCA** is an interactive, code-free R Shiny application designed to make  
 single-cell RNA sequencing (scRNA-seq) data from *Plasmodium vivax* accessible  
 to the broader scientific, public health, and educational communities.
 
-## 🔍 Key Highlights
+## Key Highlights
 
 - Explore scRNA-seq data from *P. vivax* across different parasite and infection stages.
 - Dynamic, interactive visualizations using Plotly (2D & 3D).
@@ -16,16 +16,17 @@ to the broader scientific, public health, and educational communities.
 
 ---
 
-## ✨ Features
+## Features
 
-### 🏠 Home
-- Overview of PvSCA goals and applications.
+### Home
+- Overview of PlaViSCA goals and applications.
 - Interactive life cycle image map of *P. vivax*.
+- Icons link to various sections of the application including manual, data exploration, and about page.
 
-### ℹ️ About
+### About
 - Information about the web application’s development and contributors.
 
-### 📊 Explore Data
+### Explore Data
 - Filter data by infection stage, parasite stage, coloring factor, gene, and more.
 - Choose from raw, normalized, or scaled data.
 - Toggle between 2D and 3D visualizations with customizable axes.
@@ -35,7 +36,7 @@ to the broader scientific, public health, and educational communities.
 
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
 ### 1. Clone the Repository
 
@@ -83,23 +84,29 @@ install.packages(c(
 - Open `app.R` (or `server.R` / `ui.R`) in RStudio.
 - Click the **Run App** button in the top-right of the editor.
 
-#### Option B: From the Command Line
+#### Option B: Terminal command for computer with GUI
 ```bash
-R -e "shiny::runApp('app.R', launch.browser = TRUE)"
+R -e "shiny::runApp('.', launch.browser = TRUE)"
 ```
 
+#### Option C: Terminal command for computer without GUI
+```bash
+R -e "shiny::runApp('.', host='0.0.0.0', port=3838)"
+```
+Then open a web browser and navigate to `http://<your-computer-ip>:3838`.
 ---
 
-#### 4. Options
+#### 4. Data
 
 The data used in this web application are derived from a flattened Seurat object.
 A preprocessing pipeline is applied to clean and prepare the data before 
 visualization. You can review the complete preprocessing workflow in 
-functions/preprocessing.R.
-
+functions/preprocessing.R. Data are store in directory `data/` and consist of:
+clearned_dataset.rds, data_source.csv, normalize_df.rds, scale_df.rds,raw_df.rds
+and gff_data.rds
 ---
 
-## 📫 Feedback & Contributions
+## Feedback & Contributions
 
 We welcome contributions and feedback from the community.  
 Please open issues or submit pull requests on our [GitHub repository](https://github.com/Sopheap15/pvsca).

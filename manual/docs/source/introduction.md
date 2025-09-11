@@ -116,8 +116,15 @@ remote::install_version("later", version = "1.4.2")
 - Open either `app.R` or `server.R` or `ui.R`
 - Click the **Run App** button in the top-right of the Rstudio see in **Figure 1**.
 
-## Option B: terminal command line
+## Option B: terminal for GUI computer
 Navigate to the project directory and run the following command in your terminal:
 ```bash
-R -e "shiny::runApp('app.R', launch.browser = TRUE)"
+R -e "shiny::runApp('.', launch.browser = TRUE)"
 ```
+## Option C: terminal for computer without GUI like server
+Navigate to the project directory and run the following command in your terminal:
+```bash
+R -e "shiny::runApp('.', host='0.0.0.0', port=3838)"
+```
+Open your browser with `http://server_ip:3838`. 
+You can find your server ip with `ip addr show | inet`

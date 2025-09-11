@@ -68,7 +68,6 @@
 #data_sets_section,
 #about_section {
   display: none;
-  z-index: 10;
 }
 
 /* Menu Bar */
@@ -257,7 +256,7 @@
 
 .about p {
   font-family: var(--font-primary);
-  font-size: clamp(1rem, 4vw, 2.4rem);
+  font-size: clamp(1.4rem, 4vw, 2.4rem);
   color: #fff;
   padding-left: 15px;
   line-height: 1.8;
@@ -265,28 +264,28 @@
 
 @keyframes colorFadeSmooth {
   0% {
-    color: #ffffff;
+    color: white;
   }
 
   25% {
-    color: #fff9c4;
+    color: #cce0ff;
   }
 
   50% {
-    color: #ffeb3b;
+    color: rgb(172, 171, 125);
   }
 
   75% {
-    color: #fff9c4;
+    color: #cce0ff;
   }
 
   100% {
-    color: #ffffff;
+    color: white;
   }
 }
 
 .about p:nth-of-type(2) {
-  font-size: clamp(1rem, 4vw, 2.4rem);
+  font-size: clamp(1.4rem, 4vw, 2.4rem);
   animation: colorFadeSmooth 15s ease-in-out infinite;
 }
 
@@ -318,6 +317,7 @@
 }
 
 .contact {
+  height: 50%;
   margin: 0;
   background-color: #fff;
   display: flex;
@@ -345,7 +345,7 @@
 
 .contact h2 {
   font-family: var(--font-primary);
-  font-size: clamp(1.4rem, 5vw, 2.8rem);
+  font-size: clamp(1.8rem, 5vw, 2.8rem);
   padding: 20px;
   animation: colorFadeContact 10s ease-in-out infinite;
   text-transform: uppercase;
@@ -353,7 +353,7 @@
 
 .about ol,
 ul {
-  font-size: clamp(1rem, 3.5vw, 2rem);
+  font-size: clamp(1.4rem, 3.5vw, 2.2rem);
 }
 
 .about ol,
@@ -366,7 +366,7 @@ ul li:not(:last-child) {
   display: inline-block;
   margin: 10px 0;
   border-radius: 4px;
-  font-size: clamp(1rem, 3vw, 2rem);
+  font-size: clamp(1.2rem, 3vw, 2rem);
 }
 
 /* Home section */
@@ -391,7 +391,7 @@ ul li:not(:last-child) {
   color: #fff;
   text-align: justify;
   font-family: var(--font-primary);
-  font-size: clamp(1rem, 3vw, 2.8rem);
+  font-size: clamp(1.2rem, 3vw, 2.8rem);
   line-height: 1.7;
   padding: 20px 15px;
 }
@@ -507,7 +507,7 @@ ul li:not(:last-child) {
 .pages_link span {
   color: #8d55e7;
   font-family: var(--font-primary);
-  font-size: clamp(1.4rem, 4vw, 2.2rem);
+  font-size: 2.2rem;
   font-weight: bold;
   text-align: center;
 }
@@ -521,6 +521,9 @@ ul li:not(:last-child) {
   z-index: 0;
   background: linear-gradient(to bottom, #6b80df, #ce55da);
   flex-shrink: 0;
+  /* Improve rendering performance */
+  will-change: auto;
+  transform: translateZ(0);
 }
 
 /* Fix particle canvas visibility issues */
@@ -532,6 +535,11 @@ ul li:not(:last-child) {
   width: 100% !important;
   height: 100% !important;
   pointer-events: none;
+  /* Improve rendering performance */
+  will-change: transform;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
 /* Ensure particles container is visible when home section is active */
@@ -545,6 +553,16 @@ ul li:not(:last-child) {
 #home_section:not([style*="display: none"]) .particles-js canvas {
   transform: translateZ(0);
   backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+/* Improve particles initialization */
+.particles-js:not(.particles-loaded) {
+  background: linear-gradient(to bottom, #6b80df, #ce55da);
+}
+
+.particles-js.particles-loaded {
+  background: linear-gradient(to bottom, #6b80df, #ce55da);
 }
 
 /* Ensure particles are always visible on small screens */
@@ -555,6 +573,7 @@ ul li:not(:last-child) {
     opacity: 1 !important;
     transform: translateZ(0) !important;
     backface-visibility: hidden !important;
+    -webkit-backface-visibility: hidden !important;
   }
 }
 
@@ -1155,7 +1174,7 @@ input:checked+.slider:before {
   }
 
   .intro-left p {
-    font-size: clamp(0.9rem, 2.5vw, 2.2rem);
+    font-size: clamp(1.2rem, 2.5vw, 2.2rem);
   }
 
   .home-content {
@@ -1193,7 +1212,7 @@ input:checked+.slider:before {
   }
 
   .pages_link span {
-    font-size: clamp(1.2rem, 3vw, 1.7rem);
+    font-size: 1.7rem;
   }
 
   #about_section {
@@ -1214,8 +1233,28 @@ input:checked+.slider:before {
     padding: 20px 0 0 15px;
   }
 
-  .about p {
-    font-size: clamp(1rem, 4vw, 2rem) !important;
+  .about h2,
+  .contact h2,
+  .contact,
+  .about p:nth-of-type(2),
+  .about ol,
+  ul {
+    font-size: clamp(1.6rem, 3.5vw, 2rem);
+    padding-left: 15px;
+    padding-right: 0;
+    margin-top: 0;
+  }
+
+  .about p,
+  .contact p,
+  .about ol,
+  .about ul {
+    font-size: clamp(1.6rem, 3.5vw, 2rem);
+    padding-left: 20px;
+  }
+
+  .contact h2 {
+    font-size: clamp(2rem, 4.5vw, 2.5rem);
   }
 
   /* .analysis-container {
@@ -1294,13 +1333,9 @@ input:checked+.slider:before {
 
   .particles-js {
     grid-area: particles;
-    position: relative !important;
+    position: static !important;
     margin: 0 !important;
     width: 100% !important;
-    height: 60px !important;
-    flex-shrink: 0 !important;
-    visibility: visible !important;
-    opacity: 1 !important;
   }
 
   .copyright {
@@ -1309,6 +1344,21 @@ input:checked+.slider:before {
     margin: 0 !important;
     width: 100% !important;
     background-color: white;
+  }
+
+  .about p {
+    font-size: clamp(1.8rem, 4vw, 2.3rem);
+    line-height: 1.8;
+  }
+
+  .contact h2 {
+    font-size: clamp(2.3rem, 5vw, 2.8rem);
+  }
+
+  .about ol,
+  .about ul,
+  .contact p {
+    font-size: clamp(1.7rem, 3.5vw, 2.2rem);
   }
 
   .logo {
@@ -1346,13 +1396,9 @@ input:checked+.slider:before {
 
   .particles-js {
     grid-area: particles;
-    position: relative !important;
+    position: static !important;
     margin: 0 !important;
     width: 100% !important;
-    height: 60px !important;
-    flex-shrink: 0 !important;
-    visibility: visible !important;
-    opacity: 1 !important;
   }
 
   .copyright {
@@ -1368,25 +1414,34 @@ input:checked+.slider:before {
     min-height: calc(100vh - 140px);
   }
 
-  .about .col-sm-8 {
-    margin-top: 20px;
+  .about p {
+    font-size: clamp(1.8rem, 6vw, 2.2rem);
+    line-height: 1.7;
+    padding: 15px 10px;
   }
 
-  .about p {
-    font-size: clamp(0.8rem, 3vw, 1.8rem) !important;
+  .about p:nth-of-type(2) {
+    font-size: clamp(1.8rem, 6vw, 2.2rem);
   }
 
   .contact h2 {
-    font-size: clamp(1.2rem, 4vw, 2rem) !important;
+    font-size: clamp(2.2rem, 7vw, 2.8rem);
+    padding: 15px 10px;
+  }
+
+  .about ol,
+  .about ul {
+    font-size: clamp(1.6rem, 5.5vw, 2rem);
+    padding-left: 15px;
   }
 
   .contact p {
-    font-size: clamp(0.9rem, 2.5vw, 1.5rem) !important;
+    font-size: clamp(1.6rem, 5.5vw, 2rem);
+    padding: 5px 10px;
   }
 
-  .collab-particles {
-    width: 25%;
-    height: 150px;
+  .about .col-sm-8 {
+    margin-top: 20px;
   }
 
   .contact {
@@ -1403,13 +1458,5 @@ input:checked+.slider:before {
   #data_opt .radio label {
     width: 100%;
     font-size: 1.4rem;
-  }
-}
-
-/* Extra small screens - reduce particle container further */
-@media screen and (max-width: 400px) {
-  .collab-particles {
-    width: 20%;
-    height: 120px;
   }
 }

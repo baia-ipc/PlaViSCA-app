@@ -1,6 +1,5 @@
 # sourcer function
 source("functions/helpers.R")
-library(data.table)
 library(memoise)
 
 # Define a function for memoized data loading.
@@ -30,6 +29,8 @@ cleaned_data_list <- readRDS(DATA_PATHS$cleaned_dataset)
 mr_data <- cleaned_data_list$mr_data
 hiv_data <- cleaned_data_list$hiv_data
 pca_df <- cleaned_data_list$pca_df
+
+rm(cleaned_data_list)
 
 # Define column variables based on the pre-loaded metadata
 pca_u <- grep(

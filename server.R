@@ -6,7 +6,6 @@ library(RColorBrewer)
 library(tidyverse)
 library(later)
 
-
 server <- function(input, output, session) {
   sessionData <- new.env(parent = emptyenv())
   autoUpdatePlot <- reactiveVal(FALSE)
@@ -21,6 +20,15 @@ server <- function(input, output, session) {
       "
     $('.menu-link').removeClass('active');
     $('#home').addClass('active');
+    
+    // Initialize particles for home page footer
+    setTimeout(function() {
+      if (typeof initHomeParticles === 'function') {
+        initHomeParticles();
+      } else if (typeof initParticles === 'function') {
+        initParticles('particles-js-home');
+      }
+    }, 300);
   "
     )
   })
@@ -511,7 +519,7 @@ server <- function(input, output, session) {
       })
 
       ## plot elbow
-      output$data_pca_stdv_plotly <- renderPlotly({
+      output$data_pca_stdv_plotly <- renderPlotly({        
         selected_study <- if (!is.null(input$study_label_qc) && length(input$study_label_qc) > 0) {
           input$study_label_qc[1] 
         } else {
@@ -526,7 +534,7 @@ server <- function(input, output, session) {
       })
 
       ## plot variable genes
-      output$variable_genes_plotly <- renderPlotly({
+      output$variable_genes_plotly <- renderPlotly({        
         selected_study <- if (!is.null(input$study_label_qc) && length(input$study_label_qc) > 0) {
           input$study_label_qc[1] 
         } else {
