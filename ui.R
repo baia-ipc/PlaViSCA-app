@@ -49,17 +49,20 @@ ui <- fluidPage(
     ),
     div(
       class = "menu-items",
-      actionLink("home",
+      actionLink(
+        "home",
         label = tagList(icon("home"), " Home"),
         class = "menu-link active"
       ),
       span("|"),
-      actionLink("analysis",
+      actionLink(
+        "analysis",
         label = tagList(icon("table"), " Analysis"),
         class = "menu-link"
       ),
       span("|"),
-      actionLink("about",
+      actionLink(
+        "about",
         label = tagList(icon("info-circle"), " About"),
         class = "menu-link"
       ),
@@ -73,73 +76,107 @@ ui <- fluidPage(
     fluidRow(
       class = "introduction",
       column(
-        width = 6, class = "intro-left",
+        width = 6,
+        class = "intro-left",
         p(
-        "PlaViSCA is a platform designed to support the malaria research
+          "PlaViSCA is a platform designed to support the malaria research
         community in analyzing and visualizing single-cell RNA sequencing
         (scRNA-seq) data. PlaViSca provides a user friendly interface for
         exploring metadata and gene expression across various parasite life
         cycle stages using interactive tables and 2D or 3D visualizations with
         customizable filters and coloring. The platform also allows users to
         download data for further analysis. PlaViSCA empowers researchers to
-        explore complex scRNA-seq for ", em("P. vivax"),
-        " without requiring any programming skills."
+        explore complex scRNA-seq for ",
+          em("P. vivax"),
+          " without requiring any programming skills."
         ),
-        div(class = "logo mosquito-bottom", img(
-          src = "mosquito-bottom.png",
-          alt = "mosquito"
-        ))
+        div(
+          class = "logo mosquito-bottom",
+          img(
+            src = "mosquito-bottom.png",
+            alt = "mosquito"
+          )
+        )
       ),
       column(
-        width = 6, class = "intro-right",
+        width = 6,
+        class = "intro-right",
         div(
           class = "pages_link",
-          actionLink("metadata_link", tagList(
-            img(src = "metadata.png", alt = "Metadata"),
-            span("Metadata")
-          )),
-          actionLink("analysis_link", tagList(
-            img(src = "umap.png", alt = "Analysis"),
-            span("Analysis")
-          )),
-          actionLink("qc_link", tagList(
-            img(src = "qc.png", alt = "Quality control"),
-            span("Quality control")
-          ))
+          actionLink(
+            "metadata_link",
+            tagList(
+              img(src = "metadata.png", alt = "Metadata"),
+              span("Metadata")
+            )
+          ),
+          actionLink(
+            "analysis_link",
+            tagList(
+              img(src = "umap.png", alt = "Analysis"),
+              span("Analysis")
+            )
+          ),
+          actionLink(
+            "qc_link",
+            tagList(
+              img(src = "qc.png", alt = "Quality control"),
+              span("Quality control")
+            )
+          )
         ),
         div(
           class = "pages_link",
-          actionLink("sources_link", tagList(
-            img(src = "data_sources.png", alt = "Data sources"),
-            span("Data sources")
-          )),
-          actionLink("gene_exp_link", tagList(
-            img(src = "gene_exp.png", alt = "Gene Expression"),
-            span("Gene expression")
-          )),
-          actionLink("contribute_link", tagList(
-            img(src = "contribute.png", alt = "Contribute"),
-            span("Contribute")
-          ))
+          actionLink(
+            "sources_link",
+            tagList(
+              img(src = "data_sources.png", alt = "Data sources"),
+              span("Data sources")
+            )
+          ),
+          actionLink(
+            "gene_exp_link",
+            tagList(
+              img(src = "gene_exp.png", alt = "Gene Expression"),
+              span("Gene expression")
+            )
+          ),
+          actionLink(
+            "contribute_link",
+            tagList(
+              img(src = "contribute.png", alt = "Contribute"),
+              span("Contribute")
+            )
+          )
         ),
         div(
           class = "pages_link",
-          actionLink("usermanual_link", tagList(
-            img(src = "usermanual.png", alt = "User Manual"),
-            span("User Manual")
-          )),
+          actionLink(
+            "usermanual_link",
+            tagList(
+              img(src = "usermanual.png", alt = "User Manual"),
+              span("User Manual")
+            )
+          ),
           tags$a(
             href = "https://github.com/Sopheap15/pvsca",
             target = "_blank",
             tagList(
-              img(src = "sources_code.png", alt = "Source code", height = "20px"),
+              img(
+                src = "sources_code.png",
+                alt = "Source code",
+                height = "20px"
+              ),
               span("Source code")
             )
           ),
-          actionLink("about_link", tagList(
-            img(src = "about.png", alt = "About"),
-            span("About")
-          ))
+          actionLink(
+            "about_link",
+            tagList(
+              img(src = "about.png", alt = "About"),
+              span("About")
+            )
+          )
         )
       )
     ),
@@ -153,18 +190,24 @@ ui <- fluidPage(
     fluidRow(
       class = "analysis-container",
       column(
-        width = 4, id = "sidebar", class = "sidebar",
+        width = 4,
+        id = "sidebar",
+        class = "sidebar",
         column(
-          width = 12, class = "col-12",
+          width = 12,
+          class = "col-12",
           div(
             class = "form-group shiny-input-container",
             id = "apply_filter",
             tags$label("Data filters:", `for` = "apply_filter"),
             div(
-              id = "apply_filter_wrapper", class = "dropdown-container",
-              selectizeInput("apply_filter",
+              id = "apply_filter_wrapper",
+              class = "dropdown-container",
+              selectizeInput(
+                "apply_filter",
                 label = NULL,
-                choices = NULL, multiple = TRUE,
+                choices = NULL,
+                multiple = TRUE,
                 options = list(
                   placeholder = "No filter applied"
                 )
@@ -174,8 +217,11 @@ ui <- fluidPage(
           )
         ),
         column(
-          width = 12, class = "col-12",
-          radioButtons("color", "Color",
+          width = 12,
+          class = "col-12",
+          radioButtons(
+            "color",
+            "Color",
             choices = list(
               "Study" = "study_label",
               "Life cycle" = "life_cycle_stage",
@@ -189,6 +235,7 @@ ui <- fluidPage(
               "SC Technology" = "sc_technology",
               "Geo location" = "geographic_location",
               "DPI" = "day_post_infection",
+              "HPI" = "hour_post_invasion",
               "RNA_snn" = "RNA_snn",
               "Genes" = "genes"
             ),
@@ -201,7 +248,9 @@ ui <- fluidPage(
           fluidRow(
             column(
               width = 12,
-              radioButtons("data_type", "Data type",
+              radioButtons(
+                "data_type",
+                "Data type",
                 choices = list(
                   "Raw" = "raw",
                   "Normalized" = "normalize",
@@ -215,9 +264,7 @@ ui <- fluidPage(
             id = "gene_snn_ui",
             column(
               width = 7,
-              selectizeInput("genes_n", "Gene",
-                choices = ""
-              )
+              selectizeInput("genes_n", "Gene", choices = "")
             ),
             column(
               id = "switch_id",
@@ -231,47 +278,65 @@ ui <- fluidPage(
             column(
               width = 5,
               tags$div(
-                id = "gene_link_ui", class = "col-12",
+                id = "gene_link_ui",
+                class = "col-12",
                 tags$a(
-                  id = "plasmo_link", href = "#",
-                  target = "_blank", "🔬 PlasmoDB"
+                  id = "plasmo_link",
+                  href = "#",
+                  target = "_blank",
+                  "🔬 PlasmoDB"
                 ),
                 tags$a(
-                  id = "ncbi_link", href = "#",
-                  target = "_blank", "🧬 NCBI"
+                  id = "ncbi_link",
+                  href = "#",
+                  target = "_blank",
+                  "🧬 NCBI"
                 )
               )
             )
           )
         ),
         column(
-          width = 12, class = "col-12",
-          radioButtons("size", "Size",
+          width = 12,
+          class = "col-12",
+          radioButtons(
+            "size",
+            "Size",
             choices = list("S" = 2, "M" = 4, "L" = 6),
             selected = 4
           )
         ),
         column(
-          width = 12, class = "col-12",
-          radioButtons("plot", "Plot",
+          width = 12,
+          class = "col-12",
+          radioButtons(
+            "plot",
+            "Plot",
             choices = list("2D" = "2d", "3D" = "3d"),
             selected = "3d"
           )
         ),
         column(
-          width = 12, class = "col-12",
+          width = 12,
+          class = "col-12",
           fluidRow(
             id = "axis",
             column(
-              width = 6, id = "xaxis-container",
-              selectInput("xaxis", "X-axis",
+              width = 6,
+              id = "xaxis-container",
+              selectInput(
+                "xaxis",
+                "X-axis",
                 choices = c("pc_1"),
                 selected = "pc_1"
               )
             ),
             column(
-              width = 6, id = "yaxis-container",
-              selectInput("yaxis", "Y-axis",
+              width = 6,
+              id = "yaxis-container",
+              selectInput(
+                "yaxis",
+                "Y-axis",
                 choices = c("pc_2"),
                 selected = "pc_2"
               )
@@ -279,14 +344,15 @@ ui <- fluidPage(
           )
         ),
         column(
-          width = 12, class = "col-12",
-          downloadButton("download_data", "Download",
-            class = "bt-download"
-          )
+          width = 12,
+          class = "col-12",
+          downloadButton("download_data", "Download", class = "bt-download")
         )
       ),
       column(
-        width = 12, id = "main", class = "main",
+        width = 12,
+        id = "main",
+        class = "main",
         tabsetPanel(
           id = "tabset",
           # Metadata tab
@@ -364,7 +430,8 @@ ui <- fluidPage(
               column(
                 width = 12,
                 radioButtons(
-                  "data_type_exp", "Data type",
+                  "data_type_exp",
+                  "Data type",
                   choices = list(
                     "Raw" = "raw",
                     "Normalized" = "normalize",
@@ -389,7 +456,8 @@ ui <- fluidPage(
                       tags$label(
                         class = "switch",
                         tags$input(
-                          id = "check_exp_0", type = "checkbox",
+                          id = "check_exp_0",
+                          type = "checkbox",
                           class = "toggle_exp"
                         ),
                         tags$span(class = "slider")
@@ -403,20 +471,26 @@ ui <- fluidPage(
                         id = "gene_link_ui_exp",
                         class = "gene_link_ui_exp",
                         tags$a(
-                          id = "plasmo_link_exp", href = "#",
-                          target = "_blank", "🔬 PlasmoDB"
+                          id = "plasmo_link_exp",
+                          href = "#",
+                          target = "_blank",
+                          "🔬 PlasmoDB"
                         ),
                         span("|"),
                         tags$a(
-                          id = "ncbi_link_exp", href = "#",
-                          target = "_blank", "🧬 NCBI"
+                          id = "ncbi_link_exp",
+                          href = "#",
+                          target = "_blank",
+                          "🧬 NCBI"
                         )
                       )
                     )
                   ),
                   column(
                     width = 6,
-                    selectInput("group_exp", "Group by",
+                    selectInput(
+                      "group_exp",
+                      "Group by",
                       choices = group_choices,
                       selected = "Stage"
                     )
@@ -427,7 +501,8 @@ ui <- fluidPage(
                   plotlyOutput("gene_exp_plotly"),
                   fluidRow(
                     class = "btn-add-rm-container",
-                    actionButton("add_btn_0",
+                    actionButton(
+                      "add_btn_0",
                       label = icon("plus"),
                       class = "btn btn-success btn_add"
                     )
@@ -448,7 +523,11 @@ ui <- fluidPage(
                 tags$span(class = "left-label", "Unintegrated"),
                 tags$label(
                   class = "switch",
-                  tags$input(id = "check_all", type = "checkbox", checked = TRUE),
+                  tags$input(
+                    id = "check_all",
+                    type = "checkbox",
+                    checked = TRUE
+                  ),
                   tags$span(class = "slider")
                 ),
                 tags$span(class = "right-label", "Integrated")
@@ -457,7 +536,8 @@ ui <- fluidPage(
                 width = 6,
                 class = "radio",
                 radioButtons(
-                  "embedding", NULL,
+                  "embedding",
+                  NULL,
                   inline = TRUE,
                   choices = list(
                     "PCA" = "pca",
@@ -482,7 +562,6 @@ ui <- fluidPage(
     )
   ),
 
-
   # About section
   div(
     id = "about_section",
@@ -490,14 +569,18 @@ ui <- fluidPage(
       class = "about",
       column(
         width = 8,
-        p("PlaViSca was developed by the Bioinformatics and Artificial Intelligence
+        p(
+          "PlaViSca was developed by the Bioinformatics and Artificial Intelligence
         Applications (BAIA) Unit at the Institut Pasteur du Cambodge (IPC),
         in collaboration with the Malaria Unit at IPC and the Center for Tropical
-        and Emerging Global Diseases at the University of Georgia, USA."),
-        p("We are open to collaboration and welcome opportunities to integrate
-        additional relevant data into this platform. Please reach out to us
-        using following contact.")
+        and Emerging Global Diseases at the University of Georgia, USA."
         ),
+        p(
+          "We are open to collaboration and welcome opportunities to integrate
+        additional relevant data into this platform. Please reach out to us
+        using following contact."
+        )
+      ),
       column(
         width = 4,
         id = "colab-particles",
@@ -508,30 +591,46 @@ ui <- fluidPage(
       class = "contact",
       tags$ul(
         tags$li(
-          strong("Sopheap Oeng"), " - Bioinformatic System Engineer, IPC, email: ",
+          strong("Sopheap Oeng"),
+          " - Bioinformatic System Engineer, IPC, email: ",
           a(href = "mailto:osopheap@pasteur-kh.org", "osopheap@pasteur-kh.org")
         ),
         tags$li(
-          strong("Anthony Ruberto"), " - Postdoctoral researcher at the Center
+          strong("Anthony Ruberto"),
+          " - Postdoctoral researcher at the Center
           for Tropical and Emerging Global Diseases, University of Georgia, USA,
-          email: ", a(href = "mailto:aruberto@uga.edu", "aruberto@uga.edu")
+          email: ",
+          a(href = "mailto:aruberto@uga.edu", "aruberto@uga.edu")
         ),
         tags$li(
-          strong("Jean Popovici"), " - Head, Malaria Research Unit, IPC, email: ",
-          a(href = "mailto:jpopovici@pasteur-kh.org", "jpopovici@pasteur-kh.org")
+          strong("Jean Popovici"),
+          " - Head, Malaria Research Unit, IPC, email: ",
+          a(
+            href = "mailto:jpopovici@pasteur-kh.org",
+            "jpopovici@pasteur-kh.org"
+          )
         ),
-        tags$li( 
-          strong("Giorgio Gonnella"), " - Head, BAIA Unit, IPC, email: ",
-          a(href = "mailto:ggonnella@pasteur-kh.org", "ggonnella@pasteur-kh.org")
+        tags$li(
+          strong("Giorgio Gonnella"),
+          " - Head, BAIA Unit, IPC, email: ",
+          a(
+            href = "mailto:ggonnella@pasteur-kh.org",
+            "ggonnella@pasteur-kh.org"
+          )
         )
       ),
       p(
         "PlaViSca is built using the R Shiny framework. For more detail, please
-        visit GitHub repo:", a(
+        visit GitHub repo:",
+        a(
           href = "https://github.com/Sopheap15/pvsca",
-          HTML('https://github.com/Sopheap15/pvsca
-              <span class="point-emoji">👈 </span>'), target = "_blank"
-        ), "."
+          HTML(
+            'https://github.com/Sopheap15/pvsca
+              <span class="point-emoji">👈 </span>'
+          ),
+          target = "_blank"
+        ),
+        "."
       )
     ),
     fluidRow(id = "particles-js-about", class = "particles-js"),

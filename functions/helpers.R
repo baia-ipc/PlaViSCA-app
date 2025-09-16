@@ -105,22 +105,59 @@ navigate_tabset <- function(session, menu_id, tab_name = NULL) {
 }
 
 # Filter data
+#fun_filter_df <- function(data, selections) {
+#  if (is.null(selections)) {
+#    return(data.frame())
+#  }
+#
+#  parts <- strsplit(selections, "__")
+#  filter_list <- lapply(split(parts, sapply(parts, `[[`, 1)), function(lst) {
+#    sapply(lst, `[[`, 2)
+#  })
+#
+#  keep_rows <- rep(TRUE, nrow(data))
+#  for (colname in names(filter_list)) {
+#    keep_rows <- keep_rows & data[[colname]] %in% filter_list[[colname]]
+#  }
+#
+#  data[keep_rows, , drop = FALSE]
+#}
+
 fun_filter_df <- function(data, selections) {
-  if (is.null(selections)) {
-    return(data.frame())
-  }
+  if (is.null(selections) || length(selections) == 0) {
+  return(data)
+}
 
-  parts <- strsplit(selections, "__")
-  filter_list <- lapply(split(parts, sapply(parts, `[[`, 1)), function(lst) {
-    sapply(lst, `[[`, 2)
-  })
+# Parse selections safely
+parts <- strsplit(selections, "__", fixed = TRUE)
+  valid_parts <- Filter(function(x) length(x) == 2, parts) 
+  if (length(valid_parts) == 0) {
+  return(data) 
 
-  keep_rows <- rep(TRUE, nrow(data))
+}
+
+# Build filter list
+filter_list <- lapply(
+  split(valid_parts, vapply(valid_parts, `[[`, character(1), 1)),
+  function(lst) vapply(lst, `[[`, character(1), 2)
+)
+
+keep_rows <- rep(TRUE, nrow(data))
   for (colname in names(filter_list)) {
+  if (colname %in% names(data)) {
     keep_rows <- keep_rows & data[[colname]] %in% filter_list[[colname]]
-  }
+  } else {
+    warning(sprintf("Column '%s' not found in data; skipping filter.", colname))
+}
 
-  data[keep_rows, , drop = FALSE]
+}
+
+# Always return with the same columns as input, even if no rows pass the filter
+out <- data[keep_rows, , drop = FALSE]
+  if (nrow(out) == 0) {
+  out <- data[0, , drop = FALSE]
+  }
+return(out)
 }
 
 

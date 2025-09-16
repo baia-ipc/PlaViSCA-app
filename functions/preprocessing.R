@@ -35,6 +35,17 @@ mr_data <- FetchData(
 ) %>%
   clean_names()
 
+# modify life_cycle_stage to include parasite_stage for schizont stage
+mr_data <- mr_data %>%
+  mutate(
+    life_cycle_stage = case_when(
+      life_cycle_stage == "Schizont" ~
+        paste0(life_cycle_stage, " (", parasite_stage, ")"),
+      TRUE ~ life_cycle_stage
+    )
+  )
+
+
 # clean mr_data
 mr_data <- mr_data %>%
   dplyr::rename(
