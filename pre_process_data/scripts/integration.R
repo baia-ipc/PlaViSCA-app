@@ -31,7 +31,8 @@ files <- c(
   "hazzard2024.rds",
   "ruberto2022_1.rds",
   "ruberto2022_2.rds",
-  "sa2020.rds"
+  "sa2020.rds",
+  "silva2022.rds"
 )
 
 pv.combined.all <- lapply(files, readRDS)
