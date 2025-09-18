@@ -104,66 +104,45 @@ navigate_tabset <- function(session, menu_id, tab_name = NULL) {
   }
 }
 
-# Filter data
-#fun_filter_df <- function(data, selections) {
-#  if (is.null(selections)) {
-#    return(data.frame())
-#  }
-#
-#  parts <- strsplit(selections, "__")
-#  filter_list <- lapply(split(parts, sapply(parts, `[[`, 1)), function(lst) {
-#    sapply(lst, `[[`, 2)
-#  })
-#
-#  keep_rows <- rep(TRUE, nrow(data))
-#  for (colname in names(filter_list)) {
-#    keep_rows <- keep_rows & data[[colname]] %in% filter_list[[colname]]
-#  }
-#
-#  data[keep_rows, , drop = FALSE]
-#}
 
 fun_filter_df <- function(data, selections) {
   if (is.null(selections) || length(selections) == 0) {
-  return(data)
-}
-
-# Parse selections safely
-parts <- strsplit(selections, "__", fixed = TRUE)
-  valid_parts <- Filter(function(x) length(x) == 2, parts) 
-  if (length(valid_parts) == 0) {
-  return(data) 
-
-}
-
-# Build filter list
-filter_list <- lapply(
-  split(valid_parts, vapply(valid_parts, `[[`, character(1), 1)),
-  function(lst) vapply(lst, `[[`, character(1), 2)
-)
-
-keep_rows <- rep(TRUE, nrow(data))
-  for (colname in names(filter_list)) {
-  if (colname %in% names(data)) {
-    keep_rows <- keep_rows & data[[colname]] %in% filter_list[[colname]]
-  } else {
-    warning(sprintf("Column '%s' not found in data; skipping filter.", colname))
-}
-
-}
-
-# Always return with the same columns as input, even if no rows pass the filter
-out <- data[keep_rows, , drop = FALSE]
-  if (nrow(out) == 0) {
-  out <- data[0, , drop = FALSE]
+    return(data)
   }
-return(out)
+
+  # Parse selections safely
+  parts <- strsplit(selections, "__", fixed = TRUE)
+  valid_parts <- Filter(function(x) length(x) == 2, parts)
+  if (length(valid_parts) == 0) {
+    return(data)
+  }
+
+  # Build filter list
+  filter_list <- lapply(
+    split(valid_parts, vapply(valid_parts, `[[`, character(1), 1)),
+    function(lst) vapply(lst, `[[`, character(1), 2)
+  )
+
+  keep_rows <- rep(TRUE, nrow(data))
+  for (colname in names(filter_list)) {
+    if (colname %in% names(data)) {
+      keep_rows <- keep_rows & data[[colname]] %in% filter_list[[colname]]
+    } else {
+      warning(sprintf("Column '%s' not found in data; skipping filter.", colname))
+    }
+  }
+
+  # Always return with the same columns as input, even if no rows pass the filter
+  out <- data[keep_rows, , drop = FALSE]
+  if (nrow(out) == 0) {
+    out <- data[0, , drop = FALSE]
+  }
+  return(out)
 }
 
 
 # Helper function to apply secondary filters
 apply_secondary_filters <- function(data, inputs) {
-  # Select relevant columns
   filtered <- data %>%
     select(any_of(c(
       "study_label",
@@ -336,7 +315,6 @@ newBlock <- function(new_count, counter, choice_exp, dynamicBlock, session) {
   })
 }
 
-
 # Generate df for gene_exp0
 df_exp0 <- function(gene_data, gene_input, group_input, check_exp) {
   df <- gene_data$data
@@ -364,55 +342,57 @@ df_exp0 <- function(gene_data, gene_input, group_input, check_exp) {
 # Generate df for gene_expi
 df_expi <- function(id, input, gene_data, get_gene_id) {
   reactive({
-    tryCatch({
-      req(
-        input[[paste0("genes_exp_", id)]],
-        input[[paste0("group_exp_", id)]]
-      )
+    tryCatch(
+      {
+        req(
+          input[[paste0("genes_exp_", id)]],
+          input[[paste0("group_exp_", id)]]
+        )
 
-      df <- gene_data$data
-      
-      # Safely access the check_exp input with fallback to FALSE
-      check_exp_input <- input[[paste0("check_exp_", id)]]
-      if (is.null(check_exp_input)) {
-        check_exp_input <- FALSE  # Default to FALSE if input doesn't exist
-      }
-      
-      gene_exp <- if (!check_exp_input) {
-        get_gene_id(input[[paste0("genes_exp_", id)]], gene_data$genes)
-      } else {
-        input[[paste0("genes_exp_", id)]]
-      }
+        df <- gene_data$data
 
-      # Validate gene_exp is not NULL or empty
-      if (is.null(gene_exp) || is.na(gene_exp) || gene_exp == "") {
+        # Safely access the check_exp input with fallback to FALSE
+        check_exp_input <- input[[paste0("check_exp_", id)]]
+        if (is.null(check_exp_input)) {
+          check_exp_input <- FALSE
+        }
+
+        gene_exp <- if (!check_exp_input) {
+          get_gene_id(input[[paste0("genes_exp_", id)]], gene_data$genes)
+        } else {
+          input[[paste0("genes_exp_", id)]]
+        }
+
+        # Validate gene_exp is not NULL or empty
+        if (is.null(gene_exp) || is.na(gene_exp) || gene_exp == "") {
+          return(NULL)
+        }
+
+        if (!(gene_exp %in% colnames(df))) {
+          df$gene_expr <- NA
+        } else {
+          df <- df %>% mutate(gene_expr = .data[[gene_exp]])
+        }
+
+        group_col <- input[[paste0("group_exp_", id)]]
+
+        # Validate group_col is not NULL or empty
+        if (is.null(group_col) || is.na(group_col) || group_col == "") {
+          return(NULL)
+        }
+
+        if (!(tolower(group_col) %in% colnames(df))) {
+          df[[group_col]] <- NA
+        }
+        return(df)
+      },
+      error = function(e) {
+        message("Error in df_expi for id ", id, ": ", e$message)
         return(NULL)
       }
-
-      if (!(gene_exp %in% colnames(df))) {
-        df$gene_expr <- NA
-      } else {
-        df <- df %>% mutate(gene_expr = .data[[gene_exp]])
-      }
-
-      group_col <- input[[paste0("group_exp_", id)]]
-      
-      # Validate group_col is not NULL or empty
-      if (is.null(group_col) || is.na(group_col) || group_col == "") {
-        return(NULL)
-      }
-      
-      if (!(tolower(group_col) %in% colnames(df))) {
-        df[[group_col]] <- NA
-      }
-      return(df)
-    }, error = function(e) {
-      message("Error in df_expi for id ", id, ": ", e$message)
-      return(NULL)
-    })
+    )
   })
 }
-
 
 # Set color pallet
 colors <- RColorBrewer::brewer.pal(12, "Set3")
@@ -473,9 +453,9 @@ feature_plot <- function(df, x, y, color, y_title, title) {
 # Generate Elbow plot for PCA
 elbow_plot <- function(pca_df, selected_study) {
   req(pca_df)
-  
+
   pca_df <- pca_df %>%
-      filter(study == !!selected_study)
+    filter(study == !!selected_study)
 
   plot_ly(
     data = pca_df,
@@ -502,7 +482,6 @@ var_genes_plot <- function(df, study, top_n = 10) {
   df <- df %>%
     filter(study == !!study)
 
-
   # Calculate counts AFTER filtering by study
   counts <- table(df$variable)
   var_count <- counts["TRUE"]
@@ -511,11 +490,11 @@ var_genes_plot <- function(df, study, top_n = 10) {
   # Create separate datasets for each category
   non_variable_genes <- df %>% filter(variable == FALSE)
   variable_genes <- df %>% filter(variable == TRUE)
-  
+
   top_hvf <- variable_genes %>%
     arrange(rank) %>%
     head(top_n)
-  
+
   # Remove top genes from regular variable genes to avoid overlap
   regular_variable_genes <- variable_genes %>%
     anti_join(top_hvf, by = "name")
@@ -580,28 +559,65 @@ var_genes_plot <- function(df, study, top_n = 10) {
 }
 
 
-# Generate violine gene exp plot
+# Generate violine gene exp plot with performance optimization
 gene_exp_plot <- function(data, x_col) {
-  plot_ly(
-    data = data,
-    x = ~ .data[[x_col]],
-    y = ~gene_expr,
+  # Find the actual column name (case-insensitive)
+  actual_col <- colnames(data)[tolower(colnames(data)) == tolower(x_col)]
+
+  if (length(actual_col) == 0) {
+    stop(paste("Column", x_col, "not found in data. Available columns:", paste(colnames(data), collapse = ", ")))
+  }
+
+  # Use the first match
+  actual_col <- actual_col[1]
+
+  # Ensure gene_expr column exists
+  if (!"gene_expr" %in% colnames(data)) {
+    stop("gene_expr column not found in data")
+  }
+
+  # Remove any rows with missing values to avoid plotly issues (optimized)
+  clean_data <- data[complete.cases(data[c(actual_col, "gene_expr")]), ]
+
+  if (nrow(clean_data) == 0) {
+    return(plotly::plot_ly() %>% plotly::layout(title = ""))
+  }
+
+  # Get unique groups for color mapping (optimized)
+  unique_groups <- unique(clean_data[[actual_col]])
+  n_groups <- length(unique_groups)
+
+  # Choose appropriate color palette based on number of groups (optimized)
+  colors <- if (n_groups <= 3) {
+    RColorBrewer::brewer.pal(3, "Set1")[1:n_groups]
+  } else if (n_groups <= 8) {
+    RColorBrewer::brewer.pal(n_groups, "Set2")
+  } else {
+    RColorBrewer::brewer.pal(min(n_groups, 11), "Spectral")
+  }
+
+  # Create violin plot with proper color differentiation (streamlined)
+  p <- plotly::plot_ly(
+    data = clean_data,
+    x = clean_data[[actual_col]],
+    y = clean_data$gene_expr,
+    color = clean_data[[actual_col]],
+    colors = colors,
     type = "violin",
-    color = ~ .data[[x_col]],
     box = list(visible = TRUE),
-    meanline = list(visible = TRUE)
+    meanline = list(visible = TRUE),
+    points = FALSE,
+    showlegend = FALSE
   ) %>%
-    layout(
-      xaxis = list(title = x_col),
-      yaxis = list(title = "Expression"),
-      legend = list(
-        orientation = "h",
-        x = 0.5,
-        xanchor = "center",
-        y = 1.1,
-        yanchor = "bottom"
-      )
+    plotly::layout(
+      xaxis = list(title = ""),
+      yaxis = list(title = ""),
+      title = "",
+      showlegend = FALSE,
+      margin = list(l = 40, r = 40, t = 20, b = 40)
     )
+
+  return(p)
 }
 
 # Generate PlasmoDB and NCBI links
@@ -628,7 +644,6 @@ gene_links <- function(gene_id) {
   ))
 }
 
-
 y_col <- function(check_input, x_col, unintegrated, integrated) {
   if (check_input) {
     setdiff(unintegrated, x_col)
@@ -637,11 +652,9 @@ y_col <- function(check_input, x_col, unintegrated, integrated) {
   }
 }
 
-
 # Generate color column based on input option
 get_color_column <- function(color_type, gene_input, gene_data_obj) {
-  switch(
-    color_type,
+  switch(color_type,
     "genes" = get_gene_id(gene_input, gene_data_obj),
     "cca_snn" = gene_input,
     color_type
@@ -744,16 +757,15 @@ get_legend_layout <- function(legend_title) {
 
 # Generate 2d plot
 plot_2d <- function(
-  df,
-  x,
-  y,
-  color,
-  legend_title,
-  size,
-  is_categorical,
-  selected_color,
-  colors
-) {
+    df,
+    x,
+    y,
+    color,
+    legend_title,
+    size,
+    is_categorical,
+    selected_color,
+    colors) {
   hover_text <- ~ paste(
     "Cell:",
     df$id,
@@ -831,15 +843,14 @@ plot_2d <- function(
 
 # Generate 3d plot
 plot_3d <- function(
-  df,
-  color,
-  legend_title,
-  size,
-  selected_color,
-  is_categorical,
-  colors,
-  coords
-) {
+    df,
+    color,
+    legend_title,
+    size,
+    selected_color,
+    is_categorical,
+    colors,
+    coords) {
   x_col <- coords[1]
   y_col <- coords[2]
   z_col <- coords[3]
@@ -933,15 +944,14 @@ plot_3d <- function(
 
 # Main pca, umap and tsne plotting function
 embedding_plot <- function(
-  df,
-  xaxis_input,
-  yaxis_input,
-  color,
-  legend_title,
-  size,
-  plot_type = "pca_u",
-  plot_dim = "2d"
-) {
+    df,
+    xaxis_input,
+    yaxis_input,
+    color,
+    legend_title,
+    size,
+    plot_type = "pca_u",
+    plot_dim = "2d") {
   x <- df[[xaxis_input]]
   y <- df[[yaxis_input]]
   selected_color <- df[[color]]

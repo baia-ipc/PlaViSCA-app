@@ -63,6 +63,7 @@ IDC_cycle <- SummarizedExperiment(
 )
 IDC_cycle$X <- NULL
 
+#rownames(IDC_cycle) <- gsub("-", "_", rownames(IDC_cycle))
 
 # Convert Seurat object to single-cell experiment (sce) object for SingleR mapping
 sce.all <- as.SingleCellExperiment(DietSeurat(
@@ -151,7 +152,7 @@ SCpubr::do_DimPlot(
 
 pv.combined.all <- FindClusters(
   pv.combined.all,
-  resolution = 0.1,
+  resolution = 0.05,
   graph_name = "new_clustering"
 ) # change as necessary
 
@@ -277,7 +278,15 @@ pv.combined.all <- RenameIdents(
   "10" = "Asexual 9",
   "11" = "Asexual 10",
   "12" = "Asexual 11",
-  "13" = "Asexual 12"
+  "13" = "Asexual 12",
+  "14" = "Asexual 13",
+  "15" = "Asexual 14",
+  "16" = "Asexual 15",
+  "17" = "Asexual 16",
+  "18" = "Asexual 17",
+  "19" = "Asexual 18",
+  "20" = "Asexual 19",
+  "21" = "Asexual 20"
 )
 
 
@@ -375,6 +384,12 @@ pv.combined.all$life_cycle_stage[liver_form] <- pv.combined.all$liver_form[
   liver_form
 ]
 
+
+# Update life_cycle_stage only where refine_state is not NA
+pv.combined.all$life_cycle_stage[!is.na(pv.combined.all$refine_state)] <-
+  pv.combined.all$refine_state[!is.na(pv.combined.all$refine_state)]
+
+
 # overwrite for the sample type salivary gland to sporozoite. This is for Rubeto2022_2, hazzard2022 498 and 499
 
 ruberto2022_2 <- pv.combined.all$study_label == "Ruberto2022_2"
@@ -394,4 +409,4 @@ pv.combined.all$femaleGams_module_score1 <- NULL
 pv.combined.all$maleGams_module_score1 <- NULL
 pv.combined.all@project.name <- "PlaViSca"
 
-saveRDS(pv.combined.all, file = "./pv_all_studies.rds")
+#saveRDS(pv.combined.all, file = "./pv_all_studies.rds")

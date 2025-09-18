@@ -49,9 +49,9 @@ mr_data <- mr_data %>%
 # clean mr_data
 mr_data <- mr_data %>%
   dplyr::rename(
-    umap_i_1 = gbcwm_1,
-    umap_i_2 = gbcwm_2,
-    umap_i_3 = gbcwm_3,
+    umap_i_1 = cnqwt_1,
+    umap_i_2 = cnqwt_2,
+    umap_i_3 = cnqwt_3,
     umap_u_1 = umap_1,
     umap_u_2 = umap_2,
     umap_u_3 = umap_3,
