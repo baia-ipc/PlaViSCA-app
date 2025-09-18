@@ -108,9 +108,16 @@ server <- function(input, output, session) {
     }
   })
 
-  # Change to normalize when change tabset
+  # Change to normalize when change tabset - but preserve current selection if same
   observeEvent(input$tabset, {
     if (input$tabset == "Gene expression") {
+      # Sync with embeddings data type if available, otherwise default to normalize
+      current_selection <- if (!is.null(input$data_type)) {
+        input$data_type
+      } else {
+        "normalize"
+      }
+      
       updateRadioButtons(
         session,
         "data_type_exp",
@@ -119,9 +126,16 @@ server <- function(input, output, session) {
           "Normalized" = "normalize",
           "Scaled" = "scale"
         ),
-        selected = "normalize"
+        selected = current_selection
       )
     } else if (input$tabset == "Embeddings") {
+      # Sync with gene expression data type if available, otherwise default to normalize
+      current_selection <- if (!is.null(input$data_type_exp)) {
+        input$data_type_exp
+      } else {
+        "normalize"
+      }
+      
       updateRadioButtons(
         session,
         "data_type",
@@ -130,44 +144,77 @@ server <- function(input, output, session) {
           "Normalized" = "normalize",
           "Scaled" = "scale"
         ),
-        selected = "normalize"
+        selected = current_selection
       )
     }
   })
 
-  # Select raw, normalize or scale data
+  # Data caching system to avoid unnecessary reloads
   default_df_filter <- reactiveVal(NULL)
+  cached_data <- reactiveValues(
+    raw = NULL,
+    normalize = NULL,
+    scale = NULL,
+    current_type = NULL,
+    current_filter = NULL
+  )
+
+  # Helper function to get current data type regardless of tab
+  get_current_data_type <- reactive({
+    if (input$tabset == "Gene expression") {
+      input$data_type_exp
+    } else if (input$tabset == "Embeddings") {
+      input$data_type
+    } else {
+      "normalize"  # default
+    }
+  })
+
+  # Load data only when necessary
+  load_dataset <- function(data_type) {
+    if (is.null(cached_data[[data_type]])) {
+      switch(
+        data_type,
+        raw = {
+          cached_data$raw <- load_data(DATA_PATHS$raw_df)
+          cached_data$raw
+        },
+        normalize = {
+          cached_data$normalize <- norm_df
+          cached_data$normalize
+        },
+        scale = {
+          cached_data$scale <- load_data(DATA_PATHS$scale_df)
+          cached_data$scale
+        }
+      )
+    } else {
+      cached_data[[data_type]]
+    }
+  }
 
   gene_data <- eventReactive(
     list(
-      input$tabset,
       input$apply_filter,
       input$data_type,
       input$data_type_exp
     ),
     {
-      dataset <- if (input$tabset == "Gene expression") {
-        req(input$data_type_exp)
-        current_type <- input$data_type_exp
-        switch(
-          input$data_type_exp,
-          raw = load_data(DATA_PATHS$raw_df),
-          normalize = norm_df,
-          scale = load_data(DATA_PATHS$scale_df)
-        )
-      } else if (input$tabset == "Embeddings") {
-        req(input$data_type)
-        current_type <- input$data_type
-        switch(
-          input$data_type,
-          raw = load_data(DATA_PATHS$raw_df),
-          normalize = norm_df,
-          scale = load_data(DATA_PATHS$scale_df)
-        )
-      }
-
-      req(dataset)
+      current_type <- get_current_data_type()
+      req(current_type)
+      
       selections <- input$apply_filter
+      
+      # Check if we can reuse cached data
+      if (!is.null(cached_data$current_type) && 
+          cached_data$current_type == current_type &&
+          !is.null(cached_data$current_filter) &&
+          identical(cached_data$current_filter, selections)) {
+        
+        # Return cached data without showing progress bar
+        message("Using cached data for type: ", current_type)
+        return(sessionData$last_gene_data)
+      }
 
       if (user_interact() && (is.null(selections) || length(selections) == 0)) {
         return(NULL)
@@ -179,24 +226,67 @@ server <- function(input, output, session) {
 
       req(selections)
 
-      # Show progress bar when loading data
+      # Show progress bar when loading new data
       withProgress(message = "", value = 0, {
         display_name <- switch(
           current_type,
           raw = "Raw",
-          normalize = "Normalized",
+          normalize = "Normalized", 
           scale = "Scaled",
           current_type
         )
-        setProgress(0.6, detail = paste("Loading", display_name, "data..."))
+        
+        # Check if dataset is already cached
+        if (!is.null(cached_data[[current_type]])) {
+          setProgress(0.1, detail = paste("Using cached", display_name, "dataset..."))
+        } else {
+          setProgress(0.3, detail = paste("Loading", display_name, "data..."))
+        }
+        
+        # Load dataset (from cache if available)
+        dataset <- load_dataset(current_type)
+        
+        setProgress(0.6, detail = "Filtering data...")
         result <- list(
           data = fun_filter_df(dataset, selections),
           genes = genes(dataset, gff_data)
         )
+        
+        # Cache the current state
+        cached_data$current_type <- current_type
+        cached_data$current_filter <- selections
+        sessionData$last_gene_data <- result
+        
+        setProgress(1, detail = "Complete!")
+        message("Loaded and cached data for type: ", current_type)
         return(result)
       })
-    }
+    },
+    ignoreNULL = FALSE
   )
+
+  # Synchronize data type selections between tabs
+  # When embeddings data type changes, sync with gene expression
+  observeEvent(input$data_type, {
+    if (!is.null(input$data_type) && input$tabset == "Embeddings") {
+      updateRadioButtons(
+        session,
+        "data_type_exp",
+        selected = input$data_type
+      )
+    }
+  }, ignoreInit = TRUE)
+
+  # When gene expression data type changes, sync with embeddings
+  observeEvent(input$data_type_exp, {
+    if (!is.null(input$data_type_exp) && input$tabset == "Gene expression") {
+      updateRadioButtons(
+        session,
+        "data_type",
+        selected = input$data_type_exp
+      )
+    }
+  }, ignoreInit = TRUE)
 
   # Metadata filter
   # choose columns for filter data
@@ -1033,6 +1123,13 @@ server <- function(input, output, session) {
     choice_exp(NULL)
     selected_table(NULL)
 
+    # Clear cached data
+    cached_data$raw <- NULL
+    cached_data$normalize <- NULL
+    cached_data$scale <- NULL
+    cached_data$current_type <- NULL
+    cached_data$current_filter <- NULL
+
     if (exists("sessionData", envir = .GlobalEnv)) {
       rm(list = ls(envir = sessionData), envir = sessionData)
     }
@@ -1040,4 +1137,16 @@ server <- function(input, output, session) {
     gc()
     message("Session ended. Memory cleanup completed.")
   })
+
+  # Optional: Add a function to manually clear cache if needed
+  clear_data_cache <- function() {
+    cached_data$raw <- NULL
+    cached_data$normalize <- NULL
+    cached_data$scale <- NULL
+    cached_data$current_type <- NULL
+    cached_data$current_filter <- NULL
+    sessionData$last_gene_data <- NULL
+    gc()
+    message("Data cache cleared.")
+  }
 }
