@@ -10,6 +10,43 @@ server <- function(input, output, session) {
   sessionData <- new.env(parent = emptyenv())
   autoUpdatePlot <- reactiveVal(FALSE)
 
+  # Global loading state for better UX
+  global_loading <- reactiveVal(FALSE)
+  
+  # Memory monitoring (optional - for debugging) - Fixed reactive context
+  memory_monitor <- reactiveTimer(60000)  # Check every minute
+  observe({
+    memory_monitor()
+    tryCatch({
+      mem_info <- gc(verbose = FALSE)
+      total_mb <- sum(mem_info[, 2])
+      if (total_mb > 5000) {  # Alert if over 5GB 
+        message("High memory usage detected: ", round(total_mb, 2), " MB")
+        
+        # More aggressive cleanup when memory is very high
+        if (total_mb > 8000) {  # Over 8GB
+          message("Memory usage critically high - clearing cached data...")
+          # Clear less frequently used data
+          if (!is.null(cached_data$raw)) {
+            cached_data$raw <- NULL
+            message("Cleared raw data cache")
+          }
+          if (!is.null(cached_data$scale)) {
+            cached_data$scale <- NULL
+            message("Cleared scale data cache") 
+          }
+        }
+        
+        # Force garbage collection when memory is high
+        gc(verbose = FALSE, full = TRUE)
+      } else if (total_mb > 2000) {  # Standard cleanup at 2GB
+        gc(verbose = FALSE, full = TRUE)
+      }
+    }, error = function(e) {
+      message("Memory monitoring error: ", e$message)
+    })
+  })
+
   # Navigate home and data section
   observeEvent(input$home, {
     shinyjs::hide("analysis_section")
@@ -151,6 +188,9 @@ server <- function(input, output, session) {
 
   # Data caching system to avoid unnecessary reloads
   default_df_filter <- reactiveVal(NULL)
+  app_initialized <- reactiveVal(FALSE)
+  data_loading_trigger <- reactiveVal(0)
+  
   cached_data <- reactiveValues(
     raw = NULL,
     normalize = NULL,
@@ -170,36 +210,91 @@ server <- function(input, output, session) {
     }
   })
 
-  # Load data only when necessary
+  # Load data only when necessary with better memory management
   load_dataset <- function(data_type) {
     if (is.null(cached_data[[data_type]])) {
-      switch(
+      # Force garbage collection before loading new data
+      gc(verbose = FALSE, full = TRUE)
+      
+      # Clear other cached data when loading large datasets like scaled data
+      if (data_type == "scale") {
+        message("Loading scaled data - clearing other cached data to free memory...")
+        cached_data$raw <- NULL
+        gc(verbose = FALSE, full = TRUE)
+      } else if (data_type == "raw") {
+        message("Loading raw data - clearing other cached data to free memory...")  
+        cached_data$scale <- NULL
+        gc(verbose = FALSE, full = TRUE)
+      }
+      
+      dataset <- switch(
         data_type,
         raw = {
-          cached_data$raw <- load_data(DATA_PATHS$raw_df)
-          cached_data$raw
+          if (exists("DATA_PATHS") && !is.null(DATA_PATHS$raw_df)) {
+            load_data(DATA_PATHS$raw_df)
+          } else {
+            NULL
+          }
         },
         normalize = {
-          cached_data$normalize <- norm_df
-          cached_data$normalize
+          if (exists("norm_df")) norm_df else NULL
         },
         scale = {
-          cached_data$scale <- load_data(DATA_PATHS$scale_df)
-          cached_data$scale
+          if (exists("DATA_PATHS") && !is.null(DATA_PATHS$scale_df)) {
+            load_data(DATA_PATHS$scale_df)
+          } else {
+            NULL
+          }
         }
       )
+      
+      if (!is.null(dataset)) {
+        cached_data[[data_type]] <- dataset
+        # Force garbage collection after caching
+        gc(verbose = FALSE, full = TRUE)
+        message("Successfully loaded and cached ", data_type, " data")
+      }
+      
+      return(dataset)
     } else {
-      cached_data[[data_type]]
+      return(cached_data[[data_type]])
     }
   }
 
-  gene_data <- eventReactive(
+  # Debounced observer to prevent multiple rapid triggers
+  observe({
     list(
       input$apply_filter,
       input$data_type,
       input$data_type_exp
-    ),
+    )
+    
+    # Only trigger after app is properly initialized
+    if (!is.null(input$data_type) || !is.null(input$data_type_exp)) {
+      if (!is.null(input$apply_filter) && !app_initialized()) {
+        app_initialized(TRUE)
+      }
+    }
+    
+    # Use later() to debounce - only trigger after 800ms of no changes
+    if (app_initialized()) {
+      later(function() {
+        isolate({
+          data_loading_trigger(data_loading_trigger() + 1)
+        })
+      }, 0.8)
+    }
+  })
+
+  # Main gene_data reactive with debounced trigger
+  gene_data <- eventReactive(
+    data_loading_trigger(),
     {
+      # Skip if not properly initialized
+      if (!app_initialized()) {
+        return(NULL)
+      }
+      
       current_type <- get_current_data_type()
       req(current_type)
       
@@ -211,7 +306,6 @@ server <- function(input, output, session) {
           !is.null(cached_data$current_filter) &&
           identical(cached_data$current_filter, selections)) {
         
-        # Return cached data without showing progress bar
         message("Using cached data for type: ", current_type)
         return(sessionData$last_gene_data)
       }
@@ -246,6 +340,11 @@ server <- function(input, output, session) {
         # Load dataset (from cache if available)
         dataset <- load_dataset(current_type)
         
+        if (is.null(dataset)) {
+          showNotification("Error: Dataset not available", type = "error")
+          return(NULL)
+        }
+        
         setProgress(0.6, detail = "Filtering data...")
         result <- list(
           data = fun_filter_df(dataset, selections),
@@ -259,6 +358,9 @@ server <- function(input, output, session) {
         
         setProgress(1, detail = "Complete!")
         message("Loaded and cached data for type: ", current_type)
+        
+        # Force garbage collection after processing
+        gc()
         return(result)
       })
     },
@@ -268,25 +370,49 @@ server <- function(input, output, session) {
   # Synchronize data type selections between tabs
   # When embeddings data type changes, sync with gene expression
   observeEvent(input$data_type, {
-    if (!is.null(input$data_type) && input$tabset == "Embeddings") {
+    if (!is.null(input$data_type) && !is.null(input$tabset) && input$tabset == "Embeddings") {
+      global_loading(TRUE)
       updateRadioButtons(
         session,
         "data_type_exp",
         selected = input$data_type
       )
+      # Reset loading state after a longer delay
+      later(function() {
+        tryCatch({
+          global_loading(FALSE)
+        }, error = function(e) {
+          message("Error resetting global_loading: ", e$message)
+        })
+      }, 2.5)  # Increased from 2 to 2.5 seconds
     }
   }, ignoreInit = TRUE)
 
   # When gene expression data type changes, sync with embeddings
   observeEvent(input$data_type_exp, {
-    if (!is.null(input$data_type_exp) && input$tabset == "Gene expression") {
+    if (!is.null(input$data_type_exp) && !is.null(input$tabset) && input$tabset == "Gene expression") {
+      global_loading(TRUE)
       updateRadioButtons(
         session,
         "data_type",
         selected = input$data_type_exp
       )
+      # Reset loading state after a longer delay to prevent multiple updates
+      later(function() {
+        tryCatch({
+          global_loading(FALSE)
+        }, error = function(e) {
+          message("Error resetting global_loading: ", e$message)
+        })
+      }, 2.5)  # Increased from 2 to 2.5 seconds
     }
   }, ignoreInit = TRUE)
+
+  # Provide loading feedback to UI (optional - you can use this in your UI)
+  output$loading_state <- reactive({
+    global_loading()
+  })
+  outputOptions(output, "loading_state", suspendWhenHidden = FALSE)
 
   # Metadata filter
   # choose columns for filter data
@@ -357,7 +483,7 @@ server <- function(input, output, session) {
     user_interact(TRUE)
   })
 
-  # Reactive filtered data
+  # Reactive filtered data with memory management
   filtered_data <- reactive({
     selections <- input$apply_filter
 
@@ -370,7 +496,12 @@ server <- function(input, output, session) {
     }
 
     req(selections)
-    fun_filter_df(mr_data, selections)
+    
+    # Process data and force garbage collection
+    result <- fun_filter_df(mr_data, selections)
+    gc(verbose = FALSE)
+    
+    return(result)
   })
 
   # Manipulation tabset
@@ -469,27 +600,32 @@ server <- function(input, output, session) {
       output$data_table <- renderDT(
         {
           ## data in table
+          processed_data <- filt_data %>%
+            rename_with(
+              ~ str_to_title(.),
+              .cols = any_of(c(
+                "study_label",
+                "host_species",
+                "life_cycle_stage",
+                "treatment",
+                "parasite_stage",
+                "sample_type",
+                "geographic_location",
+                "sc_technology",
+                "sequencer",
+                "strain",
+                "day_post_infection",
+                "biological_replicate"
+              ))
+            ) %>%
+            rename(nCount_RNA = n_count_rna, nFeature_RNA = n_feature_rna) %>%
+            arrange(desc(nCount_RNA))
+          
+          # Force garbage collection after data processing
+          gc(verbose = FALSE)
+          
           DT::datatable(
-            filt_data %>%
-              rename_with(
-                ~ str_to_title(.),
-                .cols = any_of(c(
-                  "study_label",
-                  "host_species",
-                  "life_cycle_stage",
-                  "treatment",
-                  "parasite_stage",
-                  "sample_type",
-                  "geographic_location",
-                  "sc_technology",
-                  "sequencer",
-                  "strain",
-                  "day_post_infection",
-                  "biological_replicate"
-                ))
-              ) %>%
-              rename(nCount_RNA = n_count_rna, nFeature_RNA = n_feature_rna) %>%
-              arrange(desc(nCount_RNA)),
+            processed_data,
             extensions = "Buttons",
             options = list(
               pageLength = 10,
@@ -679,23 +815,71 @@ server <- function(input, output, session) {
     )
   })
 
-  # df_exp data for genes_exp_0
+  # df_exp data for genes_exp_0 with improved debouncing
   df_exp_0 <- reactive({
     req(gene_data(), input$genes_exp_0, input$group_exp)
-    df_exp0(
-      gene_data = gene_data(),
-      gene_input = input$genes_exp_0,
-      group_input = input$group_exp,
-      check_exp = input$check_exp_0
-    )
+    
+    # Skip processing during loading states
+    if (global_loading()) {
+      return(NULL)
+    }
+    
+    tryCatch({
+      df_exp0(
+        gene_data = gene_data(),
+        gene_input = input$genes_exp_0,
+        group_input = input$group_exp,
+        check_exp = input$check_exp_0
+      )
+    }, error = function(e) {
+      message("Error in df_exp_0: ", e$message)
+      return(NULL)
+    })
   })
 
-  # plot for genes_exp_0
+  # Add debouncing for gene expression plot
+  gene_plot_trigger <- reactiveVal(0)
+  
+  # Debounced observer for gene expression plot
+  observe({
+    list(
+      input$genes_exp_0,
+      input$group_exp,
+      input$check_exp_0,
+      input$data_type_exp
+    )
+    
+    # Use later() to debounce gene expression plot updates with longer delay
+    later(function() {
+      tryCatch({
+        isolate({
+          gene_plot_trigger(gene_plot_trigger() + 1)
+        })
+      }, error = function(e) {
+        message("Error in gene plot debounce: ", e$message)
+      })
+    }, 1.0)  # Increased from 0.8 to 1.0 seconds
+  })
+
+  # plot for genes_exp_0 with enhanced debouncing
   output$gene_exp_plotly <- renderPlotly({
+    gene_plot_trigger()  # React to debounced trigger
     req(df_exp_0())
 
-    group <- isolate(tolower(input$group_exp))
-    gene_exp_plot(df_exp_0(), group)
+    # Additional debouncing for data type changes
+    if (global_loading()) {
+      return(plotly::plot_ly() %>% plotly::layout(title = "Updating..."))
+    }
+
+    isolate({
+      tryCatch({
+        group <- tolower(input$group_exp)
+        gene_exp_plot(df_exp_0(), group)
+      }, error = function(e) {
+        message("Error in main gene expression plot: ", e$message)
+        return(plotly::plot_ly() %>% plotly::layout(title = "Plot Error"))
+      })
+    })
   })
 
   ## gene expression link
@@ -713,7 +897,6 @@ server <- function(input, output, session) {
     btn_id <- input$click_add_btn
     id <- as.numeric(gsub("add_btn_?", "", btn_id))
     shinyjs::hide(paste0("add_btn_", id))
-    df_exp_i <- df_expi(id, input, gene_data(), get_gene_id)
 
     choice_exp(get_gene_choices(gene_data()$genes, FALSE))
 
@@ -737,23 +920,87 @@ server <- function(input, output, session) {
           server = TRUE
         )
       })
-      output[[paste0("gene_exp_plotly_", id)]] <- renderPlotly({
-        req(df_exp_i())
-        gene_exp_plot(
-          df_exp_i(),
-          tolower(input[[paste0("group_exp_", id)]])
-        )
+      
+      # Create a properly scoped reactive for this specific plot with delay
+      shinyjs::delay(200, {
+        output[[paste0("gene_exp_plotly_", id)]] <- local({
+          plot_id <- id  # Capture the current id value
+          renderPlotly({
+            # React to data type changes automatically
+            req(gene_data())
+            
+            tryCatch({
+              # Validate inputs exist
+              gene_input_id <- paste0("genes_exp_", plot_id)
+              group_input_id <- paste0("group_exp_", plot_id)
+              
+              req(input[[gene_input_id]], input[[group_input_id]])
+              
+              # Create the reactive data for this specific plot
+              # This will automatically update when gene_data() changes (i.e., data type changes)
+              df_reactive <- df_expi(
+                id = plot_id,
+                input = input,
+                gene_data = gene_data(),
+                get_gene_id = get_gene_id
+              )
+              
+              req(df_reactive())
+              
+              gene_exp_plot(
+                df_reactive(),
+                tolower(input[[group_input_id]])
+              )
+            }, error = function(e) {
+              message("Error in dynamic gene expression plot ", plot_id, ": ", e$message)
+              # Return empty plot instead of NULL to prevent rendering issues
+              return(plotly::plot_ly() %>% plotly::layout(title = "Plot Error"))
+            })
+          })
+        })
       })
     } else {
       ## add ui block to button
       id <- id + 1
       newBlock(id, counter, choice_exp(), subBlock, session)
-      output[[paste0("gene_exp_plotly_", id)]] <- renderPlotly({
-        req(df_exp_i())
-        gene_exp_plot(
-          df_exp_i(),
-          tolower(input[[paste0("group_exp_", id)]])
-        )
+      
+      # Create a properly scoped reactive for this specific plot with delay
+      shinyjs::delay(200, {
+        output[[paste0("gene_exp_plotly_", id)]] <- local({
+          plot_id <- id  # Capture the current id value
+          renderPlotly({
+            # React to data type changes automatically
+            req(gene_data())
+            
+            tryCatch({
+              # Validate inputs exist
+              gene_input_id <- paste0("genes_exp_", plot_id)
+              group_input_id <- paste0("group_exp_", plot_id)
+              
+              req(input[[gene_input_id]], input[[group_input_id]])
+              
+              # Create the reactive data for this specific plot
+              # This will automatically update when gene_data() changes (i.e., data type changes)
+              df_reactive <- df_expi(
+                id = plot_id,
+                input = input,
+                gene_data = gene_data(),
+                get_gene_id = get_gene_id
+              )
+              
+              req(df_reactive())
+              
+              gene_exp_plot(
+                df_reactive(),
+                tolower(input[[group_input_id]])
+              )
+            }, error = function(e) {
+              message("Error in dynamic gene expression plot ", plot_id, ": ", e$message)
+              # Return empty plot instead of NULL to prevent rendering issues
+              return(plotly::plot_ly() %>% plotly::layout(title = "Plot Error"))
+            })
+          })
+        })
       })
     }
   })
@@ -807,26 +1054,28 @@ server <- function(input, output, session) {
     gene_links(gene_id)
   })
 
-  ## update plot when data_type_exp_change from js
+  ## update plot when data_type_exp_change from js with debouncing
+  gene_exp_plots_trigger <- reactiveVal(0)
+  
+  # Store dynamic plot reactive functions for proper invalidation
+  dynamic_plot_reactives <- reactiveValues()
+  
   observeEvent(input$data_type_exp_change, {
     req(gene_data(), input$data_type_exp_change)
-
-    for (full_id in input$data_type_exp_change$ids) {
-      id <- sub("^genes_exp_", "", full_id)
-      group_id <- paste0("group_exp_", id)
-
-      output[[paste0("gene_exp_plotly_", id)]] <- renderPlotly({
-        req(gene_data(), input[[full_id]], input[[group_id]])
-
-        df <- df_expi(
-          id = id,
-          input = input,
-          gene_data = gene_data(),
-          get_gene_id = get_gene_id
-        )
-        gene_exp_plot(df(), tolower(input[[group_id]]))
+    
+    # Debounce multiple plot updates
+    later(function() {
+      isolate({
+        gene_exp_plots_trigger(gene_exp_plots_trigger() + 1)
+        
+        # Simply trigger invalidation of existing plots instead of recreating them
+        # This is safer and avoids reactive context issues
+        message("Data type changed - invalidating existing gene expression plots")
+        
+        # The existing dynamic plots will automatically update through their
+        # reactive dependencies on gene_data() and input changes
       })
-    }
+    }, 0.5)
   })
 
   # Manipulation tabset "Embedding"
@@ -949,7 +1198,11 @@ server <- function(input, output, session) {
     }
   })
 
-  ## update after 1 sec
+  # Add debouncing for plot updates
+  plot_update_trigger <- reactiveVal(0)
+  plot_ready <- reactiveVal(FALSE)
+
+  # Debounced observer for plot-related inputs
   observe({
     list(
       input$embedding,
@@ -964,13 +1217,53 @@ server <- function(input, output, session) {
       input$check_all,
       input$apply_filter
     )
-    autoUpdatePlot(FALSE)
-    later(
-      function() {
+    
+    # Set plot as not ready immediately when inputs change
+    tryCatch({
+      plot_ready(FALSE)
+      autoUpdatePlot(FALSE)
+    }, error = function(e) {
+      message("Error setting plot not ready: ", e$message)
+    })
+    
+    # Use later() to debounce plot updates - wait 1.2 seconds for all changes to settle
+    later(function() {
+      tryCatch({
+        isolate({
+          plot_update_trigger(plot_update_trigger() + 1)
+        })
+      }, error = function(e) {
+        message("Error in plot update debounce: ", e$message)
+      })
+    }, 1.2)
+  })
+
+  # Separate reactive to handle plot readiness
+  observe({
+    plot_update_trigger()
+    
+    # Additional delay to ensure data is fully loaded
+    later(function() {
+      tryCatch({
+        plot_ready(TRUE)
         autoUpdatePlot(TRUE)
-      },
-      1
-    )
+        
+        # Show completion notification for data type changes
+        if (isolate(global_loading())) {
+          showNotification(
+            "Data type change completed!",
+            type = "message",
+            duration = 2
+          )
+          global_loading(FALSE)
+        }
+      }, error = function(e) {
+        message("Error in plot readiness: ", e$message)
+        # Ensure plot is still marked as ready even if notification fails
+        plot_ready(TRUE)
+        autoUpdatePlot(TRUE)
+      })
+    }, 0.3)
   })
 
   ## determine plot type
@@ -983,15 +1276,17 @@ server <- function(input, output, session) {
     )
   })
 
-  ## generate pca, umap and tsne plot
+  ## generate pca, umap and tsne plot with improved debouncing
   embplot <- reactiveVal(FALSE)
   output$all_plotly <- renderPlotly({
-    req(data(), input$xaxis, input$yaxis, autoUpdatePlot())
+    # Wait for plot to be ready and data to be available
+    req(data(), input$xaxis, input$yaxis, plot_ready(), autoUpdatePlot())
 
     if (is.null(data()) || nrow(data()) == 0) {
       return(NULL)
     }
 
+    # Generate plot without progress bar
     isolate({
       color_column <- switch(
         input$color,
@@ -999,7 +1294,7 @@ server <- function(input, output, session) {
         "RNA_snn" = input$genes_n,
         input$color
       )
-
+      
       p <- embedding_plot(
         data(),
         input$xaxis,
@@ -1010,7 +1305,7 @@ server <- function(input, output, session) {
         plot_type = get_plot_type(),
         plot_dim = input$plot
       )
-
+      
       p <- p %>%
         event_register("plotly_click") %>%
         config(displaylogo = FALSE, scrollZoom = TRUE)
@@ -1029,7 +1324,7 @@ server <- function(input, output, session) {
     return(ed)
   })
 
-  ## table on cell click
+  ## table on cell click with memory management
   selected_table <- reactiveVal(NULL)
   observeEvent(click_event(), {
     event <- click_event()
@@ -1038,10 +1333,15 @@ server <- function(input, output, session) {
 
     cell_id <- event$key
 
+    # Process data without progress bar
     data$id <- seq_len(nrow(data))
     cols <- c("id", colnames(data)[str_detect(colnames(data), "^PVP01")])
     selected_df <- data[data$id == cell_id, cols, drop = FALSE]
-
+    
+    # Clear intermediate variables and force GC
+    rm(data)
+    gc(verbose = FALSE)
+    
     selected_df <- selected_df %>%
       pivot_longer(
         cols = -id,
@@ -1056,7 +1356,11 @@ server <- function(input, output, session) {
         exp_value = expression
       ) %>%
       select(gene_id, gene_name, exp_value, description)
+      
     selected_table(selected_df)
+    
+    # Force garbage collection after processing
+    gc(verbose = FALSE)
 
     showModal(modalDialog(
       title = paste("Selected Cell ID:", cell_id),
@@ -1089,6 +1393,14 @@ server <- function(input, output, session) {
     )
   })
 
+  # Clear selected table when modal is dismissed (memory cleanup)
+  observeEvent(input$shiny_modal, {
+    if (!isTruthy(input$shiny_modal)) {
+      selected_table(NULL)
+      gc(verbose = FALSE)
+    }
+  })
+
   ## handle export data
   output$export_data <- downloadHandler(
     filename = function() {
@@ -1117,36 +1429,99 @@ server <- function(input, output, session) {
     }
   )
 
-  # clear memory on session end
+  # clear memory on session end with comprehensive cleanup
   onSessionEnded(function() {
-    removeUI(selector = "#dynamic_col_*")
-    choice_exp(NULL)
-    selected_table(NULL)
-
-    # Clear cached data
-    cached_data$raw <- NULL
-    cached_data$normalize <- NULL
-    cached_data$scale <- NULL
-    cached_data$current_type <- NULL
-    cached_data$current_filter <- NULL
-
-    if (exists("sessionData", envir = .GlobalEnv)) {
-      rm(list = ls(envir = sessionData), envir = sessionData)
-    }
-    rm(list = ls(envir = .GlobalEnv, pattern = "^temp_"), envir = .GlobalEnv)
-    gc()
-    message("Session ended. Memory cleanup completed.")
+    message("Starting session cleanup...")
+    
+    tryCatch({
+      # Remove UI elements
+      removeUI(selector = "#dynamic_col_*")
+      
+      # Clear reactive values safely
+      if (exists("choice_exp")) choice_exp(NULL)
+      if (exists("selected_table")) selected_table(NULL)
+      if (exists("autoUpdatePlot")) autoUpdatePlot(FALSE)
+      if (exists("app_initialized")) app_initialized(FALSE)
+      if (exists("data_loading_trigger")) data_loading_trigger(NULL)
+      if (exists("default_df_filter")) default_df_filter(NULL)
+      if (exists("plot_ready")) plot_ready(FALSE)
+      if (exists("global_loading")) global_loading(FALSE)
+      
+      # Clear all cached data explicitly
+      if (exists("cached_data")) {
+        cached_data$raw <- NULL
+        cached_data$normalize <- NULL
+        cached_data$scale <- NULL
+        cached_data$current_type <- NULL
+        cached_data$current_filter <- NULL
+      }
+      
+      # Clear session data
+      if (exists("sessionData")) {
+        if (exists("last_gene_data", envir = sessionData)) {
+          sessionData$last_gene_data <- NULL
+        }
+        rm(list = ls(envir = sessionData), envir = sessionData)
+      }
+      
+      # Clear temporary variables from global environment
+      rm(list = ls(envir = .GlobalEnv, pattern = "^temp_"), envir = .GlobalEnv)
+      
+      # Force multiple garbage collections
+      for (i in 1:3) {
+        gc(verbose = FALSE, full = TRUE)
+        Sys.sleep(0.1)
+      }
+      
+      message("Session ended. Memory cleanup completed.")
+    }, error = function(e) {
+      message("Error during session cleanup: ", e$message)
+      # Still try to run garbage collection
+      gc(verbose = FALSE, full = TRUE)
+    })
   })
 
-  # Optional: Add a function to manually clear cache if needed
-  clear_data_cache <- function() {
-    cached_data$raw <- NULL
-    cached_data$normalize <- NULL
-    cached_data$scale <- NULL
-    cached_data$current_type <- NULL
-    cached_data$current_filter <- NULL
-    sessionData$last_gene_data <- NULL
-    gc()
-    message("Data cache cleared.")
+  # Enhanced function to manually clear cache with immediate garbage collection
+  clear_data_cache <- function(force_gc = TRUE) {
+    tryCatch({
+      message("Clearing data cache...")
+      
+      # Clear cached data
+      cached_data$raw <- NULL
+      cached_data$normalize <- NULL
+      cached_data$scale <- NULL
+      cached_data$current_type <- NULL
+      cached_data$current_filter <- NULL
+      
+      # Clear session data
+      if (exists("sessionData") && exists("last_gene_data", envir = sessionData)) {
+        sessionData$last_gene_data <- NULL
+      }
+      
+      if (force_gc) {
+        # Force aggressive garbage collection
+        for (i in 1:3) {
+          gc(verbose = FALSE, full = TRUE)
+          Sys.sleep(0.1)
+        }
+      }
+      
+      message("Data cache cleared. Memory freed.")
+    }, error = function(e) {
+      message("Error clearing cache: ", e$message)
+      # Still try garbage collection
+      gc(verbose = FALSE, full = TRUE)
+    })
   }
+
+  # Add periodic garbage collection
+  observe({
+    # Run garbage collection every 5 minutes during active session
+    invalidateLater(300000)  # 5 minutes
+    tryCatch({
+      gc(verbose = FALSE)
+    }, error = function(e) {
+      message("Periodic GC error: ", e$message)
+    })
+  })
 }

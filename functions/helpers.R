@@ -364,30 +364,52 @@ df_exp0 <- function(gene_data, gene_input, group_input, check_exp) {
 # Generate df for gene_expi
 df_expi <- function(id, input, gene_data, get_gene_id) {
   reactive({
-    req(
-      input[[paste0("genes_exp_", id)]],
-      input[[paste0("group_exp_", id)]]
-    )
+    tryCatch({
+      req(
+        input[[paste0("genes_exp_", id)]],
+        input[[paste0("group_exp_", id)]]
+      )
 
-    df <- gene_data$data
-    gene_exp <- if (!input[[paste0("check_exp_", id)]]) {
-      get_gene_id(input[[paste0("genes_exp_", id)]], gene_data$genes)
-    } else {
-      input[[paste0("genes_exp_", id)]
-      ]
-    }
+      df <- gene_data$data
+      
+      # Safely access the check_exp input with fallback to FALSE
+      check_exp_input <- input[[paste0("check_exp_", id)]]
+      if (is.null(check_exp_input)) {
+        check_exp_input <- FALSE  # Default to FALSE if input doesn't exist
+      }
+      
+      gene_exp <- if (!check_exp_input) {
+        get_gene_id(input[[paste0("genes_exp_", id)]], gene_data$genes)
+      } else {
+        input[[paste0("genes_exp_", id)]]
+      }
 
-    if (!(gene_exp %in% colnames(df))) {
-      df$gene_expr <- NA
-    } else {
-      df <- df %>% mutate(gene_expr = .data[[gene_exp]])
-    }
+      # Validate gene_exp is not NULL or empty
+      if (is.null(gene_exp) || is.na(gene_exp) || gene_exp == "") {
+        return(NULL)
+      }
 
-    group_col <- input[[paste0("group_exp_", id)]]
-    if (!(tolower(group_col) %in% colnames(df))) {
-      df[[group_col]] <- NA
-    }
-    return(df)
+      if (!(gene_exp %in% colnames(df))) {
+        df$gene_expr <- NA
+      } else {
+        df <- df %>% mutate(gene_expr = .data[[gene_exp]])
+      }
+
+      group_col <- input[[paste0("group_exp_", id)]]
+      
+      # Validate group_col is not NULL or empty
+      if (is.null(group_col) || is.na(group_col) || group_col == "") {
+        return(NULL)
+      }
+      
+      if (!(tolower(group_col) %in% colnames(df))) {
+        df[[group_col]] <- NA
+      }
+      return(df)
+    }, error = function(e) {
+      message("Error in df_expi for id ", id, ": ", e$message)
+      return(NULL)
+    })
   })
 }
 
