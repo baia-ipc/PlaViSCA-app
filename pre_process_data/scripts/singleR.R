@@ -63,7 +63,7 @@ IDC_cycle <- SummarizedExperiment(
 )
 IDC_cycle$X <- NULL
 
-#rownames(IDC_cycle) <- gsub("-", "_", rownames(IDC_cycle))
+# rownames(IDC_cycle) <- gsub("-", "_", rownames(IDC_cycle))
 
 # Convert Seurat object to single-cell experiment (sce) object for SingleR mapping
 sce.all <- as.SingleCellExperiment(DietSeurat(

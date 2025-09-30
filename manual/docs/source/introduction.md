@@ -2,14 +2,12 @@
 
 **PlaViSca** is a free, open-source, interactive R Shiny application designed for the analysis and visualization of single-cell RNA sequencing (scRNA-seq) data from *Plasmodium vivax*. It empowers researchers, especially those in the malaria research community, to explore and interpret complex datasets through an intuitive, code-free interface.
 
-Key features:
-- Explore scRNA-seq data from *P. vivax* across different parasite and infection stages
-- Filter and export metadata
-- Dynamic, interactive visualizations with 2D or 3D options
-- Gene expression viewer for stage-specific or gene-specific profiling
-- Filter and subset data by metadata variable such as study label, parasite stage, sample type, and more
-- Embeddings viewer (PCA, UMAP, t-SNE) for both integrated and unintegrated data
-- Downloadable metadata and plots for downstream analysis
+**Key features**:
+- **Metadata** – Browse, filter, and export metadata interactively, enabling selection by study, sample type, parasite stage, or other variables.
+- **Quality Control** – Assess data quality through violin plots and filter cells based on metrics across studies.
+- **Data Sources** – Access information and references for all integrated datasets.
+- **Gene Expression** – Visualize stage- or gene-specific expression patterns, dynamically add or remove plots, and compare multiple genes in real time.
+- **Embeddings** – Explore cells in 2D or 3D using PCA, UMAP, or t-SNE, for both integrated and unintegrated datasets. Cells can be selected to reveal expression profiles in downloadable tables.
 
 # Hosting and access
 
@@ -60,7 +58,7 @@ PlaViSca requires gene expression data and metadata files. These files can be do
 2. Ensure the gene expression data is in `.rds` format and save in three files normliazed_df.rds, scale_df.rds, cleaned_dataset.rds
 3. Metadata should be provided in a compatible format (e.g., `.csv` or `.rds`).
 
-metadata columns:
+**metadata columns**:
 - nCount_RNA: Total number of RNA molecules (UMI counts) detected per cell.
 - nFeature_RNA: Number of unique genes detected per cell.
 - study_pmid: PubMed ID of the publication associated with the dataset.

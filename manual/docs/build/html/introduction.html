@@ -92,15 +92,13 @@
   <section id="introduction">
 <h1>Introduction<a class="headerlink" href="#introduction" title="Link to this heading"></a></h1>
 <p><strong>PlaViSca</strong> is a free, open-source, interactive R Shiny application designed for the analysis and visualization of single-cell RNA sequencing (scRNA-seq) data from <em>Plasmodium vivax</em>. It empowers researchers, especially those in the malaria research community, to explore and interpret complex datasets through an intuitive, code-free interface.</p>
-<p>Key features:</p>
+<p><strong>Key features</strong>:</p>
 <ul class="simple">
-<li><p>Explore scRNA-seq data from <em>P. vivax</em> across different parasite and infection stages</p></li>
-<li><p>Filter and export metadata</p></li>
-<li><p>Dynamic, interactive visualizations with 2D or 3D options</p></li>
-<li><p>Gene expression viewer for stage-specific or gene-specific profiling</p></li>
-<li><p>Filter and subset data by metadata variable such as study label, parasite stage, sample type, and more</p></li>
-<li><p>Embeddings viewer (PCA, UMAP, t-SNE) for both integrated and unintegrated data</p></li>
-<li><p>Downloadable metadata and plots for downstream analysis</p></li>
+<li><p><strong>Metadata</strong> – Browse, filter, and export metadata interactively, enabling selection by study, sample type, parasite stage, or other variables.</p></li>
+<li><p><strong>Quality Control</strong> – Assess data quality through violin plots and filter cells based on metrics across studies.</p></li>
+<li><p><strong>Data Sources</strong> – Access information and references for all integrated datasets.</p></li>
+<li><p><strong>Gene Expression</strong> – Visualize stage- or gene-specific expression patterns, dynamically add or remove plots, and compare multiple genes in real time.</p></li>
+<li><p><strong>Embeddings</strong> – Explore cells in 2D or 3D using PCA, UMAP, or t-SNE, for both integrated and unintegrated datasets. Cells can be selected to reveal expression profiles in downloadable tables.</p></li>
 </ul>
 </section>
 <section id="hosting-and-access">
@@ -152,7 +150,7 @@
 <li><p>Ensure the gene expression data is in <code class="docutils literal notranslate"><span class="pre">.rds</span></code> format and save in three files normliazed_df.rds, scale_df.rds, cleaned_dataset.rds</p></li>
 <li><p>Metadata should be provided in a compatible format (e.g., <code class="docutils literal notranslate"><span class="pre">.csv</span></code> or <code class="docutils literal notranslate"><span class="pre">.rds</span></code>).</p></li>
 </ol>
-<p>metadata columns:</p>
+<p><strong>metadata columns</strong>:</p>
 <ul class="simple">
 <li><p>nCount_RNA: Total number of RNA molecules (UMI counts) detected per cell.</p></li>
 <li><p>nFeature_RNA: Number of unique genes detected per cell.</p></li>

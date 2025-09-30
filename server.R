@@ -13,42 +13,41 @@ server <- function(input, output, session) {
   # Global loading state for better UX
   global_loading <- reactiveVal(FALSE)
 
-  # Memory monitoring (optional - for debugging) - Fixed reactive context
-  memory_monitor <- reactiveTimer(60000)
-  observe({
-    memory_monitor()
-    tryCatch(
-      {
-        mem_info <- gc(verbose = FALSE)
-        total_mb <- sum(mem_info[, 2])
-        if (total_mb > 5000) {
-          message("High memory usage detected: ", round(total_mb, 2), " MB")
-
-          # More aggressive cleanup when memory is very high
-          if (total_mb > 8000) {
-            message("Memory usage critically high - clearing cached data...")
-            # Clear less frequently used data
-            if (!is.null(cached_data$raw)) {
-              cached_data$raw <- NULL
-              message("Cleared raw data cache")
-            }
-            if (!is.null(cached_data$scale)) {
-              cached_data$scale <- NULL
-              message("Cleared scale data cache")
-            }
-          }
-
-          # Force garbage collection when memory is high
-          gc(verbose = FALSE, full = TRUE)
-        } else if (total_mb > 2000) {
-          gc(verbose = FALSE, full = TRUE)
-        }
-      },
-      error = function(e) {
-        message("Memory monitoring error: ", e$message)
-      }
-    )
-  })
+  # memory_monitor <- reactiveTimer(60000)
+  # observe({
+  #   memory_monitor()
+  #   tryCatch(
+  #     {
+  #       mem_info <- gc(verbose = FALSE)
+  #       total_mb <- sum(mem_info[, 2])
+  #       if (total_mb > 5000) {
+  #         message("High memory usage detected: ", round(total_mb, 2), " MB")
+  # 
+  #         # More aggressive cleanup when memory is very high
+  #         if (total_mb > 8000) {
+  #           message("Memory usage critically high - clearing cached data...")
+  #           # Clear less frequently used data
+  #           if (!is.null(cached_data$raw)) {
+  #             cached_data$raw <- NULL
+  #             message("Cleared raw data cache")
+  #           }
+  #           if (!is.null(cached_data$scale)) {
+  #             cached_data$scale <- NULL
+  #             message("Cleared scale data cache")
+  #           }
+  #         }
+  # 
+  #         # Force garbage collection when memory is high
+  #         gc(verbose = FALSE, full = TRUE)
+  #       } else if (total_mb > 2000) {
+  #         gc(verbose = FALSE, full = TRUE)
+  #       }
+  #     },
+  #     error = function(e) {
+  #       message("Memory monitoring error: ", e$message)
+  #     }
+  #   )
+  # })
 
   # Navigate home and data section
   observeEvent(input$home, {

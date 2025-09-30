@@ -3,7 +3,7 @@ PlaViSca is structured of three main components: **Home page**, **Analysis page*
 
 ## Home page
 ![Figure 2: PlaViSca home page](imgs/home_page.png)
-**Figure 2:** PlaViSca home page
+**Figure 2**: PlaViSca home page
 
 The Home page acts as the central landing point for users see **Figure 2**. It provides a concise overview of the application's purpose and offers direct access to its core functionalities.
 
@@ -38,13 +38,13 @@ The Analysis page is designed to facilitate interactive exploration of both meta
 A short video demonstration of the Metadata tab **Video 1**. This video provides an overview of how to filter datasets by biological and experimental attributes, such as host species, life cycle stage, treatment, parasite stage, and sample type. Applying filters dynamically updates both plots and tables, enabling users to focus on relevant data subsets for further analysis.
 
 Interactive features include:
-- **Plotly Charts:** Hover to view detailed values. Additional controls (zoom, pan, selection, download) are accessible in the chart's top-right corner.
-- **DT Table:** Provides a global search box for keyword-based filtering and column-specific filters for precise data selection and export as a CSV file.
+- **Plotly Charts**: Hover to view detailed values. Additional controls (zoom, pan, selection, download) are accessible in the chart's top-right corner.
+- **DT Table**: Provides a global search box for keyword-based filtering and column-specific filters for precise data selection and export as a CSV file.
 
 ### Quality Control
 
 ![Figure 3: Quality control image](imgs/quality_control.png)
-**Figure 3:** Quality control image
+**Figure 3**: Quality control image
 
 The Quality Control tab provides visualizations to assess the integrity of single-cell RNA sequencing data **Figure 3**, including:
 - RNA Count vs. Sample
@@ -57,7 +57,7 @@ All plots support interactive filtering, enabling targeted quality assessment ba
 ### Data source
 
 ![Figure 4: Data source](imgs/data_source.png)
-**Figure 4:** Data source
+**Figure 4**: Data source
 
 The Data Source section provides detailed documentation and attribution for the datasets utilized within PlaViSca **Figure 4**. It includes comprehensive metadata such as journal names, publication dates, article titles, authors, and DOI links, enabling users to directly access the original publications. This ensures transparency, facilitates reproducibility, and appropriately credits the contributors of the datasets.
 
@@ -65,7 +65,7 @@ The Data Source section provides detailed documentation and attribution for the 
 
 <iframe width="100%" height="360" src="https://www.youtube.com/embed/ehDxOIu3fz0" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
-**Video 2:** Gene expression tab functionality
+**Video 2**: Gene expression tab functionality
 
 The Gene Expression tab provides an interactive interface for exploring gene expression across various biological conditions **Video 2**. Users can:
 - Add or remove plots as needed
@@ -80,7 +80,7 @@ Each selection generates a dynamic violin plot with interactive filtering, hover
 
 <iframe width="100%" height="360" src="https://www.youtube.com/embed/py5oW_ghmqY" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
-**Video 3:** Embedding tab functionality
+**Video 3**: Embedding tab functionality
 
 The Embedding tab offers tools for dimensionality reduction and customizable filtering of single-cell data **Video 3**. Users can:
 - Apply multiple filters using OR logic within fields and AND logic between fields
@@ -98,7 +98,7 @@ Clicking on individual cells displays a popup table with gene names, IDs, expres
 
 ## About page  
 ![Figure 5: About page](imgs/about_page.png)
-**Figure 5:** About page
+**Figure 5**: About page
 
 The **About** page provides background information on the development and vision behind the **PlaViSca** web application **Figure 5**. 
 
@@ -121,13 +121,13 @@ For questions, feedback, or collaboration inquiries, please contact:
   *Bioinformatic System Engineer, Institut Pasteur du Cambodge*  
   📧 [osopheap@pasteur-kh.org](mailto:osopheap@pasteur-kh.org)
 
-- **Anthony Ruberto**  
-  *Postdoctoral Researcher, Center for Tropical and Emerging Global Diseases, University of Georgia, USA*  
-  📧 [aruberto@uga.edu](mailto:aruberto@uga.edu)
-
 - **Jean Popvici**  
   *Head, Malaria Research Unit, Institut Pasteur du Cambodge*  
   📧 [jpopovici@pasteur-kh.org](mailto:jpopovici@pasteur-kh.org)
+
+- **Anthony Ruberto**  
+  *Postdoctoral Researcher, Center for Tropical and Emerging Global Diseases, University of Georgia, USA*  
+  📧 [aruberto@uga.edu](mailto:aruberto@uga.edu)
 
 - **Giorgio Gonnella**  
   *Head, Bioinformatics and Artificial Intelligence Unit (BAIA), Institut Pasteur du Cambodge*  
