@@ -1,82 +1,144 @@
 # Function that builds the full Metadata tab
 create_meta_filter_row <- function(suffix = "") {
-  fluidRow(
-    class = "meta-filter",
-    column(
-      width = 2,
-      selectizeInput(
-        inputId = paste0("study_label", suffix),
-        "Study label:",
-        choices = c(""),
-        multiple = TRUE,
-        options = list(
-          placeholder = "Select options...",
-          onInitialize = I('function() { this.setValue(""); }')
+  tagList(
+    # --- First row (5 boxes) ---
+    fluidRow(
+      class = "meta-filter",
+      style = "display: flex; flex-wrap: wrap; justify-content: space-between;",
+      column(
+        width = 2,
+        selectizeInput(
+          inputId = paste0("study_label", suffix),
+          "Study label:",
+          choices = c(""),
+          multiple = TRUE,
+          options = list(
+            placeholder = "Select options...",
+            onInitialize = I('function() { this.setValue(""); }')
+          )
+        )
+      ),
+      column(
+        width = 2,
+        selectizeInput(
+          inputId = paste0("sample_type", suffix),
+          "Sample type:",
+          choices = c(""),
+          multiple = TRUE,
+          options = list(
+            placeholder = "Select options...",
+            onInitialize = I('function() { this.setValue(""); }')
+          )
+        )
+      ),
+      column(
+        width = 2,
+        selectizeInput(
+          inputId = paste0("host_species", suffix),
+          "Host species:",
+          choices = c(""),
+          multiple = TRUE,
+          options = list(
+            placeholder = "Select options...",
+            onInitialize = I('function() { this.setValue(""); }')
+          )
+        )
+      ),
+      column(
+        width = 2,
+        selectizeInput(
+          inputId = paste0("life_cycle_stage", suffix),
+          "Life cycle stage:",
+          choices = c(""),
+          multiple = TRUE,
+          options = list(
+            placeholder = "Select options...",
+            onInitialize = I('function() { this.setValue(""); }')
+          )
+        )
+      ),
+      column(
+        width = 2,
+        selectizeInput(
+          inputId = paste0("treatment", suffix),
+          "Treatment:",
+          choices = c(""),
+          multiple = TRUE,
+          options = list(
+            placeholder = "Select options...",
+            onInitialize = I('function() { this.setValue(""); }')
+          )
         )
       )
     ),
-    column(
-      width = 2,
-      selectizeInput(
-        inputId = paste0("sample_type", suffix),
-        "Sample type:",
-        choices = c(""),
-        multiple = TRUE,
-        options = list(
-          placeholder = "Select options...",
-          onInitialize = I('function() { this.setValue(""); }')
+
+    # --- Second row (5 boxes) ---
+    fluidRow(
+      class = "meta-filter",
+      style = "display: flex; flex-wrap: wrap; justify-content: space-between;",
+      column(
+        width = 2,
+        selectizeInput(
+          inputId = paste0("parasite_stage", suffix),
+          "Parasite stage:",
+          choices = c(""),
+          multiple = TRUE,
+          options = list(
+            placeholder = "Select options...",
+            onInitialize = I('function() { this.setValue(""); }')
+          )
         )
-      )
-    ),
-    column(
-      width = 2,
-      selectizeInput(
-        inputId = paste0("host_species", suffix),
-        "Host species:",
-        choices = c(""),
-        multiple = TRUE,
-        options = list(
-          placeholder = "Select options...",
-          onInitialize = I('function() { this.setValue(""); }')
+      ),
+      column(
+        width = 2,
+        selectizeInput(
+          inputId = paste0("strain", suffix),
+          "Strain:",
+          choices = c(""),
+          multiple = TRUE,
+          options = list(
+            placeholder = "Select options...",
+            onInitialize = I('function() { this.setValue(""); }')
+          )
         )
-      )
-    ),
-    column(
-      width = 2,
-      selectizeInput(
-        inputId = paste0("life_cycle_stage", suffix),
-        "Life cycle stage:",
-        choices = c(""),
-        multiple = TRUE,
-        options = list(
-          placeholder = "Select options...",
-          onInitialize = I('function() { this.setValue(""); }')
+      ),
+      column(
+        width = 2,
+        selectizeInput(
+          inputId = paste0("day_post_infection", suffix),
+          "Day post infection:",
+          choices = c(""),
+          multiple = TRUE,
+          options = list(
+            placeholder = "Select options...",
+            onInitialize = I('function() { this.setValue(""); }')
+          )
         )
-      )
-    ),
-    column(
-      width = 2,
-      selectizeInput(
-        inputId = paste0("treatment", suffix),
-        "Treatment:",
-        choices = c(""),
-        multiple = TRUE,
-        options = list(
-          placeholder = "Select options...",
-          onInitialize = I('function() { this.setValue(""); }')
+      ),
+      column(
+        width = 2,
+        selectizeInput(
+          inputId = paste0("sequencer", suffix),
+          "Sequencer:",
+          choices = c(""),
+          multiple = TRUE,
+          options = list(
+            placeholder = "Select options...",
+            onInitialize = I('function() { this.setValue(""); }')
+          )
         )
-      )
-    ),
-    column(
-      width = 2,
-      selectizeInput(
-        inputId = paste0("parasite_stage", suffix),
-        "Parasite stage:",
-        choices = c(""),
-        multiple = TRUE,
-        options = list(
-          placeholder = "Select options...",
-          onInitialize = I('function() { this.setValue(""); }')
+      ),
+      column(
+        width = 2,
+        selectizeInput(
+          inputId = paste0("sc_technology", suffix),
+          "Single-cell technology:",
+          choices = c(""),
+          multiple = TRUE,
+          options = list(
+            placeholder = "Select options...",
+            onInitialize = I('function() { this.setValue(""); }')
+          )
         )
       )
     )
@@ -128,7 +190,10 @@ fun_filter_df <- function(data, selections) {
     if (colname %in% names(data)) {
       keep_rows <- keep_rows & data[[colname]] %in% filter_list[[colname]]
     } else {
-      warning(sprintf("Column '%s' not found in data; skipping filter.", colname))
+      warning(sprintf(
+        "Column '%s' not found in data; skipping filter.",
+        colname
+      ))
     }
   }
 
@@ -565,7 +630,12 @@ gene_exp_plot <- function(data, x_col) {
   actual_col <- colnames(data)[tolower(colnames(data)) == tolower(x_col)]
 
   if (length(actual_col) == 0) {
-    stop(paste("Column", x_col, "not found in data. Available columns:", paste(colnames(data), collapse = ", ")))
+    stop(paste(
+      "Column",
+      x_col,
+      "not found in data. Available columns:",
+      paste(colnames(data), collapse = ", ")
+    ))
   }
 
   # Use the first match
@@ -654,7 +724,8 @@ y_col <- function(check_input, x_col, unintegrated, integrated) {
 
 # Generate color column based on input option
 get_color_column <- function(color_type, gene_input, gene_data_obj) {
-  switch(color_type,
+  switch(
+    color_type,
     "genes" = get_gene_id(gene_input, gene_data_obj),
     "cca_snn" = gene_input,
     color_type
@@ -713,11 +784,19 @@ prepare_categorical_colors <- function(df, color) {
   }
 
   # Reconstruct the final sorted levels, with NA first if it exists
-  final_levels <- if (has_na) c("NA (missing)", sorted_values) else sorted_values
+  final_levels <- if (has_na) {
+    c("NA (missing)", sorted_values)
+  } else {
+    sorted_values
+  }
 
   # Assign colors
   num_actual_colors <- length(sorted_values)
-  palette <- if (num_actual_colors > 0) assign_colors(num_actual_colors) else character(0)
+  palette <- if (num_actual_colors > 0) {
+    assign_colors(num_actual_colors)
+  } else {
+    character(0)
+  }
 
   colors <- if (has_na) {
     setNames(c("#A9A9A94D", palette), final_levels)
@@ -757,15 +836,16 @@ get_legend_layout <- function(legend_title) {
 
 # Generate 2d plot
 plot_2d <- function(
-    df,
-    x,
-    y,
-    color,
-    legend_title,
-    size,
-    is_categorical,
-    selected_color,
-    colors) {
+  df,
+  x,
+  y,
+  color,
+  legend_title,
+  size,
+  is_categorical,
+  selected_color,
+  colors
+) {
   hover_text <- ~ paste(
     "Cell:",
     df$id,
@@ -843,14 +923,15 @@ plot_2d <- function(
 
 # Generate 3d plot
 plot_3d <- function(
-    df,
-    color,
-    legend_title,
-    size,
-    selected_color,
-    is_categorical,
-    colors,
-    coords) {
+  df,
+  color,
+  legend_title,
+  size,
+  selected_color,
+  is_categorical,
+  colors,
+  coords
+) {
   x_col <- coords[1]
   y_col <- coords[2]
   z_col <- coords[3]
@@ -944,14 +1025,15 @@ plot_3d <- function(
 
 # Main pca, umap and tsne plotting function
 embedding_plot <- function(
-    df,
-    xaxis_input,
-    yaxis_input,
-    color,
-    legend_title,
-    size,
-    plot_type = "pca_u",
-    plot_dim = "2d") {
+  df,
+  xaxis_input,
+  yaxis_input,
+  color,
+  legend_title,
+  size,
+  plot_type = "pca_u",
+  plot_dim = "2d"
+) {
   x <- df[[xaxis_input]]
   y <- df[[yaxis_input]]
   selected_color <- df[[color]]

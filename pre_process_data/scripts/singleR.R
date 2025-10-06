@@ -1,24 +1,9 @@
 library(DropletUtils) # scRNA-seq empty droplet detection
 library(readxl) # data import
-#library(stringr) # data wrangling
-#library(tibble) # data wrangling
-#library(dplyr) # data wrangling
-#library(ggplot2) # visualization
-#library(scico) # visualization
-#library(scales) # visualization
 library(rtracklayer) # contains functions to handle gff/gtf files
 library(Seurat) # contains scRNA-seq analysis functions
-#library("leiden") # contains data reduction functions
-#library(scater) # contains scRNA-seq analysis functions
-#library(ggpubr) # visualization
-#library(viridis) # visualization - color palettes
-#library(EnhancedVolcano) # visualization
-#library(pheatmap) # visualization
-#library(RColorBrewer) # visualization - color palettes
-#library(tidyr) # data wrangling
 library(SingleCellExperiment) # single-cell data storage
 library(SingleR) # single-cell data identification tool
-#library(SCpubr) # single-cell data handling and plotting tools
 library(scCustomize) # single-cell data handling and plotting tools
 library(tidyverse)
 
@@ -63,7 +48,7 @@ IDC_cycle <- SummarizedExperiment(
 )
 IDC_cycle$X <- NULL
 
-# rownames(IDC_cycle) <- gsub("-", "_", rownames(IDC_cycle))
+rownames(IDC_cycle) <- gsub("-", "_", rownames(IDC_cycle))
 
 # Convert Seurat object to single-cell experiment (sce) object for SingleR mapping
 sce.all <- as.SingleCellExperiment(DietSeurat(
@@ -124,7 +109,7 @@ SCpubr::do_BarPlot(
 )
 
 # Output the exact # of cells predicted per IDC stage
-#table(pv.combined.all$life_cycle_stage, useNA = "always")
+# table(pv.combined.all$life_cycle_stage, useNA = "always")
 
 # Plot the data in low-dimensional space
 # before cell labelling
@@ -408,5 +393,10 @@ pv.combined.all$orig.ident <- NULL
 pv.combined.all$femaleGams_module_score1 <- NULL
 pv.combined.all$maleGams_module_score1 <- NULL
 pv.combined.all@project.name <- "PlaViSca"
+
+# change day post infection to NA if not from blood
+# pv.combined.all$day_post_infection[
+#   pv.combined.all$sample_type != "Mammalian host: hepatocyte"
+# ] <- NA
 
 #saveRDS(pv.combined.all, file = "./pv_all_studies.rds")

@@ -61,6 +61,15 @@ else
     exit 1
 fi
 
+
+if [ -f "silva.R" ]; then
+    echo -e "\nruning silva..."
+    Rscript silva.R
+else
+    echo "silva.R not found!"
+    exit 1
+fi
+
 if [ -f "integration.R" ]; then
     echo -e "\nruning integration..."
     Rscript integration.R

@@ -199,15 +199,15 @@ host_species <- c(
 )
 host_id <- rep(NA, length(all_pv))
 sample_type <- c(
-  "Vector salivary gland",
-  "Vector salivary gland",
-  "Host blood",
-  "Host blood"
+  "Vector host: salivary gland",
+  "Vecto host : salivary gland",
+  "Mammalian host: blood",
+  "Mammalian host: blood"
 )
 parasite_stage <- rep("Blood stage", length(all_pv))
 strain <- c("Sal1/Chesson", "Sal1/Chesson", "Sal1", "Sal1")
 day_post_infection <- rep(NA, length(all_pv))
-treatment <- rep(NA, length(all_pv))
+treatment <- rep("No_Treatment", length(all_pv))
 biological_replicate <- c(2, 1, 2, 1)
 
 

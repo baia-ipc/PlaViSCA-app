@@ -203,7 +203,7 @@ host_id <- c(
     "4881_1"
 )
 
-sample_type <- rep("Host blood", length(all_pv))
+sample_type <- rep("Mammalian host: blood", length(all_pv))
 parasite_stage <- rep("Blood stage", length(all_pv))
 strain <- strain_ids <- c(
     "NIH1993-F3",
@@ -214,7 +214,7 @@ strain <- strain_ids <- c(
 )
 
 day_post_infection <- c(17, 14, 17, 17)
-treatment <- rep(NA, length(all_pv))
+treatment <- rep("No_Treatment", length(all_pv))
 biological_replicate <- rep(NA, length(all_pv))
 
 for (i in 1:length(all_pv)) {

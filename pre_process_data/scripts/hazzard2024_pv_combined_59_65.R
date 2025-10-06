@@ -213,9 +213,9 @@ host_id <- c(
 )
 
 sample_type <- list(
-    "Vector salivary gland",
-    "Host blood",
-    rep("Vector salivary gland", 5)
+    "Vector host: salivary gland",
+    "Mammalian host: blood",
+    rep("Vector host: salivary gland", 5)
 ) %>%
     unlist()
 
@@ -237,7 +237,7 @@ strain <- c(
 )
 
 day_post_infection <- c(18, 26, 20, 19, 17, 20, 18)
-treatment <- rep(NA, length(all_pv))
+treatment <- rep("No_Treatment", length(all_pv))
 biological_replicate <- rep(NA, length(all_pv))
 
 

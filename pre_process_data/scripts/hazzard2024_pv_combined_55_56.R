@@ -191,11 +191,11 @@ sc_technology <- rep("10x_Chomium_V3", length(all_pv))
 sequencer <- rep("Illumina NovaSeq 6000", length(all_pv))
 host_species <- rep("Saimiri boliviensis", length(all_pv))
 host_id <- c("5309_2", "5309_1")
-sample_type <- rep("Host blood", length(all_pv))
+sample_type <- rep("Mammalian host: blood", length(all_pv))
 parasite_stage <- rep("Blood stage", length(all_pv))
 strain <- rep("Chesson", length(all_pv))
 day_post_infection <- c(16, 14)
-treatment <- rep(NA, length(all_pv))
+treatment <- rep("No_Treatment", length(all_pv))
 biological_replicate <- rep(NA, length(all_pv))
 
 for (i in 1:length(all_pv)) {

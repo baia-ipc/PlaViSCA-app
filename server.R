@@ -13,42 +13,6 @@ server <- function(input, output, session) {
   # Global loading state for better UX
   global_loading <- reactiveVal(FALSE)
 
-  # memory_monitor <- reactiveTimer(60000)
-  # observe({
-  #   memory_monitor()
-  #   tryCatch(
-  #     {
-  #       mem_info <- gc(verbose = FALSE)
-  #       total_mb <- sum(mem_info[, 2])
-  #       if (total_mb > 5000) {
-  #         message("High memory usage detected: ", round(total_mb, 2), " MB")
-  # 
-  #         # More aggressive cleanup when memory is very high
-  #         if (total_mb > 8000) {
-  #           message("Memory usage critically high - clearing cached data...")
-  #           # Clear less frequently used data
-  #           if (!is.null(cached_data$raw)) {
-  #             cached_data$raw <- NULL
-  #             message("Cleared raw data cache")
-  #           }
-  #           if (!is.null(cached_data$scale)) {
-  #             cached_data$scale <- NULL
-  #             message("Cleared scale data cache")
-  #           }
-  #         }
-  # 
-  #         # Force garbage collection when memory is high
-  #         gc(verbose = FALSE, full = TRUE)
-  #       } else if (total_mb > 2000) {
-  #         gc(verbose = FALSE, full = TRUE)
-  #       }
-  #     },
-  #     error = function(e) {
-  #       message("Memory monitoring error: ", e$message)
-  #     }
-  #   )
-  # })
-
   # Navigate home and data section
   observeEvent(input$home, {
     shinyjs::hide("analysis_section")
@@ -147,7 +111,7 @@ server <- function(input, output, session) {
     }
   })
 
-  # Change to normalize when change tabset - but preserve current selection if same
+  # Change to normalize when change tabset
   observeEvent(input$tabset, {
     if (input$tabset == "Gene expression") {
       # Sync with embeddings data type if available, otherwise default to normalize
@@ -162,8 +126,8 @@ server <- function(input, output, session) {
         "data_type_exp",
         choices = list(
           "Raw" = "raw",
-          "Normalized" = "normalize",
-          "Scaled" = "scale"
+          "Normalized" = "normalize"
+          # "Scaled" = "scale"
         ),
         selected = current_selection
       )
@@ -180,8 +144,8 @@ server <- function(input, output, session) {
         "data_type",
         choices = list(
           "Raw" = "raw",
-          "Normalized" = "normalize",
-          "Scaled" = "scale"
+          "Normalized" = "normalize"
+          # "Scaled" = "scale"
         ),
         selected = current_selection
       )
@@ -196,7 +160,7 @@ server <- function(input, output, session) {
   cached_data <- reactiveValues(
     raw = NULL,
     normalize = NULL,
-    scale = NULL,
+    # scale = NULL,
     current_type = NULL,
     current_filter = NULL
   )
@@ -219,15 +183,19 @@ server <- function(input, output, session) {
       gc(verbose = FALSE, full = TRUE)
 
       # Clear other cached data when loading large datasets like scaled data
-      if (data_type == "scale") {
-        message("Loading scaled data - clearing other cached data to free memory...")
-        cached_data$raw <- NULL
-        gc(verbose = FALSE, full = TRUE)
-      } else if (data_type == "raw") {
-        message("Loading raw data - clearing other cached data to free memory...")
-        cached_data$scale <- NULL
-        gc(verbose = FALSE, full = TRUE)
-      }
+      # if (data_type == "scale") {
+      #   message(
+      #     "Loading scaled data - clearing other cached data to free memory..."
+      #   )
+      #   cached_data$raw <- NULL
+      #   gc(verbose = FALSE, full = TRUE)
+      # } else if (data_type == "raw") {
+      #   message(
+      #     "Loading raw data - clearing other cached data to free memory..."
+      #   )
+      #   cached_data$scale <- NULL
+      #   gc(verbose = FALSE, full = TRUE)
+      # }
 
       dataset <- switch(data_type,
         raw = {
@@ -239,19 +207,18 @@ server <- function(input, output, session) {
         },
         normalize = {
           if (exists("norm_df")) norm_df else NULL
-        },
-        scale = {
-          if (exists("DATA_PATHS") && !is.null(DATA_PATHS$scale_df)) {
-            load_data(DATA_PATHS$scale_df)
-          } else {
-            NULL
-          }
         }
+        # scale = {
+        #   if (exists("DATA_PATHS") && !is.null(DATA_PATHS$scale_df)) {
+        #     load_data(DATA_PATHS$scale_df)
+        #   } else {
+        #     NULL
+        #   }
+        # }
       )
 
       if (!is.null(dataset)) {
         cached_data[[data_type]] <- dataset
-        # Force garbage collection after caching
         gc(verbose = FALSE, full = TRUE)
         message("Successfully loaded and cached ", data_type, " data")
       }
@@ -279,11 +246,14 @@ server <- function(input, output, session) {
 
     # Use later() to debounce - only trigger after 500ms of no changes
     if (app_initialized()) {
-      later(function() {
-        isolate({
-          data_loading_trigger(data_loading_trigger() + 1)
-        })
-      }, 0.5) # Reduced from 0.8 to 0.5 seconds
+      later(
+        function() {
+          isolate({
+            data_loading_trigger(data_loading_trigger() + 1)
+          })
+        },
+        0.5
+      )
     }
   })
 
@@ -291,7 +261,6 @@ server <- function(input, output, session) {
   gene_data <- eventReactive(
     data_loading_trigger(),
     {
-      # Skip if not properly initialized
       if (!app_initialized()) {
         return(NULL)
       }
@@ -302,10 +271,12 @@ server <- function(input, output, session) {
       selections <- input$apply_filter
 
       # Check if we can reuse cached data
-      if (!is.null(cached_data$current_type) &&
-        cached_data$current_type == current_type &&
-        !is.null(cached_data$current_filter) &&
-        identical(cached_data$current_filter, selections)) {
+      if (
+        !is.null(cached_data$current_type) &&
+          cached_data$current_type == current_type &&
+          !is.null(cached_data$current_filter) &&
+          identical(cached_data$current_filter, selections)
+      ) {
         message("Using cached data for type: ", current_type)
         return(sessionData$last_gene_data)
       }
@@ -325,13 +296,15 @@ server <- function(input, output, session) {
         display_name <- switch(current_type,
           raw = "Raw",
           normalize = "Normalized",
-          scale = "Scaled",
-          current_type
+          # scale = "Scaled",
         )
 
         # Check if dataset is already cached
         if (!is.null(cached_data[[current_type]])) {
-          setProgress(0.1, detail = paste("Using cached", display_name, "dataset..."))
+          setProgress(
+            0.1,
+            detail = paste("Using cached", display_name, "dataset...")
+          )
         } else {
           setProgress(0.3, detail = paste("Loading", display_name, "data..."))
         }
@@ -368,9 +341,14 @@ server <- function(input, output, session) {
 
   # Synchronize data type selections between tabs
   # When embeddings data type changes, sync with gene expression
-  observeEvent(input$data_type,
+  observeEvent(
+    input$data_type,
     {
-      if (!is.null(input$data_type) && !is.null(input$tabset) && input$tabset == "Embeddings") {
+      if (
+        !is.null(input$data_type) &&
+          !is.null(input$tabset) &&
+          input$tabset == "Embeddings"
+      ) {
         global_loading(TRUE)
         updateRadioButtons(
           session,
@@ -378,25 +356,33 @@ server <- function(input, output, session) {
           selected = input$data_type
         )
         # Reset loading state after a shorter delay
-        later(function() {
-          tryCatch(
-            {
-              global_loading(FALSE)
-            },
-            error = function(e) {
-              message("Error resetting global_loading: ", e$message)
-            }
-          )
-        }, 1.5) # Reduced from 2.5 to 1.5 seconds
+        later(
+          function() {
+            tryCatch(
+              {
+                global_loading(FALSE)
+              },
+              error = function(e) {
+                message("Error resetting global_loading: ", e$message)
+              }
+            )
+          },
+          1.5
+        )
       }
     },
     ignoreInit = TRUE
   )
 
   # When gene expression data type changes, sync with embeddings
-  observeEvent(input$data_type_exp,
+  observeEvent(
+    input$data_type_exp,
     {
-      if (!is.null(input$data_type_exp) && !is.null(input$tabset) && input$tabset == "Gene expression") {
+      if (
+        !is.null(input$data_type_exp) &&
+          !is.null(input$tabset) &&
+          input$tabset == "Gene expression"
+      ) {
         global_loading(TRUE)
         updateRadioButtons(
           session,
@@ -404,16 +390,19 @@ server <- function(input, output, session) {
           selected = input$data_type_exp
         )
         # Reset loading state after a shorter delay to prevent multiple updates
-        later(function() {
-          tryCatch(
-            {
-              global_loading(FALSE)
-            },
-            error = function(e) {
-              message("Error resetting global_loading: ", e$message)
-            }
-          )
-        }, 1.5) # Reduced from 2.5 to 1.5 seconds
+        later(
+          function() {
+            tryCatch(
+              {
+                global_loading(FALSE)
+              },
+              error = function(e) {
+                message("Error resetting global_loading: ", e$message)
+              }
+            )
+          },
+          1.5
+        )
       }
     },
     ignoreInit = TRUE
@@ -521,6 +510,11 @@ server <- function(input, output, session) {
       )
       updateSelectInput(
         session,
+        "sample_type",
+        choices = unique(filt_data$sample_type)
+      )
+      updateSelectInput(
+        session,
         "host_species",
         choices = unique(filt_data$host_species)
       )
@@ -541,15 +535,34 @@ server <- function(input, output, session) {
       )
       updateSelectInput(
         session,
-        "sample_type",
-        choices = unique(filt_data$sample_type)
+        "strain",
+        choices = unique(filt_data$strain)
+      )
+      updateSelectInput(
+        session,
+        "day_post_infection",
+        choices = unique(filt_data$day_post_infection)
+      )
+      updateSelectInput(
+        session,
+        "sequencer",
+        choices = unique(filt_data$sequencer)
+      )
+      updateSelectInput(
+        session,
+        "sc_technology",
+        choices = unique(filt_data$sc_technology)
       )
     } else if (input$tabset == "Quality control") {
-      # Use the suffixed IDs for the QC tab
       updateSelectInput(
         session,
         "study_label_qc",
         choices = unique(filt_data$study_label)
+      )
+      updateSelectInput(
+        session,
+        "sample_type_qc",
+        choices = unique(filt_data$sample_type)
       )
       updateSelectInput(
         session,
@@ -573,8 +586,74 @@ server <- function(input, output, session) {
       )
       updateSelectInput(
         session,
-        "sample_type_qc",
+        "strain_qc",
+        choices = unique(filt_data$strain)
+      )
+      updateSelectInput(
+        session,
+        "day_post_infection_qc",
+        choices = unique(filt_data$day_post_infection)
+      )
+      updateSelectInput(
+        session,
+        "sequencer_qc",
+        choices = unique(filt_data$sequencer)
+      )
+      updateSelectInput(
+        session,
+        "sc_technology_qc",
+        choices = unique(filt_data$sc_technology)
+      )
+    } else if (input$tabset == "Gene expression") {
+      updateSelectInput(
+        session,
+        "study_label_exp",
+        choices = unique(filt_data$study_label)
+      )
+      updateSelectInput(
+        session,
+        "sample_type_exp",
         choices = unique(filt_data$sample_type)
+      )
+      updateSelectInput(
+        session,
+        "host_species_exp",
+        choices = unique(filt_data$host_species)
+      )
+      updateSelectInput(
+        session,
+        "life_cycle_stage_exp",
+        choices = unique(filt_data$life_cycle_stage)
+      )
+      updateSelectInput(
+        session,
+        "treatment_exp",
+        choices = unique(filt_data$treatment)
+      )
+      updateSelectInput(
+        session,
+        "parasite_stage_exp",
+        choices = unique(filt_data$parasite_stage)
+      )
+      updateSelectInput(
+        session,
+        "strain_exp",
+        choices = unique(filt_data$strain)
+      )
+      updateSelectInput(
+        session,
+        "day_post_infection_exp",
+        choices = unique(filt_data$day_post_infection)
+      )
+      updateSelectInput(
+        session,
+        "sequencer_exp",
+        choices = unique(filt_data$sequencer)
+      )
+      updateSelectInput(
+        session,
+        "sc_technology_exp",
+        choices = unique(filt_data$sc_technology)
       )
     }
   })
@@ -587,16 +666,24 @@ server <- function(input, output, session) {
       input$life_cycle_stage,
       input$treatment,
       input$parasite_stage,
-      input$sample_type
+      input$sample_type,
+      input$strain,
+      input$day_post_infection,
+      input$sequencer,
+      input$sc_technology
     ),
     {
       current_inputs <- list(
         study_label = input$study_label,
+        sample_type = input$sample_type,
         host_species = input$host_species,
         life_cycle_stage = input$life_cycle_stage,
         treatment = input$treatment,
         parasite_stage = input$parasite_stage,
-        sample_type = input$sample_type
+        strain = input$strain,
+        day_post_infection = input$day_post_infection,
+        sequencer = input$sequencer,
+        sc_technology = input$sc_technology
       )
 
       filt_data <- apply_secondary_filters(filtered_data(), current_inputs)
@@ -609,17 +696,15 @@ server <- function(input, output, session) {
               ~ str_to_title(.),
               .cols = any_of(c(
                 "study_label",
+                "sample_type",
                 "host_species",
                 "life_cycle_stage",
                 "treatment",
                 "parasite_stage",
-                "sample_type",
-                "geographic_location",
-                "sc_technology",
-                "sequencer",
                 "strain",
                 "day_post_infection",
-                "biological_replicate"
+                "sequencer",
+                "sc_technology"
               ))
             ) %>%
             rename(nCount_RNA = n_count_rna, nFeature_RNA = n_feature_rna) %>%
@@ -692,9 +777,9 @@ server <- function(input, output, session) {
       output$location_plotly <- renderPlotly({
         meta_plotly(
           filt_data,
-          "geographic_location",
+          "day_post_infection",
           "Count",
-          "Geographic location",
+          "Day post infection",
           "bar"
         )
       })
@@ -710,7 +795,11 @@ server <- function(input, output, session) {
       input$life_cycle_stage_qc,
       input$treatment_qc,
       input$parasite_stage_qc,
-      input$sample_type_qc
+      input$sample_type_qc,
+      input$strain_qc,
+      input$day_post_infection_qc,
+      input$sequencer_qc,
+      input$sc_technology_qc
     ),
     {
       current_inputs <- list(
@@ -719,7 +808,11 @@ server <- function(input, output, session) {
         life_cycle_stage = input$life_cycle_stage_qc,
         treatment = input$treatment_qc,
         parasite_stage = input$parasite_stage_qc,
-        sample_type = input$sample_type_qc
+        sample_type = input$sample_type_qc,
+        strain = input$strain_qc,
+        day_post_infection = input$day_post_infection_qc,
+        sequencer = input$sequencer_qc,
+        sc_technology = input$sc_technology_qc
       )
 
       filt_data <- apply_secondary_filters(filtered_data(), current_inputs)
@@ -777,6 +870,43 @@ server <- function(input, output, session) {
 
         var_genes_plot(hiv_data, selected_study, top_n = 15)
       })
+    }
+  )
+
+  # Gene Expression tabset
+  observeEvent(
+    list(
+      input$data_opt,
+      input$study_label_exp,
+      input$host_species_exp,
+      input$life_cycle_stage_exp,
+      input$treatment_exp,
+      input$parasite_stage_exp,
+      input$sample_type_exp,
+      input$strain_exp,
+      input$day_post_infection_exp,
+      input$sequencer_exp,
+      input$sc_technology_exp
+    ),
+    {
+      current_inputs <- list(
+        study_label = input$study_label_exp,
+        host_species = input$host_species_exp,
+        life_cycle_stage = input$life_cycle_stage_exp,
+        treatment = input$treatment_exp,
+        parasite_stage = input$parasite_stage_exp,
+        sample_type = input$sample_type_exp,
+        strain = input$strain_exp,
+        day_post_infection = input$day_post_infection_exp,
+        sequencer = input$sequencer_exp,
+        sc_technology = input$sc_technology_exp
+      )
+
+      filt_data <- apply_secondary_filters(filtered_data(), current_inputs)
+
+      # Add any Gene Expression specific plots/tables here if needed
+      # For example, if you have gene expression specific data tables or plots
+      # that should update based on these filters, add them here
     }
   )
 
@@ -858,18 +988,21 @@ server <- function(input, output, session) {
     )
 
     # Use later() to debounce gene expression plot updates with shorter delay
-    later(function() {
-      tryCatch(
-        {
-          isolate({
-            gene_plot_trigger(gene_plot_trigger() + 1)
-          })
-        },
-        error = function(e) {
-          message("Error in gene plot debounce: ", e$message)
-        }
-      )
-    }, 0.3) # Reduced from 1.0 to 0.3 seconds for faster response
+    later(
+      function() {
+        tryCatch(
+          {
+            isolate({
+              gene_plot_trigger(gene_plot_trigger() + 1)
+            })
+          },
+          error = function(e) {
+            message("Error in gene plot debounce: ", e$message)
+          }
+        )
+      },
+      0.3
+    )
   })
 
   # plot for genes_exp_0 with enhanced performance
@@ -942,7 +1075,11 @@ server <- function(input, output, session) {
           plot_id <- id
           renderPlotly({
             # Only proceed if we have data and inputs
-            req(gene_data(), input[[paste0("genes_exp_", plot_id)]], input[[paste0("group_exp_", plot_id)]])
+            req(
+              gene_data(),
+              input[[paste0("genes_exp_", plot_id)]],
+              input[[paste0("group_exp_", plot_id)]]
+            )
 
             # Skip during loading states
             if (global_loading()) {
@@ -967,7 +1104,12 @@ server <- function(input, output, session) {
                 )
               },
               error = function(e) {
-                message("Error in dynamic gene expression plot ", plot_id, ": ", e$message)
+                message(
+                  "Error in dynamic gene expression plot ",
+                  plot_id,
+                  ": ",
+                  e$message
+                )
                 return(NULL)
               }
             )
@@ -985,7 +1127,11 @@ server <- function(input, output, session) {
           plot_id <- id
           renderPlotly({
             # Only proceed if we have data and inputs
-            req(gene_data(), input[[paste0("genes_exp_", plot_id)]], input[[paste0("group_exp_", plot_id)]])
+            req(
+              gene_data(),
+              input[[paste0("genes_exp_", plot_id)]],
+              input[[paste0("group_exp_", plot_id)]]
+            )
 
             # Skip during loading states
             if (global_loading()) {
@@ -1010,7 +1156,12 @@ server <- function(input, output, session) {
                 )
               },
               error = function(e) {
-                message("Error in dynamic gene expression plot ", plot_id, ": ", e$message)
+                message(
+                  "Error in dynamic gene expression plot ",
+                  plot_id,
+                  ": ",
+                  e$message
+                )
                 return(NULL)
               }
             )
@@ -1079,14 +1230,19 @@ server <- function(input, output, session) {
     req(gene_data(), input$data_type_exp_change)
 
     # Debounce multiple plot updates with shorter delay
-    later(function() {
-      isolate({
-        gene_exp_plots_trigger(gene_exp_plots_trigger() + 1)
+    later(
+      function() {
+        isolate({
+          gene_exp_plots_trigger(gene_exp_plots_trigger() + 1)
 
-        # Simply trigger invalidation of existing plots instead of recreating them
-        message("Data type changed - invalidating existing gene expression plots")
-      })
-    }, 0.2)
+          # Simply trigger invalidation of existing plots instead of recreating them
+          message(
+            "Data type changed - invalidating existing gene expression plots"
+          )
+        })
+      },
+      0.2
+    )
   })
 
   # Manipulation tabset "Embedding"
@@ -1239,18 +1395,21 @@ server <- function(input, output, session) {
     )
 
     # Use later() to debounce plot updates - wait 1.2 seconds for all changes to settle
-    later(function() {
-      tryCatch(
-        {
-          isolate({
-            plot_update_trigger(plot_update_trigger() + 1)
-          })
-        },
-        error = function(e) {
-          message("Error in plot update debounce: ", e$message)
-        }
-      )
-    }, 1.2)
+    later(
+      function() {
+        tryCatch(
+          {
+            isolate({
+              plot_update_trigger(plot_update_trigger() + 1)
+            })
+          },
+          error = function(e) {
+            message("Error in plot update debounce: ", e$message)
+          }
+        )
+      },
+      1.2
+    )
   })
 
   # Separate reactive to handle plot readiness
@@ -1258,30 +1417,33 @@ server <- function(input, output, session) {
     plot_update_trigger()
 
     # Additional delay to ensure data is fully loaded
-    later(function() {
-      tryCatch(
-        {
-          plot_ready(TRUE)
-          autoUpdatePlot(TRUE)
+    later(
+      function() {
+        tryCatch(
+          {
+            plot_ready(TRUE)
+            autoUpdatePlot(TRUE)
 
-          # Show completion notification for data type changes
-          if (isolate(global_loading())) {
-            showNotification(
-              "Data type change completed!",
-              type = "message",
-              duration = 2
-            )
-            global_loading(FALSE)
+            # Show completion notification for data type changes
+            if (isolate(global_loading())) {
+              showNotification(
+                "Data type change completed!",
+                type = "message",
+                duration = 2
+              )
+              global_loading(FALSE)
+            }
+          },
+          error = function(e) {
+            message("Error in plot readiness: ", e$message)
+            # Ensure plot is still marked as ready even if notification fails
+            plot_ready(TRUE)
+            autoUpdatePlot(TRUE)
           }
-        },
-        error = function(e) {
-          message("Error in plot readiness: ", e$message)
-          # Ensure plot is still marked as ready even if notification fails
-          plot_ready(TRUE)
-          autoUpdatePlot(TRUE)
-        }
-      )
-    }, 0.3)
+        )
+      },
+      0.3
+    )
   })
 
   ## determine plot type
@@ -1455,14 +1617,30 @@ server <- function(input, output, session) {
         removeUI(selector = "#dynamic_col_*")
 
         # Clear reactive values safely
-        if (exists("choice_exp")) choice_exp(NULL)
-        if (exists("selected_table")) selected_table(NULL)
-        if (exists("autoUpdatePlot")) autoUpdatePlot(FALSE)
-        if (exists("app_initialized")) app_initialized(FALSE)
-        if (exists("data_loading_trigger")) data_loading_trigger(NULL)
-        if (exists("default_df_filter")) default_df_filter(NULL)
-        if (exists("plot_ready")) plot_ready(FALSE)
-        if (exists("global_loading")) global_loading(FALSE)
+        if (exists("choice_exp")) {
+          choice_exp(NULL)
+        }
+        if (exists("selected_table")) {
+          selected_table(NULL)
+        }
+        if (exists("autoUpdatePlot")) {
+          autoUpdatePlot(FALSE)
+        }
+        if (exists("app_initialized")) {
+          app_initialized(FALSE)
+        }
+        if (exists("data_loading_trigger")) {
+          data_loading_trigger(NULL)
+        }
+        if (exists("default_df_filter")) {
+          default_df_filter(NULL)
+        }
+        if (exists("plot_ready")) {
+          plot_ready(FALSE)
+        }
+        if (exists("global_loading")) {
+          global_loading(FALSE)
+        }
 
         # Clear all cached data explicitly
         if (exists("cached_data")) {
@@ -1482,7 +1660,10 @@ server <- function(input, output, session) {
         }
 
         # Clear temporary variables from global environment
-        rm(list = ls(envir = .GlobalEnv, pattern = "^temp_"), envir = .GlobalEnv)
+        rm(
+          list = ls(envir = .GlobalEnv, pattern = "^temp_"),
+          envir = .GlobalEnv
+        )
 
         # Force multiple garbage collections
         for (i in 1:3) {
@@ -1514,7 +1695,9 @@ server <- function(input, output, session) {
         cached_data$current_filter <- NULL
 
         # Clear session data
-        if (exists("sessionData") && exists("last_gene_data", envir = sessionData)) {
+        if (
+          exists("sessionData") && exists("last_gene_data", envir = sessionData)
+        ) {
           sessionData$last_gene_data <- NULL
         }
 

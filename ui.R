@@ -37,10 +37,6 @@ ui <- fluidPage(
     ),
     div(
       class = "menu-title",
-      # div(class = "logo mosquito", img(
-      #   src = "mosquito-top.png",
-      #   alt = "mosquito"
-      # )),
       div(
         class = "title-text",
         h1("PlaViSca"),
@@ -227,16 +223,13 @@ ui <- fluidPage(
               "Life cycle" = "life_cycle_stage",
               "Parasite stage" = "parasite_stage",
               "Strain" = "strain",
-              "Bio. replicate" = "biological_replicate",
               "Treatment" = "treatment",
               "Sample" = "sample_type",
               "Host species" = "host_species",
               "Sequencer" = "sequencer",
               "SC. technology" = "sc_technology",
-              "Geo. location" = "geographic_location",
               "DPI" = "day_post_infection",
               "HPI" = "hour_post_invasion",
-              "RNA_snn" = "RNA_snn",
               "Genes" = "genes"
             ),
             selected = "study_label"
@@ -253,8 +246,8 @@ ui <- fluidPage(
                 "Data type",
                 choices = list(
                   "Raw" = "raw",
-                  "Normalized" = "normalize",
-                  "Scaled" = "scale"
+                  "Normalized" = "normalize"
+                  #"Scaled" = "scale"
                 ),
                 selected = "normalize"
               )
@@ -426,6 +419,7 @@ ui <- fluidPage(
           # gene expression section
           tabPanel(
             "Gene expression",
+            create_meta_filter_row("_exp"),
             fluidRow(
               column(
                 width = 12,
@@ -434,8 +428,8 @@ ui <- fluidPage(
                   "Data type",
                   choices = list(
                     "Raw" = "raw",
-                    "Normalized" = "normalize",
-                    "Scaled" = "scale"
+                    "Normalized" = "normalize"
+                    #"Scaled" = "scale"
                   ),
                   selected = "normalize"
                 )

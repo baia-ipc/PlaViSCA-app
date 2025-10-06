@@ -191,11 +191,11 @@ sc_technology <- rep("10x_Chomium_V3", length(all_pv))
 sequencer <- rep("HiSeq X Ten", length(all_pv))
 host_species <- rep("Anopheles dirus", length(all_pv))
 host_id <- rep("tax_id-7168", length(all_pv))
-sample_type <- rep("Vector salivary gland", length(all_pv))
+sample_type <- rep("Vector host: salivary gland", length(all_pv))
 parasite_stage <- rep("Sporozoite stage", length(all_pv))
 strain <- rep("Cambodia field isolate", length(all_pv))
 day_post_infection <- c(16, 18, 17)
-treatment <- rep(NA, length(all_pv))
+treatment <- rep("No_Treatment", length(all_pv))
 biological_replicate <- c(1, 2, 3)
 
 

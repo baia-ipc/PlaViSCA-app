@@ -216,7 +216,7 @@ host_id <- c(
   "86416",
   "86416"
 )
-sample_type <- rep("Host blood", length(all_pv))
+sample_type <- rep("Mammalian host: blood", length(all_pv))
 parasite_stage <- rep("Blood stage", length(all_pv))
 strain <- c(
   "NIH-1993",
