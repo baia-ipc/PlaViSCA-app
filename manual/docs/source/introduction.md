@@ -24,7 +24,9 @@ PlaViSca is compatible with macOS, Windows, and Linux operating systems. Follow 
 - **R**: Version 4.5 or later ([Download R](https://cran.r-project.org/))
 - **RStudio**: Version 2025 or later ([Download RStudio](https://posit.co/download/rstudio-desktop/))
 - **Git**: Version 2.43 or later ([Download Git](https://git-scm.com/downloads))
-- **Recommended RAM**: 8GB or more
+- **Recommended RAM**: at least 16GB
+- **CPU**: at least 4 cores
+- **Disk**: at least 5GB free space
 
 ## Getting source code from the repository
 

@@ -201,8 +201,7 @@ server <- function(input, output, session) {
       # }
       # IMPORTANT: normalized data is NEVER cleared once loaded
 
-      dataset <- switch(
-        data_type,
+      dataset <- switch(data_type,
         raw = {
           # Only clear raw data if loading other types (but keep normalized)
           if (exists("DATA_PATHS") && !is.null(DATA_PATHS$raw_df)) {
@@ -299,8 +298,7 @@ server <- function(input, output, session) {
 
       # Show progress bar when loading new data
       withProgress(message = "", value = 0, {
-        display_name <- switch(
-          current_type,
+        display_name <- switch(current_type,
           raw = "Raw",
           normalize = "Normalized",
           # scale = "Scaled",
@@ -450,7 +448,7 @@ server <- function(input, output, session) {
     ),
     host_species = setNames(
       paste0("host_species__", unique(mr_data$host_species)),
-      unique(mr_data$host_species)
+      format_species_name(unique(mr_data$host_species))
     ),
     life_cycle_stage = setNames(
       paste0("life_cycle_stage__", unique(mr_data$life_cycle_stage)),
@@ -523,7 +521,10 @@ server <- function(input, output, session) {
       updateSelectInput(
         session,
         "host_species",
-        choices = unique(filt_data$host_species)
+        choices = setNames(
+          unique(filt_data$host_species),
+          format_species_name(unique(filt_data$host_species))
+        )
       )
       updateSelectInput(
         session,
@@ -574,7 +575,10 @@ server <- function(input, output, session) {
       updateSelectInput(
         session,
         "host_species_qc",
-        choices = unique(filt_data$host_species)
+        choices = setNames(
+          unique(filt_data$host_species),
+          format_species_name(unique(filt_data$host_species))
+        )
       )
       updateSelectInput(
         session,
@@ -625,7 +629,10 @@ server <- function(input, output, session) {
       updateSelectInput(
         session,
         "host_species_exp",
-        choices = unique(filt_data$host_species)
+        choices = setNames(
+          unique(filt_data$host_species),
+          format_species_name(unique(filt_data$host_species))
+        )
       )
       updateSelectInput(
         session,
@@ -885,7 +892,7 @@ server <- function(input, output, session) {
   # Simplified filtered gene expression data for speed
   filtered_gene_exp_data <- reactive({
     req(gene_data())
-    
+
     current_inputs <- list(
       study_label = input$study_label_exp,
       host_species = input$host_species_exp,
@@ -902,28 +909,31 @@ server <- function(input, output, session) {
     # Simple cache key for filter combinations
     filter_hash <- digest::digest(current_inputs)
     cache_key <- paste0("filtered_", get_current_data_type(), "_", filter_hash)
-    
+
     # Check cache first
     if (!is.null(sessionData[[cache_key]])) {
       return(sessionData[[cache_key]])
     }
 
     # Apply filters efficiently
-    tryCatch({
-      filt_data <- apply_secondary_filters(gene_data()$data, current_inputs)
-      
-      result <- list(
-        data = filt_data,
-        genes = gene_data()$genes
-      )
-      
-      # Cache the result
-      sessionData[[cache_key]] <- result
-      
-      return(result)
-    }, error = function(e) {
-      return(NULL)
-    })
+    tryCatch(
+      {
+        filt_data <- apply_secondary_filters(gene_data()$data, current_inputs)
+
+        result <- list(
+          data = filt_data,
+          genes = gene_data()$genes
+        )
+
+        # Cache the result
+        sessionData[[cache_key]] <- result
+
+        return(result)
+      },
+      error = function(e) {
+        return(NULL)
+      }
+    )
   })
 
   observeEvent(
@@ -955,10 +965,6 @@ server <- function(input, output, session) {
       )
 
       filt_data <- apply_secondary_filters(filtered_data(), current_inputs)
-
-      # Add any Gene Expression specific plots/tables here if needed
-      # For example, if you have gene expression specific data tables or plots
-      # that should update based on these filters, add them here
     }
   )
 
@@ -995,19 +1001,22 @@ server <- function(input, output, session) {
   # Use observer for gene choice updates
   observe({
     req(choice_exp_0())
-    
+
     # Update selectize input
-    tryCatch({
-      updateSelectizeInput(
-        session,
-        "genes_exp_0",
-        label = if (isTRUE(input$check_exp_0)) "Gene ID" else "Gene name",
-        choices = choice_exp_0(),
-        server = TRUE
-      )
-    }, error = function(e) {
-      # Silent error handling
-    })
+    tryCatch(
+      {
+        updateSelectizeInput(
+          session,
+          "genes_exp_0",
+          label = if (isTRUE(input$check_exp_0)) "Gene ID" else "Gene name",
+          choices = choice_exp_0(),
+          server = TRUE
+        )
+      },
+      error = function(e) {
+        # Silent error handling
+      }
+    )
   })
 
   # df_exp data for genes_exp_0 with filter-aware caching
@@ -1021,21 +1030,40 @@ server <- function(input, output, session) {
 
     # Create cache key that includes filter inputs for proper filtering
     filter_key <- paste0(
-      input$study_label_exp %||% "none", "_",
-      input$host_species_exp %||% "none", "_",
-      input$life_cycle_stage_exp %||% "none", "_",
-      input$treatment_exp %||% "none", "_",
-      input$parasite_stage_exp %||% "none", "_",
-      input$sample_type_exp %||% "none", "_",
-      input$strain_exp %||% "none", "_",
-      input$hour_post_invasion_exp %||% "none", "_",
-      input$sequencer_exp %||% "none", "_",
+      input$study_label_exp %||% "none",
+      "_",
+      input$host_species_exp %||% "none",
+      "_",
+      input$life_cycle_stage_exp %||% "none",
+      "_",
+      input$treatment_exp %||% "none",
+      "_",
+      input$parasite_stage_exp %||% "none",
+      "_",
+      input$sample_type_exp %||% "none",
+      "_",
+      input$strain_exp %||% "none",
+      "_",
+      input$hour_post_invasion_exp %||% "none",
+      "_",
+      input$sequencer_exp %||% "none",
+      "_",
       input$sc_technology_exp %||% "none"
     )
-    
-    cache_key <- paste0("df_exp_", input$genes_exp_0, "_", input$group_exp, "_", 
-                       input$check_exp_0, "_", get_current_data_type(), "_", filter_key)
-    
+
+    cache_key <- paste0(
+      "df_exp_",
+      input$genes_exp_0,
+      "_",
+      input$group_exp,
+      "_",
+      input$check_exp_0,
+      "_",
+      get_current_data_type(),
+      "_",
+      filter_key
+    )
+
     # Check cache first for instant gene switching
     if (!is.null(sessionData[[cache_key]])) {
       return(sessionData[[cache_key]])
@@ -1055,12 +1083,12 @@ server <- function(input, output, session) {
         return(NULL)
       }
     )
-    
+
     # Cache only successful results
     if (!is.null(result) && nrow(result) > 0) {
       sessionData[[cache_key]] <- result
     }
-    
+
     return(result)
   })
 
@@ -1076,21 +1104,38 @@ server <- function(input, output, session) {
 
     # Create cache key that includes filter inputs for proper plot updates
     filter_key <- paste0(
-      input$study_label_exp %||% "none", "_",
-      input$host_species_exp %||% "none", "_",
-      input$life_cycle_stage_exp %||% "none", "_",
-      input$treatment_exp %||% "none", "_",
-      input$parasite_stage_exp %||% "none", "_",
-      input$sample_type_exp %||% "none", "_",
-      input$strain_exp %||% "none", "_",
-      input$hour_post_invasion_exp %||% "none", "_",
-      input$sequencer_exp %||% "none", "_",
+      input$study_label_exp %||% "none",
+      "_",
+      input$host_species_exp %||% "none",
+      "_",
+      input$life_cycle_stage_exp %||% "none",
+      "_",
+      input$treatment_exp %||% "none",
+      "_",
+      input$parasite_stage_exp %||% "none",
+      "_",
+      input$sample_type_exp %||% "none",
+      "_",
+      input$strain_exp %||% "none",
+      "_",
+      input$hour_post_invasion_exp %||% "none",
+      "_",
+      input$sequencer_exp %||% "none",
+      "_",
       input$sc_technology_exp %||% "none"
     )
-    
-    plot_cache_key <- paste0("plot_", input$genes_exp_0, "_", input$group_exp, "_", 
-                            get_current_data_type(), "_", filter_key)
-    
+
+    plot_cache_key <- paste0(
+      "plot_",
+      input$genes_exp_0,
+      "_",
+      input$group_exp,
+      "_",
+      get_current_data_type(),
+      "_",
+      filter_key
+    )
+
     # Check cache for instant gene switching
     if (!is.null(sessionData[[plot_cache_key]])) {
       return(sessionData[[plot_cache_key]])
@@ -1106,12 +1151,12 @@ server <- function(input, output, session) {
         return(NULL)
       }
     )
-    
+
     # Cache successful plots
     if (!is.null(result)) {
       sessionData[[plot_cache_key]] <- result
     }
-    
+
     return(result)
   })
 
@@ -1130,9 +1175,9 @@ server <- function(input, output, session) {
   #   btn_id <- input$click_add_btn
   #   id <- as.numeric(gsub("add_btn_?", "", btn_id))
   #   shinyjs::hide(paste0("add_btn_", id))
-  # 
+  #
   #   choice_exp(get_gene_choices(gene_data()$genes, FALSE))
-  # 
+  #
   #   ## add ui block to the right after gene_exp_tar
   #   if (id == 0) {
   #     id <- id + 1
@@ -1153,7 +1198,7 @@ server <- function(input, output, session) {
   #         server = TRUE
   #       )
   #     })
-  # 
+  #
   #     # Create a properly scoped reactive for this specific plot with shorter delay
   #     shinyjs::delay(100, {
   #       output[[paste0("gene_exp_plotly_", id)]] <- local({
@@ -1165,12 +1210,12 @@ server <- function(input, output, session) {
   #             input[[paste0("genes_exp_", plot_id)]],
   #             input[[paste0("group_exp_", plot_id)]]
   #           )
-  # 
+  #
   #           # Skip during loading states
   #           if (global_loading()) {
   #             return(NULL)
   #           }
-  # 
+  #
   #           tryCatch(
   #             {
   #               # Create the reactive data for this specific plot
@@ -1180,9 +1225,9 @@ server <- function(input, output, session) {
   #                 gene_data = gene_data(),
   #                 get_gene_id = get_gene_id
   #               )
-  # 
+  #
   #               req(df_reactive())
-  # 
+  #
   #               gene_exp_plot(
   #                 df_reactive(),
   #                 tolower(input[[paste0("group_exp_", plot_id)]])
@@ -1205,7 +1250,7 @@ server <- function(input, output, session) {
   #     ## add ui block to button
   #     id <- id + 1
   #     newBlock(id, counter, choice_exp(), subBlock, session)
-  # 
+  #
   #     # Create a properly scoped reactive for this specific plot with shorter delay
   #     shinyjs::delay(100, {
   #       output[[paste0("gene_exp_plotly_", id)]] <- local({
@@ -1217,12 +1262,12 @@ server <- function(input, output, session) {
   #             input[[paste0("genes_exp_", plot_id)]],
   #             input[[paste0("group_exp_", plot_id)]]
   #           )
-  # 
+  #
   #           # Skip during loading states
   #           if (global_loading()) {
   #             return(NULL)
   #           }
-  # 
+  #
   #           tryCatch(
   #             {
   #               # Create the reactive data for this specific plot
@@ -1232,9 +1277,9 @@ server <- function(input, output, session) {
   #                 gene_data = gene_data(),
   #                 get_gene_id = get_gene_id
   #               )
-  # 
+  #
   #               req(df_reactive())
-  # 
+  #
   #               gene_exp_plot(
   #                 df_reactive(),
   #                 tolower(input[[paste0("group_exp_", plot_id)]])
@@ -1265,11 +1310,11 @@ server <- function(input, output, session) {
   #     ids <- as.numeric(unlist(input$click_remove_btn$ids))
   #     removeUI(selector = paste0("#dynamic_col_", id))
   #     remaining_ids <- ids[ids != id]
-  # 
+  #
   #     for (i in remaining_ids) {
   #       shinyjs::hide(paste0("add_btn_", i))
   #     }
-  # 
+  #
   #     if (length(remaining_ids) == 0) {
   #       shinyjs::show("add_btn_0")
   #     } else {
@@ -1399,8 +1444,7 @@ server <- function(input, output, session) {
     {
       if (input$plot == "2d") {
         shinyjs::show("axis")
-        x_choices <- switch(
-          input$embedding,
+        x_choices <- switch(input$embedding,
           "umap" = if (isTRUE(input$check_all)) umap_i else umap_u,
           "pca" = if (isTRUE(input$check_all)) pca_i else pca_u,
           "tsne" = tsne
@@ -1413,8 +1457,7 @@ server <- function(input, output, session) {
           selected = x_choices[1]
         )
 
-        y_choices <- switch(
-          input$embedding,
+        y_choices <- switch(input$embedding,
           "umap" = y_col(
             input$check_all,
             input$xaxis,
@@ -1535,8 +1578,7 @@ server <- function(input, output, session) {
 
   ## determine plot type
   get_plot_type <- reactive({
-    switch(
-      input$embedding,
+    switch(input$embedding,
       "pca" = if (isTRUE(input$check_all)) "pca_i" else "pca_u",
       "umap" = if (isTRUE(input$check_all)) "umap_i" else "umap_u",
       "tsne" = "tSNE"
@@ -1555,8 +1597,7 @@ server <- function(input, output, session) {
 
     # Generate plot without progress bar
     isolate({
-      color_column <- switch(
-        input$color,
+      color_column <- switch(input$color,
         "genes" = get_gene_id(input$genes_n, gene_data()$genes),
         "RNA_snn" = input$genes_n,
         input$color
@@ -1735,7 +1776,7 @@ server <- function(input, output, session) {
         if (exists("cached_data")) {
           cached_data$raw <- NULL
           # cached_data$normalize <- NULL  # NEVER clear normalized data
-          #cached_data$scale <- NULL
+          # cached_data$scale <- NULL
           cached_data$current_type <- NULL
           cached_data$current_filter <- NULL
         }
@@ -1779,7 +1820,7 @@ server <- function(input, output, session) {
         # Clear cached data (but preserve normalized data for gene expression speed)
         cached_data$raw <- NULL
         # cached_data$normalize <- NULL  # NEVER clear normalized data for speed
-        #cached_data$scale <- NULL
+        # cached_data$scale <- NULL
         cached_data$current_type <- NULL
         cached_data$current_filter <- NULL
 

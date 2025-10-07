@@ -1,3 +1,25 @@
+# Helper function to format species names with italics
+format_species_name <- function(species_names) {
+  # Species that should be in italics (scientific names)
+  scientific_species <- c(
+    "Anopheles freeborni",
+    "Anopheles stephensi",
+    "Anopheles dirus",
+    "Saimiri boliviensis",
+    "Aotus nancymaae",
+    "Homo sapiens"
+  )
+
+  # Apply italic formatting to scientific names
+  formatted_names <- ifelse(
+    species_names %in% scientific_species,
+    paste0("<i>", species_names, "</i>"),
+    species_names
+  )
+
+  return(formatted_names)
+}
+
 # Function that builds the full Metadata tab
 create_meta_filter_row <- function(suffix = "") {
   tagList(
@@ -40,7 +62,15 @@ create_meta_filter_row <- function(suffix = "") {
           multiple = TRUE,
           options = list(
             placeholder = "Select options...",
-            onInitialize = I('function() { this.setValue(""); }')
+            onInitialize = I('function() { this.setValue(""); }'),
+            render = I('{
+              option: function(item, escape) {
+                return "<div>" + item.label + "</div>";
+              },
+              item: function(item, escape) {
+                return "<div>" + item.label + "</div>";
+              }
+            }')
           )
         )
       ),
@@ -516,6 +546,13 @@ meta_plotly <- function(data, x_var, x_label, y_label, plt_type = "bar") {
     summarise(count = n(), .groups = "drop") %>%
     arrange(count)
 
+  # Format species names with italics if this is host_species column
+  if (x_var == "host_species") {
+    data_summary$formatted_labels <- format_species_name(data_summary[[x_var]])
+  } else {
+    data_summary$formatted_labels <- data_summary[[x_var]]
+  }
+
   data_summary[[x_var]] <- factor(
     data_summary[[x_var]],
     levels = data_summary[[x_var]]
@@ -524,7 +561,7 @@ meta_plotly <- function(data, x_var, x_label, y_label, plt_type = "bar") {
   plot_ly(
     data_summary,
     x = ~count,
-    y = as.formula(paste("~", x_var)),
+    y = ~formatted_labels,
     color = ~ .data[[x_var]],
     colors = brewer.pal(
       n = length(unique(data_summary[[x_var]])),
@@ -693,7 +730,7 @@ gene_exp_plot <- function(data, x_col) {
     stop("gene_expr column not found in data")
   }
 
-  # Remove any rows with missing values to avoid plotly issues 
+  # Remove any rows with missing values to avoid plotly issues
   clean_data <- data[complete.cases(data[c(actual_col, "gene_expr")]), ]
 
   if (nrow(clean_data) == 0) {
@@ -713,7 +750,7 @@ gene_exp_plot <- function(data, x_col) {
     RColorBrewer::brewer.pal(min(n_groups, 11), "Spectral")
   }
 
-  # Create violin plot with proper color differentiation 
+  # Create violin plot with proper color differentiation
   p <- plotly::plot_ly(
     data = clean_data,
     x = clean_data[[actual_col]],
@@ -891,6 +928,13 @@ plot_2d <- function(
     is_categorical,
     selected_color,
     colors) {
+  # Format selected_color for display if it's host_species
+  display_color <- if (color == "host_species") {
+    format_species_name(selected_color)
+  } else {
+    selected_color
+  }
+
   hover_text <- ~ paste(
     "Cell:",
     df$barcode,
@@ -899,7 +943,7 @@ plot_2d <- function(
     "<br>Color by",
     legend_title,
     ":",
-    selected_color,
+    display_color,
     "<br>n_Features_RNA:",
     df$n_feature_rna,
     "<br>X:",
@@ -984,6 +1028,13 @@ plot_3d <- function(
   y_vals <- df[[y_col]]
   z_vals <- df[[z_col]]
 
+  # Format selected_color for display if it's host_species
+  display_color <- if (color == "host_species") {
+    format_species_name(selected_color)
+  } else {
+    selected_color
+  }
+
   hover_text <- paste(
     "Cell:",
     df$barcode,
@@ -992,7 +1043,7 @@ plot_3d <- function(
     "<br>Color by",
     legend_title,
     ":",
-    selected_color,
+    display_color,
     "<br>n_Features_RNA:",
     df$n_feature_rna,
     "<br>X:",
