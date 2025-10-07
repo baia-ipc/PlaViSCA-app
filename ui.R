@@ -348,75 +348,53 @@ ui <- fluidPage(
         class = "main",
         tabsetPanel(
           id = "tabset",
-          # Metadata tab
+
+          # embedding section (moved to first position)
           tabPanel(
-            "Metadata",
-            div(
-              id = "meta_section",
-              create_meta_filter_row(),
-              fluidRow(
-                column(width = 4, plotlyOutput("sample_plotly")),
-                column(width = 4, plotlyOutput("species_plotly")),
-                column(width = 4, plotlyOutput("strain_plotly"))
+            "Embeddings",
+            fluidRow(
+              column(
+                id = "tab_switch",
+                width = 5,
+                tags$span(class = "left-label", "Unintegrated"),
+                tags$label(
+                  class = "switch",
+                  tags$input(
+                    id = "check_all",
+                    type = "checkbox",
+                    checked = TRUE
+                  ),
+                  tags$span(class = "slider")
+                ),
+                tags$span(class = "right-label", "Integrated")
               ),
-              fluidRow(
-                column(width = 4, plotlyOutput("treatment_plotly")),
-                column(width = 4, plotlyOutput("life_cycle_plotly")),
-                column(width = 4, plotlyOutput("HPI_plotly"))
-              ),
-              br(),
-              fluidRow(withSpinner(
+              column(
+                width = 6,
+                class = "radio",
+                radioButtons(
+                  "embedding",
+                  NULL,
+                  inline = TRUE,
+                  choices = list(
+                    "PCA" = "pca",
+                    "UMAP" = "umap",
+                    "tSNE" = "tsne"
+                  ),
+                  selected = "umap"
+                )
+              )
+            ),
+            fluidRow(
+              withSpinner(
                 type = 6,
                 size = 0.5,
                 color = "#3498db",
-                DT::DTOutput("data_table")
-              ))
-            )
-          ),
-          tabPanel(
-            "Quality control",
-            div(
-              id = "qual_section",
-              create_meta_filter_row("_qc"),
-              fluidRow(
-                column(
-                  width = 6,
-                  withSpinner(
-                    type = 6,
-                    size = 0.5,
-                    color = "#3498db",
-                    plotlyOutput("data_count_plotly")
-                  )
-                ),
-                column(
-                  width = 6,
-                  withSpinner(
-                    type = 6,
-                    size = 0.5,
-                    color = "#3498db",
-                    plotlyOutput("data_feature_plotly")
-                  )
-                )
-              ),
-              br(),
-              fluidRow(
-                column(width = 6, plotlyOutput("data_pca_stdv_plotly")),
-                column(width = 6, plotlyOutput("variable_genes_plotly"))
-              )
-            )
-          ),
-          tabPanel(
-            "Data sources",
-            div(
-              id = "source_section",
-              column(
-                width = 12,
-                DT::DTOutput("data_source")
+                plotlyOutput("all_plotly")
               )
             )
           ),
 
-          # gene expression section
+          # gene expression section (moved to second position)
           tabPanel(
             "Gene expression",
             fluidRow(
@@ -434,7 +412,7 @@ ui <- fluidPage(
                   choices = list(
                     "Raw" = "raw",
                     "Normalized" = "normalize"
-                    #"Scaled" = "scale"
+                    # "Scaled" = "scale"
                   ),
                   selected = "normalize"
                 )
@@ -497,7 +475,12 @@ ui <- fluidPage(
                 ),
                 fluidRow(
                   width = 12,
-                  plotlyOutput("gene_exp_plotly"),
+                  withSpinner(
+                    type = 6,
+                    size = 0.5,
+                    color = "#3498db",
+                    plotlyOutput("gene_exp_plotly")
+                  ),
                   # fluidRow(
                   #   class = "btn-add-rm-container",
                   #   actionButton(
@@ -511,48 +494,71 @@ ui <- fluidPage(
             ),
             # div(id = "gene_exp_container", class = "gene-exp-row")
           ),
-
-          # embedding section
           tabPanel(
-            "Embeddings",
-            fluidRow(
-              column(
-                id = "tab_switch",
-                width = 5,
-                tags$span(class = "left-label", "Unintegrated"),
-                tags$label(
-                  class = "switch",
-                  tags$input(
-                    id = "check_all",
-                    type = "checkbox",
-                    checked = TRUE
-                  ),
-                  tags$span(class = "slider")
+            "Quality control",
+            div(
+              id = "qual_section",
+              create_meta_filter_row("_qc"),
+              fluidRow(
+                column(
+                  width = 6,
+                  withSpinner(
+                    type = 6,
+                    size = 0.5,
+                    color = "#3498db",
+                    plotlyOutput("data_count_plotly")
+                  )
                 ),
-                tags$span(class = "right-label", "Integrated")
-              ),
-              column(
-                width = 6,
-                class = "radio",
-                radioButtons(
-                  "embedding",
-                  NULL,
-                  inline = TRUE,
-                  choices = list(
-                    "PCA" = "pca",
-                    "UMAP" = "umap",
-                    "tSNE" = "tsne"
-                  ),
-                  selected = "umap"
+                column(
+                  width = 6,
+                  withSpinner(
+                    type = 6,
+                    size = 0.5,
+                    color = "#3498db",
+                    plotlyOutput("data_feature_plotly")
+                  )
                 )
+              ),
+              br(),
+              fluidRow(
+                column(width = 6, plotlyOutput("data_pca_stdv_plotly")),
+                column(width = 6, plotlyOutput("variable_genes_plotly"))
               )
-            ),
-            fluidRow(
-              withSpinner(
+            )
+          ),
+
+          # Metadata tab (moved to fourth position)
+          tabPanel(
+            "Metadata",
+            div(
+              id = "meta_section",
+              create_meta_filter_row(),
+              fluidRow(
+                column(width = 4, plotlyOutput("sample_plotly")),
+                column(width = 4, plotlyOutput("species_plotly")),
+                column(width = 4, plotlyOutput("strain_plotly"))
+              ),
+              fluidRow(
+                column(width = 4, plotlyOutput("treatment_plotly")),
+                column(width = 4, plotlyOutput("life_cycle_plotly")),
+                column(width = 4, plotlyOutput("HPI_plotly"))
+              ),
+              br(),
+              fluidRow(withSpinner(
                 type = 6,
                 size = 0.5,
                 color = "#3498db",
-                plotlyOutput("all_plotly")
+                DT::DTOutput("data_table")
+              ))
+            )
+          ),
+          tabPanel(
+            "Data sources",
+            div(
+              id = "source_section",
+              column(
+                width = 12,
+                DT::DTOutput("data_source")
               )
             )
           )

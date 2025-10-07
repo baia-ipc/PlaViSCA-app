@@ -214,7 +214,7 @@ apply_secondary_filters <- function(data, inputs) {
     filtered <- filtered %>%
       filter(n_feature_rna > 0 & n_count_rna > 0)
   }
-  
+
   # Select relevant columns (keep all existing columns if they don't match the expected metadata columns)
   metadata_cols <- c(
     "study_label",
@@ -233,7 +233,7 @@ apply_secondary_filters <- function(data, inputs) {
     "n_count_rna",
     "n_feature_rna"
   )
-  
+
   # For gene expression data, keep all columns (metadata + gene expression)
   # For regular metadata, select only metadata columns
   available_metadata_cols <- intersect(metadata_cols, names(filtered))
@@ -693,14 +693,14 @@ gene_exp_plot <- function(data, x_col) {
     stop("gene_expr column not found in data")
   }
 
-  # Remove any rows with missing values to avoid plotly issues (optimized)
+  # Remove any rows with missing values to avoid plotly issues 
   clean_data <- data[complete.cases(data[c(actual_col, "gene_expr")]), ]
 
   if (nrow(clean_data) == 0) {
     return(plotly::plot_ly() %>% plotly::layout(title = ""))
   }
 
-  # Get unique groups for color mapping (optimized)
+  # Get unique groups for color mapping
   unique_groups <- unique(clean_data[[actual_col]])
   n_groups <- length(unique_groups)
 
@@ -713,7 +713,7 @@ gene_exp_plot <- function(data, x_col) {
     RColorBrewer::brewer.pal(min(n_groups, 11), "Spectral")
   }
 
-  # Create violin plot with proper color differentiation (streamlined)
+  # Create violin plot with proper color differentiation 
   p <- plotly::plot_ly(
     data = clean_data,
     x = clean_data[[actual_col]],
@@ -893,9 +893,9 @@ plot_2d <- function(
     colors) {
   hover_text <- ~ paste(
     "Cell:",
-    df$id,
+    df$barcode,
     "<br>Cluster:",
-    df$ident,
+    df$seurat_clusters,
     "<br>Color by",
     legend_title,
     ":",
@@ -986,9 +986,9 @@ plot_3d <- function(
 
   hover_text <- paste(
     "Cell:",
-    df$id,
+    df$barcode,
     "<br>Cluster:",
-    df$ident,
+    df$seurat_clusters,
     "<br>Color by",
     legend_title,
     ":",

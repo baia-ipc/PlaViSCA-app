@@ -183,30 +183,28 @@ server <- function(input, output, session) {
     }
   })
 
-  # Load data only when necessary with better memory management
+  # Load data only when necessary with normalized data persistence
   load_dataset <- function(data_type) {
     if (is.null(cached_data[[data_type]])) {
       # Force garbage collection before loading new data
       gc(verbose = FALSE, full = TRUE)
 
-      # Clear other cached data when loading large datasets like scaled data
+      # Clear other cached data when loading large datasets, but NEVER clear normalized data
       # if (data_type == "scale") {
-      #   message(
-      #     "Loading scaled data - clearing other cached data to free memory..."
-      #   )
+      #   # Only clear raw data when loading scaled data, keep normalized data
       #   cached_data$raw <- NULL
       #   gc(verbose = FALSE, full = TRUE)
       # } else if (data_type == "raw") {
-      #   message(
-      #     "Loading raw data - clearing other cached data to free memory..."
-      #   )
+      #   # Only clear scaled data when loading raw data, keep normalized data
       #   cached_data$scale <- NULL
       #   gc(verbose = FALSE, full = TRUE)
       # }
+      # IMPORTANT: normalized data is NEVER cleared once loaded
 
       dataset <- switch(
         data_type,
         raw = {
+          # Only clear raw data if loading other types (but keep normalized)
           if (exists("DATA_PATHS") && !is.null(DATA_PATHS$raw_df)) {
             load_data(DATA_PATHS$raw_df)
           } else {
@@ -372,7 +370,7 @@ server <- function(input, output, session) {
                 global_loading(FALSE)
               },
               error = function(e) {
-                message("Error resetting global_loading: ", e$message)
+                # Silent error handling
               }
             )
           },
@@ -406,7 +404,7 @@ server <- function(input, output, session) {
                 global_loading(FALSE)
               },
               error = function(e) {
-                message("Error resetting global_loading: ", e$message)
+                # Silent error handling
               }
             )
           },
@@ -884,7 +882,7 @@ server <- function(input, output, session) {
   )
 
   # Gene Expression tabset
-  # Create reactive for filtered gene expression data
+  # Simplified filtered gene expression data for speed
   filtered_gene_exp_data <- reactive({
     req(gene_data())
     
@@ -901,15 +899,26 @@ server <- function(input, output, session) {
       sc_technology = input$sc_technology_exp
     )
 
-    # Apply filters to the gene data's data component
+    # Simple cache key for filter combinations
+    filter_hash <- digest::digest(current_inputs)
+    cache_key <- paste0("filtered_", get_current_data_type(), "_", filter_hash)
+    
+    # Check cache first
+    if (!is.null(sessionData[[cache_key]])) {
+      return(sessionData[[cache_key]])
+    }
+
+    # Apply filters efficiently
     tryCatch({
       filt_data <- apply_secondary_filters(gene_data()$data, current_inputs)
       
-      # Return gene data structure with filtered data
       result <- list(
-        data = filt_data,  # Filtered combined data (metadata + expression)
-        genes = gene_data()$genes  # Gene info stays the same
+        data = filt_data,
+        genes = gene_data()$genes
       )
+      
+      # Cache the result
+      sessionData[[cache_key]] <- result
       
       return(result)
     }, error = function(e) {
@@ -976,21 +985,11 @@ server <- function(input, output, session) {
   })
 
   # Manipulation tabset "Gene Exp"
-  ## gene_exp_0 block with enhanced caching
+  ## gene_exp_0 block with minimal caching for speed
   choice_exp_0 <- reactive({
     req(gene_data()$genes)
-    
-    # Cache gene choices since they don't change often
-    cache_key <- paste0("gene_choices_", digest::digest(gene_data()$genes), "_", input$check_exp_0)
-    
-    if (!is.null(sessionData[[cache_key]])) {
-      return(sessionData[[cache_key]])
-    }
-    
-    result <- get_gene_choices(gene_data()$genes, input$check_exp_0)
-    sessionData[[cache_key]] <- result
-    
-    return(result)
+    # Simple gene choices without heavy caching for faster response
+    get_gene_choices(gene_data()$genes, input$check_exp_0)
   })
 
   # Use observer for gene choice updates
@@ -1011,7 +1010,7 @@ server <- function(input, output, session) {
     })
   })
 
-  # df_exp data for genes_exp_0
+  # df_exp data for genes_exp_0 with filter-aware caching
   df_exp_0 <- reactive({
     req(filtered_gene_exp_data(), input$genes_exp_0, input$group_exp)
 
@@ -1020,7 +1019,29 @@ server <- function(input, output, session) {
       return(NULL)
     }
 
-    # Compute result with error handling
+    # Create cache key that includes filter inputs for proper filtering
+    filter_key <- paste0(
+      input$study_label_exp %||% "none", "_",
+      input$host_species_exp %||% "none", "_",
+      input$life_cycle_stage_exp %||% "none", "_",
+      input$treatment_exp %||% "none", "_",
+      input$parasite_stage_exp %||% "none", "_",
+      input$sample_type_exp %||% "none", "_",
+      input$strain_exp %||% "none", "_",
+      input$hour_post_invasion_exp %||% "none", "_",
+      input$sequencer_exp %||% "none", "_",
+      input$sc_technology_exp %||% "none"
+    )
+    
+    cache_key <- paste0("df_exp_", input$genes_exp_0, "_", input$group_exp, "_", 
+                       input$check_exp_0, "_", get_current_data_type(), "_", filter_key)
+    
+    # Check cache first for instant gene switching
+    if (!is.null(sessionData[[cache_key]])) {
+      return(sessionData[[cache_key]])
+    }
+
+    # Compute result efficiently
     result <- tryCatch(
       {
         df_exp0(
@@ -1035,56 +1056,17 @@ server <- function(input, output, session) {
       }
     )
     
+    # Cache only successful results
+    if (!is.null(result) && nrow(result) > 0) {
+      sessionData[[cache_key]] <- result
+    }
+    
     return(result)
   })
 
-  # Add debouncing for gene expression plot
-  gene_plot_trigger <- reactiveVal(0)
-
-  # Debounced observer for gene expression plot
-  observe({
-    list(
-      input$genes_exp_0,
-      input$group_exp,
-      input$check_exp_0,
-      input$data_type_exp,
-      # Add gene expression filter inputs
-      input$study_label_exp,
-      input$host_species_exp,
-      input$life_cycle_stage_exp,
-      input$treatment_exp,
-      input$parasite_stage_exp,
-      input$sample_type_exp,
-      input$strain_exp,
-      input$hour_post_invasion_exp,
-      input$sequencer_exp,
-      input$sc_technology_exp
-    )
-
-    # Use later() to debounce gene expression plot updates
-    later(
-      function() {
-        tryCatch(
-          {
-            isolate({
-              gene_plot_trigger(gene_plot_trigger() + 1)
-            })
-          },
-          error = function(e) {
-            # Silent error handling
-          }
-        )
-      },
-      0.3
-    )
-  })
-
-  # plot for genes_exp_0
+  # Simplified gene expression plot for maximum speed
   output$gene_exp_plotly <- renderPlotly({
-    # React to debounced trigger
-    gene_plot_trigger()
-    
-    # Only proceed if we have data
+    # Direct reactive dependencies for fastest response
     req(df_exp_0(), input$group_exp)
 
     # Skip during loading states
@@ -1092,7 +1074,29 @@ server <- function(input, output, session) {
       return(NULL)
     }
 
-    # Generate plot with error handling
+    # Create cache key that includes filter inputs for proper plot updates
+    filter_key <- paste0(
+      input$study_label_exp %||% "none", "_",
+      input$host_species_exp %||% "none", "_",
+      input$life_cycle_stage_exp %||% "none", "_",
+      input$treatment_exp %||% "none", "_",
+      input$parasite_stage_exp %||% "none", "_",
+      input$sample_type_exp %||% "none", "_",
+      input$strain_exp %||% "none", "_",
+      input$hour_post_invasion_exp %||% "none", "_",
+      input$sequencer_exp %||% "none", "_",
+      input$sc_technology_exp %||% "none"
+    )
+    
+    plot_cache_key <- paste0("plot_", input$genes_exp_0, "_", input$group_exp, "_", 
+                            get_current_data_type(), "_", filter_key)
+    
+    # Check cache for instant gene switching
+    if (!is.null(sessionData[[plot_cache_key]])) {
+      return(sessionData[[plot_cache_key]])
+    }
+
+    # Generate plot efficiently
     result <- tryCatch(
       {
         group <- tolower(input$group_exp)
@@ -1102,6 +1106,11 @@ server <- function(input, output, session) {
         return(NULL)
       }
     )
+    
+    # Cache successful plots
+    if (!is.null(result)) {
+      sessionData[[plot_cache_key]] <- result
+    }
     
     return(result)
   })
@@ -1722,10 +1731,10 @@ server <- function(input, output, session) {
           global_loading(FALSE)
         }
 
-        # Clear all cached data explicitly
+        # Clear all cached data explicitly (but preserve normalized data for speed)
         if (exists("cached_data")) {
           cached_data$raw <- NULL
-          cached_data$normalize <- NULL
+          # cached_data$normalize <- NULL  # NEVER clear normalized data
           #cached_data$scale <- NULL
           cached_data$current_type <- NULL
           cached_data$current_filter <- NULL
@@ -1767,9 +1776,9 @@ server <- function(input, output, session) {
       {
         message("Clearing data cache...")
 
-        # Clear cached data
+        # Clear cached data (but preserve normalized data for gene expression speed)
         cached_data$raw <- NULL
-        cached_data$normalize <- NULL
+        # cached_data$normalize <- NULL  # NEVER clear normalized data for speed
         #cached_data$scale <- NULL
         cached_data$current_type <- NULL
         cached_data$current_filter <- NULL
