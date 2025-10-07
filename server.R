@@ -8,6 +8,12 @@ library(later)
 
 server <- function(input, output, session) {
   sessionData <- new.env(parent = emptyenv())
+
+  # Reactive expression for publication data - updates when CSV file changes
+  pub_data <- reactive({
+    readr::read_csv("data/data_source.csv", show_col_types = FALSE)
+  })
+
   autoUpdatePlot <- reactiveVal(FALSE)
 
   # Global loading state for better UX
@@ -197,7 +203,8 @@ server <- function(input, output, session) {
       #   gc(verbose = FALSE, full = TRUE)
       # }
 
-      dataset <- switch(data_type,
+      dataset <- switch(
+        data_type,
         raw = {
           if (exists("DATA_PATHS") && !is.null(DATA_PATHS$raw_df)) {
             load_data(DATA_PATHS$raw_df)
@@ -293,7 +300,8 @@ server <- function(input, output, session) {
 
       # Show progress bar when loading new data
       withProgress(message = "", value = 0, {
-        display_name <- switch(current_type,
+        display_name <- switch(
+          current_type,
           raw = "Raw",
           normalize = "Normalized",
           # scale = "Scaled",
@@ -540,8 +548,8 @@ server <- function(input, output, session) {
       )
       updateSelectInput(
         session,
-        "day_post_infection",
-        choices = unique(filt_data$day_post_infection)
+        "hour_post_invasion",
+        choices = unique(filt_data$hour_post_invasion)
       )
       updateSelectInput(
         session,
@@ -591,8 +599,8 @@ server <- function(input, output, session) {
       )
       updateSelectInput(
         session,
-        "day_post_infection_qc",
-        choices = unique(filt_data$day_post_infection)
+        "hour_post_invasion_qc",
+        choices = unique(filt_data$hour_post_invasion)
       )
       updateSelectInput(
         session,
@@ -642,8 +650,8 @@ server <- function(input, output, session) {
       )
       updateSelectInput(
         session,
-        "day_post_infection_exp",
-        choices = unique(filt_data$day_post_infection)
+        "hour_post_invasion_exp",
+        choices = unique(filt_data$hour_post_invasion)
       )
       updateSelectInput(
         session,
@@ -668,7 +676,7 @@ server <- function(input, output, session) {
       input$parasite_stage,
       input$sample_type,
       input$strain,
-      input$day_post_infection,
+      input$hour_post_invasion,
       input$sequencer,
       input$sc_technology
     ),
@@ -681,7 +689,7 @@ server <- function(input, output, session) {
         treatment = input$treatment,
         parasite_stage = input$parasite_stage,
         strain = input$strain,
-        day_post_infection = input$day_post_infection,
+        hour_post_invasion = input$hour_post_invasion,
         sequencer = input$sequencer,
         sc_technology = input$sc_technology
       )
@@ -692,6 +700,7 @@ server <- function(input, output, session) {
         {
           ## data in table
           processed_data <- filt_data %>%
+            select(-c(biological_replicate)) %>%
             rename_with(
               ~ str_to_title(.),
               .cols = any_of(c(
@@ -702,7 +711,7 @@ server <- function(input, output, session) {
                 "treatment",
                 "parasite_stage",
                 "strain",
-                "day_post_infection",
+                "hour_post_invasion",
                 "sequencer",
                 "sc_technology"
               ))
@@ -736,25 +745,9 @@ server <- function(input, output, session) {
         server = TRUE
       )
 
-      ## plot stage vs count
-      output$stage_plotly <- renderPlotly({
-        meta_plotly(
-          filt_data,
-          "parasite_stage",
-          "Count",
-          "Parasite stage",
-          "bar"
-        )
-      })
-
       ## plot sample vs count
       output$sample_plotly <- renderPlotly({
         meta_plotly(filt_data, "sample_type", "Count", "Sample type", "bar")
-      })
-
-      ## plot strain vs count
-      output$strain_plotly <- renderPlotly({
-        meta_plotly(filt_data, "strain", "Count", "Strain", "bar")
       })
 
       ## plot species vs count
@@ -762,24 +755,40 @@ server <- function(input, output, session) {
         meta_plotly(filt_data, "host_species", "Count", "Host species", "bar")
       })
 
+      ## plot strain vs count
+      output$strain_plotly <- renderPlotly({
+        meta_plotly(filt_data, "strain", "Count", "Strain", "bar")
+      })
+
       ## plot reproductive_form vs count
-      output$type_plotly <- renderPlotly({
+      output$treatment_plotly <- renderPlotly({
         meta_plotly(
           filt_data,
-          "life_cycle_stage",
+          "treatment",
           "Count",
-          "Life cycle stage",
+          "Treatment",
           "bar"
         )
       })
 
-      ## plot location vs count
-      output$location_plotly <- renderPlotly({
+      ## plot life_cycle vs count
+      output$life_cycle_plotly <- renderPlotly({
         meta_plotly(
           filt_data,
-          "day_post_infection",
+          "life_cycle_stage",
           "Count",
-          "Day post infection",
+          "Life cyle stage",
+          "bar"
+        )
+      })
+
+      ## plot hour post infection vs count
+      output$HPI_plotly <- renderPlotly({
+        meta_plotly(
+          filt_data,
+          "hour_post_invasion",
+          "Count",
+          "Intra erythrocyte development stage",
           "bar"
         )
       })
@@ -797,7 +806,7 @@ server <- function(input, output, session) {
       input$parasite_stage_qc,
       input$sample_type_qc,
       input$strain_qc,
-      input$day_post_infection_qc,
+      input$hour_post_invasion_qc,
       input$sequencer_qc,
       input$sc_technology_qc
     ),
@@ -810,7 +819,7 @@ server <- function(input, output, session) {
         parasite_stage = input$parasite_stage_qc,
         sample_type = input$sample_type_qc,
         strain = input$strain_qc,
-        day_post_infection = input$day_post_infection_qc,
+        hour_post_invasion = input$hour_post_invasion_qc,
         sequencer = input$sequencer_qc,
         sc_technology = input$sc_technology_qc
       )
@@ -884,7 +893,7 @@ server <- function(input, output, session) {
       input$parasite_stage_exp,
       input$sample_type_exp,
       input$strain_exp,
-      input$day_post_infection_exp,
+      input$hour_post_invasion_exp,
       input$sequencer_exp,
       input$sc_technology_exp
     ),
@@ -897,7 +906,7 @@ server <- function(input, output, session) {
         parasite_stage = input$parasite_stage_exp,
         sample_type = input$sample_type_exp,
         strain = input$strain_exp,
-        day_post_infection = input$day_post_infection_exp,
+        hour_post_invasion = input$hour_post_invasion_exp,
         sequencer = input$sequencer_exp,
         sc_technology = input$sc_technology_exp
       )
@@ -915,14 +924,14 @@ server <- function(input, output, session) {
     if (input$tabset == "Data sources") {
       output$data_source <- renderDT({
         DT::datatable(
-          pub_data,
+          pub_data(),
           escape = FALSE,
           options = list(
             pageLength = 10,
             scrollX = TRUE,
             autoWidth = FALSE,
             columnDefs = list(
-              list(width = "800px", targets = 3, className = "dt-left")
+              list(width = "500px", targets = 3, className = "dt-left")
             )
           ),
           selection = "single",
@@ -1314,7 +1323,8 @@ server <- function(input, output, session) {
     {
       if (input$plot == "2d") {
         shinyjs::show("axis")
-        x_choices <- switch(input$embedding,
+        x_choices <- switch(
+          input$embedding,
           "umap" = if (isTRUE(input$check_all)) umap_i else umap_u,
           "pca" = if (isTRUE(input$check_all)) pca_i else pca_u,
           "tsne" = tsne
@@ -1327,7 +1337,8 @@ server <- function(input, output, session) {
           selected = x_choices[1]
         )
 
-        y_choices <- switch(input$embedding,
+        y_choices <- switch(
+          input$embedding,
           "umap" = y_col(
             input$check_all,
             input$xaxis,
@@ -1448,7 +1459,8 @@ server <- function(input, output, session) {
 
   ## determine plot type
   get_plot_type <- reactive({
-    switch(input$embedding,
+    switch(
+      input$embedding,
       "pca" = if (isTRUE(input$check_all)) "pca_i" else "pca_u",
       "umap" = if (isTRUE(input$check_all)) "umap_i" else "umap_u",
       "tsne" = "tSNE"
@@ -1467,7 +1479,8 @@ server <- function(input, output, session) {
 
     # Generate plot without progress bar
     isolate({
-      color_column <- switch(input$color,
+      color_column <- switch(
+        input$color,
         "genes" = get_gene_id(input$genes_n, gene_data()$genes),
         "RNA_snn" = input$genes_n,
         input$color
@@ -1690,7 +1703,7 @@ server <- function(input, output, session) {
         # Clear cached data
         cached_data$raw <- NULL
         cached_data$normalize <- NULL
-        cached_data$scale <- NULL
+        #cached_data$scale <- NULL
         cached_data$current_type <- NULL
         cached_data$current_filter <- NULL
 

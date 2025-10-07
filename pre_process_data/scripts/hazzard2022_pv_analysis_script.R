@@ -200,7 +200,7 @@ host_species <- c(
 host_id <- rep(NA, length(all_pv))
 sample_type <- c(
   "Vector host: salivary gland",
-  "Vecto host : salivary gland",
+  "Vector host: salivary gland",
   "Mammalian host: blood",
   "Mammalian host: blood"
 )

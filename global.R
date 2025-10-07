@@ -16,10 +16,6 @@ DATA_PATHS <- list(
   cleaned_dataset = "data/cleaned_dataset.rds"
 )
 
-# Load small, non-blocking data at startup
-pub_data <- readr::read_csv("data/data_source.csv", show_col_types = FALSE)
-# pub_data$DOI <- paste0("<a href='", pub_data$DOI, "' target='_blank'>", pub_data$DOI, "</a>")
-
 gff_data <- readRDS("ref/PvivaxP01_gff_data.rds")
 
 # Pre-load the most commonly used data (normalized data and metadata)

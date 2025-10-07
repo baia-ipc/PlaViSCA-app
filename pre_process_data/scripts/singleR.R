@@ -48,7 +48,7 @@ IDC_cycle <- SummarizedExperiment(
 )
 IDC_cycle$X <- NULL
 
-rownames(IDC_cycle) <- gsub("-", "_", rownames(IDC_cycle))
+#rownames(IDC_cycle) <- gsub("-", "_", rownames(IDC_cycle))
 
 # Convert Seurat object to single-cell experiment (sce) object for SingleR mapping
 sce.all <- as.SingleCellExperiment(DietSeurat(
@@ -68,6 +68,11 @@ pred.IDC.all <- SingleR(
 # add pruned prediction time to seurat
 pv.combined.all$hour_post_invasion <- pred.IDC.all$pruned.labels
 
+# NA on hour post invasion for sample type rather than blood
+pv.combined.all$hour_post_invasion[
+  pv.combined.all$sample_type != "Mammalian host: blood"
+] <- NA
+
 # sopheap identify IDC time
 pred.IDC.all$pruned.labels <- as.numeric(pred.IDC.all$pruned.labels)
 pred.IDC.all$pruned.labels <- case_when(
@@ -86,6 +91,10 @@ match_cell <- intersect(colnames(pv.combined.all), rownames(pred.IDC.all))
 
 pv.combined.all$life_cycle_stage <- pred.IDC.all[match_cell, ]$pruned.labels
 
+# NA for sample type rather than blood
+pv.combined.all$life_cycle_stage[
+  pv.combined.all$sample_type != "Mammalian host: blood"
+] <- NA
 
 plotDeltaDistribution(pred.IDC.all, ncol = 3)
 # Add SingleR annotations to Seurat object
@@ -98,6 +107,37 @@ plotDeltaDistribution(pred.IDC.all, ncol = 3)
 #   pv.combined.all$IDC.pred,
 #   levels = sort(as.numeric(unique(pv.combined.all$IDC.pred)))
 # )
+
+# overwrite life cycle stage with column liver form frm Ruberto2022_1
+pv.combined.all$liver_form[
+  pv.combined.all$liver_form == "Hypnozoites"
+] <- "Hypnozoite"
+
+pv.combined.all$liver_form[
+  pv.combined.all$liver_form == "Schizonts"
+] <- "Schizont"
+
+
+liver_form <- pv.combined.all$liver_form %in% c("Hypnozoite", "Schizont")
+
+pv.combined.all$life_cycle_stage[liver_form] <- pv.combined.all$liver_form[
+  liver_form
+]
+
+
+# Update life_cycle_stage only where refine_state is not NA
+pv.combined.all$life_cycle_stage[!is.na(pv.combined.all$refine_state)] <-
+  pv.combined.all$refine_state[!is.na(pv.combined.all$refine_state)]
+
+
+# overwrite for the sample type salivary gland to sporozoite. This is for Rubeto2022_2, hazzard2022 498 and 499
+
+ruberto2022_2 <- pv.combined.all$study_label == "Ruberto2022_2"
+pv.combined.all$life_cycle_stage[ruberto2022_2] <- "Sporozoite"
+
+hazzard2022 <- pv.combined.all$run_id %in% c("SRR20710498", "SRR20710499")
+pv.combined.all$life_cycle_stage[hazzard2022] <- "Sporozoite"
+
 
 # visualize the number of cells in the dataset assigned to a parasite stage:
 SCpubr::do_BarPlot(
@@ -353,35 +393,6 @@ pv.combined.all$life_cycle_stage[match_cell] <- df$type[match(
   df$new_cells
 )]
 
-# overwrite life cycle stage with column liver form frm Ruberto2022_1
-pv.combined.all$liver_form[
-  pv.combined.all$liver_form == "Hypnozoites"
-] <- "Hypnozoite"
-
-pv.combined.all$liver_form[
-  pv.combined.all$liver_form == "Schizonts"
-] <- "Schizont"
-
-
-liver_form <- pv.combined.all$liver_form %in% c("Hypnozoite", "Schizont")
-
-pv.combined.all$life_cycle_stage[liver_form] <- pv.combined.all$liver_form[
-  liver_form
-]
-
-
-# Update life_cycle_stage only where refine_state is not NA
-pv.combined.all$life_cycle_stage[!is.na(pv.combined.all$refine_state)] <-
-  pv.combined.all$refine_state[!is.na(pv.combined.all$refine_state)]
-
-
-# overwrite for the sample type salivary gland to sporozoite. This is for Rubeto2022_2, hazzard2022 498 and 499
-
-ruberto2022_2 <- pv.combined.all$study_label == "Ruberto2022_2"
-pv.combined.all$life_cycle_stage[ruberto2022_2] <- "Sporozoite"
-
-hazzard2022 <- pv.combined.all$run_id %in% c("SRR20710498", "SRR20710499")
-pv.combined.all$life_cycle_stage[hazzard2022] <- "Sporozoite"
 
 # clean up
 # change features from - to _ to match with gff gene_id

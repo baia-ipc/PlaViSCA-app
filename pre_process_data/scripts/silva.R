@@ -8,7 +8,7 @@ df <- readxl::read_xls("data/TableS2_Cell_Metadata.xls", skip = 1)
 df <- df |>
   mutate(
     refine_state = case_when(
-      State == "Replicative" ~ "Szhizont (liver stage)",
+      State == "Replicative" ~ "Schizont (liver stage)",
       TRUE ~ State
     )
   )
@@ -27,8 +27,8 @@ silva$run_id <- paste0("SRR18134", 227:284)
 silva$study_label <- "Mancio Silva2022"
 silva$num_srr <- 58
 silva$pub_year <- 2022
-silva$goegraphic_location <- "USA_RockvilleThailand_Ubon-Ratchathani"
-silva$sc_technology <- NA
+silva$goegraphic_location <- "Thailand_Ubon-Ratchathani"
+silva$sc_technology <- "Seq_Well"
 silva$sequncer <- c(
   rep("NextSeq 500", 16),
   rep("Illumina NovaSeq 6000", 42)
@@ -67,10 +67,17 @@ silva$treatment <- c(
 silva$biological_replicate <- NA
 
 silva$refine_state <- NA
-match_cell <- intersect(colnames(silva), df$Updated_names)
-silva$refine_state[match_cell] <- df$refine_state[match(
-  match_cell,
-  df$Updated_names
-)]
+
+for (cell in df$Updated_names) {
+  matched <- grep(paste0("^", cell), colnames(silva), value = TRUE)
+  silva$refine_state[matched] <- df$refine_state[df$Updated_names == cell]
+}
+
+
+# match_cell <- intersect(colnames(silva), df$Updated_names)
+# silva$refine_state[match_cell] <- df$refine_state[match(
+#   match_cell,
+#   df$Updated_names
+# )]
 
 saveRDS(silva, file = "silva2022.rds")

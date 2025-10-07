@@ -247,7 +247,7 @@ ui <- fluidPage(
                 choices = list(
                   "Raw" = "raw",
                   "Normalized" = "normalize"
-                  #"Scaled" = "scale"
+                  # "Scaled" = "scale"
                 ),
                 selected = "normalize"
               )
@@ -355,14 +355,14 @@ ui <- fluidPage(
               id = "meta_section",
               create_meta_filter_row(),
               fluidRow(
-                column(width = 4, plotlyOutput("stage_plotly")),
                 column(width = 4, plotlyOutput("sample_plotly")),
+                column(width = 4, plotlyOutput("species_plotly")),
                 column(width = 4, plotlyOutput("strain_plotly"))
               ),
               fluidRow(
-                column(width = 4, plotlyOutput("species_plotly")),
-                column(width = 4, plotlyOutput("type_plotly")),
-                column(width = 4, plotlyOutput("location_plotly"))
+                column(width = 4, plotlyOutput("treatment_plotly")),
+                column(width = 4, plotlyOutput("life_cycle_plotly")),
+                column(width = 4, plotlyOutput("HPI_plotly"))
               ),
               br(),
               fluidRow(withSpinner(

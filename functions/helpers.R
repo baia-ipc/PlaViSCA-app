@@ -105,8 +105,8 @@ create_meta_filter_row <- function(suffix = "") {
       column(
         width = 2,
         selectizeInput(
-          inputId = paste0("day_post_infection", suffix),
-          "Day post infection:",
+          inputId = paste0("hour_post_invasion", suffix),
+          "Hour post invasion:",
           choices = c(""),
           multiple = TRUE,
           options = list(
@@ -208,7 +208,9 @@ fun_filter_df <- function(data, selections) {
 
 # Helper function to apply secondary filters
 apply_secondary_filters <- function(data, inputs) {
+  # Filter out rows with invalid RNA data (n_feature_rna > 0 and n_count_rna > 0)
   filtered <- data %>%
+    filter(n_feature_rna > 0 & n_count_rna > 0) %>%
     select(any_of(c(
       "study_label",
       "host_species",
@@ -221,6 +223,7 @@ apply_secondary_filters <- function(data, inputs) {
       "sequencer",
       "strain",
       "day_post_infection",
+      "hour_post_invasion",
       "biological_replicate",
       "n_count_rna",
       "n_feature_rna"
@@ -229,7 +232,7 @@ apply_secondary_filters <- function(data, inputs) {
   # Dynamically apply filters for each non-empty input
   for (col in names(inputs)) {
     values <- inputs[[col]]
-    if (!is.null(values) && length(values) > 0) {
+    if (!is.null(values) && length(values) > 0 && col %in% names(filtered)) {
       filtered <- filtered %>% filter(.data[[col]] %in% values)
     }
   }
@@ -464,6 +467,34 @@ colors <- RColorBrewer::brewer.pal(12, "Set3")
 
 # Generate metadata plot
 meta_plotly <- function(data, x_var, x_label, y_label, plt_type = "bar") {
+  # Check if the column exists
+  if (!x_var %in% colnames(data)) {
+    stop(paste("Column", x_var, "not found in data"))
+  }
+
+  # Remove rows with missing values in the x_var column
+  data <- data %>%
+    filter(!is.na(.data[[x_var]]) & .data[[x_var]] != "")
+
+  # Check if we have any data left after filtering
+  if (nrow(data) == 0) {
+    # Return an empty plot with a message
+    return(
+      plot_ly() %>%
+        add_annotations(
+          text = paste("No data available for", x_label),
+          showarrow = FALSE,
+          x = 0.5,
+          y = 0.5
+        ) %>%
+        layout(
+          xaxis = list(title = x_label),
+          yaxis = list(title = y_label),
+          showlegend = FALSE
+        )
+    )
+  }
+
   data_summary <- data %>%
     group_by(.data[[x_var]]) %>%
     summarise(count = n(), .groups = "drop") %>%
@@ -724,8 +755,7 @@ y_col <- function(check_input, x_col, unintegrated, integrated) {
 
 # Generate color column based on input option
 get_color_column <- function(color_type, gene_input, gene_data_obj) {
-  switch(
-    color_type,
+  switch(color_type,
     "genes" = get_gene_id(gene_input, gene_data_obj),
     "cca_snn" = gene_input,
     color_type
@@ -836,16 +866,15 @@ get_legend_layout <- function(legend_title) {
 
 # Generate 2d plot
 plot_2d <- function(
-  df,
-  x,
-  y,
-  color,
-  legend_title,
-  size,
-  is_categorical,
-  selected_color,
-  colors
-) {
+    df,
+    x,
+    y,
+    color,
+    legend_title,
+    size,
+    is_categorical,
+    selected_color,
+    colors) {
   hover_text <- ~ paste(
     "Cell:",
     df$id,
@@ -923,15 +952,14 @@ plot_2d <- function(
 
 # Generate 3d plot
 plot_3d <- function(
-  df,
-  color,
-  legend_title,
-  size,
-  selected_color,
-  is_categorical,
-  colors,
-  coords
-) {
+    df,
+    color,
+    legend_title,
+    size,
+    selected_color,
+    is_categorical,
+    colors,
+    coords) {
   x_col <- coords[1]
   y_col <- coords[2]
   z_col <- coords[3]
@@ -1025,15 +1053,14 @@ plot_3d <- function(
 
 # Main pca, umap and tsne plotting function
 embedding_plot <- function(
-  df,
-  xaxis_input,
-  yaxis_input,
-  color,
-  legend_title,
-  size,
-  plot_type = "pca_u",
-  plot_dim = "2d"
-) {
+    df,
+    xaxis_input,
+    yaxis_input,
+    color,
+    legend_title,
+    size,
+    plot_type = "pca_u",
+    plot_dim = "2d") {
   x <- df[[xaxis_input]]
   y <- df[[yaxis_input]]
   selected_color <- df[[color]]
