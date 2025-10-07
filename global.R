@@ -58,12 +58,9 @@ RNA_snn <- grep("RNA_snn", colnames(mr_data), ignore.case = TRUE, value = TRUE)
 
 # Static definitions
 group_choices <- c(
+  "life_cycle_stage",
   "parasite_stage",
   "host_species",
   "treatment",
-  "sample_type",
-  "life_cycle_stage",
-  "study_label",
-  "pub_year",
-  "run_id"
+  "sample_type"
 )

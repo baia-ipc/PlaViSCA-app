@@ -419,7 +419,12 @@ ui <- fluidPage(
           # gene expression section
           tabPanel(
             "Gene expression",
-            create_meta_filter_row("_exp"),
+            fluidRow(
+              column(
+                width = 12,
+                create_meta_filter_row("_exp")
+              )
+            ),
             fluidRow(
               column(
                 width = 12,
@@ -486,25 +491,25 @@ ui <- fluidPage(
                       "group_exp",
                       "Group by",
                       choices = group_choices,
-                      selected = "Stage"
+                      selected = "life_cycle_stage"
                     )
                   )
                 ),
                 fluidRow(
                   width = 12,
                   plotlyOutput("gene_exp_plotly"),
-                  fluidRow(
-                    class = "btn-add-rm-container",
-                    actionButton(
-                      "add_btn_0",
-                      label = icon("plus"),
-                      class = "btn btn-success btn_add"
-                    )
-                  )
+                  # fluidRow(
+                  #   class = "btn-add-rm-container",
+                  #   actionButton(
+                  #     "add_btn_0",
+                  #     label = icon("plus"),
+                  #     class = "btn btn-success btn_add"
+                  #   )
+                  # )
                 )
               )
             ),
-            div(id = "gene_exp_container", class = "gene-exp-row")
+            # div(id = "gene_exp_container", class = "gene-exp-row")
           ),
 
           # embedding section

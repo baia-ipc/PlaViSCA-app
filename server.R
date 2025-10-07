@@ -5,6 +5,7 @@ library(plotly)
 library(RColorBrewer)
 library(tidyverse)
 library(later)
+library(digest)
 
 server <- function(input, output, session) {
   sessionData <- new.env(parent = emptyenv())
@@ -883,6 +884,39 @@ server <- function(input, output, session) {
   )
 
   # Gene Expression tabset
+  # Create reactive for filtered gene expression data
+  filtered_gene_exp_data <- reactive({
+    req(gene_data())
+    
+    current_inputs <- list(
+      study_label = input$study_label_exp,
+      host_species = input$host_species_exp,
+      life_cycle_stage = input$life_cycle_stage_exp,
+      treatment = input$treatment_exp,
+      parasite_stage = input$parasite_stage_exp,
+      sample_type = input$sample_type_exp,
+      strain = input$strain_exp,
+      hour_post_invasion = input$hour_post_invasion_exp,
+      sequencer = input$sequencer_exp,
+      sc_technology = input$sc_technology_exp
+    )
+
+    # Apply filters to the gene data's data component
+    tryCatch({
+      filt_data <- apply_secondary_filters(gene_data()$data, current_inputs)
+      
+      # Return gene data structure with filtered data
+      result <- list(
+        data = filt_data,  # Filtered combined data (metadata + expression)
+        genes = gene_data()$genes  # Gene info stays the same
+      )
+      
+      return(result)
+    }, error = function(e) {
+      return(NULL)
+    })
+  })
+
   observeEvent(
     list(
       input$data_opt,
@@ -942,46 +976,66 @@ server <- function(input, output, session) {
   })
 
   # Manipulation tabset "Gene Exp"
-  ## gene_exp_0 block
+  ## gene_exp_0 block with enhanced caching
   choice_exp_0 <- reactive({
-    get_gene_choices(gene_data()$genes, input$check_exp_0)
+    req(gene_data()$genes)
+    
+    # Cache gene choices since they don't change often
+    cache_key <- paste0("gene_choices_", digest::digest(gene_data()$genes), "_", input$check_exp_0)
+    
+    if (!is.null(sessionData[[cache_key]])) {
+      return(sessionData[[cache_key]])
+    }
+    
+    result <- get_gene_choices(gene_data()$genes, input$check_exp_0)
+    sessionData[[cache_key]] <- result
+    
+    return(result)
   })
 
+  # Use observer for gene choice updates
   observe({
     req(choice_exp_0())
-    updateSelectizeInput(
-      session,
-      "genes_exp_0",
-      label = if (isTRUE(input$check_exp_0)) "Gene ID" else "Gene name",
-      choices = choice_exp_0(),
-      server = TRUE
-    )
+    
+    # Update selectize input
+    tryCatch({
+      updateSelectizeInput(
+        session,
+        "genes_exp_0",
+        label = if (isTRUE(input$check_exp_0)) "Gene ID" else "Gene name",
+        choices = choice_exp_0(),
+        server = TRUE
+      )
+    }, error = function(e) {
+      # Silent error handling
+    })
   })
 
-  # df_exp data for genes_exp_0 with improved performance
+  # df_exp data for genes_exp_0
   df_exp_0 <- reactive({
-    req(gene_data(), input$genes_exp_0, input$group_exp)
+    req(filtered_gene_exp_data(), input$genes_exp_0, input$group_exp)
 
     # Skip processing during loading states
     if (global_loading()) {
       return(NULL)
     }
 
-    # Cache the result to avoid recomputation
-    tryCatch(
+    # Compute result with error handling
+    result <- tryCatch(
       {
         df_exp0(
-          gene_data = gene_data(),
+          gene_data = filtered_gene_exp_data(),
           gene_input = input$genes_exp_0,
           group_input = input$group_exp,
           check_exp = input$check_exp_0
         )
       },
       error = function(e) {
-        message("Error in df_exp_0: ", e$message)
         return(NULL)
       }
     )
+    
+    return(result)
   })
 
   # Add debouncing for gene expression plot
@@ -993,10 +1047,21 @@ server <- function(input, output, session) {
       input$genes_exp_0,
       input$group_exp,
       input$check_exp_0,
-      input$data_type_exp
+      input$data_type_exp,
+      # Add gene expression filter inputs
+      input$study_label_exp,
+      input$host_species_exp,
+      input$life_cycle_stage_exp,
+      input$treatment_exp,
+      input$parasite_stage_exp,
+      input$sample_type_exp,
+      input$strain_exp,
+      input$hour_post_invasion_exp,
+      input$sequencer_exp,
+      input$sc_technology_exp
     )
 
-    # Use later() to debounce gene expression plot updates with shorter delay
+    # Use later() to debounce gene expression plot updates
     later(
       function() {
         tryCatch(
@@ -1006,7 +1071,7 @@ server <- function(input, output, session) {
             })
           },
           error = function(e) {
-            message("Error in gene plot debounce: ", e$message)
+            # Silent error handling
           }
         )
       },
@@ -1014,10 +1079,11 @@ server <- function(input, output, session) {
     )
   })
 
-  # plot for genes_exp_0 with enhanced performance
+  # plot for genes_exp_0
   output$gene_exp_plotly <- renderPlotly({
-    gene_plot_trigger() # React to debounced trigger
-
+    # React to debounced trigger
+    gene_plot_trigger()
+    
     # Only proceed if we have data
     req(df_exp_0(), input$group_exp)
 
@@ -1026,17 +1092,18 @@ server <- function(input, output, session) {
       return(NULL)
     }
 
-    # Generate plot directly without isolate for better performance
-    tryCatch(
+    # Generate plot with error handling
+    result <- tryCatch(
       {
         group <- tolower(input$group_exp)
         gene_exp_plot(df_exp_0(), group)
       },
       error = function(e) {
-        message("Error in main gene expression plot: ", e$message)
         return(NULL)
       }
     )
+    
+    return(result)
   })
 
   ## gene expression link
@@ -1050,158 +1117,158 @@ server <- function(input, output, session) {
   ## observe add button click from js
   choice_exp <- reactiveVal()
   counter <- reactiveVal(0)
-  observeEvent(input$click_add_btn, {
-    btn_id <- input$click_add_btn
-    id <- as.numeric(gsub("add_btn_?", "", btn_id))
-    shinyjs::hide(paste0("add_btn_", id))
-
-    choice_exp(get_gene_choices(gene_data()$genes, FALSE))
-
-    ## add ui block to the right after gene_exp_tar
-    if (id == 0) {
-      id <- id + 1
-      insertUI(
-        selector = "#gene_exp_tar",
-        where = "afterEnd",
-        ui = column(
-          width = 6,
-          id = paste0("dynamic_col_", id),
-          subBlock(id)
-        )
-      )
-      shinyjs::delay(100, {
-        updateSelectizeInput(
-          session,
-          inputId = paste0("genes_exp_", id),
-          choices = choice_exp(),
-          server = TRUE
-        )
-      })
-
-      # Create a properly scoped reactive for this specific plot with shorter delay
-      shinyjs::delay(100, {
-        output[[paste0("gene_exp_plotly_", id)]] <- local({
-          plot_id <- id
-          renderPlotly({
-            # Only proceed if we have data and inputs
-            req(
-              gene_data(),
-              input[[paste0("genes_exp_", plot_id)]],
-              input[[paste0("group_exp_", plot_id)]]
-            )
-
-            # Skip during loading states
-            if (global_loading()) {
-              return(NULL)
-            }
-
-            tryCatch(
-              {
-                # Create the reactive data for this specific plot
-                df_reactive <- df_expi(
-                  id = plot_id,
-                  input = input,
-                  gene_data = gene_data(),
-                  get_gene_id = get_gene_id
-                )
-
-                req(df_reactive())
-
-                gene_exp_plot(
-                  df_reactive(),
-                  tolower(input[[paste0("group_exp_", plot_id)]])
-                )
-              },
-              error = function(e) {
-                message(
-                  "Error in dynamic gene expression plot ",
-                  plot_id,
-                  ": ",
-                  e$message
-                )
-                return(NULL)
-              }
-            )
-          })
-        })
-      })
-    } else {
-      ## add ui block to button
-      id <- id + 1
-      newBlock(id, counter, choice_exp(), subBlock, session)
-
-      # Create a properly scoped reactive for this specific plot with shorter delay
-      shinyjs::delay(100, {
-        output[[paste0("gene_exp_plotly_", id)]] <- local({
-          plot_id <- id
-          renderPlotly({
-            # Only proceed if we have data and inputs
-            req(
-              gene_data(),
-              input[[paste0("genes_exp_", plot_id)]],
-              input[[paste0("group_exp_", plot_id)]]
-            )
-
-            # Skip during loading states
-            if (global_loading()) {
-              return(NULL)
-            }
-
-            tryCatch(
-              {
-                # Create the reactive data for this specific plot
-                df_reactive <- df_expi(
-                  id = plot_id,
-                  input = input,
-                  gene_data = gene_data(),
-                  get_gene_id = get_gene_id
-                )
-
-                req(df_reactive())
-
-                gene_exp_plot(
-                  df_reactive(),
-                  tolower(input[[paste0("group_exp_", plot_id)]])
-                )
-              },
-              error = function(e) {
-                message(
-                  "Error in dynamic gene expression plot ",
-                  plot_id,
-                  ": ",
-                  e$message
-                )
-                return(NULL)
-              }
-            )
-          })
-        })
-      })
-    }
-  })
+  # observeEvent(input$click_add_btn, {
+  #   btn_id <- input$click_add_btn
+  #   id <- as.numeric(gsub("add_btn_?", "", btn_id))
+  #   shinyjs::hide(paste0("add_btn_", id))
+  # 
+  #   choice_exp(get_gene_choices(gene_data()$genes, FALSE))
+  # 
+  #   ## add ui block to the right after gene_exp_tar
+  #   if (id == 0) {
+  #     id <- id + 1
+  #     insertUI(
+  #       selector = "#gene_exp_tar",
+  #       where = "afterEnd",
+  #       ui = column(
+  #         width = 6,
+  #         id = paste0("dynamic_col_", id),
+  #         subBlock(id)
+  #       )
+  #     )
+  #     shinyjs::delay(100, {
+  #       updateSelectizeInput(
+  #         session,
+  #         inputId = paste0("genes_exp_", id),
+  #         choices = choice_exp(),
+  #         server = TRUE
+  #       )
+  #     })
+  # 
+  #     # Create a properly scoped reactive for this specific plot with shorter delay
+  #     shinyjs::delay(100, {
+  #       output[[paste0("gene_exp_plotly_", id)]] <- local({
+  #         plot_id <- id
+  #         renderPlotly({
+  #           # Only proceed if we have data and inputs
+  #           req(
+  #             gene_data(),
+  #             input[[paste0("genes_exp_", plot_id)]],
+  #             input[[paste0("group_exp_", plot_id)]]
+  #           )
+  # 
+  #           # Skip during loading states
+  #           if (global_loading()) {
+  #             return(NULL)
+  #           }
+  # 
+  #           tryCatch(
+  #             {
+  #               # Create the reactive data for this specific plot
+  #               df_reactive <- df_expi(
+  #                 id = plot_id,
+  #                 input = input,
+  #                 gene_data = gene_data(),
+  #                 get_gene_id = get_gene_id
+  #               )
+  # 
+  #               req(df_reactive())
+  # 
+  #               gene_exp_plot(
+  #                 df_reactive(),
+  #                 tolower(input[[paste0("group_exp_", plot_id)]])
+  #               )
+  #             },
+  #             error = function(e) {
+  #               message(
+  #                 "Error in dynamic gene expression plot ",
+  #                 plot_id,
+  #                 ": ",
+  #                 e$message
+  #               )
+  #               return(NULL)
+  #             }
+  #           )
+  #         })
+  #       })
+  #     })
+  #   } else {
+  #     ## add ui block to button
+  #     id <- id + 1
+  #     newBlock(id, counter, choice_exp(), subBlock, session)
+  # 
+  #     # Create a properly scoped reactive for this specific plot with shorter delay
+  #     shinyjs::delay(100, {
+  #       output[[paste0("gene_exp_plotly_", id)]] <- local({
+  #         plot_id <- id
+  #         renderPlotly({
+  #           # Only proceed if we have data and inputs
+  #           req(
+  #             gene_data(),
+  #             input[[paste0("genes_exp_", plot_id)]],
+  #             input[[paste0("group_exp_", plot_id)]]
+  #           )
+  # 
+  #           # Skip during loading states
+  #           if (global_loading()) {
+  #             return(NULL)
+  #           }
+  # 
+  #           tryCatch(
+  #             {
+  #               # Create the reactive data for this specific plot
+  #               df_reactive <- df_expi(
+  #                 id = plot_id,
+  #                 input = input,
+  #                 gene_data = gene_data(),
+  #                 get_gene_id = get_gene_id
+  #               )
+  # 
+  #               req(df_reactive())
+  # 
+  #               gene_exp_plot(
+  #                 df_reactive(),
+  #                 tolower(input[[paste0("group_exp_", plot_id)]])
+  #               )
+  #             },
+  #             error = function(e) {
+  #               message(
+  #                 "Error in dynamic gene expression plot ",
+  #                 plot_id,
+  #                 ": ",
+  #                 e$message
+  #               )
+  #               return(NULL)
+  #             }
+  #           )
+  #         })
+  #       })
+  #     })
+  #   }
+  # })
 
   ## observe remove button click from js
-  observeEvent(
-    input$click_remove_btn,
-    {
-      rm_btn_id <- input$click_remove_btn$btn_id
-      id <- as.numeric(gsub("remove_btn_", "", rm_btn_id))
-      ids <- as.numeric(unlist(input$click_remove_btn$ids))
-      removeUI(selector = paste0("#dynamic_col_", id))
-      remaining_ids <- ids[ids != id]
-
-      for (i in remaining_ids) {
-        shinyjs::hide(paste0("add_btn_", i))
-      }
-
-      if (length(remaining_ids) == 0) {
-        shinyjs::show("add_btn_0")
-      } else {
-        shinyjs::show(paste0("add_btn_", max(remaining_ids)))
-      }
-    },
-    ignoreNULL = TRUE
-  )
+  # observeEvent(
+  #   input$click_remove_btn,
+  #   {
+  #     rm_btn_id <- input$click_remove_btn$btn_id
+  #     id <- as.numeric(gsub("remove_btn_", "", rm_btn_id))
+  #     ids <- as.numeric(unlist(input$click_remove_btn$ids))
+  #     removeUI(selector = paste0("#dynamic_col_", id))
+  #     remaining_ids <- ids[ids != id]
+  # 
+  #     for (i in remaining_ids) {
+  #       shinyjs::hide(paste0("add_btn_", i))
+  #     }
+  # 
+  #     if (length(remaining_ids) == 0) {
+  #       shinyjs::show("add_btn_0")
+  #     } else {
+  #       shinyjs::show(paste0("add_btn_", max(remaining_ids)))
+  #     }
+  #   },
+  #   ignoreNULL = TRUE
+  # )
 
   ## update gene_id or name in SelectizeInput when toggle button click
   observeEvent(list(input$click_toggle_exp), {
@@ -1659,7 +1726,7 @@ server <- function(input, output, session) {
         if (exists("cached_data")) {
           cached_data$raw <- NULL
           cached_data$normalize <- NULL
-          cached_data$scale <- NULL
+          #cached_data$scale <- NULL
           cached_data$current_type <- NULL
           cached_data$current_filter <- NULL
         }

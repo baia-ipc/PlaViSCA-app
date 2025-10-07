@@ -1461,3 +1461,116 @@ input:checked+.slider:before {
     font-size: 1.4rem;
   }
 }
+
+/* TABSET STYLING - Left Alignment */
+#tabset .nav-tabs {
+  justify-content: flex-start;
+  padding-left: 0;
+  margin-bottom: 20px;
+}
+
+#tabset .nav-tabs .nav-item {
+  margin-right: 10px;
+}
+
+#tabset .nav-tabs .nav-link {
+  border: 1px solid transparent;
+  border-radius: var(--border-radius) var(--border-radius) 0 0;
+  padding: 12px 20px;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  background-color: #f8f9fa;
+  transition: var(--transition-base);
+}
+
+#tabset .nav-tabs .nav-link:hover {
+  border-color: var(--color-secondary);
+  background-color: var(--color-accent);
+  color: var(--color-text-primary);
+}
+
+#tabset .nav-tabs .nav-link.active {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+  color: white;
+  font-weight: 600;
+}
+
+#tabset .tab-content {
+  border: none;
+  padding: 0;
+}
+
+/* Enhanced styling for better visual hierarchy */
+#tabset .nav-tabs {
+  border-bottom: 2px solid var(--color-secondary);
+}
+
+#tabset .nav-tabs .nav-link.active {
+  border-bottom-color: var(--color-primary);
+  position: relative;
+}
+
+#tabset .nav-tabs .nav-link.active::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background-color: var(--color-primary);
+}
+
+/* Gene Expression Tab - Data Type Radio Buttons Indentation */
+#data_type_exp {
+  padding-left: 40px;
+}
+
+#data_type_exp .control-label {
+  margin-left: 0;
+  font-weight: 500;
+  color: var(--color-text-primary);
+}
+
+#data_type_exp .shiny-options-group {
+  padding-left: 15px;
+}
+
+/* Optional: Style the radio buttons themselves for better appearance */
+#data_type_exp .radio label {
+  font-weight: 400;
+  color: var(--color-text-primary);
+  margin-bottom: 8px;
+}
+
+/* Gene Expression Tab - Gene Selection Row Indentation */
+.gene-exp-row {
+  padding-left: 40px;
+}
+
+/* Ensure gene selection inputs have consistent styling */
+#genes_exp_0-label,
+#group_exp-label {
+  font-weight: 500;
+  color: var(--color-text-primary);
+}
+
+/* Style the gene selection container */
+#gene_exp_tar .form-group {
+  margin-bottom: 15px;
+}
+
+/* Style the gene link section */
+.gene_link_ui_exp {
+  padding-top: 25px;
+}
+
+.gene_link_ui_exp a {
+  color: var(--color-primary);
+  text-decoration: none;
+  font-size: 0.9em;
+}
+
+.gene_link_ui_exp a:hover {
+  color: var(--color-purple);
+}

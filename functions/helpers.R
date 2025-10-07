@@ -208,26 +208,42 @@ fun_filter_df <- function(data, selections) {
 
 # Helper function to apply secondary filters
 apply_secondary_filters <- function(data, inputs) {
-  # Filter out rows with invalid RNA data (n_feature_rna > 0 and n_count_rna > 0)
-  filtered <- data %>%
-    filter(n_feature_rna > 0 & n_count_rna > 0) %>%
-    select(any_of(c(
-      "study_label",
-      "host_species",
-      "life_cycle_stage",
-      "treatment",
-      "parasite_stage",
-      "sample_type",
-      "geographic_location",
-      "sc_technology",
-      "sequencer",
-      "strain",
-      "day_post_infection",
-      "hour_post_invasion",
-      "biological_replicate",
-      "n_count_rna",
-      "n_feature_rna"
-    )))
+  # Filter out rows with invalid RNA data only if these columns exist
+  filtered <- data
+  if ("n_feature_rna" %in% names(data) && "n_count_rna" %in% names(data)) {
+    filtered <- filtered %>%
+      filter(n_feature_rna > 0 & n_count_rna > 0)
+  }
+  
+  # Select relevant columns (keep all existing columns if they don't match the expected metadata columns)
+  metadata_cols <- c(
+    "study_label",
+    "host_species",
+    "life_cycle_stage",
+    "treatment",
+    "parasite_stage",
+    "sample_type",
+    "geographic_location",
+    "sc_technology",
+    "sequencer",
+    "strain",
+    "day_post_infection",
+    "hour_post_invasion",
+    "biological_replicate",
+    "n_count_rna",
+    "n_feature_rna"
+  )
+  
+  # For gene expression data, keep all columns (metadata + gene expression)
+  # For regular metadata, select only metadata columns
+  available_metadata_cols <- intersect(metadata_cols, names(filtered))
+  if (length(setdiff(names(filtered), metadata_cols)) > 10) {
+    # Likely gene expression data with many gene columns - keep all columns
+    filtered <- filtered
+  } else {
+    # Regular metadata - select only relevant columns
+    filtered <- filtered %>% select(any_of(metadata_cols))
+  }
 
   # Dynamically apply filters for each non-empty input
   for (col in names(inputs)) {
