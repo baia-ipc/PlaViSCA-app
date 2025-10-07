@@ -76,7 +76,7 @@ server <- function(input, output, session) {
     )
   })
 
-  # Navigate tabsetPannel
+  # Navigation between main sections
   observeEvent(input$metadata_link, {
     navigate_tabset(session, "analysis", "Metadata")
   })
@@ -118,7 +118,7 @@ server <- function(input, output, session) {
     }
   })
 
-  # Change to normalize when change tabset
+  # Synchronize data type selection across tabs
   observeEvent(input$tabset, {
     if (input$tabset == "Gene expression") {
       # Sync with embeddings data type if available, otherwise default to normalize
@@ -159,7 +159,7 @@ server <- function(input, output, session) {
     }
   })
 
-  # Data caching system to avoid unnecessary reloads
+  # Data caching system for performance optimization
   default_df_filter <- reactiveVal(NULL)
   app_initialized <- reactiveVal(FALSE)
   data_loading_trigger <- reactiveVal(0)
@@ -167,7 +167,6 @@ server <- function(input, output, session) {
   cached_data <- reactiveValues(
     raw = NULL,
     normalize = NULL,
-    # scale = NULL,
     current_type = NULL,
     current_filter = NULL
   )
@@ -183,27 +182,14 @@ server <- function(input, output, session) {
     }
   })
 
-  # Load data only when necessary with normalized data persistence
+  # Load data with performance optimization and caching
   load_dataset <- function(data_type) {
     if (is.null(cached_data[[data_type]])) {
       # Force garbage collection before loading new data
       gc(verbose = FALSE, full = TRUE)
 
-      # Clear other cached data when loading large datasets, but NEVER clear normalized data
-      # if (data_type == "scale") {
-      #   # Only clear raw data when loading scaled data, keep normalized data
-      #   cached_data$raw <- NULL
-      #   gc(verbose = FALSE, full = TRUE)
-      # } else if (data_type == "raw") {
-      #   # Only clear scaled data when loading raw data, keep normalized data
-      #   cached_data$scale <- NULL
-      #   gc(verbose = FALSE, full = TRUE)
-      # }
-      # IMPORTANT: normalized data is NEVER cleared once loaded
-
       dataset <- switch(data_type,
         raw = {
-          # Only clear raw data if loading other types (but keep normalized)
           if (exists("DATA_PATHS") && !is.null(DATA_PATHS$raw_df)) {
             load_data(DATA_PATHS$raw_df)
           } else {
@@ -213,13 +199,6 @@ server <- function(input, output, session) {
         normalize = {
           if (exists("norm_df")) norm_df else NULL
         }
-        # scale = {
-        #   if (exists("DATA_PATHS") && !is.null(DATA_PATHS$scale_df)) {
-        #     load_data(DATA_PATHS$scale_df)
-        #   } else {
-        #     NULL
-        #   }
-        # }
       )
 
       if (!is.null(dataset)) {
@@ -704,9 +683,30 @@ server <- function(input, output, session) {
 
       output$data_table <- renderDT(
         {
-          ## data in table
+          # Create metadata table with filtered columns and proper formatting
           processed_data <- filt_data %>%
-            select(-c(biological_replicate)) %>%
+            select(-c(
+              biological_replicate,
+              liver_form,
+              starts_with("rna_snn_res_"),
+              starts_with("umap_"),
+              starts_with("pca_"),
+              starts_with("t_sne_"),
+              barcode,
+              study_pmid,
+              run_id,
+              num_srr,
+              pub_year,
+              host_id,
+              goegraphic_location,
+              sequncer,
+              refine_state,
+              pred_gametocyte,
+              seurat_clusters,
+              parasite_stage,
+              geographic_location,
+              day_post_infection
+            )) %>%
             rename_with(
               ~ str_to_title(.),
               .cols = any_of(c(
@@ -715,17 +715,32 @@ server <- function(input, output, session) {
                 "host_species",
                 "life_cycle_stage",
                 "treatment",
-                "parasite_stage",
                 "strain",
                 "hour_post_invasion",
                 "sequencer",
                 "sc_technology"
               ))
             ) %>%
-            rename(nCount_RNA = n_count_rna, nFeature_RNA = n_feature_rna) %>%
-            arrange(desc(nCount_RNA))
+            rename(
+              nCount_RNA = n_count_rna,
+              nFeature_RNA = n_feature_rna,
+              Study_Label = Study_label 
+            ) %>%
+            arrange(Study_Label, desc(nCount_RNA)) %>%
+            select(
+              Study_Label,
+              Sample_type, 
+              Host_species, 
+              Strain,
+              Treatment, 
+              Life_cycle_stage, 
+              Hour_post_invasion,
+              Sc_technology,
+              Sequencer,
+              nCount_RNA,
+              nFeature_RNA
+            )
 
-          # Force garbage collection after data processing
           gc(verbose = FALSE)
 
           DT::datatable(
@@ -1794,13 +1809,6 @@ server <- function(input, output, session) {
           list = ls(envir = .GlobalEnv, pattern = "^temp_"),
           envir = .GlobalEnv
         )
-
-        # Force multiple garbage collections
-        for (i in 1:3) {
-          gc(verbose = FALSE, full = TRUE)
-          Sys.sleep(0.1)
-        }
-
         message("Session ended. Memory cleanup completed.")
       },
       error = function(e) {

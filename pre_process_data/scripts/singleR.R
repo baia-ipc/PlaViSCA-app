@@ -12,6 +12,7 @@ setwd("/srv/baia/prj/pvsca/pre_process_data")
 
 pv.combined.all <- readRDS("./pv_all_studies.rds")
 
+
 # First, upload (PMID:xxxx) data to R (data can be found in the OneDrive folder)
 Zhu_HiDef_PVX_IDC_timecourse_1 <- read_excel(
   "./data/Zhu_SciReps_2016.xls",
@@ -95,6 +96,7 @@ pv.combined.all$life_cycle_stage <- pred.IDC.all[match_cell, ]$pruned.labels
 pv.combined.all$life_cycle_stage[
   pv.combined.all$sample_type != "Mammalian host: blood"
 ] <- NA
+
 
 plotDeltaDistribution(pred.IDC.all, ncol = 3)
 # Add SingleR annotations to Seurat object
@@ -294,8 +296,8 @@ pv.combined.all <- RenameIdents(
   "1" = "Asexual 2",
   "2" = "Female gametocyte",
   "3" = "Asexual 3",
-  "4" = "Asexual 4",
-  "5" = "Male gametocyte",
+  "4" = "Male gametocyte",
+  "5" = "Asexual 4",
   "6" = "Asexual 5",
   "7" = "Asexual 6",
   "8" = "Asexual 7",
@@ -394,6 +396,18 @@ pv.combined.all$life_cycle_stage[match_cell] <- df$type[match(
 )]
 
 
+# mutate life cycle stage if sample type is liver call schizont (liver stage) and if blood call schizont (blood stage)
+pv.combined.all$life_cycle_stage[
+  pv.combined.all$sample_type == "Mammalian host: hepatocyte" &
+    pv.combined.all$life_cycle_stage == "Schizont"
+] <- "Schizont (liver stage)"
+
+pv.combined.all$life_cycle_stage[
+  pv.combined.all$sample_type == "Mammalian host: blood" &
+    pv.combined.all$life_cycle_stage == "Schizont"
+] <- "Schizont (blood stage)"
+
+
 # clean up
 # change features from - to _ to match with gff gene_id
 features <- gsub("-", "_", rownames(pv.combined.all[["RNA"]]@features))
@@ -405,9 +419,4 @@ pv.combined.all$femaleGams_module_score1 <- NULL
 pv.combined.all$maleGams_module_score1 <- NULL
 pv.combined.all@project.name <- "PlaViSca"
 
-# change day post infection to NA if not from blood
-# pv.combined.all$day_post_infection[
-#   pv.combined.all$sample_type != "Mammalian host: hepatocyte"
-# ] <- NA
-
-#saveRDS(pv.combined.all, file = "./pv_all_studies.rds")
+saveRDS(pv.combined.all, file = "./pv_all_studies.rds")
