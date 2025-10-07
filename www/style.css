@@ -887,7 +887,8 @@ ul li:not(:last-child) {
 #data_type .shiny-options-group,
 #data_type_exp .shiny-options-group {
   margin: 0;
-  justify-content: space-between;
+  justify-content: flex-start;
+  gap: 20px;
 }
 
 /* Gene and switch UI */
