@@ -5,7 +5,6 @@ library(plotly)
 library(RColorBrewer)
 library(tidyverse)
 library(later)
-library(digest)
 
 server <- function(input, output, session) {
   sessionData <- new.env(parent = emptyenv())
@@ -171,7 +170,7 @@ server <- function(input, output, session) {
     current_filter = NULL
   )
 
-  # Helper function to get current data type regardless of tab
+  # get current data type regardless of tab
   get_current_data_type <- reactive({
     if (input$tabset == "Gene expression") {
       input$data_type_exp
@@ -185,7 +184,6 @@ server <- function(input, output, session) {
   # Load data with performance optimization and caching
   load_dataset <- function(data_type) {
     if (is.null(cached_data[[data_type]])) {
-      # Force garbage collection before loading new data
       gc(verbose = FALSE, full = TRUE)
 
       dataset <- switch(data_type,
@@ -286,7 +284,7 @@ server <- function(input, output, session) {
         # Check if dataset is already cached
         if (!is.null(cached_data[[current_type]])) {
           setProgress(
-            0.1,
+            0.3,
             detail = paste("Using cached", display_name, "dataset...")
           )
         } else {
@@ -316,81 +314,33 @@ server <- function(input, output, session) {
         message("Loaded and cached data for type: ", current_type)
 
         # Force garbage collection after processing
-        gc()
+        gc(verbose = FALSE)
         return(result)
       })
     },
     ignoreNULL = FALSE
   )
 
-  # Synchronize data type selections between tabs
-  # When embeddings data type changes, sync with gene expression
-  observeEvent(
-    input$data_type,
-    {
-      if (
-        !is.null(input$data_type) &&
-          !is.null(input$tabset) &&
-          input$tabset == "Embeddings"
-      ) {
-        global_loading(TRUE)
-        updateRadioButtons(
-          session,
-          "data_type_exp",
-          selected = input$data_type
-        )
-        # Reset loading state after a shorter delay
-        later(
-          function() {
-            tryCatch(
-              {
-                global_loading(FALSE)
-              },
-              error = function(e) {
-                # Silent error handling
-              }
-            )
-          },
-          1.5
-        )
-      }
-    },
-    ignoreInit = TRUE
+  # Synchronize data type selections between tabs using helper functions
+  create_data_type_sync_observer(
+    input = input,
+    session = session,
+    input_name = "data_type",
+    target_input = "data_type_exp",
+    expected_tabset = "Embeddings",
+    global_loading = global_loading
   )
 
-  # When gene expression data type changes, sync with embeddings
-  observeEvent(
-    input$data_type_exp,
-    {
-      if (
-        !is.null(input$data_type_exp) &&
-          !is.null(input$tabset) &&
-          input$tabset == "Gene expression"
-      ) {
-        global_loading(TRUE)
-        updateRadioButtons(
-          session,
-          "data_type",
-          selected = input$data_type_exp
-        )
-        # Reset loading state after a shorter delay to prevent multiple updates
-        later(
-          function() {
-            tryCatch(
-              {
-                global_loading(FALSE)
-              },
-              error = function(e) {
-                # Silent error handling
-              }
-            )
-          },
-          1.5
-        )
-      }
-    },
-    ignoreInit = TRUE
+  create_data_type_sync_observer(
+    input = input,
+    session = session,
+    input_name = "data_type_exp",
+    target_input = "data_type",
+    expected_tabset = "Gene expression",
+    global_loading = global_loading
   )
+
+
 
   # Provide loading feedback to UI (optional - you can use this in your UI)
   output$loading_state <- reactive({
@@ -724,16 +674,16 @@ server <- function(input, output, session) {
             rename(
               nCount_RNA = n_count_rna,
               nFeature_RNA = n_feature_rna,
-              Study_Label = Study_label 
+              Study_Label = Study_label
             ) %>%
             arrange(Study_Label, desc(nCount_RNA)) %>%
             select(
               Study_Label,
-              Sample_type, 
-              Host_species, 
+              Sample_type,
+              Host_species,
               Strain,
-              Treatment, 
-              Life_cycle_stage, 
+              Treatment,
+              Life_cycle_stage,
               Hour_post_invasion,
               Sc_technology,
               Sequencer,
@@ -921,12 +871,24 @@ server <- function(input, output, session) {
       sc_technology = input$sc_technology_exp
     )
 
-    # Simple cache key for filter combinations
-    filter_hash <- digest::digest(current_inputs)
-    cache_key <- paste0("filtered_", get_current_data_type(), "_", filter_hash)
+    # Create cache key
+    cache_key <- make_cache_key(
+      "filtered",
+      get_current_data_type(),
+      input$study_label_exp,
+      input$host_species_exp,
+      input$life_cycle_stage_exp,
+      input$treatment_exp,
+      input$parasite_stage_exp,
+      input$sample_type_exp,
+      input$strain_exp,
+      input$hour_post_invasion_exp,
+      input$sequencer_exp,
+      input$sc_technology_exp
+    )
 
-    # Check cache first
-    if (!is.null(sessionData) && exists(cache_key, envir = sessionData, inherits = FALSE)) {
+    # Check cache first - use exists()
+    if (exists(cache_key, envir = sessionData, inherits = FALSE)) {
       return(sessionData[[cache_key]])
     }
 
@@ -1043,44 +1005,27 @@ server <- function(input, output, session) {
       return(NULL)
     }
 
-    # Create cache key that includes filter inputs for proper filtering
-    filter_key <- paste0(
-      input$study_label_exp %||% "none",
-      "_",
-      input$host_species_exp %||% "none",
-      "_",
-      input$life_cycle_stage_exp %||% "none",
-      "_",
-      input$treatment_exp %||% "none",
-      "_",
-      input$parasite_stage_exp %||% "none",
-      "_",
-      input$sample_type_exp %||% "none",
-      "_",
-      input$strain_exp %||% "none",
-      "_",
-      input$hour_post_invasion_exp %||% "none",
-      "_",
-      input$sequencer_exp %||% "none",
-      "_",
-      input$sc_technology_exp %||% "none"
-    )
-
-    cache_key <- paste0(
-      "df_exp_",
+    # Create a safe cache key without digest
+    cache_key <- make_cache_key(
+      "df_exp",
       input$genes_exp_0,
-      "_",
       input$group_exp,
-      "_",
       input$check_exp_0,
-      "_",
       get_current_data_type(),
-      "_",
-      digest::digest(filter_key)  # Use digest to ensure safe key
+      input$study_label_exp,
+      input$host_species_exp,
+      input$life_cycle_stage_exp,
+      input$treatment_exp,
+      input$parasite_stage_exp,
+      input$sample_type_exp,
+      input$strain_exp,
+      input$hour_post_invasion_exp,
+      input$sequencer_exp,
+      input$sc_technology_exp
     )
 
-    # Check cache first for instant gene switching
-    if (!is.null(sessionData) && exists(cache_key, envir = sessionData, inherits = FALSE)) {
+    # Check cache first for instant gene switching - use exists() for safety
+    if (exists(cache_key, envir = sessionData, inherits = FALSE)) {
       return(sessionData[[cache_key]])
     }
 
@@ -1117,42 +1062,26 @@ server <- function(input, output, session) {
       return(NULL)
     }
 
-    # Create cache key that includes filter inputs for proper plot updates
-    filter_key <- paste0(
-      input$study_label_exp %||% "none",
-      "_",
-      input$host_species_exp %||% "none",
-      "_",
-      input$life_cycle_stage_exp %||% "none",
-      "_",
-      input$treatment_exp %||% "none",
-      "_",
-      input$parasite_stage_exp %||% "none",
-      "_",
-      input$sample_type_exp %||% "none",
-      "_",
-      input$strain_exp %||% "none",
-      "_",
-      input$hour_post_invasion_exp %||% "none",
-      "_",
-      input$sequencer_exp %||% "none",
-      "_",
-      input$sc_technology_exp %||% "none"
-    )
-
-    plot_cache_key <- paste0(
-      "plot_",
+    # Create a safe cache key without digest
+    plot_cache_key <- make_cache_key(
+      "plot",
       input$genes_exp_0,
-      "_",
       input$group_exp,
-      "_",
       get_current_data_type(),
-      "_",
-      digest::digest(filter_key)  # Use digest to ensure safe key
+      input$study_label_exp,
+      input$host_species_exp,
+      input$life_cycle_stage_exp,
+      input$treatment_exp,
+      input$parasite_stage_exp,
+      input$sample_type_exp,
+      input$strain_exp,
+      input$hour_post_invasion_exp,
+      input$sequencer_exp,
+      input$sc_technology_exp
     )
 
-    # Check cache for instant gene switching
-    if (!is.null(sessionData) && exists(plot_cache_key, envir = sessionData, inherits = FALSE)) {
+    # Check cache for instant gene switching - use exists() for safety
+    if (exists(plot_cache_key, envir = sessionData, inherits = FALSE)) {
       return(sessionData[[plot_cache_key]])
     }
 

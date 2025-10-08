@@ -1,3 +1,65 @@
+# Helper function for creating safe cache keys
+make_cache_key <- function(...) {
+  args <- list(...)
+  parts <- lapply(args, function(x) {
+    if (is.null(x)) {
+      return("NULL")
+    } else if (length(x) > 1) {
+      return(paste(sort(as.character(x)), collapse = "|"))
+    } else {
+      return(as.character(x))
+    }
+  })
+  paste(parts, collapse = "__")
+}
+
+# Helper function to sync data types between tabs with loading state management
+sync_data_type <- function(session, from_input, to_input, new_value, global_loading, delay = 1.5) {
+  global_loading(TRUE)
+  updateRadioButtons(
+    session,
+    to_input,
+    selected = new_value
+  )
+  # Reset loading state after delay
+  later(
+    function() {
+      tryCatch(
+        {
+          global_loading(FALSE)
+        },
+        error = function(e) {
+          # Silent error handling
+        }
+      )
+    },
+    delay
+  )
+}
+
+# Helper function to create data type sync observer
+create_data_type_sync_observer <- function(input, session, input_name, target_input, expected_tabset, global_loading) {
+  observeEvent(
+    input[[input_name]],
+    {
+      if (
+        !is.null(input[[input_name]]) &&
+          !is.null(input$tabset) &&
+          input$tabset == expected_tabset
+      ) {
+        sync_data_type(
+          session = session,
+          from_input = input_name,
+          to_input = target_input,
+          new_value = input[[input_name]],
+          global_loading = global_loading
+        )
+      }
+    },
+    ignoreInit = TRUE
+  )
+}
+
 # Helper function to format species names with italics
 format_species_name <- function(species_names) {
   # Species that should be in italics (scientific names)
@@ -174,6 +236,22 @@ create_meta_filter_row <- function(suffix = "") {
     )
   )
 }
+
+# Helper function to create safe cache keys from inputs (handles vectors)
+make_cache_key <- function(...) {
+  args <- list(...)
+  parts <- lapply(args, function(x) {
+    if (is.null(x)) {
+      return("NULL")
+    } else if (length(x) > 1) {
+      return(paste(sort(as.character(x)), collapse = "|"))
+    } else {
+      return(as.character(x))
+    }
+  })
+  paste(parts, collapse = "__")
+}
+
 
 
 # Navigate tabsetpanel
@@ -571,19 +649,11 @@ meta_plotly <- function(data, x_var, x_label, y_label, plt_type = "bar") {
   ) %>%
     layout(
       xaxis = list(title = x_label),
-      yaxis = list(
-        title = y_label,
-        tickfont = list(size = 12),
-        ticklabelposition = "outside",
-        ticklen = 5,
-        tickwidth = 1,
-        tickcolor = "transparent",
-        side = "left"
-      ),
+      yaxis = list(title = y_label),
       showlegend = FALSE,
       barmode = "group",
       bargap = 0.1,
-      margin = list(l = 180, r = 50, t = 50, b = 80)
+      margin = list(l = 150, r = 50, t = 50, b = 80)
     )
 }
 
