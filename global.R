@@ -54,7 +54,7 @@ umap_u <- grep(
   value = TRUE
 )
 tsne <- grep("t_sne", colnames(mr_data), ignore.case = TRUE, value = TRUE)
-RNA_snn <- grep("RNA_snn", colnames(mr_data), ignore.case = TRUE, value = TRUE)
+# RNA_snn <- grep("RNA_snn", colnames(mr_data), ignore.case = TRUE, value = TRUE)  # Commented out as not displayed
 
 # Static definitions
 group_choices <- c(

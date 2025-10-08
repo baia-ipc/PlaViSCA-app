@@ -109,8 +109,8 @@ ui <- fluidPage(
           actionLink(
             "analysis_link",
             tagList(
-              img(src = "umap.png", alt = "Analysis"),
-              span("Analysis")
+              img(src = "umap.png", alt = "Embeddings"),
+              span("Embeddings")
             )
           ),
           actionLink(
@@ -540,7 +540,14 @@ ui <- fluidPage(
               ),
               fluidRow(
                 column(width = 4, plotlyOutput("treatment_plotly")),
-                column(width = 4, plotlyOutput("life_cycle_plotly")),
+                column(
+                  width = 4,
+                  plotlyOutput("life_cycle_plotly"),
+                  div(
+                    style = "text-align: center; margin-top: 5px; font-size: 12px; color: #666;",
+                    HTML("<em>Note: All life cycle stages are predicted, except for the sporozoite.</em>")
+                  )
+                ),
                 column(width = 4, plotlyOutput("HPI_plotly"))
               ),
               br(),

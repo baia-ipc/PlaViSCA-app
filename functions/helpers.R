@@ -21,7 +21,6 @@ sync_data_type <- function(session, from_input, to_input, new_value, global_load
     to_input,
     selected = new_value
   )
-  # Reset loading state after delay
   later(
     function() {
       tryCatch(
@@ -62,7 +61,6 @@ create_data_type_sync_observer <- function(input, session, input_name, target_in
 
 # Helper function to format species names with italics
 format_species_name <- function(species_names) {
-  # Species that should be in italics (scientific names)
   scientific_species <- c(
     "Anopheles freeborni",
     "Anopheles stephensi",
@@ -653,7 +651,7 @@ meta_plotly <- function(data, x_var, x_label, y_label, plt_type = "bar") {
       showlegend = FALSE,
       barmode = "group",
       bargap = 0.1,
-      margin = list(l = 150, r = 50, t = 50, b = 80)
+      margin = list(l = 120, r = 50, t = 50, b = 80)
     )
 }
 
@@ -1108,7 +1106,7 @@ plot_3d <- function(
   z_vals <- df[[z_col]]
 
   # Format selected_color for display if it's host_species
-  display_color <- if (color == "host_species") {
+  display_color <- if (!is.null(color) && !is.na(color) && color == "host_species") {
     format_species_name(selected_color)
   } else {
     selected_color
@@ -1207,6 +1205,12 @@ embedding_plot <- function(
     size,
     plot_type = "pca_u",
     plot_dim = "2d") {
+  # Validate inputs
+  if (is.null(color) || is.na(color) || color == "" || !color %in% names(df)) {
+    color <- "sample_type" # Safe fallback
+    warning("Invalid color column, using 'sample_type' as fallback")
+  }
+
   x <- df[[xaxis_input]]
   y <- df[[yaxis_input]]
   selected_color <- df[[color]]

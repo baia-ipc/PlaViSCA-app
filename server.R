@@ -202,7 +202,6 @@ server <- function(input, output, session) {
       if (!is.null(dataset)) {
         cached_data[[data_type]] <- dataset
         gc(verbose = FALSE, full = TRUE)
-        message("Successfully loaded and cached ", data_type, " data")
       }
 
       return(dataset)
@@ -254,7 +253,6 @@ server <- function(input, output, session) {
         !is.null(cached_data$current_type) &&
           cached_data$current_type == current_type
       ) {
-        message("Using cached data for type: ", current_type)
         return(sessionData$last_gene_data)
       }
 
@@ -286,7 +284,7 @@ server <- function(input, output, session) {
 
         setProgress(0.6, detail = "Processing genes...")
         result <- list(
-          data = dataset,  # Return full dataset, no filtering here
+          data = dataset, # Return full dataset, no filtering here
           genes = genes(dataset, gff_data)
         )
 
@@ -308,33 +306,33 @@ server <- function(input, output, session) {
   # Separate reactive for filtered gene data - no progress bar
   filtered_gene_data <- reactive({
     req(gene_data())
-    
+
     selections <- input$apply_filter
-    
+
     # If no selections made (empty or null), use default filter
     if (is.null(selections) || length(selections) == 0) {
       selections <- default_df_filter()
     }
-    
+
     req(selections)
-    
+
     # Create cache key for filtered gene data
     cache_key <- make_cache_key("filtered_gene_data", get_current_data_type(), selections)
-    
+
     # Check cache first to avoid reprocessing
     if (exists(cache_key, envir = sessionData, inherits = FALSE)) {
       return(sessionData[[cache_key]])
     }
-    
+
     # Filter the data without progress bar
     result <- list(
       data = fun_filter_df(gene_data()$data, selections),
       genes = gene_data()$genes
     )
-    
+
     # Cache the result
     sessionData[[cache_key]] <- result
-    
+
     return(result)
   })
 
@@ -359,7 +357,7 @@ server <- function(input, output, session) {
 
 
 
-  # Provide loading feedback to UI 
+  # Provide loading feedback to UI
   output$loading_state <- reactive({
     global_loading()
   })
@@ -418,7 +416,7 @@ server <- function(input, output, session) {
       session,
       "apply_filter",
       choices = grouped_choices,
-      selected = character(0)  # Start with empty selection
+      selected = character(0)
     )
   })
 
@@ -916,8 +914,6 @@ server <- function(input, output, session) {
     if (exists(cache_key, envir = sessionData, inherits = FALSE)) {
       return(sessionData[[cache_key]])
     }
-
-    # Apply filters efficiently
     tryCatch(
       {
         filt_data <- apply_secondary_filters(filtered_gene_data()$data, current_inputs)
@@ -995,16 +991,13 @@ server <- function(input, output, session) {
   # Manipulation tabset "Gene Exp"
   ## gene_exp_0 block with minimal caching for speed
   choice_exp_0 <- reactive({
-    req(gene_data()$genes)  # Use non-filtered genes for choices
-    # Simple gene choices without heavy caching for faster response
+    req(gene_data()$genes)
     get_gene_choices(gene_data()$genes, input$check_exp_0)
   })
 
   # Use observer for gene choice updates
   observe({
     req(choice_exp_0())
-
-    # Update selectize input
     tryCatch(
       {
         updateSelectizeInput(
@@ -1079,15 +1072,13 @@ server <- function(input, output, session) {
 
   # Simplified gene expression plot for maximum speed
   output$gene_exp_plotly <- renderPlotly({
-    # Direct reactive dependencies for fastest response
     req(df_exp_0(), input$group_exp)
 
-    # Skip during loading states
     if (global_loading()) {
       return(NULL)
     }
 
-    # Create a safe cache key without digest
+    # Create cache key
     plot_cache_key <- make_cache_key(
       "plot",
       input$genes_exp_0,
@@ -1335,9 +1326,6 @@ server <- function(input, output, session) {
           gene_exp_plots_trigger(gene_exp_plots_trigger() + 1)
 
           # Simply trigger invalidation of existing plots instead of recreating them
-          message(
-            "Data type changed - invalidating existing gene expression plots"
-          )
         })
       },
       0.2
@@ -1354,10 +1342,10 @@ server <- function(input, output, session) {
   })
 
   choice <- eventReactive(list(input$check, input$data_type), {
-    get_gene_choices(gene_data()$genes, input$check)  # Use non-filtered genes for choices
+    get_gene_choices(gene_data()$genes, input$check)
   })
 
-  ## dynamic UI for gene and RNA_snn selection
+  ## dynamic UI for gene selection (RNA_snn commented out)
   shinyjs::hide("gene_snn_ui")
   shinyjs::hide("data_type")
   observe({
@@ -1373,18 +1361,18 @@ server <- function(input, output, session) {
         choices = choice(),
         server = TRUE
       )
-    } else if (input$color == "RNA_snn") {
-      shinyjs::show("gene_snn_ui")
-      shinyjs::hide("gene_link_ui")
-      shinyjs::hide("data_type")
-      shinyjs::hide("switch_id")
-      updateSelectizeInput(
-        session,
-        "genes_n",
-        label = "Select Resolution",
-        choices = RNA_snn,
-        server = TRUE
-      )
+      # } else if (input$color == "RNA_snn") {
+      #   shinyjs::show("gene_snn_ui")
+      #   shinyjs::hide("gene_link_ui")
+      #   shinyjs::hide("data_type")
+      #   shinyjs::hide("switch_id")
+      #   updateSelectizeInput(
+      #     session,
+      #     "genes_n",
+      #     label = "Select Resolution",
+      #     choices = RNA_snn,
+      #     server = TRUE
+      #   )
     } else {
       shinyjs::hide("gene_snn_ui")
       shinyjs::hide("gene_link_ui")
@@ -1452,6 +1440,21 @@ server <- function(input, output, session) {
       }
     }
   )
+
+  ## automatically update size selection based on plot type
+  observeEvent(input$plot, {
+    if (!is.null(input$plot)) {
+      if (input$plot == "2d") {
+        updateRadioButtons(session, "size", selected = 2)  # S (small)
+        # Also use shinyjs as backup
+        runjs('$("input[name=\'size\'][value=\'2\']").prop("checked", true).trigger("change");')
+      } else if (input$plot == "3d") {
+        updateRadioButtons(session, "size", selected = 4)  # M (medium)
+        # Also use shinyjs as backup
+        runjs('$("input[name=\'size\'][value=\'4\']").prop("checked", true).trigger("change");')
+      }
+    }
+  }, ignoreInit = TRUE)
 
   ## choose data based on input color
   data <- reactive({
@@ -1567,10 +1570,15 @@ server <- function(input, output, session) {
     # Generate plot without progress bar
     isolate({
       color_column <- switch(input$color,
-        "genes" = get_gene_id(input$genes_n, gene_data()$genes),  # Use non-filtered genes for ID lookup
-        "RNA_snn" = input$genes_n,
+        "genes" = get_gene_id(input$genes_n, gene_data()$genes),
+        # "RNA_snn" = input$genes_n,  
         input$color
       )
+
+      # Validate color_column - if it's NA or NULL, fallback to a safe default
+      if (is.null(color_column) || is.na(color_column) || color_column == "") {
+        color_column <- "sample_type"
+      }
 
       p <- embedding_plot(
         data(),
@@ -1606,11 +1614,11 @@ server <- function(input, output, session) {
   observeEvent(click_event(), {
     event <- click_event()
     req(event)
+    
     data <- filtered_gene_data()$data
-
     cell_id <- event$key
 
-    # Process data without progress bar
+    # Process data without progress bar - keep it simple and fast
     data$id <- seq_len(nrow(data))
     cols <- c("id", colnames(data)[str_detect(colnames(data), "^PVP01")])
     selected_df <- data[data$id == cell_id, cols, drop = FALSE]
@@ -1619,12 +1627,15 @@ server <- function(input, output, session) {
     rm(data)
     gc(verbose = FALSE)
 
+    # Convert to long format using the original working approach
     selected_df <- selected_df %>%
       pivot_longer(
         cols = -id,
         names_to = "gene_id",
         values_to = "expression"
       ) %>%
+      # Filter out zero expression genes for better performance
+      filter(expression > 0) %>%
       left_join(gff_data, by = c("gene_id" = "id")) %>%
       arrange(desc(expression)) %>%
       rename(
@@ -1632,7 +1643,7 @@ server <- function(input, output, session) {
         gene_name = name,
         exp_value = expression
       ) %>%
-      select(gene_id, gene_name, exp_value, description)
+      select(gene_id, gene_name, exp_value, description) 
 
     selected_table(selected_df)
 
@@ -1657,23 +1668,36 @@ server <- function(input, output, session) {
     datatable(
       selected_table(),
       options = list(
-        pageLength = 10,
+        pageLength = 15,
         scrollY = "400px",
         scrollCollapse = TRUE,
-        paging = FALSE,
-        autoWidth = TRUE
+        paging = TRUE,
+        autoWidth = FALSE
       ),
       rownames = FALSE,
       filter = "top",
       selection = "single",
       width = "100%"
-    )
+    ) %>%
+    formatRound("exp_value", digits = 3)
   })
 
-  # Clear selected table when modal is dismissed (memory cleanup)
+  # Clear selected table and cell cache when modal is dismissed (memory cleanup)
   observeEvent(input$shiny_modal, {
     if (!isTruthy(input$shiny_modal)) {
       selected_table(NULL)
+      
+      # Clear old cell cache entries to prevent memory buildup (keep last 10)
+      cache_keys <- names(cell_data_cache)
+      cell_keys <- cache_keys[grepl("^cell_", cache_keys)]
+      if (length(cell_keys) > 10) {
+        # Remove oldest entries
+        old_keys <- head(cell_keys, length(cell_keys) - 10)
+        for (key in old_keys) {
+          cell_data_cache[[key]] <- NULL
+        }
+      }
+      
       gc(verbose = FALSE)
     }
   })
@@ -1791,7 +1815,7 @@ server <- function(input, output, session) {
           if (exists("last_gene_data", envir = sessionData)) {
             sessionData$last_gene_data <- NULL
           }
-          
+
           # Clear cached filtered metadata and gene data
           cached_keys <- ls(envir = sessionData, pattern = "^filtered_")
           if (length(cached_keys) > 0) {
