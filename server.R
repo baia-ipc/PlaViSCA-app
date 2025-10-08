@@ -138,7 +138,6 @@ server <- function(input, output, session) {
         selected = current_selection
       )
     } else if (input$tabset == "Embeddings") {
-      # Sync with gene expression data type if available, otherwise default to normalize
       current_selection <- if (!is.null(input$data_type_exp)) {
         input$data_type_exp
       } else {
@@ -184,8 +183,6 @@ server <- function(input, output, session) {
   # Load data with performance optimization and caching
   load_dataset <- function(data_type) {
     if (is.null(cached_data[[data_type]])) {
-      gc(verbose = FALSE, full = TRUE)
-
       dataset <- switch(data_type,
         raw = {
           if (exists("DATA_PATHS") && !is.null(DATA_PATHS$raw_df)) {
@@ -201,7 +198,10 @@ server <- function(input, output, session) {
 
       if (!is.null(dataset)) {
         cached_data[[data_type]] <- dataset
-        gc(verbose = FALSE, full = TRUE)
+        # Only gc after loading large datasets
+        if (data_type == "raw") {
+          gc(verbose = FALSE)
+        }
       }
 
       return(dataset)
@@ -284,7 +284,7 @@ server <- function(input, output, session) {
 
         setProgress(0.6, detail = "Processing genes...")
         result <- list(
-          data = dataset, # Return full dataset, no filtering here
+          data = dataset, 
           genes = genes(dataset, gff_data)
         )
 
@@ -295,8 +295,6 @@ server <- function(input, output, session) {
         setProgress(1, detail = "Complete!")
         message("Loaded and cached data for type: ", current_type)
 
-        # Force garbage collection after processing
-        gc(verbose = FALSE)
         return(result)
       })
     },
@@ -444,9 +442,8 @@ server <- function(input, output, session) {
       return(sessionData[[cache_key]])
     }
 
-    # Process data and force garbage collection
+    # Process data
     result <- fun_filter_df(mr_data, selections)
-    gc(verbose = FALSE)
 
     # Cache the result
     sessionData[[cache_key]] <- result
@@ -713,8 +710,6 @@ server <- function(input, output, session) {
               nCount_RNA,
               nFeature_RNA
             )
-
-          gc(verbose = FALSE)
 
           DT::datatable(
             processed_data,
@@ -1324,8 +1319,6 @@ server <- function(input, output, session) {
       function() {
         isolate({
           gene_exp_plots_trigger(gene_exp_plots_trigger() + 1)
-
-          # Simply trigger invalidation of existing plots instead of recreating them
         })
       },
       0.2
@@ -1351,7 +1344,7 @@ server <- function(input, output, session) {
   observe({
     if (input$color == "genes") {
       shinyjs::show("data_type")
-      shinyjs::show("gene_snn_ui")
+      # shinyjs::show("gene_snn_ui")
       shinyjs::show("gene_link_ui")
       shinyjs::show("switch_id")
       updateSelectizeInput(
@@ -1374,7 +1367,7 @@ server <- function(input, output, session) {
       #     server = TRUE
       #   )
     } else {
-      shinyjs::hide("gene_snn_ui")
+      # shinyjs::hide("gene_snn_ui")
       shinyjs::hide("gene_link_ui")
       shinyjs::hide("data_type")
       shinyjs::hide("switch_id")
@@ -1442,19 +1435,20 @@ server <- function(input, output, session) {
   )
 
   ## automatically update size selection based on plot type
-  observeEvent(input$plot, {
-    if (!is.null(input$plot)) {
-      if (input$plot == "2d") {
-        updateRadioButtons(session, "size", selected = 2)  # S (small)
-        # Also use shinyjs as backup
-        runjs('$("input[name=\'size\'][value=\'2\']").prop("checked", true).trigger("change");')
-      } else if (input$plot == "3d") {
-        updateRadioButtons(session, "size", selected = 4)  # M (medium)
-        # Also use shinyjs as backup
-        runjs('$("input[name=\'size\'][value=\'4\']").prop("checked", true).trigger("change");')
+  observeEvent(input$plot,
+    {
+      if (!is.null(input$plot)) {
+        if (input$plot == "2d") {
+          updateRadioButtons(session, "size", selected = 2)
+          runjs('$("input[name=\'size\'][value=\'2\']").prop("checked", true).trigger("change");')
+        } else if (input$plot == "3d") {
+          updateRadioButtons(session, "size", selected = 4)
+          runjs('$("input[name=\'size\'][value=\'4\']").prop("checked", true).trigger("change");')
+        }
       }
-    }
-  }, ignoreInit = TRUE)
+    },
+    ignoreInit = TRUE
+  )
 
   ## choose data based on input color
   data <- reactive({
@@ -1538,7 +1532,6 @@ server <- function(input, output, session) {
           },
           error = function(e) {
             message("Error in plot readiness: ", e$message)
-            # Ensure plot is still marked as ready even if notification fails
             plot_ready(TRUE)
             autoUpdatePlot(TRUE)
           }
@@ -1560,7 +1553,6 @@ server <- function(input, output, session) {
   ## generate pca, umap and tsne plot with improved debouncing
   embplot <- reactiveVal(FALSE)
   output$all_plotly <- renderPlotly({
-    # Wait for plot to be ready and data to be available
     req(data(), input$xaxis, input$yaxis, plot_ready(), autoUpdatePlot())
 
     if (is.null(data()) || nrow(data()) == 0) {
@@ -1571,7 +1563,7 @@ server <- function(input, output, session) {
     isolate({
       color_column <- switch(input$color,
         "genes" = get_gene_id(input$genes_n, gene_data()$genes),
-        # "RNA_snn" = input$genes_n,  
+        # "RNA_snn" = input$genes_n,
         input$color
       )
 
@@ -1614,7 +1606,7 @@ server <- function(input, output, session) {
   observeEvent(click_event(), {
     event <- click_event()
     req(event)
-    
+
     data <- filtered_gene_data()$data
     cell_id <- event$key
 
@@ -1623,9 +1615,8 @@ server <- function(input, output, session) {
     cols <- c("id", colnames(data)[str_detect(colnames(data), "^PVP01")])
     selected_df <- data[data$id == cell_id, cols, drop = FALSE]
 
-    # Clear intermediate variables and force GC
+    # Clear intermediate variables
     rm(data)
-    gc(verbose = FALSE)
 
     # Convert to long format using the original working approach
     selected_df <- selected_df %>%
@@ -1643,12 +1634,9 @@ server <- function(input, output, session) {
         gene_name = name,
         exp_value = expression
       ) %>%
-      select(gene_id, gene_name, exp_value, description) 
+      select(gene_id, gene_name, exp_value, description)
 
     selected_table(selected_df)
-
-    # Force garbage collection after processing
-    gc(verbose = FALSE)
 
     showModal(modalDialog(
       title = paste("Selected Cell ID:", cell_id),
@@ -1679,26 +1667,23 @@ server <- function(input, output, session) {
       selection = "single",
       width = "100%"
     ) %>%
-    formatRound("exp_value", digits = 3)
+      formatRound("exp_value", digits = 3)
   })
 
   # Clear selected table and cell cache when modal is dismissed (memory cleanup)
   observeEvent(input$shiny_modal, {
     if (!isTruthy(input$shiny_modal)) {
       selected_table(NULL)
-      
+
       # Clear old cell cache entries to prevent memory buildup (keep last 10)
       cache_keys <- names(cell_data_cache)
       cell_keys <- cache_keys[grepl("^cell_", cache_keys)]
       if (length(cell_keys) > 10) {
-        # Remove oldest entries
         old_keys <- head(cell_keys, length(cell_keys) - 10)
         for (key in old_keys) {
           cell_data_cache[[key]] <- NULL
         }
       }
-      
-      gc(verbose = FALSE)
     }
   })
 
@@ -1737,7 +1722,7 @@ server <- function(input, output, session) {
     tryCatch(
       {
         # Remove UI elements
-        removeUI(selector = "#dynamic_col_*")
+        # removeUI(selector = "#dynamic_col_*")
 
         # Clear reactive values safely
         if (exists("choice_exp")) {
@@ -1768,7 +1753,7 @@ server <- function(input, output, session) {
         # Clear all cached data explicitly (but preserve normalized data for speed)
         if (exists("cached_data")) {
           cached_data$raw <- NULL
-          # cached_data$normalize <- NULL  # NEVER clear normalized data
+          # cached_data$normalize <- NULL 
           # cached_data$scale <- NULL
           cached_data$current_type <- NULL
           cached_data$current_filter <- NULL
@@ -1791,8 +1776,6 @@ server <- function(input, output, session) {
       },
       error = function(e) {
         message("Error during session cleanup: ", e$message)
-        # Still try to run garbage collection
-        gc(verbose = FALSE, full = TRUE)
       }
     )
   })
@@ -1805,7 +1788,7 @@ server <- function(input, output, session) {
 
         # Clear cached data (but preserve normalized data for gene expression speed)
         cached_data$raw <- NULL
-        # cached_data$normalize <- NULL  # NEVER clear normalized data for speed
+        # cached_data$normalize <- NULL  
         # cached_data$scale <- NULL
         cached_data$current_type <- NULL
         cached_data$current_filter <- NULL
@@ -1824,34 +1807,15 @@ server <- function(input, output, session) {
         }
 
         if (force_gc) {
-          # Force aggressive garbage collection
-          for (i in 1:3) {
-            gc(verbose = FALSE, full = TRUE)
-            Sys.sleep(0.1)
-          }
+          # Single garbage collection after cache clearing
+          gc(verbose = FALSE)
         }
 
         message("Data cache cleared. Memory freed.")
       },
       error = function(e) {
         message("Error clearing cache: ", e$message)
-        # Still try garbage collection
-        gc(verbose = FALSE, full = TRUE)
       }
     )
   }
-
-  # Add periodic garbage collection
-  observe({
-    # Run garbage collection every 5 minutes during active session
-    invalidateLater(300000)
-    tryCatch(
-      {
-        gc(verbose = FALSE)
-      },
-      error = function(e) {
-        message("Periodic GC error: ", e$message)
-      }
-    )
-  })
 }
