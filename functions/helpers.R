@@ -647,11 +647,16 @@ meta_plotly <- function(data, x_var, x_label, y_label, plt_type = "bar") {
   ) %>%
     layout(
       xaxis = list(title = x_label),
-      yaxis = list(title = y_label),
+      yaxis = list(
+        title = y_label,
+        ticklen = 5,
+        tickwidth = 2,
+        tickcolor = "transparent"
+      ),
       showlegend = FALSE,
       barmode = "group",
       bargap = 0.1,
-      margin = list(l = 120, r = 50, t = 50, b = 80)
+      margin = list(l = 180, r = 50, t = 50, b = 80)
     )
 }
 
