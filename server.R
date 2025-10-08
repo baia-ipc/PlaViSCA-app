@@ -211,17 +211,16 @@ server <- function(input, output, session) {
     }
   }
 
-  # Debounced observer to prevent multiple rapid triggers
+  # Debounced observer to prevent multiple rapid triggers - ONLY for data type changes
   observe({
     list(
-      input$apply_filter,
       input$data_type,
       input$data_type_exp
     )
 
     # Only trigger after app is properly initialized
     if (!is.null(input$data_type) || !is.null(input$data_type_exp)) {
-      if (!is.null(input$apply_filter) && !app_initialized()) {
+      if (!app_initialized()) {
         app_initialized(TRUE)
       }
     }
@@ -239,7 +238,7 @@ server <- function(input, output, session) {
     }
   })
 
-  # Main gene_data reactive with debounced trigger
+  # Main gene_data reactive - ONLY loads data, no filtering
   gene_data <- eventReactive(
     data_loading_trigger(),
     {
@@ -250,28 +249,14 @@ server <- function(input, output, session) {
       current_type <- get_current_data_type()
       req(current_type)
 
-      selections <- input$apply_filter
-
-      # Check if we can reuse cached data
+      # Check if we can reuse cached data based ONLY on data type
       if (
         !is.null(cached_data$current_type) &&
-          cached_data$current_type == current_type &&
-          !is.null(cached_data$current_filter) &&
-          identical(cached_data$current_filter, selections)
+          cached_data$current_type == current_type
       ) {
         message("Using cached data for type: ", current_type)
         return(sessionData$last_gene_data)
       }
-
-      if (user_interact() && (is.null(selections) || length(selections) == 0)) {
-        return(NULL)
-      }
-
-      if (is.null(selections)) {
-        selections <- default_df_filter()
-      }
-
-      req(selections)
 
       # Show progress bar when loading new data
       withProgress(message = "", value = 0, {
@@ -299,15 +284,14 @@ server <- function(input, output, session) {
           return(NULL)
         }
 
-        setProgress(0.6, detail = "Filtering data...")
+        setProgress(0.6, detail = "Processing genes...")
         result <- list(
-          data = fun_filter_df(dataset, selections),
+          data = dataset,  # Return full dataset, no filtering here
           genes = genes(dataset, gff_data)
         )
 
-        # Cache the current state
+        # Cache the current state (only data type, no filter)
         cached_data$current_type <- current_type
-        cached_data$current_filter <- selections
         sessionData$last_gene_data <- result
 
         setProgress(1, detail = "Complete!")
@@ -320,6 +304,39 @@ server <- function(input, output, session) {
     },
     ignoreNULL = FALSE
   )
+
+  # Separate reactive for filtered gene data - no progress bar
+  filtered_gene_data <- reactive({
+    req(gene_data())
+    
+    selections <- input$apply_filter
+    
+    # If no selections made (empty or null), use default filter
+    if (is.null(selections) || length(selections) == 0) {
+      selections <- default_df_filter()
+    }
+    
+    req(selections)
+    
+    # Create cache key for filtered gene data
+    cache_key <- make_cache_key("filtered_gene_data", get_current_data_type(), selections)
+    
+    # Check cache first to avoid reprocessing
+    if (exists(cache_key, envir = sessionData, inherits = FALSE)) {
+      return(sessionData[[cache_key]])
+    }
+    
+    # Filter the data without progress bar
+    result <- list(
+      data = fun_filter_df(gene_data()$data, selections),
+      genes = gene_data()$genes
+    )
+    
+    # Cache the result
+    sessionData[[cache_key]] <- result
+    
+    return(result)
+  })
 
   # Synchronize data type selections between tabs using helper functions
   create_data_type_sync_observer(
@@ -342,7 +359,7 @@ server <- function(input, output, session) {
 
 
 
-  # Provide loading feedback to UI (optional - you can use this in your UI)
+  # Provide loading feedback to UI 
   output$loading_state <- reactive({
     global_loading()
   })
@@ -401,7 +418,7 @@ server <- function(input, output, session) {
       session,
       "apply_filter",
       choices = grouped_choices,
-      selected = default_values
+      selected = character(0)  # Start with empty selection
     )
   })
 
@@ -410,23 +427,31 @@ server <- function(input, output, session) {
     user_interact(TRUE)
   })
 
-  # Reactive filtered data with memory management
+  # Reactive filtered data with memory management and caching
   filtered_data <- reactive({
     selections <- input$apply_filter
 
-    if (user_interact() && (is.null(selections) || length(selections) == 0)) {
-      return(data.frame())
-    }
-
-    if (is.null(selections)) {
+    # If no selections made (empty or null), use default filter
+    if (is.null(selections) || length(selections) == 0) {
       selections <- default_df_filter()
     }
 
     req(selections)
 
+    # Create cache key for filtered data
+    cache_key <- make_cache_key("filtered_metadata", selections)
+
+    # Check cache first to avoid reprocessing
+    if (exists(cache_key, envir = sessionData, inherits = FALSE)) {
+      return(sessionData[[cache_key]])
+    }
+
     # Process data and force garbage collection
     result <- fun_filter_df(mr_data, selections)
     gc(verbose = FALSE)
+
+    # Cache the result
+    sessionData[[cache_key]] <- result
 
     return(result)
   })
@@ -856,7 +881,7 @@ server <- function(input, output, session) {
   # Gene Expression tabset
   # Simplified filtered gene expression data for speed
   filtered_gene_exp_data <- reactive({
-    req(gene_data())
+    req(filtered_gene_data())
 
     current_inputs <- list(
       study_label = input$study_label_exp,
@@ -873,7 +898,7 @@ server <- function(input, output, session) {
 
     # Create cache key
     cache_key <- make_cache_key(
-      "filtered",
+      "filtered_exp",
       get_current_data_type(),
       input$study_label_exp,
       input$host_species_exp,
@@ -895,11 +920,11 @@ server <- function(input, output, session) {
     # Apply filters efficiently
     tryCatch(
       {
-        filt_data <- apply_secondary_filters(gene_data()$data, current_inputs)
+        filt_data <- apply_secondary_filters(filtered_gene_data()$data, current_inputs)
 
         result <- list(
           data = filt_data,
-          genes = gene_data()$genes
+          genes = filtered_gene_data()$genes
         )
 
         # Cache the result
@@ -970,7 +995,7 @@ server <- function(input, output, session) {
   # Manipulation tabset "Gene Exp"
   ## gene_exp_0 block with minimal caching for speed
   choice_exp_0 <- reactive({
-    req(gene_data()$genes)
+    req(gene_data()$genes)  # Use non-filtered genes for choices
     # Simple gene choices without heavy caching for faster response
     get_gene_choices(gene_data()$genes, input$check_exp_0)
   })
@@ -1329,7 +1354,7 @@ server <- function(input, output, session) {
   })
 
   choice <- eventReactive(list(input$check, input$data_type), {
-    get_gene_choices(gene_data()$genes, input$check)
+    get_gene_choices(gene_data()$genes, input$check)  # Use non-filtered genes for choices
   })
 
   ## dynamic UI for gene and RNA_snn selection
@@ -1431,7 +1456,7 @@ server <- function(input, output, session) {
   ## choose data based on input color
   data <- reactive({
     if (input$color == "genes") {
-      gene_data()$data
+      filtered_gene_data()$data
     } else {
       filtered_data()
     }
@@ -1542,7 +1567,7 @@ server <- function(input, output, session) {
     # Generate plot without progress bar
     isolate({
       color_column <- switch(input$color,
-        "genes" = get_gene_id(input$genes_n, gene_data()$genes),
+        "genes" = get_gene_id(input$genes_n, gene_data()$genes),  # Use non-filtered genes for ID lookup
         "RNA_snn" = input$genes_n,
         input$color
       )
@@ -1581,7 +1606,7 @@ server <- function(input, output, session) {
   observeEvent(click_event(), {
     event <- click_event()
     req(event)
-    data <- gene_data()$data
+    data <- filtered_gene_data()$data
 
     cell_id <- event$key
 
@@ -1762,10 +1787,16 @@ server <- function(input, output, session) {
         cached_data$current_filter <- NULL
 
         # Clear session data
-        if (
-          exists("sessionData") && exists("last_gene_data", envir = sessionData)
-        ) {
-          sessionData$last_gene_data <- NULL
+        if (exists("sessionData")) {
+          if (exists("last_gene_data", envir = sessionData)) {
+            sessionData$last_gene_data <- NULL
+          }
+          
+          # Clear cached filtered metadata and gene data
+          cached_keys <- ls(envir = sessionData, pattern = "^filtered_")
+          if (length(cached_keys) > 0) {
+            rm(list = cached_keys, envir = sessionData)
+          }
         }
 
         if (force_gc) {
