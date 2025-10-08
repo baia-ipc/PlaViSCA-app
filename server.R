@@ -926,7 +926,7 @@ server <- function(input, output, session) {
     cache_key <- paste0("filtered_", get_current_data_type(), "_", filter_hash)
 
     # Check cache first
-    if (!is.null(sessionData[[cache_key]])) {
+    if (!is.null(sessionData) && exists(cache_key, envir = sessionData, inherits = FALSE)) {
       return(sessionData[[cache_key]])
     }
 
@@ -1076,11 +1076,11 @@ server <- function(input, output, session) {
       "_",
       get_current_data_type(),
       "_",
-      filter_key
+      digest::digest(filter_key)  # Use digest to ensure safe key
     )
 
     # Check cache first for instant gene switching
-    if (!is.null(sessionData[[cache_key]])) {
+    if (!is.null(sessionData) && exists(cache_key, envir = sessionData, inherits = FALSE)) {
       return(sessionData[[cache_key]])
     }
 
@@ -1148,11 +1148,11 @@ server <- function(input, output, session) {
       "_",
       get_current_data_type(),
       "_",
-      filter_key
+      digest::digest(filter_key)  # Use digest to ensure safe key
     )
 
     # Check cache for instant gene switching
-    if (!is.null(sessionData[[plot_cache_key]])) {
+    if (!is.null(sessionData) && exists(plot_cache_key, envir = sessionData, inherits = FALSE)) {
       return(sessionData[[plot_cache_key]])
     }
 
