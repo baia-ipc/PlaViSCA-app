@@ -14,6 +14,97 @@ function updateLabelStyles($input) {
   }
 }
 
+// Smooth sidebar transition optimization
+function optimizeSidebarTransition() {
+  const sidebar = document.getElementById('sidebar');
+  const main = document.getElementById('main');
+  
+  if (sidebar && main) {
+    // Ensure GPU acceleration for smoother transitions
+    sidebar.style.transform = 'translateZ(0)';
+    sidebar.style.willChange = 'width, opacity';
+    main.style.willChange = 'width';
+    
+    // Add transition end listener to clean up will-change
+    sidebar.addEventListener('transitionend', function() {
+      if (this.style.willChange) {
+        this.style.willChange = 'auto';
+        main.style.willChange = 'auto';
+      }
+    });
+  }
+}
+
+// Immediate sidebar control - no Shiny delays
+function setupImmediateSidebarControl() {
+  // Function to show/hide sidebar immediately
+  function toggleSidebar(tabName) {
+    const sidebar = document.getElementById('sidebar');
+    const main = document.getElementById('main');
+    
+    if (!sidebar || !main) return;
+    
+    // Tabs that should hide the sidebar
+    const hideSidebarTabs = ['Metadata', 'Quality control', 'Data sources', 'Gene expression'];
+    
+    if (hideSidebarTabs.includes(tabName)) {
+      // Hide sidebar immediately
+      sidebar.classList.remove('visible');
+      main.classList.add('col-sm-12');
+    } else {
+      // Show sidebar immediately (for Embeddings)
+      sidebar.classList.add('visible');
+      main.classList.remove('col-sm-12');
+    }
+  }
+  
+  // Direct click listener on tab navigation
+  function setupTabClickListeners() {
+    // Listen for clicks on tab links
+    $(document).on('click', 'a[data-toggle="tab"]', function(e) {
+      const tabName = $(this).text().trim();
+      // Immediate response - no delay
+      toggleSidebar(tabName);
+    });
+    
+    // Also listen for any element that might trigger tab changes
+    $(document).on('click', '[data-value]', function(e) {
+      const tabName = $(this).attr('data-value');
+      if (tabName) {
+        toggleSidebar(tabName);
+      }
+    });
+    
+    // Listen for Bootstrap tab events
+    $(document).on('show.bs.tab', 'a[data-toggle="tab"]', function(e) {
+      const tabName = $(e.target).text().trim();
+      toggleSidebar(tabName);
+    });
+  }
+  
+  // Set initial state
+  function setInitialSidebarState() {
+    // Default to Embeddings tab (first tab) - show sidebar
+    const sidebar = document.getElementById('sidebar');
+    const main = document.getElementById('main');
+    
+    if (sidebar && main) {
+      sidebar.classList.add('visible');
+      main.classList.remove('col-sm-12');
+    }
+  }
+  
+  // Initialize everything
+  setupTabClickListeners();
+  setInitialSidebarState();
+}
+
+// Initialize immediate sidebar control when DOM is ready
+$(document).ready(function() {
+  setupImmediateSidebarControl();
+  optimizeSidebarTransition();
+});
+
 // Optimized tooltip management with caching and throttling
 let tooltipUpdateTimeout;
 const tooltipCache = new Map();

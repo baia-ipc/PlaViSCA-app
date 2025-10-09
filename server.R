@@ -102,20 +102,8 @@ server <- function(input, output, session) {
   })
 
   # Larger screen adjustment
-  observe({
-    if (
-      input$tabset == "Metadata" ||
-        input$tabset == "Quality control" ||
-        input$tabset == "Data sources" ||
-        input$tabset == "Gene expression"
-    ) {
-      shinyjs::removeClass("sidebar", "visible")
-      shinyjs::runjs('$("#main").addClass("col-sm-12");')
-    } else {
-      shinyjs::addClass("sidebar", "visible")
-      shinyjs::runjs('$("#main").removeClass("col-sm-12");')
-    }
-  })
+  # Note: Sidebar visibility is now handled by immediate JavaScript in script.js
+  # This provides instant response without waiting for Shiny reactive system
 
   # Synchronize data type selection across tabs
   observeEvent(input$tabset, {

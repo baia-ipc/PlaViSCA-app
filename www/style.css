@@ -602,14 +602,16 @@ ul li:not(:last-child) {
   margin-top: 10px;
   opacity: 0;
   visibility: hidden;
-  transition: width 0.5s ease, opacity 0.5s ease, visibility 0.8s;
+  transition: width 0.3s ease, opacity 0.2s ease, visibility 0.3s;
+  overflow: hidden;
 }
 
 .sidebar.visible {
   width: 25%;
   opacity: 1;
   visibility: visible;
-  transition: width 0.5s ease, opacity 0.5s ease;
+  transition: width 0.3s ease, opacity 0.3s ease 0.1s;
+  overflow: visible;
 }
 
 .main {
