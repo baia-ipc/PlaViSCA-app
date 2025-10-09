@@ -70,8 +70,9 @@ red_df <- mr_data %>%
     any_of(metadata),
     any_of(contains("umap")),
     any_of(contains("pca")),
-    any_of(contains("tsne"))
+    any_of(contains("t_sne"))
   )
+
 # sort by row names
 red_df <- red_df[order(rownames(red_df)), ]
 

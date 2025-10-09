@@ -13,7 +13,7 @@ make_cache_key <- function(...) {
   paste(parts, collapse = "__")
 }
 
-# Helper function to sync data types between tabs with loading state management
+# Helper function to sync data types between tabs
 sync_data_type <- function(session, from_input, to_input, new_value, global_loading, delay = 1.5) {
   global_loading(TRUE)
   updateRadioButtons(
@@ -36,7 +36,7 @@ sync_data_type <- function(session, from_input, to_input, new_value, global_load
   )
 }
 
-# Helper function to create data type sync observer
+# Helper function to create data type
 create_data_type_sync_observer <- function(input, session, input_name, target_input, expected_tabset, global_loading) {
   observeEvent(
     input[[input_name]],
@@ -83,7 +83,7 @@ format_species_name <- function(species_names) {
 # Function that builds the full Metadata tab
 create_meta_filter_row <- function(suffix = "") {
   tagList(
-    # --- First row (5 boxes) ---
+    # First row (5 boxes)
     fluidRow(
       class = "meta-filter",
       style = "display: flex; flex-wrap: wrap; justify-content: space-between;",
@@ -162,7 +162,7 @@ create_meta_filter_row <- function(suffix = "") {
       )
     ),
 
-    # --- Second row (5 boxes) ---
+    # Second row (5 boxes)
     fluidRow(
       class = "meta-filter",
       style = "display: flex; flex-wrap: wrap; justify-content: space-between;",
@@ -236,19 +236,19 @@ create_meta_filter_row <- function(suffix = "") {
 }
 
 # Helper function to create safe cache keys from inputs (handles vectors)
-make_cache_key <- function(...) {
-  args <- list(...)
-  parts <- lapply(args, function(x) {
-    if (is.null(x)) {
-      return("NULL")
-    } else if (length(x) > 1) {
-      return(paste(sort(as.character(x)), collapse = "|"))
-    } else {
-      return(as.character(x))
-    }
-  })
-  paste(parts, collapse = "__")
-}
+# make_cache_key <- function(...) {
+#   args <- list(...)
+#   parts <- lapply(args, function(x) {
+#     if (is.null(x)) {
+#       return("NULL")
+#     } else if (length(x) > 1) {
+#       return(paste(sort(as.character(x)), collapse = "|"))
+#     } else {
+#       return(as.character(x))
+#     }
+#   })
+#   paste(parts, collapse = "__")
+# }
 
 
 
@@ -820,22 +820,35 @@ gene_exp_plot <- function(data, x_col) {
   }
 
   # Performance optimization: Sample data if too large
-  if (nrow(clean_data) > 5000) {
-    set.seed(42) # For reproducible sampling
-    sample_idx <- sample(nrow(clean_data), 5000)
-    clean_data <- clean_data[sample_idx, ]
-  }
+  # if (nrow(clean_data) > 5000) {
+  #   set.seed(42)
+  #   sample_idx <- sample(nrow(clean_data), 5000)
+  #   clean_data <- clean_data[sample_idx, ]
+  # }
 
   # Get unique groups
   unique_groups <- unique(clean_data[[actual_col]])
   n_groups <- length(unique_groups)
 
-  # Use Dark2 palette for better colors
+  # Use Set2 palette for better colors
   colors <- if (n_groups <= 8) {
-    RColorBrewer::brewer.pal(max(3, n_groups), "Dark2")[1:n_groups]
+    RColorBrewer::brewer.pal(max(3, n_groups), "Set2")[1:n_groups]
   } else {
     viridis::viridis(n_groups)
   }
+
+  # Calculate statistics for each group for hover text
+  stats_data <- clean_data %>%
+    group_by(!!sym(actual_col)) %>%
+    summarise(
+      mean_val = round(mean(gene_expr, na.rm = TRUE), 3),
+      sd_val = round(sd(gene_expr, na.rm = TRUE), 3),
+      .groups = "drop"
+    )
+
+  # Merge statistics back to the main data for hover text
+  clean_data <- clean_data %>%
+    left_join(stats_data, by = actual_col)
 
   # Create violin plot
   p <- plotly::plot_ly(
@@ -850,8 +863,18 @@ gene_exp_plot <- function(data, x_col) {
     showlegend = FALSE,
     points = "all",
     jitter = 0.3,
-    pointpos = 0
-  )
+    pointpos = 0,
+    text = ~ paste(
+      "Group:", clean_data[[actual_col]], "<br>",
+      "Expression:", round(gene_expr, 3), "<br>",
+      "Mean:", mean_val, "<br>",
+      "SD:", sd_val
+    ),
+    hoverinfo = "text"
+  ) %>%
+    plotly::layout(
+      yaxis = list(title = "Exp. value")
+    )
 
   return(p)
 }

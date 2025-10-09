@@ -1570,11 +1570,11 @@ input:checked+.slider:before {
 }
 
 .gene_link_ui_exp a {
-  color: var(--color-primary);
+  color: #0066cc;
   text-decoration: none;
   font-size: 0.9em;
 }
 
 .gene_link_ui_exp a:hover {
-  color: var(--color-purple);
+  color: #d234e7;
 }

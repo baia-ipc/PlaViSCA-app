@@ -3,7 +3,6 @@ source("functions/helpers.R")
 library(memoise)
 
 # Define a function for memoized data loading.
-# This will cache the result of readRDS, so each file is only read once per session.
 load_data <- memoise(function(file_path) {
   readRDS(file_path)
 })
@@ -19,7 +18,6 @@ DATA_PATHS <- list(
 gff_data <- readRDS("ref/PvivaxP01_gff_data.rds")
 
 # Pre-load the most commonly used data (normalized data and metadata)
-# This ensures immediate app responsiveness for the default user workflow
 norm_df <- readRDS(DATA_PATHS$norm_df)
 cleaned_data_list <- readRDS(DATA_PATHS$cleaned_dataset)
 mr_data <- cleaned_data_list$mr_data

@@ -101,10 +101,6 @@ server <- function(input, output, session) {
     runjs("window.open('manual/index.html', '_blank')")
   })
 
-  # Larger screen adjustment
-  # Note: Sidebar visibility is now handled by immediate JavaScript in script.js
-  # This provides instant response without waiting for Shiny reactive system
-
   # Synchronize data type selection across tabs
   observeEvent(input$tabset, {
     syncing_tabs(TRUE)
@@ -219,7 +215,7 @@ server <- function(input, output, session) {
       input$data_type_exp
     )
 
-    # Skip if we're in the middle of tab synchronization
+    # Skip if we are in the middle of tab synchronization
     if (syncing_tabs()) {
       return()
     }
@@ -1053,7 +1049,7 @@ server <- function(input, output, session) {
 
   # Simplified gene expression plot for maximum speed
 
-  # Initialize dropdown immediately when gene data is available (app launch)
+  # Initialize dropdown
   observeEvent(gene_data(),
     {
       req(gene_data()$genes)
@@ -1442,7 +1438,7 @@ server <- function(input, output, session) {
       shinyjs::hide("gene_link_ui")
       shinyjs::hide("data_type")
       shinyjs::hide("switch_id")
-      genes_loading(FALSE) # Reset loading state when hiding
+      genes_loading(FALSE) 
     }
   })
 
@@ -1472,7 +1468,7 @@ server <- function(input, output, session) {
       },
       error = function(e) {
         message("Error updating gene choices: ", e$message)
-        genes_loading(FALSE) # Reset even on error
+        genes_loading(FALSE) 
       }
     )
   })
@@ -1537,7 +1533,7 @@ server <- function(input, output, session) {
     }
   )
 
-  ## automatically update size selection based on plot type
+  ## automatically update size selection based on embedding plot 2D or 3D
   observeEvent(input$plot,
     {
       if (!is.null(input$plot)) {
@@ -1565,7 +1561,7 @@ server <- function(input, output, session) {
   # Add debouncing for plot updates
   plot_update_trigger <- reactiveVal(0)
   plot_ready <- reactiveVal(FALSE)
-  genes_loading <- reactiveVal(FALSE) # Track gene loading state
+  genes_loading <- reactiveVal(FALSE) 
 
   # Simplified debounced observer for plot-related inputs
   observe({
