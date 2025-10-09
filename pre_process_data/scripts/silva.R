@@ -73,6 +73,8 @@ for (cell in df$Updated_names) {
   silva$refine_state[matched] <- df$refine_state[df$Updated_names == cell]
 }
 
+# Add barcode column for consistency with other studies
+silva$barcode <- colnames(silva)
 
 # match_cell <- intersect(colnames(silva), df$Updated_names)
 # silva$refine_state[match_cell] <- df$refine_state[match(

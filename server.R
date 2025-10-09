@@ -119,6 +119,8 @@ server <- function(input, output, session) {
 
   # Synchronize data type selection across tabs
   observeEvent(input$tabset, {
+    syncing_tabs(TRUE) # Set flag to prevent reactive loops
+
     if (input$tabset == "Gene expression") {
       # Sync with embeddings data type if available, otherwise default to normalize
       current_selection <- if (!is.null(input$data_type)) {
@@ -127,16 +129,19 @@ server <- function(input, output, session) {
         "normalize"
       }
 
-      updateRadioButtons(
-        session,
-        "data_type_exp",
-        choices = list(
-          "Raw" = "raw",
-          "Normalized" = "normalize"
-          # "Scaled" = "scale"
-        ),
-        selected = current_selection
-      )
+      # Only update if the selection is different to avoid unnecessary triggers
+      if (is.null(input$data_type_exp) || input$data_type_exp != current_selection) {
+        updateRadioButtons(
+          session,
+          "data_type_exp",
+          choices = list(
+            "Raw" = "raw",
+            "Normalized" = "normalize"
+            # "Scaled" = "scale"
+          ),
+          selected = current_selection
+        )
+      }
     } else if (input$tabset == "Embeddings") {
       current_selection <- if (!is.null(input$data_type_exp)) {
         input$data_type_exp
@@ -144,23 +149,32 @@ server <- function(input, output, session) {
         "normalize"
       }
 
-      updateRadioButtons(
-        session,
-        "data_type",
-        choices = list(
-          "Raw" = "raw",
-          "Normalized" = "normalize"
-          # "Scaled" = "scale"
-        ),
-        selected = current_selection
-      )
+      # Only update if the selection is different to avoid unnecessary triggers
+      if (is.null(input$data_type) || input$data_type != current_selection) {
+        updateRadioButtons(
+          session,
+          "data_type",
+          choices = list(
+            "Raw" = "raw",
+            "Normalized" = "normalize"
+            # "Scaled" = "scale"
+          ),
+          selected = current_selection
+        )
+      }
     }
+
+    # Reset flag after a short delay
+    later(function() {
+      syncing_tabs(FALSE)
+    }, 0.1)
   })
 
   # Data caching system for performance optimization
   default_df_filter <- reactiveVal(NULL)
   app_initialized <- reactiveVal(FALSE)
   data_loading_trigger <- reactiveVal(0)
+  syncing_tabs <- reactiveVal(FALSE) # Flag to prevent sync loops
 
   cached_data <- reactiveValues(
     raw = NULL,
@@ -216,6 +230,11 @@ server <- function(input, output, session) {
       input$data_type,
       input$data_type_exp
     )
+
+    # Skip if we're in the middle of tab synchronization
+    if (syncing_tabs()) {
+      return()
+    }
 
     # Only trigger after app is properly initialized
     if (!is.null(input$data_type) || !is.null(input$data_type_exp)) {
@@ -284,7 +303,7 @@ server <- function(input, output, session) {
 
         setProgress(0.6, detail = "Processing genes...")
         result <- list(
-          data = dataset, 
+          data = dataset,
           genes = genes(dataset, gff_data)
         )
 
@@ -1335,6 +1354,7 @@ server <- function(input, output, session) {
   })
 
   choice <- eventReactive(list(input$check, input$data_type), {
+    req(gene_data()$genes) # Ensure gene data is available
     get_gene_choices(gene_data()$genes, input$check)
   })
 
@@ -1344,15 +1364,37 @@ server <- function(input, output, session) {
   observe({
     if (input$color == "genes") {
       shinyjs::show("data_type")
-      # shinyjs::show("gene_snn_ui")
+      shinyjs::show("gene_snn_ui")
       shinyjs::show("gene_link_ui")
       shinyjs::show("switch_id")
-      updateSelectizeInput(
-        session,
-        "genes_n",
-        label = if (isTRUE(input$check)) "Gene ID" else "Gene name",
-        choices = choice(),
-        server = TRUE
+
+      # Use a safer approach to get gene choices
+      tryCatch(
+        {
+          gene_choices <- if (!is.null(gene_data()$genes)) {
+            get_gene_choices(gene_data()$genes, input$check)
+          } else {
+            ""
+          }
+
+          updateSelectizeInput(
+            session,
+            "genes_n",
+            label = if (isTRUE(input$check)) "Gene ID" else "Gene name",
+            choices = gene_choices,
+            server = TRUE
+          )
+        },
+        error = function(e) {
+          # Fallback to empty choices if there's an error
+          updateSelectizeInput(
+            session,
+            "genes_n",
+            label = if (isTRUE(input$check)) "Gene ID" else "Gene name",
+            choices = "",
+            server = TRUE
+          )
+        }
       )
       # } else if (input$color == "RNA_snn") {
       #   shinyjs::show("gene_snn_ui")
@@ -1367,11 +1409,33 @@ server <- function(input, output, session) {
       #     server = TRUE
       #   )
     } else {
-      # shinyjs::hide("gene_snn_ui")
+      shinyjs::hide("gene_snn_ui")
       shinyjs::hide("gene_link_ui")
       shinyjs::hide("data_type")
       shinyjs::hide("switch_id")
     }
+  })
+
+  # Separate observer to update gene choices when data or toggle changes
+  observe({
+    req(gene_data()$genes, input$color == "genes")
+
+    tryCatch(
+      {
+        gene_choices <- get_gene_choices(gene_data()$genes, input$check)
+
+        updateSelectizeInput(
+          session,
+          "genes_n",
+          label = if (isTRUE(input$check)) "Gene ID" else "Gene name",
+          choices = gene_choices,
+          server = TRUE
+        )
+      },
+      error = function(e) {
+        message("Error updating gene choices: ", e$message)
+      }
+    )
   })
 
   ## hide switch for tsne
@@ -1753,7 +1817,7 @@ server <- function(input, output, session) {
         # Clear all cached data explicitly (but preserve normalized data for speed)
         if (exists("cached_data")) {
           cached_data$raw <- NULL
-          # cached_data$normalize <- NULL 
+          # cached_data$normalize <- NULL
           # cached_data$scale <- NULL
           cached_data$current_type <- NULL
           cached_data$current_filter <- NULL
@@ -1788,7 +1852,7 @@ server <- function(input, output, session) {
 
         # Clear cached data (but preserve normalized data for gene expression speed)
         cached_data$raw <- NULL
-        # cached_data$normalize <- NULL  
+        # cached_data$normalize <- NULL
         # cached_data$scale <- NULL
         cached_data$current_type <- NULL
         cached_data$current_filter <- NULL

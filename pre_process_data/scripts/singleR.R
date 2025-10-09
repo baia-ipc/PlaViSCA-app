@@ -12,6 +12,9 @@ setwd("/srv/baia/prj/pvsca/pre_process_data")
 
 pv.combined.all <- readRDS("./pv_all_studies.rds")
 
+# subset to see barcode of study silva2020
+silva <- subset(pv.combined.all, subset = study_label == "Mancio Silva2022")
+
 
 # First, upload (PMID:xxxx) data to R (data can be found in the OneDrive folder)
 Zhu_HiDef_PVX_IDC_timecourse_1 <- read_excel(
