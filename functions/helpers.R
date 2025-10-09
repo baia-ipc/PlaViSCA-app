@@ -790,7 +790,7 @@ var_genes_plot <- function(df, study, top_n = 10) {
 }
 
 
-# Generate violine gene exp plot with performance optimization
+# Generate dot plot gene expression plot with performance optimization
 gene_exp_plot <- function(data, x_col) {
   # Find the actual column name (case-insensitive)
   actual_col <- colnames(data)[tolower(colnames(data)) == tolower(x_col)]
@@ -832,21 +832,35 @@ gene_exp_plot <- function(data, x_col) {
     RColorBrewer::brewer.pal(min(n_groups, 11), "Spectral")
   }
 
-  # Create violin plot with proper color differentiation
+  # Add jitter to x-coordinates for better point separation
+  clean_data$x_jitter <- as.numeric(as.factor(clean_data[[actual_col]])) +
+    runif(nrow(clean_data), -0.2, 0.2)
+
+  # Create dot plot with jittered points
   p <- plotly::plot_ly(
     data = clean_data,
-    x = clean_data[[actual_col]],
-    y = clean_data$gene_expr,
+    x = ~x_jitter,
+    y = ~gene_expr,
     color = clean_data[[actual_col]],
     colors = colors,
-    type = "violin",
-    box = list(visible = TRUE),
-    meanline = list(visible = TRUE),
-    points = FALSE,
+    type = "scatter",
+    mode = "markers",
+    marker = list(
+      size = 5,
+      opacity = 0.7,
+      line = list(width = 0.5, color = "rgba(255,255,255,0.8)")
+    ),
+    text = ~ paste("Group:", clean_data[[actual_col]], "<br>Expression:", round(gene_expr, 3)),
+    hoverinfo = "text",
     showlegend = FALSE
   ) %>%
     plotly::layout(
-      xaxis = list(title = ""),
+      xaxis = list(
+        title = "",
+        tickvals = 1:n_groups,
+        ticktext = unique_groups,
+        range = c(0.5, n_groups + 0.5)
+      ),
       yaxis = list(title = "Expression value"),
       title = "",
       showlegend = FALSE,
