@@ -790,7 +790,7 @@ var_genes_plot <- function(df, study, top_n = 10) {
 }
 
 
-# Generate dot plot gene expression plot with performance optimization
+# Generate violin plot with jittered points overlay
 gene_exp_plot <- function(data, x_col) {
   # Find the actual column name (case-insensitive)
   actual_col <- colnames(data)[tolower(colnames(data)) == tolower(x_col)]
@@ -819,10 +819,6 @@ gene_exp_plot <- function(data, x_col) {
     return(plotly::plot_ly() %>% plotly::layout(title = ""))
   }
 
-  # Get unique groups for color mapping
-  unique_groups <- unique(clean_data[[actual_col]])
-  n_groups <- length(unique_groups)
-
   # Performance optimization: Sample data if too large
   if (nrow(clean_data) > 5000) {
     set.seed(42) # For reproducible sampling
@@ -830,65 +826,32 @@ gene_exp_plot <- function(data, x_col) {
     clean_data <- clean_data[sample_idx, ]
   }
 
-  # Choose better color palette avoiding yellow/light colors
-  colors <- if (n_groups <= 3) {
-    c("#E31A1C", "#1F78B4", "#33A02C")[1:n_groups] # Red, Blue, Green
-  } else if (n_groups <= 6) {
-    c("#E31A1C", "#1F78B4", "#33A02C", "#6A3D9A", "#FF7F00", "#B15928")[1:n_groups] # Darker Set1
-  } else if (n_groups <= 8) {
-    RColorBrewer::brewer.pal(n_groups, "Dark2") # Dark2 palette (no yellow)
+  # Get unique groups
+  unique_groups <- unique(clean_data[[actual_col]])
+  n_groups <- length(unique_groups)
+
+  # Use Dark2 palette for better colors
+  colors <- if (n_groups <= 8) {
+    RColorBrewer::brewer.pal(max(3, n_groups), "Dark2")[1:n_groups]
   } else {
-    # Custom color sequence avoiding yellow tones
-    rep(c(
-      "#E31A1C", "#1F78B4", "#33A02C", "#6A3D9A", "#FF7F00", "#B15928",
-      "#A6CEE3", "#B2DF8A"
-    ), length.out = n_groups)
+    viridis::viridis(n_groups)
   }
 
-  # Pre-calculate jitter for better performance
-  group_factor <- as.numeric(as.factor(clean_data[[actual_col]]))
-  clean_data$x_jitter <- group_factor + runif(nrow(clean_data), -0.3, 0.3)
-
-  # Create optimized dot plot
+  # Create violin plot
   p <- plotly::plot_ly(
     data = clean_data,
-    x = ~x_jitter,
+    x = clean_data[[actual_col]],
     y = ~gene_expr,
+    type = "violin",
+    box = list(visible = FALSE),
+    meanline = list(visible = FALSE),
     color = clean_data[[actual_col]],
     colors = colors,
-    type = "scatter",
-    mode = "markers",
-    marker = list(
-      size = 4,
-      opacity = 0.6,
-      line = list(width = 0.3, color = "rgba(255,255,255,0.9)")
-    ),
-    text = ~ paste("Group:", clean_data[[actual_col]], "<br>Expression:", round(gene_expr, 3)),
-    hoverinfo = "text",
-    showlegend = FALSE
-  ) %>%
-    plotly::layout(
-      xaxis = list(
-        title = "",
-        tickvals = 1:n_groups,
-        ticktext = unique_groups,
-        range = c(0.5, n_groups + 0.5),
-        showgrid = FALSE
-      ),
-      yaxis = list(
-        title = "Expression value",
-        showgrid = TRUE,
-        gridcolor = "rgba(200,200,200,0.3)"
-      ),
-      title = "",
-      showlegend = FALSE,
-      margin = list(l = 60, r = 40, t = 20, b = 40),
-      plot_bgcolor = "rgba(0,0,0,0)",
-      paper_bgcolor = "rgba(0,0,0,0)"
-    ) %>%
-    plotly::config(
-      staticPlot = FALSE
-    )
+    showlegend = FALSE,
+    points = "all",
+    jitter = 0.3,
+    pointpos = 0
+  )
 
   return(p)
 }

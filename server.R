@@ -1847,110 +1847,23 @@ server <- function(input, output, session) {
     }
   )
 
-  # clear memory on session end with comprehensive cleanup
+  # Simple memory cleanup on session end
   onSessionEnded(function() {
-    message("Starting session cleanup...")
-
     tryCatch(
       {
-        # Remove UI elements
-        # removeUI(selector = "#dynamic_col_*")
-
-        # Clear reactive values safely
-        if (exists("choice_exp")) {
-          choice_exp(NULL)
-        }
-        if (exists("selected_table")) {
-          selected_table(NULL)
-        }
-        if (exists("autoUpdatePlot")) {
-          autoUpdatePlot(FALSE)
-        }
-        if (exists("app_initialized")) {
-          app_initialized(FALSE)
-        }
-        if (exists("data_loading_trigger")) {
-          data_loading_trigger(NULL)
-        }
-        if (exists("default_df_filter")) {
-          default_df_filter(NULL)
-        }
-        if (exists("plot_ready")) {
-          plot_ready(FALSE)
-        }
-        if (exists("global_loading")) {
-          global_loading(FALSE)
-        }
-        if (exists("genes_loading")) {
-          genes_loading(FALSE)
+        # Clear memoise cache
+        if (exists("load_data") && is.function(load_data)) {
+          memoise::forget(load_data)
         }
 
-        # Clear all cached data explicitly (but preserve normalized data for speed)
-        if (exists("cached_data")) {
-          cached_data$raw <- NULL
-          # cached_data$normalize <- NULL
-          # cached_data$scale <- NULL
-          cached_data$current_type <- NULL
-          cached_data$current_filter <- NULL
-        }
+        # Run garbage collection
+        gc()
 
-        # Clear session data
-        if (exists("sessionData")) {
-          if (exists("last_gene_data", envir = sessionData)) {
-            sessionData$last_gene_data <- NULL
-          }
-          rm(list = ls(envir = sessionData), envir = sessionData)
-        }
-
-        # Clear temporary variables from global environment
-        rm(
-          list = ls(envir = .GlobalEnv, pattern = "^temp_"),
-          envir = .GlobalEnv
-        )
-        message("Session ended. Memory cleanup completed.")
+        message("Session ended. Memory cleaned.")
       },
       error = function(e) {
-        message("Error during session cleanup: ", e$message)
+        message("Error during cleanup: ", e$message)
       }
     )
   })
-
-  # Enhanced function to manually clear cache with immediate garbage collection
-  clear_data_cache <- function(force_gc = TRUE) {
-    tryCatch(
-      {
-        message("Clearing data cache...")
-
-        # Clear cached data (but preserve normalized data for gene expression speed)
-        cached_data$raw <- NULL
-        # cached_data$normalize <- NULL
-        # cached_data$scale <- NULL
-        cached_data$current_type <- NULL
-        cached_data$current_filter <- NULL
-
-        # Clear session data
-        if (exists("sessionData")) {
-          if (exists("last_gene_data", envir = sessionData)) {
-            sessionData$last_gene_data <- NULL
-          }
-
-          # Clear cached filtered metadata and gene data
-          cached_keys <- ls(envir = sessionData, pattern = "^filtered_")
-          if (length(cached_keys) > 0) {
-            rm(list = cached_keys, envir = sessionData)
-          }
-        }
-
-        if (force_gc) {
-          # Single garbage collection after cache clearing
-          gc(verbose = FALSE)
-        }
-
-        message("Data cache cleared. Memory freed.")
-      },
-      error = function(e) {
-        message("Error clearing cache: ", e$message)
-      }
-    )
-  }
 }

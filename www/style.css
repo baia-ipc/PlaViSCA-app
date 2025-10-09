@@ -973,6 +973,8 @@ input:checked+.slider:before {
   position: absolute;
   padding-left: 0;
   width: 300px;
+  top: -32px;
+  left: 125px;
 }
 
 .gene_link_ui_exp {
