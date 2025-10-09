@@ -823,20 +823,33 @@ gene_exp_plot <- function(data, x_col) {
   unique_groups <- unique(clean_data[[actual_col]])
   n_groups <- length(unique_groups)
 
-  # Choose appropriate color palette based on number of groups (optimized)
-  colors <- if (n_groups <= 3) {
-    RColorBrewer::brewer.pal(3, "Set1")[1:n_groups]
-  } else if (n_groups <= 8) {
-    RColorBrewer::brewer.pal(n_groups, "Set2")
-  } else {
-    RColorBrewer::brewer.pal(min(n_groups, 11), "Spectral")
+  # Performance optimization: Sample data if too large
+  if (nrow(clean_data) > 5000) {
+    set.seed(42) # For reproducible sampling
+    sample_idx <- sample(nrow(clean_data), 5000)
+    clean_data <- clean_data[sample_idx, ]
   }
 
-  # Add jitter to x-coordinates for better point separation
-  clean_data$x_jitter <- as.numeric(as.factor(clean_data[[actual_col]])) +
-    runif(nrow(clean_data), -0.2, 0.2)
+  # Choose better color palette avoiding yellow/light colors
+  colors <- if (n_groups <= 3) {
+    c("#E31A1C", "#1F78B4", "#33A02C")[1:n_groups] # Red, Blue, Green
+  } else if (n_groups <= 6) {
+    c("#E31A1C", "#1F78B4", "#33A02C", "#6A3D9A", "#FF7F00", "#B15928")[1:n_groups] # Darker Set1
+  } else if (n_groups <= 8) {
+    RColorBrewer::brewer.pal(n_groups, "Dark2") # Dark2 palette (no yellow)
+  } else {
+    # Custom color sequence avoiding yellow tones
+    rep(c(
+      "#E31A1C", "#1F78B4", "#33A02C", "#6A3D9A", "#FF7F00", "#B15928",
+      "#A6CEE3", "#B2DF8A"
+    ), length.out = n_groups)
+  }
 
-  # Create dot plot with jittered points
+  # Pre-calculate jitter for better performance
+  group_factor <- as.numeric(as.factor(clean_data[[actual_col]]))
+  clean_data$x_jitter <- group_factor + runif(nrow(clean_data), -0.3, 0.3)
+
+  # Create optimized dot plot
   p <- plotly::plot_ly(
     data = clean_data,
     x = ~x_jitter,
@@ -846,9 +859,9 @@ gene_exp_plot <- function(data, x_col) {
     type = "scatter",
     mode = "markers",
     marker = list(
-      size = 5,
-      opacity = 0.7,
-      line = list(width = 0.5, color = "rgba(255,255,255,0.8)")
+      size = 4,
+      opacity = 0.6,
+      line = list(width = 0.3, color = "rgba(255,255,255,0.9)")
     ),
     text = ~ paste("Group:", clean_data[[actual_col]], "<br>Expression:", round(gene_expr, 3)),
     hoverinfo = "text",
@@ -859,12 +872,22 @@ gene_exp_plot <- function(data, x_col) {
         title = "",
         tickvals = 1:n_groups,
         ticktext = unique_groups,
-        range = c(0.5, n_groups + 0.5)
+        range = c(0.5, n_groups + 0.5),
+        showgrid = FALSE
       ),
-      yaxis = list(title = "Expression value"),
+      yaxis = list(
+        title = "Expression value",
+        showgrid = TRUE,
+        gridcolor = "rgba(200,200,200,0.3)"
+      ),
       title = "",
       showlegend = FALSE,
-      margin = list(l = 60, r = 40, t = 20, b = 40)
+      margin = list(l = 60, r = 40, t = 20, b = 40),
+      plot_bgcolor = "rgba(0,0,0,0)",
+      paper_bgcolor = "rgba(0,0,0,0)"
+    ) %>%
+    plotly::config(
+      staticPlot = FALSE
     )
 
   return(p)

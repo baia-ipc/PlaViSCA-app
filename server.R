@@ -897,7 +897,7 @@ server <- function(input, output, session) {
     )
 
     # Create cache key as a single string for filtered gene expression data
-    cache_key <- paste(
+    cache_key <- make_cache_key(
       "filtered_gene_exp",
       input$study_label_exp,
       input$host_species_exp,
@@ -908,8 +908,7 @@ server <- function(input, output, session) {
       input$strain_exp,
       input$hour_post_invasion_exp,
       input$sequencer_exp,
-      input$sc_technology_exp,
-      sep = "_"
+      input$sc_technology_exp
     )
     if (exists(cache_key, envir = sessionData, inherits = FALSE)) {
       return(sessionData[[cache_key]])
@@ -1128,13 +1127,12 @@ server <- function(input, output, session) {
     }
 
     # Create cache key
-    plot_cache_key <- paste(
+    plot_cache_key <- make_cache_key(
       "gene_exp_plot",
       input$genes_exp_0,
       input$group_exp,
       input$study_label_exp,
-      input$check_exp_0,
-      sep = "_"
+      input$check_exp_0
     )
 
     # Check cache for instant gene switching
