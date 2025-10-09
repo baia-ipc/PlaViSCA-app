@@ -119,7 +119,7 @@ server <- function(input, output, session) {
 
   # Synchronize data type selection across tabs
   observeEvent(input$tabset, {
-    syncing_tabs(TRUE) # Set flag to prevent reactive loops
+    syncing_tabs(TRUE)
 
     if (input$tabset == "Gene expression") {
       # Sync with embeddings data type if available, otherwise default to normalize
@@ -174,7 +174,7 @@ server <- function(input, output, session) {
   default_df_filter <- reactiveVal(NULL)
   app_initialized <- reactiveVal(FALSE)
   data_loading_trigger <- reactiveVal(0)
-  syncing_tabs <- reactiveVal(FALSE) # Flag to prevent sync loops
+  syncing_tabs <- reactiveVal(FALSE)
 
   cached_data <- reactiveValues(
     raw = NULL,
@@ -243,7 +243,7 @@ server <- function(input, output, session) {
       }
     }
 
-    # Use later() to debounce - only trigger after 500ms of no changes
+    # Use later() to debounce - only trigger after 300ms of no changes (reduced from 500ms)
     if (app_initialized()) {
       later(
         function() {
@@ -251,7 +251,7 @@ server <- function(input, output, session) {
             data_loading_trigger(data_loading_trigger() + 1)
           })
         },
-        0.5
+        0.3
       )
     }
   })
@@ -279,8 +279,8 @@ server <- function(input, output, session) {
       withProgress(message = "", value = 0, {
         display_name <- switch(current_type,
           raw = "Raw",
-          normalize = "Normalized",
-          # scale = "Scaled",
+          normalize = "Normalized"
+          # scale = "Scaled"
         )
 
         # Check if dataset is already cached
@@ -908,10 +908,9 @@ server <- function(input, output, session) {
       sc_technology = input$sc_technology_exp
     )
 
-    # Create cache key
-    cache_key <- make_cache_key(
-      "filtered_exp",
-      get_current_data_type(),
+    # Create cache key as a single string for filtered gene expression data
+    cache_key <- paste(
+      "filtered_gene_exp",
       input$study_label_exp,
       input$host_species_exp,
       input$life_cycle_stage_exp,
@@ -921,10 +920,9 @@ server <- function(input, output, session) {
       input$strain_exp,
       input$hour_post_invasion_exp,
       input$sequencer_exp,
-      input$sc_technology_exp
+      input$sc_technology_exp,
+      sep = "_"
     )
-
-    # Check cache first - use exists()
     if (exists(cache_key, envir = sessionData, inherits = FALSE)) {
       return(sessionData[[cache_key]])
     }
@@ -1009,27 +1007,9 @@ server <- function(input, output, session) {
     get_gene_choices(gene_data()$genes, input$check_exp_0)
   })
 
-  # Use observer for gene choice updates
-  observe({
-    req(choice_exp_0())
-    tryCatch(
-      {
-        updateSelectizeInput(
-          session,
-          "genes_exp_0",
-          label = if (isTRUE(input$check_exp_0)) "Gene ID" else "Gene name",
-          choices = choice_exp_0(),
-          server = TRUE
-        )
-      },
-      error = function(e) {
-        # Silent error handling
-      }
-    )
-  })
-
-  # df_exp data for genes_exp_0 with filter-aware caching
+  # df_exp data for genes_exp_0 with simplified reactive approach
   df_exp_0 <- reactive({
+    # Basic requirements check
     req(filtered_gene_exp_data(), input$genes_exp_0, input$group_exp)
 
     # Skip processing during loading states
@@ -1085,32 +1065,91 @@ server <- function(input, output, session) {
   })
 
   # Simplified gene expression plot for maximum speed
-  output$gene_exp_plotly <- renderPlotly({
-    req(df_exp_0(), input$group_exp)
 
+  # Initialize dropdown immediately when gene data is available (app launch)
+  observeEvent(gene_data(),
+    {
+      req(gene_data()$genes)
+
+      # Get initial choices
+      initial_choices <- get_gene_choices(gene_data()$genes, FALSE)
+
+      # Update dropdown immediately during app launch
+      tryCatch(
+        {
+          updateSelectizeInput(
+            session,
+            "genes_exp_0",
+            label = "Gene name",
+            choices = initial_choices,
+            server = TRUE
+          )
+        },
+        error = function(e) {
+          # Silent error handling
+        }
+      )
+    },
+    once = TRUE
+  ) # Only run once when data first loads
+
+  # Update dropdown when check box changes
+  observeEvent(input$check_exp_0, {
+    req(gene_data()$genes)
+
+    # Get choices based on checkbox state
+    choices <- get_gene_choices(gene_data()$genes, input$check_exp_0)
+
+    tryCatch(
+      {
+        updateSelectizeInput(
+          session,
+          "genes_exp_0",
+          label = if (isTRUE(input$check_exp_0)) "Gene ID" else "Gene name",
+          choices = choices,
+          server = TRUE
+        )
+      },
+      error = function(e) {
+        # Silent error handling
+      }
+    )
+  })
+
+  output$gene_exp_plotly <- renderPlotly({
+    # Basic requirements only
+    req(input$genes_exp_0, input$group_exp)
+
+    # Skip during global loading
     if (global_loading()) {
       return(NULL)
     }
 
+    # Get data and validate
+    plot_data <- df_exp_0()
+    req(plot_data)
+
+    # Validate data structure
+    if (nrow(plot_data) == 0) {
+      return(NULL)
+    }
+
+    # Check if the selected gene is valid in the data
+    if (!"gene_expr" %in% names(plot_data)) {
+      return(NULL)
+    }
+
     # Create cache key
-    plot_cache_key <- make_cache_key(
-      "plot",
+    plot_cache_key <- paste(
+      "gene_exp_plot",
       input$genes_exp_0,
       input$group_exp,
-      get_current_data_type(),
       input$study_label_exp,
-      input$host_species_exp,
-      input$life_cycle_stage_exp,
-      input$treatment_exp,
-      input$parasite_stage_exp,
-      input$sample_type_exp,
-      input$strain_exp,
-      input$hour_post_invasion_exp,
-      input$sequencer_exp,
-      input$sc_technology_exp
+      input$check_exp_0,
+      sep = "_"
     )
 
-    # Check cache for instant gene switching - use exists() for safety
+    # Check cache for instant gene switching
     if (exists(plot_cache_key, envir = sessionData, inherits = FALSE)) {
       return(sessionData[[plot_cache_key]])
     }
@@ -1119,7 +1158,7 @@ server <- function(input, output, session) {
     result <- tryCatch(
       {
         group <- tolower(input$group_exp)
-        gene_exp_plot(df_exp_0(), group)
+        gene_exp_plot(plot_data, group)
       },
       error = function(e) {
         return(NULL)
@@ -1333,15 +1372,10 @@ server <- function(input, output, session) {
   observeEvent(input$data_type_exp_change, {
     req(gene_data(), input$data_type_exp_change)
 
-    # Debounce multiple plot updates with shorter delay
-    later(
-      function() {
-        isolate({
-          gene_exp_plots_trigger(gene_exp_plots_trigger() + 1)
-        })
-      },
-      0.2
-    )
+    # Direct trigger without additional delay since data is already loaded
+    isolate({
+      gene_exp_plots_trigger(gene_exp_plots_trigger() + 1)
+    })
   })
 
   # Manipulation tabset "Embedding"
@@ -1368,6 +1402,9 @@ server <- function(input, output, session) {
       shinyjs::show("gene_link_ui")
       shinyjs::show("switch_id")
 
+      # Set loading state when showing gene UI
+      genes_loading(TRUE)
+
       # Use a safer approach to get gene choices
       tryCatch(
         {
@@ -1384,6 +1421,11 @@ server <- function(input, output, session) {
             choices = gene_choices,
             server = TRUE
           )
+
+          # Reset loading state after update
+          later(function() {
+            genes_loading(FALSE)
+          }, 0.1)
         },
         error = function(e) {
           # Fallback to empty choices if there's an error
@@ -1394,6 +1436,7 @@ server <- function(input, output, session) {
             choices = "",
             server = TRUE
           )
+          genes_loading(FALSE)
         }
       )
       # } else if (input$color == "RNA_snn") {
@@ -1413,12 +1456,16 @@ server <- function(input, output, session) {
       shinyjs::hide("gene_link_ui")
       shinyjs::hide("data_type")
       shinyjs::hide("switch_id")
+      genes_loading(FALSE) # Reset loading state when hiding
     }
   })
 
   # Separate observer to update gene choices when data or toggle changes
   observe({
     req(gene_data()$genes, input$color == "genes")
+
+    # Set loading state to prevent plot updates
+    genes_loading(TRUE)
 
     tryCatch(
       {
@@ -1431,9 +1478,15 @@ server <- function(input, output, session) {
           choices = gene_choices,
           server = TRUE
         )
+
+        # Reset loading state after choices are updated
+        later(function() {
+          genes_loading(FALSE)
+        }, 0.1)
       },
       error = function(e) {
         message("Error updating gene choices: ", e$message)
+        genes_loading(FALSE) # Reset even on error
       }
     )
   })
@@ -1526,8 +1579,9 @@ server <- function(input, output, session) {
   # Add debouncing for plot updates
   plot_update_trigger <- reactiveVal(0)
   plot_ready <- reactiveVal(FALSE)
+  genes_loading <- reactiveVal(FALSE) # Track gene loading state
 
-  # Debounced observer for plot-related inputs
+  # Simplified debounced observer for plot-related inputs
   observe({
     list(
       input$embedding,
@@ -1554,54 +1608,25 @@ server <- function(input, output, session) {
       }
     )
 
-    # Use later() to debounce plot updates - wait 1.2 seconds for all changes to settle
+    # Simple debounce - wait for inputs to stabilize
     later(
       function() {
         tryCatch(
           {
             isolate({
               plot_update_trigger(plot_update_trigger() + 1)
+              plot_ready(TRUE)
+              autoUpdatePlot(TRUE)
             })
           },
           error = function(e) {
             message("Error in plot update debounce: ", e$message)
-          }
-        )
-      },
-      1.2
-    )
-  })
-
-  # Separate reactive to handle plot readiness
-  observe({
-    plot_update_trigger()
-
-    # Additional delay to ensure data is fully loaded
-    later(
-      function() {
-        tryCatch(
-          {
-            plot_ready(TRUE)
-            autoUpdatePlot(TRUE)
-
-            # Show completion notification for data type changes
-            if (isolate(global_loading())) {
-              showNotification(
-                "Data type change completed!",
-                type = "message",
-                duration = 2
-              )
-              global_loading(FALSE)
-            }
-          },
-          error = function(e) {
-            message("Error in plot readiness: ", e$message)
             plot_ready(TRUE)
             autoUpdatePlot(TRUE)
           }
         )
       },
-      0.3
+      0.6
     )
   })
 
@@ -1614,11 +1639,60 @@ server <- function(input, output, session) {
     )
   })
 
-  ## generate pca, umap and tsne plot with improved debouncing
+  ## generate pca, umap and tsne plot with comprehensive dependency checking
   embplot <- reactiveVal(FALSE)
-  output$all_plotly <- renderPlotly({
-    req(data(), input$xaxis, input$yaxis, plot_ready(), autoUpdatePlot())
 
+  # Embedding plot readiness state
+  embedding_ready <- reactiveVal(FALSE)
+  last_gene_selection <- reactiveVal("")
+
+  # Comprehensive dependency checker with gene selection stability
+  all_dependencies_ready <- reactive({
+    # Core data requirements
+    if (is.null(data()) || nrow(data()) == 0) {
+      return(FALSE)
+    }
+
+    # Basic plot settings
+    if (is.null(input$xaxis) || is.null(input$yaxis)) {
+      return(FALSE)
+    }
+
+    # Plot readiness and auto-update flags
+    if (!plot_ready() || !autoUpdatePlot()) {
+      return(FALSE)
+    }
+
+    # For gene coloring, ensure stable gene selection
+    if (input$color == "genes") {
+      current_gene <- input$genes_n
+      if (is.null(current_gene) || current_gene == "") {
+        return(FALSE)
+      }
+
+      # Check if gene selection has been stable
+      if (last_gene_selection() != current_gene) {
+        last_gene_selection(current_gene)
+        # Give a moment for the gene selection to stabilize
+        invalidateLater(150)
+        return(FALSE)
+      }
+    }
+
+    # All dependencies are ready
+    return(TRUE)
+  })
+
+  # Observer to set ready state when dependencies are met
+  observe({
+    embedding_ready(all_dependencies_ready())
+  })
+
+  output$all_plotly <- renderPlotly({
+    # Wait for all dependencies to be ready and stable
+    req(all_dependencies_ready(), embedding_ready())
+
+    # Triple-check data is still valid
     if (is.null(data()) || nrow(data()) == 0) {
       return(NULL)
     }
@@ -1654,7 +1728,15 @@ server <- function(input, output, session) {
       embplot(TRUE)
       return(p)
     })
-  }) ## click event: after plot is ready
+  })
+
+  # Add a loading state output for the plot
+  output$plot_loading_state <- reactive({
+    !all_dependencies_ready()
+  })
+  outputOptions(output, "plot_loading_state", suspendWhenHidden = FALSE)
+
+  ## click event: after plot is ready
 
   click_event <- reactive({
     req(embplot())
@@ -1812,6 +1894,9 @@ server <- function(input, output, session) {
         }
         if (exists("global_loading")) {
           global_loading(FALSE)
+        }
+        if (exists("genes_loading")) {
+          genes_loading(FALSE)
         }
 
         # Clear all cached data explicitly (but preserve normalized data for speed)
