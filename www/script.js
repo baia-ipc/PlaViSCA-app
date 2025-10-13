@@ -18,15 +18,14 @@ function updateLabelStyles($input) {
 function optimizeSidebarTransition() {
   const sidebar = document.getElementById('sidebar');
   const main = document.getElementById('main');
-  
+
   if (sidebar && main) {
-    // Ensure GPU acceleration for smoother transitions
     sidebar.style.transform = 'translateZ(0)';
     sidebar.style.willChange = 'width, opacity';
     main.style.willChange = 'width';
-    
+
     // Add transition end listener to clean up will-change
-    sidebar.addEventListener('transitionend', function() {
+    sidebar.addEventListener('transitionend', function () {
       if (this.style.willChange) {
         this.style.willChange = 'auto';
         main.style.willChange = 'auto';
@@ -41,12 +40,12 @@ function setupImmediateSidebarControl() {
   function toggleSidebar(tabName) {
     const sidebar = document.getElementById('sidebar');
     const main = document.getElementById('main');
-    
+
     if (!sidebar || !main) return;
-    
+
     // Tabs that should hide the sidebar
     const hideSidebarTabs = ['Metadata', 'Quality control', 'Data sources', 'Gene expression'];
-    
+
     if (hideSidebarTabs.includes(tabName)) {
       // Hide sidebar immediately
       sidebar.classList.remove('visible');
@@ -57,50 +56,50 @@ function setupImmediateSidebarControl() {
       main.classList.remove('col-sm-12');
     }
   }
-  
+
   // Direct click listener on tab navigation
   function setupTabClickListeners() {
     // Listen for clicks on tab links
-    $(document).on('click', 'a[data-toggle="tab"]', function(e) {
+    $(document).on('click', 'a[data-toggle="tab"]', function (e) {
       const tabName = $(this).text().trim();
       // Immediate response - no delay
       toggleSidebar(tabName);
     });
-    
+
     // Also listen for any element that might trigger tab changes
-    $(document).on('click', '[data-value]', function(e) {
+    $(document).on('click', '[data-value]', function (e) {
       const tabName = $(this).attr('data-value');
       if (tabName) {
         toggleSidebar(tabName);
       }
     });
-    
+
     // Listen for Bootstrap tab events
-    $(document).on('show.bs.tab', 'a[data-toggle="tab"]', function(e) {
+    $(document).on('show.bs.tab', 'a[data-toggle="tab"]', function (e) {
       const tabName = $(e.target).text().trim();
       toggleSidebar(tabName);
     });
   }
-  
+
   // Set initial state
   function setInitialSidebarState() {
     // Default to Embeddings tab (first tab) - show sidebar
     const sidebar = document.getElementById('sidebar');
     const main = document.getElementById('main');
-    
+
     if (sidebar && main) {
       sidebar.classList.add('visible');
       main.classList.remove('col-sm-12');
     }
   }
-  
+
   // Initialize everything
   setupTabClickListeners();
   setInitialSidebarState();
 }
 
 // Initialize immediate sidebar control when DOM is ready
-$(document).ready(function() {
+$(document).ready(function () {
   setupImmediateSidebarControl();
   optimizeSidebarTransition();
 });
@@ -114,20 +113,20 @@ function updateTooltips() {
   clearTimeout(tooltipUpdateTimeout);
   tooltipUpdateTimeout = setTimeout(() => {
     const $labels = $('label[title]');
-    
+
     // Dispose existing tooltips only if they exist
     if ($labels.length > 0) {
       $labels.tooltip('dispose');
     }
-    
+
     $('input[type="checkbox"], input[type="radio"]').each(function () {
       const $input = $(this);
       const $label = $input.closest('label');
-      
+
       if ($label.length) {
         const txt = $label.text().trim();
         const cacheKey = `${this.id}_${this.checked}`;
-        
+
         let tip = tooltipCache.get(cacheKey);
         if (!tip) {
           tip = $input.is(':checked')
@@ -135,13 +134,13 @@ function updateTooltips() {
             : `Click to select ${txt}`;
           tooltipCache.set(cacheKey, tip);
         }
-        
+
         $label.attr('title', tip);
       }
     });
 
     // Reinitialize tooltips with better performance options
-    $('label[title]').tooltip({ 
+    $('label[title]').tooltip({
       placement: 'right',
       trigger: 'hover',
       delay: { show: 300, hide: 100 }
@@ -159,9 +158,9 @@ function updateTooltips() {
 // }
 
 // Function to add highlight on Plotly 2D points
-(function() {
+(function () {
   const originalGetContext = HTMLCanvasElement.prototype.getContext;
-  HTMLCanvasElement.prototype.getContext = function(type, options) {
+  HTMLCanvasElement.prototype.getContext = function (type, options) {
     if (type === '2d') {
       options = options || {};
       options.willReadFrequently = true;
@@ -186,16 +185,16 @@ function setupPlotlyHighlight() {
     const now = Date.now();
     if (now - lastHighlightTime < HIGHLIGHT_THROTTLE) return;
     lastHighlightTime = now;
-    
+
     if (!data || !data.points || !data.points[0]) return;
-    
+
     const point = data.points[0];
     if (typeof point.z !== "undefined") return;
 
     // Cache DOM query
     const $sizeInput = $('input[name="size"]:checked');
     if (!$sizeInput.length) return;
-    
+
     const baseSize = parseInt($sizeInput.val()) || 5;
     const highlightSize = baseSize * 5;
 
@@ -204,13 +203,13 @@ function setupPlotlyHighlight() {
       updateHighlight(point.x, point.y, highlightSize);
     });
   });
-  
+
   plotlyHighlightSetup = true;
 }
 
 function updateHighlight(xVal, yVal, highlightSize) {
   if (!plotlyElement || !plotlyElement.data) return;
-  
+
   const traces = plotlyElement.data;
   const highlightIndices = traces
     .map((trace, index) => trace.name === "highlight-point" ? index : -1)
@@ -249,14 +248,14 @@ function cleanupResources() {
       clearTimeout(tooltipUpdateTimeout);
       tooltipUpdateTimeout = null;
     }
-    
+
     // Clear caches
     tooltipCache.clear();
-    
+
     // Cleanup tooltips with error handling
     const $tooltips = $('label[title]');
     if ($tooltips.length > 0) {
-      $tooltips.each(function() {
+      $tooltips.each(function () {
         try {
           $(this).tooltip('dispose');
         } catch (e) {
@@ -264,7 +263,7 @@ function cleanupResources() {
         }
       });
     }
-    
+
     // Cleanup plotly events
     if (plotlyElement) {
       $(plotlyElement).off('plotly_click.highlight');
@@ -272,9 +271,9 @@ function cleanupResources() {
     }
     plotlyHighlightSetup = false;
     lastHighlightTime = 0;
-    
+
     // Cleanup draggable instances
-    $('.modal-dialog').each(function() {
+    $('.modal-dialog').each(function () {
       if ($(this).hasClass('ui-draggable')) {
         try {
           $(this).draggable('destroy');
@@ -283,12 +282,12 @@ function cleanupResources() {
         }
       }
     });
-    
+
     // Force garbage collection hint
     if (window.gc && typeof window.gc === 'function') {
       window.gc();
     }
-    
+
   } catch (error) {
     console.warn('Cleanup error:', error);
   }
@@ -302,7 +301,7 @@ $(document).ready(function () {
   const $aboutSection = $("#about_section");
   const $hamburger = $('.hamburger');
   const $menuItems = $('.menu-items');
-  
+
   // Show/hide initial sections
   $homeSection.show();
   $analysisSection.hide();
@@ -330,18 +329,18 @@ $(document).ready(function () {
       setTimeout(ensureHomeParticles, 500);
     }
   }
-  
+
   // Initialize particles after a short delay to ensure DOM is ready
   setTimeout(ensureHomeParticles, 200);
 
   // Use cached selector and single event handler  
-  $hamburger.on('click', function() {
+  $hamburger.on('click', function () {
     $menuItems.toggleClass('active');
   });
 
   // Cache input selectors for performance
   const $inputs = $('input[type="checkbox"], input[type="radio"]');
-  
+
   // Initial update of label styles and tooltips
   $inputs.each(function () {
     updateLabelStyles($(this));
@@ -359,7 +358,7 @@ $(document).ready(function () {
         .removeClass('checked-label');
     }
     updateLabelStyles($i);
-    
+
     // Debounce tooltip updates
     clearTimeout(updateTimeout);
     updateTimeout = setTimeout(() => {
@@ -379,18 +378,18 @@ $(document).ready(function () {
     const ids = $dynamicCols.map(function () {
       return parseInt(this.id.replace("dynamic_col_", ""));
     }).get();
-    
+
     // Use setTimeout for non-blocking execution
     setTimeout(function () {
       Shiny.setInputValue('click_remove_btn', { btn_id: btn_id, ids: ids },
-      { priority: 'event' });
+        { priority: 'event' });
     }, 50);
   });
 
   //  Optimized toggle and gene expression handlers
   $(document).on('click', '.toggle_exp', function () {
     Shiny.setInputValue('click_toggle_exp', { id: this.id, value: this.checked },
-    { priority: 'event' });
+      { priority: 'event' });
   });
 
   $(document).on('change', '[id^="genes_exp_"]', function () {
@@ -407,22 +406,22 @@ $(document).ready(function () {
         const id = this.id;
         return (!id.endsWith('-label') && !id.endsWith('-selectized')) ? id : null;
       }).get().filter(Boolean);
-      
+
       Shiny.setInputValue('data_type_exp_change', { ids: ids, nonce: Date.now() },
-      { priority: 'event' });
+        { priority: 'event' });
     }, 100);
   });
 
   // Setup Plotly 2D highlight feature
   setupPlotlyHighlight();
-  
+
   // Enhanced modal management with better error handling
   let modalInstances = new Set();
-  
+
   $(document).on('shown.bs.modal', '.modal', function () {
     const $dialog = $(this).find('.modal-dialog');
     const modalId = this.id || `modal_${Date.now()}`;
-    
+
     // Cleanup existing draggable instance if exists
     if ($dialog.hasClass('ui-draggable')) {
       try {
@@ -431,7 +430,7 @@ $(document).ready(function () {
         console.warn('Failed to destroy existing draggable:', e);
       }
     }
-    
+
     try {
       $dialog.draggable({
         handle: '.modal-header',
@@ -443,11 +442,11 @@ $(document).ready(function () {
       console.warn('Failed to create draggable modal:', e);
     }
   });
-  
+
   $(document).on('hidden.bs.modal', '.modal', function () {
     const $dialog = $(this).find('.modal-dialog');
     const modalId = this.id;
-    
+
     if ($dialog.hasClass('ui-draggable')) {
       try {
         $dialog.draggable('destroy');
@@ -457,9 +456,9 @@ $(document).ready(function () {
       }
     }
   });
-  
+
   // Dropdown handler
-  $(document).on('click', '.dropdown-arrow', function(e) {
+  $(document).on('click', '.dropdown-arrow', function (e) {
     e.preventDefault();
     const $wrapper = $(this).closest('#apply_filter_wrapper');
     const $selectizeInput = $wrapper.find('.selectize-input');
@@ -469,13 +468,13 @@ $(document).ready(function () {
   });
 
   // Enhanced cleanup on page unload
-  $(window).on('beforeunload', function() {
+  $(window).on('beforeunload', function () {
     cleanupResources();
     modalInstances.clear();
   });
 
   // Shiny disconnection handling
-  $(document).on('shiny:disconnected shiny:sessionended', function() {
+  $(document).on('shiny:disconnected shiny:sessionended', function () {
     cleanupResources();
     modalInstances.clear();
   });

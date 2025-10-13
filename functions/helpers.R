@@ -14,7 +14,14 @@ make_cache_key <- function(...) {
 }
 
 # Helper function to sync data types between tabs
-sync_data_type <- function(session, from_input, to_input, new_value, global_loading, delay = 1.5) {
+sync_data_type <- function(
+  session,
+  from_input,
+  to_input,
+  new_value,
+  global_loading,
+  delay = 1.5
+) {
   global_loading(TRUE)
   updateRadioButtons(
     session,
@@ -37,7 +44,14 @@ sync_data_type <- function(session, from_input, to_input, new_value, global_load
 }
 
 # Helper function to create data type
-create_data_type_sync_observer <- function(input, session, input_name, target_input, expected_tabset, global_loading) {
+create_data_type_sync_observer <- function(
+  input,
+  session,
+  input_name,
+  target_input,
+  expected_tabset,
+  global_loading
+) {
   observeEvent(
     input[[input_name]],
     {
@@ -123,14 +137,16 @@ create_meta_filter_row <- function(suffix = "") {
           options = list(
             placeholder = "Select options...",
             onInitialize = I('function() { this.setValue(""); }'),
-            render = I('{
+            render = I(
+              '{
               option: function(item, escape) {
                 return "<div>" + item.label + "</div>";
               },
               item: function(item, escape) {
                 return "<div>" + item.label + "</div>";
               }
-            }')
+            }'
+            )
           )
         )
       ),
@@ -235,22 +251,6 @@ create_meta_filter_row <- function(suffix = "") {
   )
 }
 
-# Helper function to create safe cache keys from inputs (handles vectors)
-# make_cache_key <- function(...) {
-#   args <- list(...)
-#   parts <- lapply(args, function(x) {
-#     if (is.null(x)) {
-#       return("NULL")
-#     } else if (length(x) > 1) {
-#       return(paste(sort(as.character(x)), collapse = "|"))
-#     } else {
-#       return(as.character(x))
-#     }
-#   })
-#   paste(parts, collapse = "__")
-# }
-
-
 
 # Navigate tabsetpanel
 navigate_tabset <- function(session, menu_id, tab_name = NULL) {
@@ -344,10 +344,8 @@ apply_secondary_filters <- function(data, inputs) {
   # For regular metadata, select only metadata columns
   available_metadata_cols <- intersect(metadata_cols, names(filtered))
   if (length(setdiff(names(filtered), metadata_cols)) > 10) {
-    # Likely gene expression data with many gene columns - keep all columns
     filtered <- filtered
   } else {
-    # Regular metadata - select only relevant columns
     filtered <- filtered %>% select(any_of(metadata_cols))
   }
 
@@ -405,105 +403,105 @@ get_gene_id <- function(gene_name, gene_names) {
 
 
 # Generate UI subBlock in gene expression
-subBlock <- function(i) {
-  tagList(
-    fluidRow(
-      class = "gene-select-input",
-      column(
-        width = 6,
-        selectizeInput(
-          paste0("genes_exp_", i),
-          label = "Gene Name",
-          choices = NULL
-        ),
-        column(
-          width = 2,
-          class = "switch_exp",
-          tags$label(
-            class = "switch",
-            tags$input(
-              id = paste0("check_exp_", i),
-              type = "checkbox",
-              class = "toggle_exp"
-            ),
-            tags$span(class = "slider")
-          )
-        ),
-        column(
-          width = 4,
-          id = paste0("gene_link_exp_", i),
-          class = "gene_link_exp",
-          tags$div(
-            id = paste0("gene_link_ui_exp_", i),
-            class = "gene_link_ui_exp",
-            tags$a(
-              id = paste0("plasmo_link_exp_", i),
-              href = "#",
-              target = "_blank",
-              "🔬 PlasmoDB"
-            ),
-            span("|"),
-            tags$a(
-              id = paste0("ncbi_link_exp_", i),
-              href = "#",
-              target = "_blank",
-              "🧬 NCBI"
-            )
-          )
-        )
-      ),
-      column(
-        width = 6,
-        selectInput(
-          paste0("group_exp_", i),
-          "Group by",
-          choices = group_choices,
-          selected = "Stage"
-        )
-      )
-    ),
-    fluidRow(
-      width = 12,
-      fluidRow(plotlyOutput(paste0("gene_exp_plotly_", i))),
-      fluidRow(
-        class = "btn-add-rm-container",
-        actionButton(
-          paste0("remove_btn_", i),
-          label = icon("minus"),
-          class = "btn btn-danger btn_remove"
-        ),
-        actionButton(
-          paste0("add_btn_", i),
-          label = icon("plus"),
-          class = "btn btn-success btn_add"
-        )
-      )
-    )
-  )
-}
+# subBlock <- function(i) {
+#   tagList(
+#     fluidRow(
+#       class = "gene-select-input",
+#       column(
+#         width = 6,
+#         selectizeInput(
+#           paste0("genes_exp_", i),
+#           label = "Gene Name",
+#           choices = NULL
+#         ),
+#         column(
+#           width = 2,
+#           class = "switch_exp",
+#           tags$label(
+#             class = "switch",
+#             tags$input(
+#               id = paste0("check_exp_", i),
+#               type = "checkbox",
+#               class = "toggle_exp"
+#             ),
+#             tags$span(class = "slider")
+#           )
+#         ),
+#         column(
+#           width = 4,
+#           id = paste0("gene_link_exp_", i),
+#           class = "gene_link_exp",
+#           tags$div(
+#             id = paste0("gene_link_ui_exp_", i),
+#             class = "gene_link_ui_exp",
+#             tags$a(
+#               id = paste0("plasmo_link_exp_", i),
+#               href = "#",
+#               target = "_blank",
+#               "🔬 PlasmoDB"
+#             ),
+#             span("|"),
+#             tags$a(
+#               id = paste0("ncbi_link_exp_", i),
+#               href = "#",
+#               target = "_blank",
+#               "🧬 NCBI"
+#             )
+#           )
+#         )
+#       ),
+#       column(
+#         width = 6,
+#         selectInput(
+#           paste0("group_exp_", i),
+#           "Group by",
+#           choices = group_choices,
+#           selected = "Stage"
+#         )
+#       )
+#     ),
+#     fluidRow(
+#       width = 12,
+#       fluidRow(plotlyOutput(paste0("gene_exp_plotly_", i))),
+#       fluidRow(
+#         class = "btn-add-rm-container",
+#         actionButton(
+#           paste0("remove_btn_", i),
+#           label = icon("minus"),
+#           class = "btn btn-danger btn_remove"
+#         ),
+#         actionButton(
+#           paste0("add_btn_", i),
+#           label = icon("plus"),
+#           class = "btn btn-success btn_add"
+#         )
+#       )
+#     )
+#   )
+# }
 
 # Create new block
-newBlock <- function(new_count, counter, choice_exp, dynamicBlock, session) {
-  counter(new_count)
-  insertUI(
-    selector = "#gene_exp_container",
-    where = "beforeEnd",
-    ui = column(
-      width = 6,
-      id = paste0("dynamic_col_", new_count),
-      dynamicBlock(new_count)
-    )
-  )
+# newBlock <- function(new_count, counter, choice_exp, dynamicBlock, session) {
+#   counter(new_count)
+#   insertUI(
+#     selector = "#gene_exp_container",
+#     where = "beforeEnd",
+#     ui = column(
+#       width = 6,
+#       id = paste0("dynamic_col_", new_count),
+#       dynamicBlock(new_count)
+#     )
+#   )
 
-  shinyjs::delay(100, {
-    updateSelectizeInput(
-      session,
-      inputId = paste0("genes_exp_", new_count),
-      choices = choice_exp,
-      server = TRUE
-    )
-  })
-}
+#   shinyjs::delay(100, {
+#     updateSelectizeInput(
+#       session,
+#       inputId = paste0("genes_exp_", new_count),
+#       choices = choice_exp,
+#       server = TRUE
+#     )
+#   })
+# }
 
 # Generate df for gene_exp0
 df_exp0 <- function(gene_data, gene_input, group_input, check_exp) {
@@ -589,7 +587,6 @@ colors <- RColorBrewer::brewer.pal(12, "Set3")
 
 # Generate metadata plot
 meta_plotly <- function(data, x_var, x_label, y_label, plt_type = "bar") {
-  # Check if the column exists
   if (!x_var %in% colnames(data)) {
     stop(paste("Column", x_var, "not found in data"))
   }
@@ -600,7 +597,6 @@ meta_plotly <- function(data, x_var, x_label, y_label, plt_type = "bar") {
 
   # Check if we have any data left after filtering
   if (nrow(data) == 0) {
-    # Return an empty plot with a message
     return(
       plot_ly() %>%
         add_annotations(
@@ -792,7 +788,6 @@ var_genes_plot <- function(df, study, top_n = 10) {
 
 # Generate violin plot with jittered points overlay
 gene_exp_plot <- function(data, x_col) {
-  # Find the actual column name (case-insensitive)
   actual_col <- colnames(data)[tolower(colnames(data)) == tolower(x_col)]
 
   if (length(actual_col) == 0) {
@@ -818,13 +813,6 @@ gene_exp_plot <- function(data, x_col) {
   if (nrow(clean_data) == 0) {
     return(plotly::plot_ly() %>% plotly::layout(title = ""))
   }
-
-  # Performance optimization: Sample data if too large
-  # if (nrow(clean_data) > 5000) {
-  #   set.seed(42)
-  #   sample_idx <- sample(nrow(clean_data), 5000)
-  #   clean_data <- clean_data[sample_idx, ]
-  # }
 
   # Get unique groups
   unique_groups <- unique(clean_data[[actual_col]])
@@ -865,10 +853,17 @@ gene_exp_plot <- function(data, x_col) {
     jitter = 0.3,
     pointpos = 0,
     text = ~ paste(
-      "Group:", clean_data[[actual_col]], "<br>",
-      "Expression:", round(gene_expr, 3), "<br>",
-      "Mean:", mean_val, "<br>",
-      "SD:", sd_val
+      "Group:",
+      clean_data[[actual_col]],
+      "<br>",
+      "Expression:",
+      round(gene_expr, 3),
+      "<br>",
+      "Mean:",
+      mean_val,
+      "<br>",
+      "SD:",
+      sd_val
     ),
     hoverinfo = "text"
   ) %>%
@@ -913,7 +908,8 @@ y_col <- function(check_input, x_col, unintegrated, integrated) {
 
 # Generate color column based on input option
 get_color_column <- function(color_type, gene_input, gene_data_obj) {
-  switch(color_type,
+  switch(
+    color_type,
     "genes" = get_gene_id(gene_input, gene_data_obj),
     "cca_snn" = gene_input,
     color_type
@@ -1024,15 +1020,16 @@ get_legend_layout <- function(legend_title) {
 
 # Generate 2d plot
 plot_2d <- function(
-    df,
-    x,
-    y,
-    color,
-    legend_title,
-    size,
-    is_categorical,
-    selected_color,
-    colors) {
+  df,
+  x,
+  y,
+  color,
+  legend_title,
+  size,
+  is_categorical,
+  selected_color,
+  colors
+) {
   # Format selected_color for display if it's host_species
   display_color <- if (color == "host_species") {
     format_species_name(selected_color)
@@ -1119,14 +1116,15 @@ plot_2d <- function(
 
 # Generate 3d plot
 plot_3d <- function(
-    df,
-    color,
-    legend_title,
-    size,
-    selected_color,
-    is_categorical,
-    colors,
-    coords) {
+  df,
+  color,
+  legend_title,
+  size,
+  selected_color,
+  is_categorical,
+  colors,
+  coords
+) {
   x_col <- coords[1]
   y_col <- coords[2]
   z_col <- coords[3]
@@ -1136,7 +1134,9 @@ plot_3d <- function(
   z_vals <- df[[z_col]]
 
   # Format selected_color for display if it's host_species
-  display_color <- if (!is.null(color) && !is.na(color) && color == "host_species") {
+  display_color <- if (
+    !is.null(color) && !is.na(color) && color == "host_species"
+  ) {
     format_species_name(selected_color)
   } else {
     selected_color
@@ -1229,14 +1229,15 @@ plot_3d <- function(
 
 # Main pca, umap and tsne plotting function
 embedding_plot <- function(
-    df,
-    xaxis_input,
-    yaxis_input,
-    color,
-    legend_title,
-    size,
-    plot_type = "pca_u",
-    plot_dim = "2d") {
+  df,
+  xaxis_input,
+  yaxis_input,
+  color,
+  legend_title,
+  size,
+  plot_type = "pca_u",
+  plot_dim = "2d"
+) {
   # Validate inputs
   if (is.null(color) || is.na(color) || color == "" || !color %in% names(df)) {
     color <- "sample_type" # Safe fallback

@@ -224,7 +224,7 @@ ui <- fluidPage(
               "Parasite stage" = "parasite_stage",
               "Strain" = "strain",
               "Treatment" = "treatment",
-              "Sample" = "sample_type",
+              "Sample type" = "sample_type",
               "Host species" = "host_species",
               "Sequencer" = "sequencer",
               "SC. technology" = "sc_technology",
