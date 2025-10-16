@@ -15,13 +15,12 @@ make_cache_key <- function(...) {
 
 # Helper function to sync data types between tabs
 sync_data_type <- function(
-  session,
-  from_input,
-  to_input,
-  new_value,
-  global_loading,
-  delay = 1.5
-) {
+    session,
+    from_input,
+    to_input,
+    new_value,
+    global_loading,
+    delay = 1.5) {
   global_loading(TRUE)
   updateRadioButtons(
     session,
@@ -45,13 +44,12 @@ sync_data_type <- function(
 
 # Helper function to create data type
 create_data_type_sync_observer <- function(
-  input,
-  session,
-  input_name,
-  target_input,
-  expected_tabset,
-  global_loading
-) {
+    input,
+    session,
+    input_name,
+    target_input,
+    expected_tabset,
+    global_loading) {
   observeEvent(
     input[[input_name]],
     {
@@ -908,8 +906,7 @@ y_col <- function(check_input, x_col, unintegrated, integrated) {
 
 # Generate color column based on input option
 get_color_column <- function(color_type, gene_input, gene_data_obj) {
-  switch(
-    color_type,
+  switch(color_type,
     "genes" = get_gene_id(gene_input, gene_data_obj),
     "cca_snn" = gene_input,
     color_type
@@ -1020,16 +1017,15 @@ get_legend_layout <- function(legend_title) {
 
 # Generate 2d plot
 plot_2d <- function(
-  df,
-  x,
-  y,
-  color,
-  legend_title,
-  size,
-  is_categorical,
-  selected_color,
-  colors
-) {
+    df,
+    x,
+    y,
+    color,
+    legend_title,
+    size,
+    is_categorical,
+    selected_color,
+    colors) {
   # Format selected_color for display if it's host_species
   display_color <- if (color == "host_species") {
     format_species_name(selected_color)
@@ -1044,6 +1040,8 @@ plot_2d <- function(
     df$seurat_clusters,
     "<br>Study:",
     df$study_label,
+    "<br>Life cycle stage:",
+    df$life_cycle_stage,
     "<br>Color by",
     legend_title,
     ":",
@@ -1116,15 +1114,14 @@ plot_2d <- function(
 
 # Generate 3d plot
 plot_3d <- function(
-  df,
-  color,
-  legend_title,
-  size,
-  selected_color,
-  is_categorical,
-  colors,
-  coords
-) {
+    df,
+    color,
+    legend_title,
+    size,
+    selected_color,
+    is_categorical,
+    colors,
+    coords) {
   x_col <- coords[1]
   y_col <- coords[2]
   z_col <- coords[3]
@@ -1149,6 +1146,8 @@ plot_3d <- function(
     df$seurat_clusters,
     "<br>Study:",
     df$study_label,
+    "<br>Life cycle stage:",
+    df$life_cycle_stage,
     "<br>Color by",
     legend_title,
     ":",
@@ -1229,15 +1228,14 @@ plot_3d <- function(
 
 # Main pca, umap and tsne plotting function
 embedding_plot <- function(
-  df,
-  xaxis_input,
-  yaxis_input,
-  color,
-  legend_title,
-  size,
-  plot_type = "pca_u",
-  plot_dim = "2d"
-) {
+    df,
+    xaxis_input,
+    yaxis_input,
+    color,
+    legend_title,
+    size,
+    plot_type = "pca_u",
+    plot_dim = "2d") {
   # Validate inputs
   if (is.null(color) || is.na(color) || color == "" || !color %in% names(df)) {
     color <- "sample_type" # Safe fallback
