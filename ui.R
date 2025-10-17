@@ -481,18 +481,18 @@ ui <- fluidPage(
                     color = "#3498db",
                     plotlyOutput("gene_exp_plotly")
                   ),
-                  # fluidRow(
-                  #   class = "btn-add-rm-container",
-                  #   actionButton(
-                  #     "add_btn_0",
-                  #     label = icon("plus"),
-                  #     class = "btn btn-success btn_add"
-                  #   )
-                  # )
+                  fluidRow(
+                    class = "btn-add-rm-container",
+                    actionButton(
+                      "add_btn_0",
+                      label = icon("plus"),
+                      class = "btn btn-success btn_add"
+                    )
+                  )
                 )
               )
             ),
-            # div(id = "gene_exp_container", class = "gene-exp-row")
+            div(id = "gene_exp_container", class = "gene-exp-row")
           ),
           tabPanel(
             "Quality control",

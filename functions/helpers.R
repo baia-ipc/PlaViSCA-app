@@ -401,82 +401,105 @@ get_gene_id <- function(gene_name, gene_names) {
 
 
 # Generate UI subBlock in gene expression
-# subBlock <- function(i) {
-#   tagList(
-#     fluidRow(
-#       class = "gene-select-input",
-#       column(
-#         width = 6,
-#         selectizeInput(
-#           paste0("genes_exp_", i),
-#           label = "Gene Name",
-#           choices = NULL
-#         ),
-#         column(
-#           width = 2,
-#           class = "switch_exp",
-#           tags$label(
-#             class = "switch",
-#             tags$input(
-#               id = paste0("check_exp_", i),
-#               type = "checkbox",
-#               class = "toggle_exp"
-#             ),
-#             tags$span(class = "slider")
-#           )
-#         ),
-#         column(
-#           width = 4,
-#           id = paste0("gene_link_exp_", i),
-#           class = "gene_link_exp",
-#           tags$div(
-#             id = paste0("gene_link_ui_exp_", i),
-#             class = "gene_link_ui_exp",
-#             tags$a(
-#               id = paste0("plasmo_link_exp_", i),
-#               href = "#",
-#               target = "_blank",
-#               "🔬 PlasmoDB"
-#             ),
-#             span("|"),
-#             tags$a(
-#               id = paste0("ncbi_link_exp_", i),
-#               href = "#",
-#               target = "_blank",
-#               "🧬 NCBI"
-#             )
-#           )
-#         )
-#       ),
-#       column(
-#         width = 6,
-#         selectInput(
-#           paste0("group_exp_", i),
-#           "Group by",
-#           choices = group_choices,
-#           selected = "Stage"
-#         )
-#       )
-#     ),
-#     fluidRow(
-#       width = 12,
-#       fluidRow(plotlyOutput(paste0("gene_exp_plotly_", i))),
-#       fluidRow(
-#         class = "btn-add-rm-container",
-#         actionButton(
-#           paste0("remove_btn_", i),
-#           label = icon("minus"),
-#           class = "btn btn-danger btn_remove"
-#         ),
-#         actionButton(
-#           paste0("add_btn_", i),
-#           label = icon("plus"),
-#           class = "btn btn-success btn_add"
-#         )
-#       )
-#     )
-#   )
-# }
+subBlock <- function(i) {
+  tagList(
+    fluidRow(
+      class = "gene-select-input",
+      column(
+        width = 6,
+        selectizeInput(
+          paste0("genes_exp_", i),
+          label = "Gene Name",
+          choices = NULL
+        ),
+        column(
+          width = 2,
+          class = "switch_exp",
+          tags$label(
+            class = "switch",
+            tags$input(
+              id = paste0("check_exp_", i),
+              type = "checkbox",
+              class = "toggle_exp"
+            ),
+            tags$span(class = "slider")
+          )
+        ),
+        column(
+          width = 4,
+          id = paste0("gene_link_exp_", i),
+          class = "gene_link_exp",
+          tags$div(
+            id = paste0("gene_link_ui_exp_", i),
+            class = "gene_link_ui_exp",
+            tags$a(
+              id = paste0("plasmo_link_exp_", i),
+              href = "#",
+              target = "_blank",
+              "🔬 PlasmoDB"
+            ),
+            span("|"),
+            tags$a(
+              id = paste0("ncbi_link_exp_", i),
+              href = "#",
+              target = "_blank",
+              "🧬 NCBI"
+            )
+          )
+        )
+      ),
+      column(
+        width = 6,
+        selectInput(
+          paste0("group_exp_", i),
+          "Group by",
+          choices = group_choices,
+          selected = if (!is.null(group_choices) && length(group_choices) > 0) group_choices[1] else "life_cycle_stage"
+        )
+      )
+    ),
+    fluidRow(
+      width = 12,
+      fluidRow(plotlyOutput(paste0("gene_exp_plotly_", i))),
+      fluidRow(
+        class = "btn-add-rm-container",
+        actionButton(
+          paste0("remove_btn_", i),
+          label = icon("minus"),
+          class = "btn btn-danger btn_remove"
+        ),
+        actionButton(
+          paste0("add_btn_", i),
+          label = icon("plus"),
+          class = "btn btn-success btn_add"
+        )
+      )
+    )
+  )
+}
+
+# Create new block helper
+newBlock <- function(new_count, counter, choice_exp, dynamicBlock, session) {
+  counter(new_count)
+  insertUI(
+    selector = "#gene_exp_container",
+    where = "beforeEnd",
+    ui = column(
+      width = 6,
+      id = paste0("dynamic_col_", new_count),
+      dynamicBlock(new_count)
+    )
+  )
+
+  shinyjs::delay(100, {
+    updateSelectizeInput(
+      session,
+      inputId = paste0("genes_exp_", new_count),
+      choices = choice_exp,
+      server = TRUE
+    )
+  })
+}
 
 # Create new block
 # newBlock <- function(new_count, counter, choice_exp, dynamicBlock, session) {
