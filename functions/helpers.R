@@ -13,6 +13,38 @@ make_cache_key <- function(...) {
   paste(parts, collapse = "__")
 }
 
+# Create a cache key for filtered gene expression inputs
+filtered_gene_exp_cache_key <- function(input) {
+  get_field <- function(name) {
+    if (is.null(input)) {
+      return(NULL)
+    }
+    # If input is a list-like object (reactive input is a list proxy), try list access
+    if (is.list(input) && !is.null(input[[name]])) {
+      return(input[[name]])
+    }
+    # Otherwise try direct [[ access and catch errors
+    tryCatch(
+      input[[name]],
+      error = function(e) NULL
+    )
+  }
+
+  make_cache_key(
+    "filtered_gene_exp",
+    get_field("study_label_exp"),
+    get_field("host_species_exp"),
+    get_field("life_cycle_stage_exp"),
+    get_field("treatment_exp"),
+    get_field("parasite_stage_exp"),
+    get_field("sample_type_exp"),
+    get_field("strain_exp"),
+    get_field("hour_post_invasion_exp"),
+    get_field("sequencer_exp"),
+    get_field("sc_technology_exp")
+  )
+}
+
 # Helper function to sync data types between tabs
 sync_data_type <- function(
     session,
@@ -301,17 +333,20 @@ fun_filter_df <- function(data, selections) {
     }
   }
 
-  # Always return with the same columns as input, even if no rows pass the filter
+  # Always return with the same columns as input
   out <- data[keep_rows, , drop = FALSE]
   if (nrow(out) == 0) {
     out <- data[0, , drop = FALSE]
   }
+
+  # subset the full expression matrix by row without re-running filters.
+  attr(out, "row_idx") <- which(keep_rows)
   return(out)
 }
 
 
 # Helper function to apply secondary filters
-apply_secondary_filters <- function(data, inputs) {
+apply_secondary_filters <- function(data, inputs, keep_gene_matrix = TRUE, genes = NULL) {
   # Filter out rows with invalid RNA data only if these columns exist
   filtered <- data
   if ("n_feature_rna" %in% names(data) && "n_count_rna" %in% names(data)) {
@@ -341,10 +376,27 @@ apply_secondary_filters <- function(data, inputs) {
   # For gene expression data, keep all columns (metadata + gene expression)
   # For regular metadata, select only metadata columns
   available_metadata_cols <- intersect(metadata_cols, names(filtered))
-  if (length(setdiff(names(filtered), metadata_cols)) > 10) {
-    filtered <- filtered
+  non_metadata_cols_count <- length(setdiff(names(filtered), metadata_cols))
+
+  if (!keep_gene_matrix) {
+    # If caller provided a genes vector, use it to explicitly drop gene columns
+    if (!is.null(genes) && length(genes) > 0) {
+      # Drop any columns that match the provided gene list
+      keep_cols <- setdiff(names(filtered), genes)
+      keep_cols <- intersect(keep_cols, names(filtered))
+      # Ensure metadata columns are preserved
+      keep_cols <- unique(c(keep_cols, available_metadata_cols))
+      filtered <- filtered %>% select(any_of(keep_cols))
+    } else {
+      # Fallback: select metadata columns only
+      filtered <- filtered %>% select(any_of(metadata_cols))
+    }
   } else {
-    filtered <- filtered %>% select(any_of(metadata_cols))
+    if (non_metadata_cols_count > 10) {
+      filtered <- filtered
+    } else {
+      filtered <- filtered %>% select(any_of(metadata_cols))
+    }
   }
 
   # Dynamically apply filters for each non-empty input
@@ -460,7 +512,7 @@ subBlock <- function(i) {
     ),
     fluidRow(
       width = 12,
-      fluidRow(plotlyOutput(paste0("gene_exp_plotly_", i))),
+      fluidRow(withSpinner(plotlyOutput(paste0("gene_exp_plotly_", i)), type = 6, size = 0.5, color = "#3498db")),
       fluidRow(
         class = "btn-add-rm-container",
         actionButton(
@@ -501,32 +553,20 @@ newBlock <- function(new_count, counter, choice_exp, dynamicBlock, session) {
   })
 }
 
-# Create new block
-# newBlock <- function(new_count, counter, choice_exp, dynamicBlock, session) {
-#   counter(new_count)
-#   insertUI(
-#     selector = "#gene_exp_container",
-#     where = "beforeEnd",
-#     ui = column(
-#       width = 6,
-#       id = paste0("dynamic_col_", new_count),
-#       dynamicBlock(new_count)
-#     )
-#   )
-
-#   shinyjs::delay(100, {
-#     updateSelectizeInput(
-#       session,
-#       inputId = paste0("genes_exp_", new_count),
-#       choices = choice_exp,
-#       server = TRUE
-#     )
-#   })
-# }
 
 # Generate df for gene_exp0
-df_exp0 <- function(gene_data, gene_input, group_input, check_exp) {
-  df <- gene_data$data
+df_exp0 <- function(gene_data, gene_input, group_input, check_exp, full_data = NULL, cache_env = NULL) {
+  start_time <- Sys.time()
+  df_full <- if (!is.null(full_data)) full_data else gene_data$data
+  # If the filtered metadata provided row indices, subset the full matrix to those rows
+  row_idx <- NULL
+  if (!is.null(gene_data) && !is.null(gene_data$data)) {
+    row_idx <- attr(gene_data$data, "row_idx")
+  }
+  if (!is.null(row_idx) && length(row_idx) > 0) {
+    # subset rows of the full expression matrix to match filtered metadata
+    df_full <- df_full[row_idx, , drop = FALSE]
+  }
   genes <- gene_data$genes
 
   # Determine the gene column to use
@@ -536,31 +576,87 @@ df_exp0 <- function(gene_data, gene_input, group_input, check_exp) {
     gene_input
   }
 
-  if (!(gene_exp %in% colnames(df))) {
-    df$gene_expr <- NA
-  } else {
-    df <- df %>% mutate(gene_expr = .data[[gene_exp]])
+  # Identify gene columns from the genes annotation; fall back to a pattern
+  gene_cols <- character(0)
+  if (!is.null(genes) && nrow(genes) > 0 && "gene" %in% colnames(genes)) {
+    gene_cols <- genes$gene
   }
 
-  if (!(tolower(group_input) %in% colnames(df))) {
-    df[[group_input]] <- NA
+  # Identify metadata columns (everything that's not a gene column)
+  meta_cols <- setdiff(colnames(df_full), gene_cols)
+
+  # Remove embedding coordinate columns
+  embed_patterns <- c("^umap", "^pca", "^t_sne", "^tsne", "^tSNE")
+  embed_regex <- paste(embed_patterns, collapse = "|")
+  meta_cols <- meta_cols[!grepl(embed_regex, meta_cols, ignore.case = TRUE)]
+
+  # Ensure the grouping column is present
+  if (!(group_input %in% meta_cols)) {
+    meta_cols <- unique(c(meta_cols, group_input))
   }
-  return(df)
+
+  # Build cache key for metadata and check cache first (if provided)
+  row_idx_len <- NA
+  if (!is.null(gene_data) && !is.null(gene_data$data)) row_idx_len <- length(attr(gene_data$data, "row_idx"))
+  cache_key_meta <- make_cache_key("slim_meta", row_idx_len)
+  if (!is.null(cache_env) && exists(cache_key_meta, envir = cache_env, inherits = FALSE)) {
+    slim_meta <- cache_env[[cache_key_meta]]
+    message(sprintf("df_exp0: meta cache hit key=%s", cache_key_meta))
+  } else {
+    # Build slim dataframe: metadata columns only
+    slim_meta <- df_full %>% select(any_of(meta_cols))
+    if (!is.null(cache_env)) {
+      try(cache_env[[cache_key_meta]] <- slim_meta, silent = TRUE)
+    }
+  }
+
+  # Build cache key for full slim_df and check cache first (if provided)
+  cache_key <- make_cache_key("slim_df", gene_exp, group_input, row_idx_len)
+  if (!is.null(cache_env) && exists(cache_key, envir = cache_env, inherits = FALSE)) {
+    cached <- cache_env[[cache_key]]
+    message(sprintf("df_exp0: cache hit key=%s", cache_key))
+    return(cached)
+  }
+
+  # Add gene expression column
+  # Extract gene vector first to avoid copying the whole matrix
+  gene_vec <- if (!is.null(gene_exp) && gene_exp %in% colnames(df_full)) df_full[[gene_exp]] else rep(NA, nrow(df_full))
+  slim_meta$gene_expr <- gene_vec
+
+  # Free the large full dataframe
+  obj_size <- object.size(slim_meta)
+  # Free the potentially large full matrix reference
+  if (is.null(full_data)) rm(df_full)
+  invisible(gc(verbose = FALSE))
+
+  if (!is.null(cache_env)) {
+    try(cache_env[[cache_key]] <- slim_meta, silent = TRUE)
+  }
+
+  return(slim_meta)
 }
 
 # Generate df for gene_expi
-df_expi <- function(id, input, gene_data, get_gene_id) {
+df_expi <- function(id, input, gene_data, get_gene_id, full_data = NULL, cache_env = NULL) {
   reactive({
+    start_time <- Sys.time()
     tryCatch(
       {
         req(
           input[[paste0("genes_exp_", id)]],
           input[[paste0("group_exp_", id)]]
         )
+        df_full <- if (!is.null(full_data)) full_data else gene_data$data
+        # Similarly subset rows to match filtered metadata if available
+        row_idx <- NULL
+        if (!is.null(gene_data) && !is.null(gene_data$data)) {
+          row_idx <- attr(gene_data$data, "row_idx")
+        }
+        if (!is.null(row_idx) && length(row_idx) > 0) {
+          df_full <- df_full[row_idx, , drop = FALSE]
+        }
 
-        df <- gene_data$data
-
-        # Safely access the check_exp input with fallback to FALSE
+        # Check_exp input
         check_exp_input <- input[[paste0("check_exp_", id)]]
         if (is.null(check_exp_input)) {
           check_exp_input <- FALSE
@@ -577,23 +673,68 @@ df_expi <- function(id, input, gene_data, get_gene_id) {
           return(NULL)
         }
 
-        if (!(gene_exp %in% colnames(df))) {
-          df$gene_expr <- NA
-        } else {
-          df <- df %>% mutate(gene_expr = .data[[gene_exp]])
+        # Identify gene columns from the genes annotation
+        gene_cols <- character(0)
+        if (!is.null(gene_data$genes) && nrow(gene_data$genes) > 0 && "gene" %in% colnames(gene_data$genes)) {
+          gene_cols <- gene_data$genes$gene
         }
+
+        # Metadata columns are columns that are not gene expression columns
+        meta_cols <- setdiff(colnames(df_full), gene_cols)
+
+        # Remove embedding coordinate columns to keep the slim dataframe small
+        embed_patterns <- c("^umap", "^pca", "^t_sne", "^tsne", "^tSNE")
+        embed_regex <- paste(embed_patterns, collapse = "|")
+        meta_cols <- meta_cols[!grepl(embed_regex, meta_cols, ignore.case = TRUE)]
 
         group_col <- input[[paste0("group_exp_", id)]]
 
-        # Validate group_col is not NULL or empty
-        if (is.null(group_col) || is.na(group_col) || group_col == "") {
-          return(NULL)
+        # Ensure the grouping column is present in metadata
+        if (!(group_col %in% meta_cols)) {
+          meta_cols <- unique(c(meta_cols, group_col))
         }
 
-        if (!(tolower(group_col) %in% colnames(df))) {
-          df[[group_col]] <- NA
+        # Build cache key for metadata and check cache first (if provided)
+        row_idx_len <- NA
+        if (!is.null(gene_data) && !is.null(gene_data$data)) row_idx_len <- length(attr(gene_data$data, "row_idx"))
+        cache_key_meta <- make_cache_key("slim_meta", row_idx_len)
+        if (!is.null(cache_env) && exists(cache_key_meta, envir = cache_env, inherits = FALSE)) {
+          slim_df <- cache_env[[cache_key_meta]]
+          message(sprintf("df_expi(id=%s): meta cache hit key=%s", id, cache_key_meta))
+        } else {
+          # Build slim dataframe: metadata columns only
+          slim_df <- df_full %>% select(any_of(meta_cols))
+          if (!is.null(cache_env)) {
+            try(cache_env[[cache_key_meta]] <- slim_df, silent = TRUE)
+          }
         }
-        return(df)
+
+        # Build cache key for full slim_df and check cache first (if provided)
+        cache_key <- make_cache_key("slim_df", gene_exp, group_col, row_idx_len, id)
+        if (!is.null(cache_env) && exists(cache_key, envir = cache_env, inherits = FALSE)) {
+          message(sprintf("df_expi(id=%s): cache hit key=%s", id, cache_key))
+          return(cache_env[[cache_key]])
+        }
+
+        # Add gene expression column
+        # Extract gene vector first to avoid copying the big matrix
+        gene_vec <- if (gene_exp %in% colnames(df_full)) df_full[[gene_exp]] else rep(NA, nrow(df_full))
+        slim_df$gene_expr <- gene_vec
+
+        # Free the full dataframe
+        obj_size <- object.size(slim_df)
+        if (is.null(full_data)) rm(df_full)
+        invisible(gc(verbose = FALSE))
+
+        dur <- as.numeric(difftime(Sys.time(), start_time, units = "secs"))
+        # message(sprintf(
+        #   "df_expi(id=%s): rows=%d cols=%d size=%s dur=%.3fs",
+        #   id, nrow(slim_df), ncol(slim_df), format(obj_size, units = "auto"), dur
+        # ))
+
+        if (!is.null(cache_env)) try(cache_env[[cache_key]] <- slim_df, silent = TRUE)
+
+        return(slim_df)
       },
       error = function(e) {
         message("Error in df_expi for id ", id, ": ", e$message)
@@ -601,6 +742,88 @@ df_expi <- function(id, input, gene_data, get_gene_id) {
       }
     )
   })
+}
+
+# Non-reactive variant of df_expi for headless testing and batch runs.
+df_expi_nr <- function(id, input_list, gene_data, get_gene_id, full_data = NULL, cache_env = NULL) {
+  start_time <- Sys.time()
+
+  # Emulate req by checking required fields
+  gene_input <- input_list[[paste0("genes_exp_", id)]]
+  group_input <- input_list[[paste0("group_exp_", id)]]
+  if (is.null(gene_input) || is.null(group_input)) {
+    return(NULL)
+  }
+
+  df_full <- if (!is.null(full_data)) full_data else gene_data$data
+
+  # Subset rows if row_idx present
+  row_idx <- NULL
+  if (!is.null(gene_data) && !is.null(gene_data$data)) {
+    row_idx <- attr(gene_data$data, "row_idx")
+  }
+  if (!is.null(row_idx) && length(row_idx) > 0) {
+    df_full <- df_full[row_idx, , drop = FALSE]
+  }
+
+  # check_exp
+  check_exp_input <- input_list[[paste0("check_exp_", id)]]
+  if (is.null(check_exp_input)) check_exp_input <- FALSE
+
+  gene_exp <- if (!check_exp_input) get_gene_id(gene_input, gene_data$genes) else gene_input
+  if (is.null(gene_exp) || is.na(gene_exp) || gene_exp == "") {
+    return(NULL)
+  }
+
+  # Identify gene columns from annotation
+  gene_cols <- character(0)
+  if (!is.null(gene_data$genes) && nrow(gene_data$genes) > 0 && "gene" %in% colnames(gene_data$genes)) {
+    gene_cols <- gene_data$genes$gene
+  }
+
+  meta_cols <- setdiff(colnames(df_full), gene_cols)
+  embed_patterns <- c("^umap", "^pca", "^t_sne", "^tsne", "^tSNE")
+  embed_regex <- paste(embed_patterns, collapse = "|")
+  meta_cols <- meta_cols[!grepl(embed_regex, meta_cols, ignore.case = TRUE)]
+
+  group_col <- group_input
+  if (!(group_col %in% meta_cols)) meta_cols <- unique(c(meta_cols, group_col))
+
+  # Build cache key for metadata and check cache first (if provided)
+  row_idx_len <- NA
+  if (!is.null(gene_data) && !is.null(gene_data$data)) row_idx_len <- length(attr(gene_data$data, "row_idx"))
+  cache_key_meta <- make_cache_key("slim_meta", row_idx_len)
+  if (!is.null(cache_env) && exists(cache_key_meta, envir = cache_env, inherits = FALSE)) {
+    slim_df <- cache_env[[cache_key_meta]]
+    message(sprintf("df_expi_nr(id=%s): meta cache hit key=%s", id, cache_key_meta))
+  } else {
+    # Build slim dataframe: metadata columns only
+    slim_df <- df_full %>% select(any_of(meta_cols))
+    if (!is.null(cache_env)) {
+      try(cache_env[[cache_key_meta]] <- slim_df, silent = TRUE)
+    }
+  }
+
+  # Caching for full slim_df
+  cache_key <- make_cache_key("slim_df", gene_exp, group_col, row_idx_len, id)
+  if (!is.null(cache_env) && exists(cache_key, envir = cache_env, inherits = FALSE)) {
+    message(sprintf("df_expi_nr(id=%s): cache hit key=%s", id, cache_key))
+    return(cache_env[[cache_key]])
+  }
+
+  gene_vec <- if (gene_exp %in% colnames(df_full)) df_full[[gene_exp]] else rep(NA, nrow(df_full))
+  slim_df$gene_expr <- gene_vec
+
+  obj_size <- object.size(slim_df)
+  if (is.null(full_data)) rm(df_full)
+  invisible(gc(verbose = FALSE))
+
+  dur <- as.numeric(difftime(Sys.time(), start_time, units = "secs"))
+  # message(sprintf("df_expi_nr(id=%s): rows=%d cols=%d size=%s dur=%.3fs", id, nrow(slim_df), ncol(slim_df), format(obj_size, units = "auto"), dur))
+
+  if (!is.null(cache_env)) try(cache_env[[cache_key]] <- slim_df, silent = TRUE)
+
+  return(slim_df)
 }
 
 # Set color pallet

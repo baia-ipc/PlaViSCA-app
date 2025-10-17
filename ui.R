@@ -420,79 +420,82 @@ ui <- fluidPage(
             ),
             fluidRow(
               class = "gene-exp-row",
-              column(
-                id = "gene_exp_tar",
-                width = 6,
-                fluidRow(
-                  column(
-                    width = 6,
-                    selectizeInput("genes_exp_0", "Gene", choices = NULL),
+              div(
+                id = "gene_exp_container",
+                class = "gene-exp-row",
+                column(
+                  id = "gene_exp_tar",
+                  width = 6,
+                  fluidRow(
                     column(
-                      width = 2,
-                      class = "switch_exp",
-                      tags$label(
-                        class = "switch",
-                        tags$input(
-                          id = "check_exp_0",
-                          type = "checkbox",
-                          class = "toggle_exp"
-                        ),
-                        tags$span(class = "slider")
+                      width = 6,
+                      selectizeInput("genes_exp_0", "Gene", choices = NULL),
+                      column(
+                        width = 2,
+                        class = "switch_exp",
+                        tags$label(
+                          class = "switch",
+                          tags$input(
+                            id = "check_exp_0",
+                            type = "checkbox",
+                            class = "toggle_exp"
+                          ),
+                          tags$span(class = "slider")
+                        )
+                      ),
+                      column(
+                        width = 4,
+                        id = "gene_link_exp",
+                        class = "gene_link_exp",
+                        tags$div(
+                          id = "gene_link_ui_exp",
+                          class = "gene_link_ui_exp",
+                          tags$a(
+                            id = "plasmo_link_exp",
+                            href = "#",
+                            target = "_blank",
+                            "🔬 PlasmoDB"
+                          ),
+                          span("|"),
+                          tags$a(
+                            id = "ncbi_link_exp",
+                            href = "#",
+                            target = "_blank",
+                            "🧬 NCBI"
+                          )
+                        )
                       )
                     ),
                     column(
-                      width = 4,
-                      id = "gene_link_exp",
-                      class = "gene_link_exp",
-                      tags$div(
-                        id = "gene_link_ui_exp",
-                        class = "gene_link_ui_exp",
-                        tags$a(
-                          id = "plasmo_link_exp",
-                          href = "#",
-                          target = "_blank",
-                          "🔬 PlasmoDB"
-                        ),
-                        span("|"),
-                        tags$a(
-                          id = "ncbi_link_exp",
-                          href = "#",
-                          target = "_blank",
-                          "🧬 NCBI"
-                        )
+                      width = 6,
+                      selectInput(
+                        "group_exp",
+                        "Group by",
+                        choices = group_choices,
+                        selected = "life_cycle_stage"
                       )
                     )
                   ),
-                  column(
-                    width = 6,
-                    selectInput(
-                      "group_exp",
-                      "Group by",
-                      choices = group_choices,
-                      selected = "life_cycle_stage"
-                    )
-                  )
-                ),
-                fluidRow(
-                  width = 12,
-                  withSpinner(
-                    type = 6,
-                    size = 0.5,
-                    color = "#3498db",
-                    plotlyOutput("gene_exp_plotly")
-                  ),
                   fluidRow(
-                    class = "btn-add-rm-container",
-                    actionButton(
-                      "add_btn_0",
-                      label = icon("plus"),
-                      class = "btn btn-success btn_add"
+                    width = 12,
+                    withSpinner(
+                      type = 6,
+                      size = 0.5,
+                      color = "#3498db",
+                      plotlyOutput("gene_exp_plotly")
+                    ),
+                    fluidRow(
+                      class = "btn-add-rm-container",
+                      actionButton(
+                        "add_btn_0",
+                        label = icon("plus"),
+                        class = "btn btn-success btn_add"
+                      )
                     )
                   )
                 )
               )
-            ),
-            div(id = "gene_exp_container", class = "gene-exp-row")
+            )
           ),
           tabPanel(
             "Quality control",

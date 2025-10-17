@@ -1,22 +1,22 @@
-library(shiny)
-library(shinyjs)
-library(DT)
-library(plotly)
-library(RColorBrewer)
-library(tidyverse)
-library(later)
+  library(shiny)
+  library(shinyjs)
+  library(DT)
+  library(plotly)
+  library(RColorBrewer)
+  library(tidyverse)
+  library(later)
 
 server <- function(input, output, session) {
   sessionData <- new.env(parent = emptyenv())
 
-  # Reactive expression for publication data - updates when CSV file changes
+  # Load publication data
   pub_data <- reactive({
     readr::read_csv("data/data_source.csv", show_col_types = FALSE)
   })
 
   autoUpdatePlot <- reactiveVal(FALSE)
 
-  # Global loading state for better UX
+  # Global loading state
   global_loading <- reactiveVal(FALSE)
 
   # Navigate home and data section
@@ -185,45 +185,40 @@ server <- function(input, output, session) {
 
   # Load data with performance optimization and caching
   load_dataset <- function(data_type) {
-    if (is.null(cached_data[[data_type]])) {
-      dataset <- switch(data_type,
-        raw = {
-          if (exists("DATA_PATHS") && !is.null(DATA_PATHS$raw_df)) {
-            load_data(DATA_PATHS$raw_df)
-          } else {
-            NULL
-          }
-        },
-        normalize = {
-          if (exists("norm_df")) norm_df else NULL
-        }
-      )
-
-      if (!is.null(dataset)) {
-        cached_data[[data_type]] <- dataset
-        # Only gc after loading large datasets
-        if (data_type == "raw") {
-          gc(verbose = FALSE)
-        }
-      }
-
-      return(dataset)
-    } else {
+    if (!is.null(cached_data[[data_type]])) {
       return(cached_data[[data_type]])
     }
+
+    dataset <- switch(data_type,
+      raw = {
+        if (exists("DATA_PATHS") && !is.null(DATA_PATHS$raw_df)) {
+          load_data(DATA_PATHS$raw_df)
+        } else {
+          NULL
+        }
+      },
+      normalize = {
+        if (exists("norm_df")) norm_df else NULL
+      }
+    )
+
+    if (!is.null(dataset)) {
+      cached_data[[data_type]] <- dataset
+      # Only gc after loading large datasets
+      if (data_type == "raw") {
+        gc(verbose = FALSE)
+      }
+    }
+
+    return(dataset)
   }
 
-  # Debounced observer to prevent multiple rapid triggers - ONLY for data type changes
+  # Debounced observer to prevent multiple rapid triggers
   observe({
     list(
       input$data_type,
       input$data_type_exp
     )
-
-    # Skip if we are in the middle of tab synchronization
-    if (syncing_tabs()) {
-      return()
-    }
 
     # Only trigger after app is properly initialized
     if (!is.null(input$data_type) || !is.null(input$data_type_exp)) {
@@ -265,32 +260,16 @@ server <- function(input, output, session) {
       }
 
       # Show progress bar when loading new data
-      withProgress(message = "", value = 0, {
+      withProgress(message = "Loading data", value = 30, {
         display_name <- switch(current_type,
           raw = "Raw",
           normalize = "Normalized"
           # scale = "Scaled"
         )
 
-        # Check if dataset is already cached
-        if (!is.null(cached_data[[current_type]])) {
-          setProgress(
-            0.3,
-            detail = paste("Using cached", display_name, "dataset...")
-          )
-        } else {
-          setProgress(0.3, detail = paste("Loading", display_name, "data..."))
-        }
-
         # Load dataset (from cache if available)
         dataset <- load_dataset(current_type)
 
-        if (is.null(dataset)) {
-          showNotification("Error: Dataset not available", type = "error")
-          return(NULL)
-        }
-
-        setProgress(0.6, detail = "Processing genes...")
         result <- list(
           data = dataset,
           genes = genes(dataset, gff_data)
@@ -300,16 +279,13 @@ server <- function(input, output, session) {
         cached_data$current_type <- current_type
         sessionData$last_gene_data <- result
 
-        setProgress(1, detail = "Complete!")
-        message("Loaded and cached data for type: ", current_type)
-
         return(result)
       })
     },
     ignoreNULL = FALSE
   )
 
-  # Separate reactive for filtered gene data - no progress bar
+  # Separate reactive for filtered gene data 
   filtered_gene_data <- reactive({
     req(gene_data())
 
@@ -334,7 +310,7 @@ server <- function(input, output, session) {
       return(sessionData[[cache_key]])
     }
 
-    # Filter the data without progress bar
+    # Filter the data
     result <- list(
       data = fun_filter_df(gene_data()$data, selections),
       genes = gene_data()$genes
@@ -366,10 +342,10 @@ server <- function(input, output, session) {
   )
 
   # Provide loading feedback to UI
-  output$loading_state <- reactive({
-    global_loading()
-  })
-  outputOptions(output, "loading_state", suspendWhenHidden = FALSE)
+  # output$loading_state <- reactive({
+  #   global_loading()
+  # })
+  # outputOptions(output, "loading_state", suspendWhenHidden = FALSE)
 
   # Metadata filter
   # choose columns for filter data
@@ -433,7 +409,7 @@ server <- function(input, output, session) {
     user_interact(TRUE)
   })
 
-  # Reactive filtered data with memory management and caching
+  # Reactive filtered data
   filtered_data <- reactive({
     selections <- input$apply_filter
 
@@ -883,8 +859,30 @@ server <- function(input, output, session) {
     }
   )
 
+  # Data sources tabset
+  observeEvent(input$tabset, {
+    if (input$tabset == "Data sources") {
+      output$data_source <- renderDT({
+        DT::datatable(
+          pub_data(),
+          escape = FALSE,
+          options = list(
+            pageLength = 10,
+            scrollX = TRUE,
+            autoWidth = FALSE,
+            columnDefs = list(
+              list(width = "500px", targets = 3, className = "dt-left")
+            )
+          ),
+          selection = "single",
+          rownames = FALSE
+        )
+      })
+    }
+  })
+
+
   # Gene Expression tabset
-  # Simplified filtered gene expression data for speed
   filtered_gene_exp_data <- reactive({
     req(filtered_gene_data())
 
@@ -902,36 +900,35 @@ server <- function(input, output, session) {
     )
 
     # Create cache key as a single string for filtered gene expression data
-    cache_key <- make_cache_key(
-      "filtered_gene_exp",
-      input$study_label_exp,
-      input$host_species_exp,
-      input$life_cycle_stage_exp,
-      input$treatment_exp,
-      input$parasite_stage_exp,
-      input$sample_type_exp,
-      input$strain_exp,
-      input$hour_post_invasion_exp,
-      input$sequencer_exp,
-      input$sc_technology_exp
-    )
+    cache_key <- filtered_gene_exp_cache_key(input)
     if (exists(cache_key, envir = sessionData, inherits = FALSE)) {
       return(sessionData[[cache_key]])
     }
     tryCatch(
       {
-        filt_data <- apply_secondary_filters(
+        full_df <- if (!is.null(sessionData$last_gene_data)) sessionData$last_gene_data$data else filtered_gene_data()$data
+
+        filt_meta <- apply_secondary_filters(
           filtered_gene_data()$data,
-          current_inputs
+          current_inputs,
+          keep_gene_matrix = FALSE,
+          genes = if (!is.null(filtered_gene_data()$genes)) filtered_gene_data()$genes$gene else NULL
         )
+
+        # Ensure row indices are available on the metadata result
+        row_idx <- attr(filt_meta, "row_idx")
 
         result <- list(
-          data = filt_data,
-          genes = filtered_gene_data()$genes
+          data = filt_meta,
+          genes = filtered_gene_data()$genes,
+          full = full_df,
+          row_idx = row_idx
         )
 
-        # Cache the result
-        sessionData[[cache_key]] <- result
+  # Cache the result (filtered gene-expression metadata and snapshot
+  # reference). Dynamic plots are created from static snapshots so no
+  # per-plot reactive clearing is required here.
+  sessionData[[cache_key]] <- result
 
         return(result)
       },
@@ -973,27 +970,7 @@ server <- function(input, output, session) {
     }
   )
 
-  # Data sources tabset
-  observeEvent(input$tabset, {
-    if (input$tabset == "Data sources") {
-      output$data_source <- renderDT({
-        DT::datatable(
-          pub_data(),
-          escape = FALSE,
-          options = list(
-            pageLength = 10,
-            scrollX = TRUE,
-            autoWidth = FALSE,
-            columnDefs = list(
-              list(width = "500px", targets = 3, className = "dt-left")
-            )
-          ),
-          selection = "single",
-          rownames = FALSE
-        )
-      })
-    }
-  })
+
 
   # Manipulation tabset "Gene Exp"
   ## gene_exp_0 block with minimal caching for speed
@@ -1004,7 +981,6 @@ server <- function(input, output, session) {
 
   # df_exp data for genes_exp_0 with simplified reactive approach
   df_exp_0 <- reactive({
-    # Basic requirements check
     req(filtered_gene_exp_data(), input$genes_exp_0, input$group_exp)
 
     # Skip processing during loading states
@@ -1043,7 +1019,8 @@ server <- function(input, output, session) {
           gene_data = filtered_gene_exp_data(),
           gene_input = input$genes_exp_0,
           group_input = input$group_exp,
-          check_exp = input$check_exp_0
+          check_exp = input$check_exp_0,
+          full_data = filtered_gene_exp_data()$full
         )
       },
       error = function(e) {
@@ -1056,10 +1033,33 @@ server <- function(input, output, session) {
       sessionData[[cache_key]] <- result
     }
 
+    # Keep an explicit copy for the initial (static) gene expression plot so
+    # dynamic plots (which will create their own copies) do not mutate or
+    # reference the same data object. Store both the slim dataframe (result)
+    # and a copy of the full_data used to build it.
+    try({
+      if (!is.null(result)) {
+        df_gene0(result)
+      }
+      # store a copy of the full matrix used for the initial plot
+      if (!is.null(filtered_gene_exp_data()) && !is.null(filtered_gene_exp_data()$full)) {
+        full_tmp <- filtered_gene_exp_data()$full
+        # force a shallow copy by subsetting which triggers copy-on-write
+        if (nrow(full_tmp) > 0 && ncol(full_tmp) > 0) {
+          full_tmp <- full_tmp[seq_len(nrow(full_tmp)), seq_len(ncol(full_tmp)), drop = FALSE]
+        }
+        df_gene0_full(full_tmp)
+      }
+    }, silent = TRUE)
+
     return(result)
   })
 
-  # Simplified gene expression plot for maximum speed
+  # Explicit reactiveVals to hold the initial gene-expression slim dataframe
+  # and a copy of the full matrix used to create it.
+  df_gene0 <- reactiveVal(NULL)
+  df_gene0_full <- reactiveVal(NULL)
+
 
   # Initialize dropdown
   observeEvent(
@@ -1067,7 +1067,6 @@ server <- function(input, output, session) {
     {
       req(gene_data()$genes)
 
-      # Get initial choices
       initial_choices <- get_gene_choices(gene_data()$genes, FALSE)
 
       # Update dropdown immediately during app launch
@@ -1112,29 +1111,31 @@ server <- function(input, output, session) {
     )
   })
 
+  # Initial (static) gene expression plot — use the df_gene0 snapshot so it
+  # remains independent of dynamic plot additions. df_gene0 is populated by
+  # df_exp_0 when the user selects a gene/group.
   output$gene_exp_plotly <- renderPlotly({
     req(input$genes_exp_0, input$group_exp)
 
-    # Skip during global loading
     if (global_loading()) {
       return(NULL)
     }
 
-    # Get data and validate
-    plot_data <- df_exp_0()
+    # Prefer the explicit snapshot; fall back to computing df_exp_0 once if
+    # snapshot is not available.
+    plot_data <- df_gene0()
+    if (is.null(plot_data)) {
+      plot_data <- df_exp_0()
+      # store snapshot for future renders
+      try({ df_gene0(plot_data) }, silent = TRUE)
+    }
     req(plot_data)
 
-    # Validate data structure
-    if (nrow(plot_data) == 0) {
+    if (nrow(plot_data) == 0 || !"gene_expr" %in% names(plot_data)) {
       return(NULL)
     }
 
-    # Check if the selected gene is valid in the data
-    if (!"gene_expr" %in% names(plot_data)) {
-      return(NULL)
-    }
-
-    # Create cache key
+    # Create cache key (still useful for fast switching of gene/group)
     plot_cache_key <- make_cache_key(
       "gene_exp_plot",
       input$genes_exp_0,
@@ -1143,27 +1144,16 @@ server <- function(input, output, session) {
       input$check_exp_0
     )
 
-    # Check cache for instant gene switching
     if (exists(plot_cache_key, envir = sessionData, inherits = FALSE)) {
       return(sessionData[[plot_cache_key]])
     }
 
-    # Generate plot efficiently
-    result <- tryCatch(
-      {
-        group <- tolower(input$group_exp)
-        gene_exp_plot(plot_data, group)
-      },
-      error = function(e) {
-        return(NULL)
-      }
-    )
+    result <- tryCatch({
+      group <- tolower(input$group_exp)
+      gene_exp_plot(plot_data, group)
+    }, error = function(e) NULL)
 
-    # Cache successful plots
-    if (!is.null(result)) {
-      sessionData[[plot_cache_key]] <- result
-    }
-
+    if (!is.null(result)) sessionData[[plot_cache_key]] <- result
     return(result)
   })
 
@@ -1183,14 +1173,16 @@ server <- function(input, output, session) {
     id <- as.numeric(gsub("add_btn_?", "", btn_id))
     shinyjs::hide(paste0("add_btn_", id))
 
-    choice_exp(get_gene_choices(gene_data()$genes, FALSE))
+    # Use the filtered gene-expression data for choices so selection respects metadata filters
+    req(filtered_gene_exp_data())
+    choice_exp(isolate(get_gene_choices(filtered_gene_exp_data()$genes, FALSE)))
 
     ## add ui block to the right after gene_exp_tar
     if (id == 0) {
       id <- id + 1
       insertUI(
-        selector = "#gene_exp_tar",
-        where = "afterEnd",
+        selector = "#gene_exp_container",
+        where = "beforeEnd",
         ui = column(
           width = 6,
           id = paste0("dynamic_col_", id),
@@ -1199,67 +1191,107 @@ server <- function(input, output, session) {
       )
       # Capture choices now (reactive) then populate selectize shortly after so UI appears quickly
       selectize_choices <- NULL
-      try({ selectize_choices <- choice_exp() }, silent = TRUE)
+      try(
+        {
+          selectize_choices <- choice_exp()
+        },
+        silent = TRUE
+      )
       later(function() {
-        tryCatch({
-          if (!is.null(selectize_choices)) {
-            updateSelectizeInput(
-              session,
-              inputId = paste0("genes_exp_", id),
-              choices = selectize_choices,
-              server = TRUE
-            )
+        tryCatch(
+          {
+            if (!is.null(selectize_choices)) {
+              updateSelectizeInput(
+                session,
+                inputId = paste0("genes_exp_", id),
+                choices = selectize_choices,
+                server = TRUE
+              )
+            }
+          },
+          error = function(e) {
+            message("Error updating selectize input for dynamic gene: ", e$message)
           }
-        }, error = function(e) {
-          message("Error updating selectize input for dynamic gene: ", e$message)
-        })
+        )
       }, 0.25)
 
       # Create the renderPlotly immediately (ensures render has access to reactives)
       output[[paste0("gene_exp_plotly_", id)]] <- local({
         plot_id <- id
         renderPlotly({
-            # Only proceed if we have data and inputs
-            req(
-              gene_data(),
-              input[[paste0("genes_exp_", plot_id)]],
-              input[[paste0("group_exp_", plot_id)]]
-            )
+          # Only proceed if we have data and inputs
+          req(
+            gene_data(),
+            input[[paste0("genes_exp_", plot_id)]],
+            input[[paste0("group_exp_", plot_id)]]
+          )
 
-            # Skip during loading states
-            if (global_loading()) {
+          # Skip during loading states
+          if (global_loading()) {
+            return(NULL)
+          }
+
+          tryCatch(
+            {
+              # Create or reuse the reactive data for this specific plot so
+              # the slim dataframe is computed only once per dynamic plot.
+              df_key <- paste0("df_expi_", plot_id)
+              if (is.null(sessionData$dynamic_static[[df_key]])) {
+                # Create a static snapshot of the filtered_gene_exp_data for
+                # this dynamic plot and store it in sessionData so it won't
+                # change when the global filters change.
+                snapshot <- NULL
+                try({
+                  fg <- filtered_gene_exp_data()
+                  snapshot <- list(
+                    data = fg$data,
+                    genes = fg$genes,
+                    full = if (!is.null(fg$full)) fg$full[seq_len(nrow(fg$full)), seq_len(ncol(fg$full)), drop = FALSE] else NULL
+                  )
+                }, silent = TRUE)
+
+                # store under a unique session key
+                session_key <- paste0("dynamic_data_", plot_id)
+                sessionData[[session_key]] <- snapshot
+
+                # Produce a non-reactive slim dataframe for this plot so it
+                # remains independent. Use df_expi_nr which expects an input
+                # list; build a minimal input list for this id.
+                input_list <- list()
+                input_list[[paste0("genes_exp_", plot_id)]] <- isolate(input[[paste0("genes_exp_", plot_id)]])
+                input_list[[paste0("group_exp_", plot_id)]] <- isolate(input[[paste0("group_exp_", plot_id)]])
+                input_list[[paste0("check_exp_", plot_id)]] <- isolate(input[[paste0("check_exp_", plot_id)]])
+
+                # Obtain a static dataframe using the non-reactive helper
+                static_df <- NULL
+                try({
+                  static_df <- df_expi_nr(plot_id, input_list, list(data = snapshot$data, genes = snapshot$genes), get_gene_id, full_data = snapshot$full)
+                }, silent = TRUE)
+
+                # Store static dataframe in sessionData for this dynamic plot
+                sessionData$dynamic_static[[df_key]] <- static_df
+              }
+
+              static_df <- sessionData$dynamic_static[[df_key]]
+              req(static_df)
+
+              gene_exp_plot(
+                static_df,
+                tolower(input[[paste0("group_exp_", plot_id)]])
+              )
+            },
+            error = function(e) {
+              message(
+                "Error in dynamic gene expression plot ",
+                plot_id,
+                ": ",
+                e$message
+              )
               return(NULL)
             }
-
-            tryCatch(
-              {
-                # Create the reactive data for this specific plot
-                df_reactive <- df_expi(
-                  id = plot_id,
-                  input = input,
-                  gene_data = gene_data(),
-                  get_gene_id = get_gene_id
-                )
-
-                req(df_reactive())
-
-                gene_exp_plot(
-                  df_reactive(),
-                  tolower(input[[paste0("group_exp_", plot_id)]])
-                )
-              },
-              error = function(e) {
-                message(
-                  "Error in dynamic gene expression plot ",
-                  plot_id,
-                  ": ",
-                  e$message
-                )
-                return(NULL)
-              }
-            )
-          })
+          )
         })
+      })
     } else {
       ## add ui block to button
       id <- id + 1
@@ -1268,67 +1300,100 @@ server <- function(input, output, session) {
       # Create a properly scoped reactive for this specific plot with shorter delay
       # Capture choices now and schedule selectize update
       selectize_choices <- NULL
-      try({ selectize_choices <- choice_exp() }, silent = TRUE)
+      try(
+        {
+          selectize_choices <- choice_exp()
+        },
+        silent = TRUE
+      )
       later(function() {
-        tryCatch({
-          if (!is.null(selectize_choices)) {
-            updateSelectizeInput(
-              session,
-              inputId = paste0("genes_exp_", id),
-              choices = selectize_choices,
-              server = TRUE
-            )
+        tryCatch(
+          {
+            if (!is.null(selectize_choices)) {
+              updateSelectizeInput(
+                session,
+                inputId = paste0("genes_exp_", id),
+                choices = selectize_choices,
+                server = TRUE
+              )
+            }
+          },
+          error = function(e) {
+            message("Error updating selectize input for dynamic gene: ", e$message)
           }
-        }, error = function(e) {
-          message("Error updating selectize input for dynamic gene: ", e$message)
-        })
+        )
       }, 0.25)
 
       # Create the renderPlotly immediately so it captures reactive environment correctly
       output[[paste0("gene_exp_plotly_", id)]] <- local({
         plot_id <- id
         renderPlotly({
-            # Only proceed if we have data and inputs
-            req(
-              gene_data(),
-              input[[paste0("genes_exp_", plot_id)]],
-              input[[paste0("group_exp_", plot_id)]]
-            )
+          # Only proceed if we have data and inputs
+          req(
+            gene_data(),
+            input[[paste0("genes_exp_", plot_id)]],
+            input[[paste0("group_exp_", plot_id)]]
+          )
 
-            # Skip during loading states
-            if (global_loading()) {
+          # Skip during loading states
+          if (global_loading()) {
+            return(NULL)
+          }
+
+          tryCatch(
+            {
+              # Create or reuse the reactive data for this specific plot so
+              # the slim dataframe is computed only once per dynamic plot.
+              df_key <- paste0("df_expi_", plot_id)
+              if (is.null(sessionData$dynamic_static[[df_key]])) {
+                # Create a static snapshot for this dynamic plot (same as
+                # above branch) and produce a non-reactive dataframe.
+                snapshot <- NULL
+                try({
+                  fg <- filtered_gene_exp_data()
+                  snapshot <- list(
+                    data = fg$data,
+                    genes = fg$genes,
+                    full = if (!is.null(fg$full)) fg$full[seq_len(nrow(fg$full)), seq_len(ncol(fg$full)), drop = FALSE] else NULL
+                  )
+                }, silent = TRUE)
+
+                session_key <- paste0("dynamic_data_", plot_id)
+                sessionData[[session_key]] <- snapshot
+
+                input_list <- list()
+                input_list[[paste0("genes_exp_", plot_id)]] <- isolate(input[[paste0("genes_exp_", plot_id)]])
+                input_list[[paste0("group_exp_", plot_id)]] <- isolate(input[[paste0("group_exp_", plot_id)]])
+                input_list[[paste0("check_exp_", plot_id)]] <- isolate(input[[paste0("check_exp_", plot_id)]])
+
+                static_df <- NULL
+                try({
+                  static_df <- df_expi_nr(plot_id, input_list, list(data = snapshot$data, genes = snapshot$genes), get_gene_id, full_data = snapshot$full)
+                }, silent = TRUE)
+
+                sessionData$dynamic_static[[df_key]] <- static_df
+              }
+
+              static_df <- sessionData$dynamic_static[[df_key]]
+              req(static_df)
+
+              gene_exp_plot(
+                static_df,
+                tolower(input[[paste0("group_exp_", plot_id)]])
+              )
+            },
+            error = function(e) {
+              message(
+                "Error in dynamic gene expression plot ",
+                plot_id,
+                ": ",
+                e$message
+              )
               return(NULL)
             }
-
-            tryCatch(
-              {
-                # Create the reactive data for this specific plot
-                df_reactive <- df_expi(
-                  id = plot_id,
-                  input = input,
-                  gene_data = gene_data(),
-                  get_gene_id = get_gene_id
-                )
-
-                req(df_reactive())
-
-                gene_exp_plot(
-                  df_reactive(),
-                  tolower(input[[paste0("group_exp_", plot_id)]])
-                )
-              },
-              error = function(e) {
-                message(
-                  "Error in dynamic gene expression plot ",
-                  plot_id,
-                  ": ",
-                  e$message
-                )
-                return(NULL)
-              }
-            )
-          })
+          )
         })
+      })
     }
   })
 
@@ -1340,22 +1405,49 @@ server <- function(input, output, session) {
       id <- as.numeric(gsub("remove_btn_", "", rm_btn_id))
       ids <- as.numeric(unlist(input$click_remove_btn$ids))
       # Remove server-side output binding to free render closures before removing UI
-      try({
-        output[[paste0("gene_exp_plotly_", id)]] <- NULL
-      }, silent = TRUE)
+      try(
+        {
+          output[[paste0("gene_exp_plotly_", id)]] <- NULL
+        },
+        silent = TRUE
+      )
+
+      # Also remove any cached reactive for this dynamic plot to avoid
+      # Also remove any cached static dataframe for this dynamic plot to avoid
+      # keeping a reference to the slim dataframe in memory.
+      try(
+        {
+          df_key <- paste0("df_expi_", id)
+          if (!is.null(sessionData$dynamic_static[[df_key]])) {
+            sessionData$dynamic_static[[df_key]] <- NULL
+          }
+          # And also remove the snapshot entry if present
+          session_key <- paste0("dynamic_data_", id)
+          if (!is.null(sessionData[[session_key]])) {
+            sessionData[[session_key]] <- NULL
+          }
+        },
+        silent = TRUE
+      )
 
       # Remove UI element immediately on both server and client to ensure the
       # whole dynamic block is removed (fallbacks for robustness)
-      try({
-        # Server-side removal (immediate to send remove instruction to client)
-        removeUI(selector = paste0("#dynamic_col_", id), multiple = FALSE, immediate = TRUE)
-      }, silent = TRUE)
+      try(
+        {
+          # Server-side removal (immediate to send remove instruction to client)
+          removeUI(selector = paste0("#dynamic_col_", id), multiple = FALSE, immediate = TRUE)
+        },
+        silent = TRUE
+      )
 
       # Client-side fallback: directly remove the DOM node with JS in case
       # server-side removal didn't take effect (ensures the whole block vanishes)
-      try({
-        shinyjs::runjs(sprintf("$('#dynamic_col_%s').remove();", id))
-      }, silent = TRUE)
+      try(
+        {
+          shinyjs::runjs(sprintf("$('#dynamic_col_%s').remove();", id))
+        },
+        silent = TRUE
+      )
       remaining_ids <- ids[ids != id]
 
       for (i in remaining_ids) {
@@ -1401,7 +1493,10 @@ server <- function(input, output, session) {
   gene_exp_plots_trigger <- reactiveVal(0)
 
   # Store dynamic plot reactive functions for proper invalidation
-  dynamic_plot_reactives <- reactiveValues()
+  # Store static per-dynamic-plot dataframes here to avoid cross-plot
+  # reactive invalidation. Using a plain list in sessionData prevents
+  # Shiny from re-evaluating plots when unrelated reactives change.
+  sessionData$dynamic_static <- list()
 
   observeEvent(input$data_type_exp_change, {
     req(gene_data(), input$data_type_exp_change)
