@@ -399,12 +399,41 @@ apply_secondary_filters <- function(data, inputs, keep_gene_matrix = TRUE, genes
     }
   }
 
-  # Dynamically apply filters for each non-empty input
+  # Dynamically apply filters for each non-empty input (on the filtered view)
   for (col in names(inputs)) {
     values <- inputs[[col]]
     if (!is.null(values) && length(values) > 0 && col %in% names(filtered)) {
       filtered <- filtered %>% filter(.data[[col]] %in% values)
     }
+  }
+
+  # Compute row_idx relative to the original input `data` so callers can
+  # subset the full expression matrix without re-running filters. We build
+  # the same logical mask using the original data frame.
+  original <- data
+  if (!is.null(original) && nrow(original) > 0) {
+    keep_rows <- rep(TRUE, nrow(original))
+
+    # Apply the RNA QC filters if present
+    if ("n_feature_rna" %in% names(original) && "n_count_rna" %in% names(original)) {
+      keep_rows <- keep_rows & (original$n_feature_rna > 0 & original$n_count_rna > 0)
+    }
+
+    # Apply the dynamic inputs
+    if (!is.null(inputs) && length(inputs) > 0) {
+      for (col in names(inputs)) {
+        values <- inputs[[col]]
+        if (!is.null(values) && length(values) > 0 && col %in% names(original)) {
+          keep_rows <- keep_rows & (original[[col]] %in% values)
+        }
+      }
+    }
+
+    # Attach row indices (positions in the original data)
+    idx <- which(keep_rows)
+    attr(filtered, "row_idx") <- idx
+  } else {
+    attr(filtered, "row_idx") <- integer(0)
   }
 
   return(filtered)
@@ -557,16 +586,14 @@ newBlock <- function(new_count, counter, choice_exp, dynamicBlock, session) {
 # Generate df for gene_exp0
 df_exp0 <- function(gene_data, gene_input, group_input, check_exp, full_data = NULL, cache_env = NULL) {
   start_time <- Sys.time()
-  df_full <- if (!is.null(full_data)) full_data else gene_data$data
-  # If the filtered metadata provided row indices, subset the full matrix to those rows
-  row_idx <- NULL
-  if (!is.null(gene_data) && !is.null(gene_data$data)) {
-    row_idx <- attr(gene_data$data, "row_idx")
-  }
-  if (!is.null(row_idx) && length(row_idx) > 0) {
-    # subset rows of the full expression matrix to match filtered metadata
-    df_full <- df_full[row_idx, , drop = FALSE]
-  }
+  # full_data is the large expression matrix; gene_data$data should be the
+  # filtered metadata (small). Use meta_source for metadata and full_mat for
+  # the full expression matrix. We avoid subsetting the full matrix to keep
+  # memory usage low and instead extract a single column vector by index.
+  full_mat <- if (!is.null(full_data)) full_data else NULL
+  meta_source <- if (!is.null(gene_data) && !is.null(gene_data$data)) gene_data$data else data.frame()
+  # If the filtered metadata provided row indices, record them
+  row_idx <- if (!is.null(gene_data) && !is.null(gene_data$data)) attr(gene_data$data, "row_idx") else NULL
   genes <- gene_data$genes
 
   # Determine the gene column to use
@@ -583,7 +610,7 @@ df_exp0 <- function(gene_data, gene_input, group_input, check_exp, full_data = N
   }
 
   # Identify metadata columns (everything that's not a gene column)
-  meta_cols <- setdiff(colnames(df_full), gene_cols)
+  meta_cols <- setdiff(colnames(meta_source), gene_cols)
 
   # Remove embedding coordinate columns
   embed_patterns <- c("^umap", "^pca", "^t_sne", "^tsne", "^tSNE")
@@ -604,7 +631,7 @@ df_exp0 <- function(gene_data, gene_input, group_input, check_exp, full_data = N
     message(sprintf("df_exp0: meta cache hit key=%s", cache_key_meta))
   } else {
     # Build slim dataframe: metadata columns only
-    slim_meta <- df_full %>% select(any_of(meta_cols))
+    slim_meta <- meta_source %>% select(any_of(meta_cols))
     if (!is.null(cache_env)) {
       try(cache_env[[cache_key_meta]] <- slim_meta, silent = TRUE)
     }
@@ -618,10 +645,8 @@ df_exp0 <- function(gene_data, gene_input, group_input, check_exp, full_data = N
     return(cached)
   }
 
-  # Add gene expression column
-  # Extract gene vector first to avoid copying the whole matrix
-  gene_vec <- if (!is.null(gene_exp) && gene_exp %in% colnames(df_full)) df_full[[gene_exp]] else rep(NA, nrow(df_full))
-  slim_meta$gene_expr <- gene_vec
+  # Use helper to build the minimal slim dataframe for plotting
+  slim_meta <- build_plot_slim(slim_meta, full_mat, gene_exp, group_input)
 
   # Free the large full dataframe
   obj_size <- object.size(slim_meta)
@@ -646,15 +671,11 @@ df_expi <- function(id, input, gene_data, get_gene_id, full_data = NULL, cache_e
           input[[paste0("genes_exp_", id)]],
           input[[paste0("group_exp_", id)]]
         )
-        df_full <- if (!is.null(full_data)) full_data else gene_data$data
-        # Similarly subset rows to match filtered metadata if available
-        row_idx <- NULL
-        if (!is.null(gene_data) && !is.null(gene_data$data)) {
-          row_idx <- attr(gene_data$data, "row_idx")
-        }
-        if (!is.null(row_idx) && length(row_idx) > 0) {
-          df_full <- df_full[row_idx, , drop = FALSE]
-        }
+        # full_data is the large expression matrix; use meta_source for metadata
+        full_mat <- if (!is.null(full_data)) full_data else NULL
+        meta_source <- if (!is.null(gene_data) && !is.null(gene_data$data)) gene_data$data else data.frame()
+        # row indices of filtered metadata
+        row_idx <- if (!is.null(gene_data) && !is.null(gene_data$data)) attr(gene_data$data, "row_idx") else NULL
 
         # Check_exp input
         check_exp_input <- input[[paste0("check_exp_", id)]]
@@ -702,8 +723,8 @@ df_expi <- function(id, input, gene_data, get_gene_id, full_data = NULL, cache_e
           slim_df <- cache_env[[cache_key_meta]]
           message(sprintf("df_expi(id=%s): meta cache hit key=%s", id, cache_key_meta))
         } else {
-          # Build slim dataframe: metadata columns only
-          slim_df <- df_full %>% select(any_of(meta_cols))
+          # Build slim dataframe and add gene_expr column via helper
+            slim_df <- meta_source %>% select(any_of(meta_cols))
           if (!is.null(cache_env)) {
             try(cache_env[[cache_key_meta]] <- slim_df, silent = TRUE)
           }
@@ -716,10 +737,7 @@ df_expi <- function(id, input, gene_data, get_gene_id, full_data = NULL, cache_e
           return(cache_env[[cache_key]])
         }
 
-        # Add gene expression column
-        # Extract gene vector first to avoid copying the big matrix
-        gene_vec <- if (gene_exp %in% colnames(df_full)) df_full[[gene_exp]] else rep(NA, nrow(df_full))
-        slim_df$gene_expr <- gene_vec
+        slim_df <- build_plot_slim(slim_df, full_mat, gene_exp, group_col)
 
         # Free the full dataframe
         obj_size <- object.size(slim_df)
@@ -755,16 +773,12 @@ df_expi_nr <- function(id, input_list, gene_data, get_gene_id, full_data = NULL,
     return(NULL)
   }
 
-  df_full <- if (!is.null(full_data)) full_data else gene_data$data
-
-  # Subset rows if row_idx present
-  row_idx <- NULL
-  if (!is.null(gene_data) && !is.null(gene_data$data)) {
-    row_idx <- attr(gene_data$data, "row_idx")
-  }
-  if (!is.null(row_idx) && length(row_idx) > 0) {
-    df_full <- df_full[row_idx, , drop = FALSE]
-  }
+  # Avoid subsetting the potentially huge full matrix; keep the full matrix
+  # reference and use the filtered metadata for the slim dataframe.
+  full_mat <- if (!is.null(full_data)) full_data else NULL
+  meta_source <- if (!is.null(gene_data) && !is.null(gene_data$data)) gene_data$data else data.frame()
+  # row indices in the original full matrix
+  row_idx <- if (!is.null(gene_data) && !is.null(gene_data$data)) attr(gene_data$data, "row_idx") else NULL
 
   # check_exp
   check_exp_input <- input_list[[paste0("check_exp_", id)]]
@@ -781,7 +795,7 @@ df_expi_nr <- function(id, input_list, gene_data, get_gene_id, full_data = NULL,
     gene_cols <- gene_data$genes$gene
   }
 
-  meta_cols <- setdiff(colnames(df_full), gene_cols)
+  meta_cols <- setdiff(colnames(meta_source), gene_cols)
   embed_patterns <- c("^umap", "^pca", "^t_sne", "^tsne", "^tSNE")
   embed_regex <- paste(embed_patterns, collapse = "|")
   meta_cols <- meta_cols[!grepl(embed_regex, meta_cols, ignore.case = TRUE)]
@@ -797,8 +811,6 @@ df_expi_nr <- function(id, input_list, gene_data, get_gene_id, full_data = NULL,
     slim_df <- cache_env[[cache_key_meta]]
     message(sprintf("df_expi_nr(id=%s): meta cache hit key=%s", id, cache_key_meta))
   } else {
-    # Build slim dataframe: metadata columns only
-    slim_df <- df_full %>% select(any_of(meta_cols))
     if (!is.null(cache_env)) {
       try(cache_env[[cache_key_meta]] <- slim_df, silent = TRUE)
     }
@@ -811,8 +823,7 @@ df_expi_nr <- function(id, input_list, gene_data, get_gene_id, full_data = NULL,
     return(cache_env[[cache_key]])
   }
 
-  gene_vec <- if (gene_exp %in% colnames(df_full)) df_full[[gene_exp]] else rep(NA, nrow(df_full))
-  slim_df$gene_expr <- gene_vec
+  slim_df <- build_plot_slim(slim_df, full_mat, gene_exp, group_col)
 
   obj_size <- object.size(slim_df)
   if (is.null(full_data)) rm(df_full)
@@ -1235,6 +1246,43 @@ prepare_categorical_colors <- function(df, color) {
   df[[color]] <- factor(df[[color]], levels = final_levels)
 
   return(list(df = df, colors = colors))
+}
+
+
+# Build a minimal slim dataframe for plotting: include the group column (and
+# optionally extra columns) from the filtered metadata and a single gene
+# expression vector extracted from the full expression matrix by indexing the
+# gene column with the metadata row indices. This avoids copying the entire
+# full matrix while producing the small dataframe used by plotting code.
+build_plot_slim <- function(meta, full_mat, gene_exp, group_col, extra_cols = NULL) {
+  if (is.null(meta)) meta <- data.frame()
+
+  # Ensure the group column exists in the returned slim df
+  needed <- unique(c(group_col, extra_cols))
+  available <- intersect(needed, colnames(meta))
+  # If group_col not present, create it with NA so plotting code fails clearly
+  if (!(group_col %in% colnames(meta))) {
+    meta[[group_col]] <- NA_character_
+  }
+
+  slim <- meta %>% select(any_of(needed))
+
+  # Extract gene expression vector from the full matrix using row_idx
+  row_idx <- attr(meta, "row_idx")
+  if (!is.null(full_mat) && !is.null(gene_exp) && gene_exp %in% colnames(full_mat)) {
+    if (!is.null(row_idx) && length(row_idx) > 0) {
+      gene_vec <- full_mat[[gene_exp]][row_idx]
+    } else {
+      # No row indices: fallback to full column but trim to meta rows if possible
+      gene_vec <- full_mat[[gene_exp]]
+      if (nrow(slim) > 0) gene_vec <- gene_vec[seq_len(nrow(slim))]
+    }
+  } else {
+    gene_vec <- rep(NA, nrow(slim))
+  }
+
+  slim$gene_expr <- gene_vec
+  return(slim)
 }
 
 # Get plot dimension

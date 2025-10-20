@@ -1037,20 +1037,13 @@ server <- function(input, output, session) {
     # dynamic plots (which will create their own copies) do not mutate or
     # reference the same data object. Store both the slim dataframe (result)
     # and a copy of the full_data used to build it.
-    try({
-      if (!is.null(result)) {
-        df_gene0(result)
-      }
-      # store a copy of the full matrix used for the initial plot
-      if (!is.null(filtered_gene_exp_data()) && !is.null(filtered_gene_exp_data()$full)) {
-        full_tmp <- filtered_gene_exp_data()$full
-        # force a shallow copy by subsetting which triggers copy-on-write
-        if (nrow(full_tmp) > 0 && ncol(full_tmp) > 0) {
-          full_tmp <- full_tmp[seq_len(nrow(full_tmp)), seq_len(ncol(full_tmp)), drop = FALSE]
-        }
-        df_gene0_full(full_tmp)
-      }
-    }, silent = TRUE)
+        try({
+          if (!is.null(result)) {
+            df_gene0(result)
+          }
+          # Do NOT store a second copy of the full matrix for the initial
+          # plot; keep only the small slim dataframe to avoid extra memory.
+        }, silent = TRUE)
 
     return(result)
   })
@@ -1058,7 +1051,6 @@ server <- function(input, output, session) {
   # Explicit reactiveVals to hold the initial gene-expression slim dataframe
   # and a copy of the full matrix used to create it.
   df_gene0 <- reactiveVal(NULL)
-  df_gene0_full <- reactiveVal(NULL)
 
 
   # Initialize dropdown
@@ -1233,52 +1225,31 @@ server <- function(input, output, session) {
 
           tryCatch(
             {
-              # Create or reuse the reactive data for this specific plot so
-              # the slim dataframe is computed only once per dynamic plot.
-              df_key <- paste0("df_expi_", plot_id)
-              if (is.null(sessionData$dynamic_static[[df_key]])) {
-                # Create a static snapshot of the filtered_gene_exp_data for
-                # this dynamic plot and store it in sessionData so it won't
-                # change when the global filters change.
-                snapshot <- NULL
-                try({
-                  fg <- filtered_gene_exp_data()
-                  snapshot <- list(
-                    data = fg$data,
-                    genes = fg$genes,
-                    full = if (!is.null(fg$full)) fg$full[seq_len(nrow(fg$full)), seq_len(ncol(fg$full)), drop = FALSE] else NULL
-                  )
-                }, silent = TRUE)
+              # Simpler: build a tiny dataframe for plotting on-demand so we
+              # never copy or reassign the full expression matrix. This keeps
+              # the large `full` object in memory and constructs only the
+              # needed group column + gene_expr vector for plotting.
+              fg <- filtered_gene_exp_data()
+              cur_gene <- isolate(input[[paste0("genes_exp_", plot_id)]])
+              cur_group <- isolate(input[[paste0("group_exp_", plot_id)]])
+              cur_check <- isolate(input[[paste0("check_exp_", plot_id)]])
 
-                # store under a unique session key
-                session_key <- paste0("dynamic_data_", plot_id)
-                sessionData[[session_key]] <- snapshot
+              # Resolve gene id when the user selects by name
+              gene_exp_val <- if (isTRUE(cur_check)) cur_gene else get_gene_id(cur_gene, fg$genes)
 
-                # Produce a non-reactive slim dataframe for this plot so it
-                # remains independent. Use df_expi_nr which expects an input
-                # list; build a minimal input list for this id.
-                input_list <- list()
-                input_list[[paste0("genes_exp_", plot_id)]] <- isolate(input[[paste0("genes_exp_", plot_id)]])
-                input_list[[paste0("group_exp_", plot_id)]] <- isolate(input[[paste0("group_exp_", plot_id)]])
-                input_list[[paste0("check_exp_", plot_id)]] <- isolate(input[[paste0("check_exp_", plot_id)]])
+              static_df <- tryCatch({
+                build_plot_slim(fg$data, fg$full, gene_exp_val, cur_group)
+              }, error = function(e) {
+                message(sprintf("dynamic gene plot %s: error building slim df: %s", plot_id, e$message))
+                NULL
+              })
 
-                # Obtain a static dataframe using the non-reactive helper
-                static_df <- NULL
-                try({
-                  static_df <- df_expi_nr(plot_id, input_list, list(data = snapshot$data, genes = snapshot$genes), get_gene_id, full_data = snapshot$full)
-                }, silent = TRUE)
-
-                # Store static dataframe in sessionData for this dynamic plot
-                sessionData$dynamic_static[[df_key]] <- static_df
+              if (is.null(static_df) || nrow(static_df) == 0) {
+                message(sprintf("dynamic gene plot %s: no data after building slim df (gene=%s)", plot_id, as.character(gene_exp_val)))
+                return(plotly::plot_ly() %>% plotly::layout(title = "No data"))
               }
 
-              static_df <- sessionData$dynamic_static[[df_key]]
-              req(static_df)
-
-              gene_exp_plot(
-                static_df,
-                tolower(input[[paste0("group_exp_", plot_id)]])
-              )
+              gene_exp_plot(static_df, tolower(cur_group))
             },
             error = function(e) {
               message(
@@ -1342,45 +1313,30 @@ server <- function(input, output, session) {
 
           tryCatch(
             {
-              # Create or reuse the reactive data for this specific plot so
-              # the slim dataframe is computed only once per dynamic plot.
-              df_key <- paste0("df_expi_", plot_id)
-              if (is.null(sessionData$dynamic_static[[df_key]])) {
-                # Create a static snapshot for this dynamic plot (same as
-                # above branch) and produce a non-reactive dataframe.
-                snapshot <- NULL
-                try({
-                  fg <- filtered_gene_exp_data()
-                  snapshot <- list(
-                    data = fg$data,
-                    genes = fg$genes,
-                    full = if (!is.null(fg$full)) fg$full[seq_len(nrow(fg$full)), seq_len(ncol(fg$full)), drop = FALSE] else NULL
-                  )
-                }, silent = TRUE)
+              # Simpler and memory-safe: build the tiny plot dataframe on-demand
+              # from the filtered metadata and the full matrix. Do NOT copy the
+              # full matrix into per-plot session snapshots (that caused memory
+              # to grow with the number of dynamic plots).
+              fg <- filtered_gene_exp_data()
+              cur_gene <- isolate(input[[paste0("genes_exp_", plot_id)]])
+              cur_group <- isolate(input[[paste0("group_exp_", plot_id)]])
+              cur_check <- isolate(input[[paste0("check_exp_", plot_id)]])
 
-                session_key <- paste0("dynamic_data_", plot_id)
-                sessionData[[session_key]] <- snapshot
+              gene_exp_val <- if (isTRUE(cur_check)) cur_gene else get_gene_id(cur_gene, fg$genes)
 
-                input_list <- list()
-                input_list[[paste0("genes_exp_", plot_id)]] <- isolate(input[[paste0("genes_exp_", plot_id)]])
-                input_list[[paste0("group_exp_", plot_id)]] <- isolate(input[[paste0("group_exp_", plot_id)]])
-                input_list[[paste0("check_exp_", plot_id)]] <- isolate(input[[paste0("check_exp_", plot_id)]])
+              static_df <- tryCatch({
+                build_plot_slim(fg$data, fg$full, gene_exp_val, cur_group)
+              }, error = function(e) {
+                message(sprintf("dynamic gene plot %s: error building slim df: %s", plot_id, e$message))
+                NULL
+              })
 
-                static_df <- NULL
-                try({
-                  static_df <- df_expi_nr(plot_id, input_list, list(data = snapshot$data, genes = snapshot$genes), get_gene_id, full_data = snapshot$full)
-                }, silent = TRUE)
-
-                sessionData$dynamic_static[[df_key]] <- static_df
+              if (is.null(static_df) || nrow(static_df) == 0) {
+                message(sprintf("dynamic gene plot %s: no data after building slim df (gene=%s)", plot_id, as.character(gene_exp_val)))
+                return(plotly::plot_ly() %>% plotly::layout(title = "No data"))
               }
 
-              static_df <- sessionData$dynamic_static[[df_key]]
-              req(static_df)
-
-              gene_exp_plot(
-                static_df,
-                tolower(input[[paste0("group_exp_", plot_id)]])
-              )
+              gene_exp_plot(static_df, tolower(cur_group))
             },
             error = function(e) {
               message(
@@ -1415,17 +1371,9 @@ server <- function(input, output, session) {
       # Also remove any cached reactive for this dynamic plot to avoid
       # Also remove any cached static dataframe for this dynamic plot to avoid
       # keeping a reference to the slim dataframe in memory.
-      try(
+        try(
         {
-          df_key <- paste0("df_expi_", id)
-          if (!is.null(sessionData$dynamic_static[[df_key]])) {
-            sessionData$dynamic_static[[df_key]] <- NULL
-          }
-          # And also remove the snapshot entry if present
-          session_key <- paste0("dynamic_data_", id)
-          if (!is.null(sessionData[[session_key]])) {
-            sessionData[[session_key]] <- NULL
-          }
+          # No per-plot cached objects to clear (we build on-demand)
         },
         silent = TRUE
       )
@@ -1492,29 +1440,10 @@ server <- function(input, output, session) {
   ## update plot when data_type_exp_change from js with debouncing
   gene_exp_plots_trigger <- reactiveVal(0)
 
-  # Store dynamic plot reactive functions for proper invalidation
-  # Store static per-dynamic-plot dataframes here to avoid cross-plot
-  # reactive invalidation. Using a plain list in sessionData prevents
-  # Shiny from re-evaluating plots when unrelated reactives change.
-  sessionData$dynamic_static <- list()
-
-  observeEvent(input$data_type_exp_change, {
-    req(gene_data(), input$data_type_exp_change)
-
-    # Direct trigger without additional delay since data is already loaded
-    isolate({
-      gene_exp_plots_trigger(gene_exp_plots_trigger() + 1)
-    })
-  })
-
-  # Manipulation tabset "Embedding"
-  observeEvent(input$genes_n, {
-    req(input$genes_n)
-    if (input$color == "genes") {
-      gene_id <- get_gene_id(input$genes_n, gene_data()$genes)
-      gene_links(gene_id)
-    }
-  })
+  # No per-plot static storage: we build minimal plot dataframes on-demand
+  # to avoid retaining references to the large full matrix across multiple
+  # dynamic plots.
+  # (no per-plot cached objects)
 
   choice <- eventReactive(list(input$check, input$data_type), {
     req(gene_data()$genes)
