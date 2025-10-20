@@ -304,6 +304,8 @@ navigate_tabset <- function(session, menu_id, tab_name = NULL) {
 
 
 fun_filter_df <- function(data, selections) {
+  # Defensive: if data is NULL, just return NULL so callers can handle it
+  if (is.null(data)) return(NULL)
   if (is.null(selections) || length(selections) == 0) {
     return(data)
   }
@@ -700,8 +702,11 @@ df_expi <- function(id, input, gene_data, get_gene_id, full_data = NULL, cache_e
           gene_cols <- gene_data$genes$gene
         }
 
-        # Metadata columns are columns that are not gene expression columns
-        meta_cols <- setdiff(colnames(df_full), gene_cols)
+        # Metadata columns are columns in the metadata source that are not
+        # gene expression columns. Use the provided filtered metadata (meta_source)
+        # rather than an undefined/full global object to avoid mismatches and
+        # accidental inclusion of gene columns.
+        meta_cols <- setdiff(colnames(meta_source), gene_cols)
 
         # Remove embedding coordinate columns to keep the slim dataframe small
         embed_patterns <- c("^umap", "^pca", "^t_sne", "^tsne", "^tSNE")
@@ -737,12 +742,12 @@ df_expi <- function(id, input, gene_data, get_gene_id, full_data = NULL, cache_e
           return(cache_env[[cache_key]])
         }
 
-        slim_df <- build_plot_slim(slim_df, full_mat, gene_exp, group_col)
+  slim_df <- build_plot_slim(slim_df, full_mat, gene_exp, group_col)
 
-        # Free the full dataframe
-        obj_size <- object.size(slim_df)
-        if (is.null(full_data)) rm(df_full)
-        invisible(gc(verbose = FALSE))
+  # Free the full dataframe reference (don't try to remove undefined
+  # variables). Allow GC to reclaim temporary objects.
+  obj_size <- object.size(slim_df)
+  invisible(gc(verbose = FALSE))
 
         dur <- as.numeric(difftime(Sys.time(), start_time, units = "secs"))
         # message(sprintf(
@@ -795,6 +800,7 @@ df_expi_nr <- function(id, input_list, gene_data, get_gene_id, full_data = NULL,
     gene_cols <- gene_data$genes$gene
   }
 
+  # Determine metadata columns from the filtered metadata (meta_source)
   meta_cols <- setdiff(colnames(meta_source), gene_cols)
   embed_patterns <- c("^umap", "^pca", "^t_sne", "^tsne", "^tSNE")
   embed_regex <- paste(embed_patterns, collapse = "|")
@@ -811,6 +817,8 @@ df_expi_nr <- function(id, input_list, gene_data, get_gene_id, full_data = NULL,
     slim_df <- cache_env[[cache_key_meta]]
     message(sprintf("df_expi_nr(id=%s): meta cache hit key=%s", id, cache_key_meta))
   } else {
+    # Build slim metadata dataframe and optionally cache it
+    slim_df <- meta_source %>% select(any_of(meta_cols))
     if (!is.null(cache_env)) {
       try(cache_env[[cache_key_meta]] <- slim_df, silent = TRUE)
     }
@@ -826,7 +834,6 @@ df_expi_nr <- function(id, input_list, gene_data, get_gene_id, full_data = NULL,
   slim_df <- build_plot_slim(slim_df, full_mat, gene_exp, group_col)
 
   obj_size <- object.size(slim_df)
-  if (is.null(full_data)) rm(df_full)
   invisible(gc(verbose = FALSE))
 
   dur <- as.numeric(difftime(Sys.time(), start_time, units = "secs"))

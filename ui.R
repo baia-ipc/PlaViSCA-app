@@ -620,11 +620,11 @@ ui <- fluidPage(
           a(href = "mailto:aruberto@uga.edu", "aruberto@uga.edu")
         ),
         tags$li(
-          strong("Jean Popovici"),
-          " - Head, Malaria Research Unit, IPC, email: ",
+          strong("Brice FEUFACK DONFACK"),
+          " - Postdoctoral researcher, Malaria Research Unit, IPC, email: ",
           a(
-            href = "mailto:jpopovici@pasteur-kh.org",
-            "jpopovici@pasteur-kh.org"
+            href = "mailto:ldonfack@pasteur-kh.org",
+            "ldonfack@pasteur-kh.org"
           )
         ),
         tags$li(

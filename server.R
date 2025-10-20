@@ -14,6 +14,21 @@ server <- function(input, output, session) {
     readr::read_csv("data/data_source.csv", show_col_types = FALSE)
   })
 
+  # When the filtered gene-expression metadata changes (for example when
+  # the user changes study_label or other filters), invalidate the static
+  # gene-expression snapshot so the initial plot is re-computed with the
+  # current filters. Without this the UI prefers the stored `df_gene0`
+  # snapshot and the static plot can remain stale while dynamic plots
+  # (which build on-demand) reflect the new filters.
+  observeEvent(filtered_gene_exp_data(), {
+    try(
+      {
+        df_gene0(NULL)
+      },
+      silent = TRUE
+    )
+  })
+
   autoUpdatePlot <- reactiveVal(FALSE)
 
   # Global loading state
@@ -275,9 +290,13 @@ server <- function(input, output, session) {
           genes = genes(dataset, gff_data)
         )
 
-        # Cache the current state (only data type, no filter)
-        cached_data$current_type <- current_type
-        sessionData$last_gene_data <- result
+  # Cache the current state (only data type, no filter)
+  cached_data$current_type <- current_type
+  # Store the result (data + genes) in sessionData for downstream
+  # consumers. The dataset itself is the same object returned by
+  # load_dataset() and is also referenced from cached_data; we avoid
+  # making additional manual copies elsewhere.
+  sessionData$last_gene_data <- result
 
         return(result)
       })
@@ -310,9 +329,34 @@ server <- function(input, output, session) {
       return(sessionData[[cache_key]])
     }
 
-    # Filter the data
+    # Parse the simple selection strings ("col__value") into a named list
+    # suitable for apply_secondary_filters so we never build a full-data
+    # subset that contains all gene columns (which caused large copies).
+    parsed_inputs <- list()
+    if (!is.null(selections) && length(selections) > 0) {
+      parts <- strsplit(selections, "__", fixed = TRUE)
+      valid_parts <- Filter(function(x) length(x) == 2, parts)
+      if (length(valid_parts) > 0) {
+        filter_list <- lapply(
+          split(valid_parts, vapply(valid_parts, `[[`, character(1), 1)),
+          function(lst) vapply(lst, `[[`, character(1), 2)
+        )
+        parsed_inputs <- filter_list
+      }
+    }
+
+    # Use apply_secondary_filters with keep_gene_matrix = FALSE so the
+    # returned object contains only metadata columns + attr(row_idx) and
+    # avoids creating a large copy with gene expression columns.
+    filtered_meta <- tryCatch({
+      apply_secondary_filters(gene_data()$data, parsed_inputs, keep_gene_matrix = FALSE, genes = if (!is.null(gene_data()$genes)) gene_data()$genes$gene else NULL)
+    }, error = function(e) {
+      # Fallback to safe fun_filter_df behavior if something unexpected
+      fun_filter_df(gene_data()$data, selections)
+    })
+
     result <- list(
-      data = fun_filter_df(gene_data()$data, selections),
+      data = filtered_meta,
       genes = gene_data()$genes
     )
 
@@ -906,7 +950,10 @@ server <- function(input, output, session) {
     }
     tryCatch(
       {
-        full_df <- if (!is.null(sessionData$last_gene_data)) sessionData$last_gene_data$data else filtered_gene_data()$data
+  # Get the full expression matrix from the cached_data storage where
+  # load_dataset keeps the large object. sessionData$last_gene_data no
+  # longer contains the full matrix to prevent duplicate references.
+  full_df <- if (!is.null(cached_data[[get_current_data_type()]])) cached_data[[get_current_data_type()]] else filtered_gene_data()$data
 
         filt_meta <- apply_secondary_filters(
           filtered_gene_data()$data,
