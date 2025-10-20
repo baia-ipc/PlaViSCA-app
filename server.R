@@ -14,12 +14,6 @@ server <- function(input, output, session) {
     readr::read_csv("data/data_source.csv", show_col_types = FALSE)
   })
 
-  # When the filtered gene-expression metadata changes (for example when
-  # the user changes study_label or other filters), invalidate the static
-  # gene-expression snapshot so the initial plot is re-computed with the
-  # current filters. Without this the UI prefers the stored `df_gene0`
-  # snapshot and the static plot can remain stale while dynamic plots
-  # (which build on-demand) reflect the new filters.
   observeEvent(filtered_gene_exp_data(), {
     try(
       {
@@ -28,12 +22,6 @@ server <- function(input, output, session) {
       silent = TRUE
     )
   })
-
-  autoUpdatePlot <- reactiveVal(FALSE)
-
-  # Global loading state
-  global_loading <- reactiveVal(FALSE)
-
   # Navigate home and data section
   observeEvent(input$home, {
     shinyjs::hide("analysis_section")
@@ -129,21 +117,17 @@ server <- function(input, output, session) {
       }
 
       # Only update if the selection is different to avoid unnecessary triggers
-      if (
-        is.null(input$data_type_exp) || input$data_type_exp != current_selection
-      ) {
+      if (is.null(input$data_type_exp) || input$data_type_exp != current_selection) {
         updateRadioButtons(
           session,
           "data_type_exp",
           choices = list(
             "Raw" = "raw",
             "Normalized" = "normalize"
-            # "Scaled" = "scale"
           ),
           selected = current_selection
         )
       }
-    } else if (input$tabset == "Embeddings") {
       current_selection <- if (!is.null(input$data_type_exp)) {
         input$data_type_exp
       } else {
@@ -292,12 +276,7 @@ server <- function(input, output, session) {
 
   # Cache the current state (only data type, no filter)
   cached_data$current_type <- current_type
-  # Store the result (data + genes) in sessionData for downstream
-  # consumers. The dataset itself is the same object returned by
-  # load_dataset() and is also referenced from cached_data; we avoid
-  # making additional manual copies elsewhere.
   sessionData$last_gene_data <- result
-
         return(result)
       })
     },
@@ -329,8 +308,6 @@ server <- function(input, output, session) {
       return(sessionData[[cache_key]])
     }
 
-    # Parse the simple selection strings ("col__value") into a named list
-    # suitable for apply_secondary_filters so we never build a full-data
     # subset that contains all gene columns (which caused large copies).
     parsed_inputs <- list()
     if (!is.null(selections) && length(selections) > 0) {
@@ -345,9 +322,6 @@ server <- function(input, output, session) {
       }
     }
 
-    # Use apply_secondary_filters with keep_gene_matrix = FALSE so the
-    # returned object contains only metadata columns + attr(row_idx) and
-    # avoids creating a large copy with gene expression columns.
     filtered_meta <- tryCatch({
       apply_secondary_filters(gene_data()$data, parsed_inputs, keep_gene_matrix = FALSE, genes = if (!is.null(gene_data()$genes)) gene_data()$genes$gene else NULL)
     }, error = function(e) {
@@ -384,12 +358,6 @@ server <- function(input, output, session) {
     expected_tabset = "Gene expression",
     global_loading = global_loading
   )
-
-  # Provide loading feedback to UI
-  # output$loading_state <- reactive({
-  #   global_loading()
-  # })
-  # outputOptions(output, "loading_state", suspendWhenHidden = FALSE)
 
   # Metadata filter
   # choose columns for filter data
@@ -472,7 +440,6 @@ server <- function(input, output, session) {
       return(sessionData[[cache_key]])
     }
 
-    # Process data
     result <- fun_filter_df(mr_data, selections)
 
     # Cache the result
@@ -1252,10 +1219,6 @@ server <- function(input, output, session) {
 
           tryCatch(
             {
-              # Simpler: build a tiny dataframe for plotting on-demand so we
-              # never copy or reassign the full expression matrix. This keeps
-              # the large `full` object in memory and constructs only the
-              # needed group column + gene_expr vector for plotting.
               fg <- filtered_gene_exp_data()
               cur_gene <- isolate(input[[paste0("genes_exp_", plot_id)]])
               cur_group <- isolate(input[[paste0("group_exp_", plot_id)]])
@@ -1395,7 +1358,6 @@ server <- function(input, output, session) {
         silent = TRUE
       )
 
-      # Client-side fallback: directly remove the DOM node with JS in case
       # server-side removal didn't take effect (ensures the whole block vanishes)
       try(
         {
@@ -1446,11 +1408,6 @@ server <- function(input, output, session) {
 
   ## update plot when data_type_exp_change from js with debouncing
   gene_exp_plots_trigger <- reactiveVal(0)
-
-  # No per-plot static storage: we build minimal plot dataframes on-demand
-  # to avoid retaining references to the large full matrix across multiple
-  # dynamic plots.
-  # (no per-plot cached objects)
 
   choice <- eventReactive(list(input$check, input$data_type), {
     req(gene_data()$genes)
@@ -1656,6 +1613,7 @@ server <- function(input, output, session) {
   plot_update_trigger <- reactiveVal(0)
   plot_ready <- reactiveVal(FALSE)
   genes_loading <- reactiveVal(FALSE)
+  autoUpdatePlot <- reactiveVal(FALSE)
 
   # Simplified debounced observer for plot-related inputs
   observe({
@@ -1867,39 +1825,95 @@ server <- function(input, output, session) {
     event <- click_event()
     req(event)
 
-    data <- filtered_gene_data()$data
-    cell_id <- event$key
+    # The plotting dataframe (metadata used for plotting) contains an
+    # attribute 'row_idx' which maps plotting rows back to the full
+    # gene-expression matrix. Use that to find the correct full-matrix row
+    # and then extract expression values from gene_data()$data.
+    meta_df <- filtered_gene_data()$data
+    full_mat <- gene_data()$data
+    cell_key <- event$key
 
-    # Process data without progress bar - keep it simple and fast
-    data$id <- seq_len(nrow(data))
-    cols <- c("id", colnames(data)[str_detect(colnames(data), "^PVP01")])
-    selected_df <- data[data$id == cell_id, cols, drop = FALSE]
+    # Determine available gene columns from the full matrix
+    gene_cols <- colnames(full_mat)[str_detect(colnames(full_mat), "^PVP01")]
 
-    # Clear intermediate variables
-    rm(data)
+    # Map the plotly key back to a full-matrix row index
+    mapped_full_row <- integer(0)
+    try({
+      numeric_id <- suppressWarnings(as.integer(as.character(cell_key)))
+      if (!is.na(numeric_id) && !is.null(meta_df) && numeric_id >= 1 && numeric_id <= nrow(meta_df)) {
+        ridx_attr <- attr(meta_df, "row_idx")
+        if (!is.null(ridx_attr) && length(ridx_attr) >= numeric_id) {
+          mapped_full_row <- ridx_attr[numeric_id]
+        }
+      } else if (!is.null(cell_key) && !is.null(meta_df) && any(cell_key == meta_df$barcode, na.rm = TRUE)) {
+        # map using metadata barcode -> row_idx
+        which_meta <- which(meta_df$barcode == cell_key)[1]
+        ridx_attr <- attr(meta_df, "row_idx")
+        if (!is.null(which_meta) && !is.null(ridx_attr) && length(ridx_attr) >= which_meta) {
+          mapped_full_row <- ridx_attr[which_meta]
+        }
+      } else if (!is.null(cell_key) && any(cell_key == full_mat$barcode, na.rm = TRUE)) {
+        # fallback: match directly in the full matrix's barcode column
+        mapped_full_row <- which(full_mat$barcode == cell_key)[1]
+      }
+    }, silent = TRUE)
 
-    # Convert to long format using the original working approach
-    selected_df <- selected_df %>%
-      pivot_longer(
-        cols = -id,
-        names_to = "gene_id",
-        values_to = "expression"
-      ) %>%
-      # Filter out zero expression genes for better performance
-      filter(expression > 0) %>%
-      left_join(gff_data, by = c("gene_id" = "id")) %>%
-      arrange(desc(expression)) %>%
-      rename(
-        cell_id = id,
-        gene_name = name,
-        exp_value = expression
-      ) %>%
-      select(gene_id, gene_name, exp_value, description)
+    # If we couldn't find a matching full row, return an empty table
+    if (length(mapped_full_row) == 0 || is.na(mapped_full_row)) {
+      selected_table(tibble::tibble(
+        gene_id = character(),
+        gene_name = character(),
+        exp_value = numeric(),
+        description = character()
+      ))
 
-    selected_table(selected_df)
+      showModal(modalDialog(
+        title = paste("Selected Cell ID:", as.character(cell_key)),
+        div(style = "width: 100%;", DT::DTOutput("cell_expression_table")),
+        size = "xl",
+        easyClose = TRUE,
+        footer = modalButton(label = tagList(icon("times")))
+      ))
+      return()
+    }
+
+    # Extract the expression row from the full matrix
+    # Ensure full_mat is a data.frame for tidy operations
+    if (!is.data.frame(full_mat)) full_mat <- as.data.frame(full_mat)
+
+    # Build a one-row data.frame with an 'id' column for pivoting
+    expr_row <- full_mat[mapped_full_row, gene_cols, drop = FALSE]
+    expr_row$id <- mapped_full_row
+
+    if (length(gene_cols) == 0) {
+      long_tbl <- tibble::tibble(
+        gene_id = character(),
+        gene_name = character(),
+        exp_value = numeric(),
+        description = character()
+      )
+    } else {
+      long_tbl <- expr_row %>%
+        pivot_longer(
+          cols = -id,
+          names_to = "gene_id",
+          values_to = "expression"
+        ) %>%
+        filter(expression > 0) %>%
+        left_join(gff_data, by = c("gene_id" = "id")) %>%
+        arrange(desc(expression)) %>%
+        rename(
+          cell_id = id,
+          gene_name = name,
+          exp_value = expression
+        ) %>%
+        select(gene_id, gene_name, exp_value, description)
+    }
+
+    selected_table(long_tbl)
 
     showModal(modalDialog(
-      title = paste("Selected Cell ID:", cell_id),
+      title = paste("Selected Cell ID:", as.character(cell_key)),
       div(style = "width: 100%;", DT::DTOutput("cell_expression_table")),
       size = "xl",
       easyClose = TRUE,
