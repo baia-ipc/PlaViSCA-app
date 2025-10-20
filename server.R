@@ -951,8 +951,6 @@ server <- function(input, output, session) {
     tryCatch(
       {
   # Get the full expression matrix from the cached_data storage where
-  # load_dataset keeps the large object. sessionData$last_gene_data no
-  # longer contains the full matrix to prevent duplicate references.
   full_df <- if (!is.null(cached_data[[get_current_data_type()]])) cached_data[[get_current_data_type()]] else filtered_gene_data()$data
 
         filt_meta <- apply_secondary_filters(
@@ -972,9 +970,6 @@ server <- function(input, output, session) {
           row_idx = row_idx
         )
 
-  # Cache the result (filtered gene-expression metadata and snapshot
-  # reference). Dynamic plots are created from static snapshots so no
-  # per-plot reactive clearing is required here.
   sessionData[[cache_key]] <- result
 
         return(result)
@@ -1079,26 +1074,16 @@ server <- function(input, output, session) {
     if (!is.null(result) && nrow(result) > 0) {
       sessionData[[cache_key]] <- result
     }
-
-    # Keep an explicit copy for the initial (static) gene expression plot so
-    # dynamic plots (which will create their own copies) do not mutate or
-    # reference the same data object. Store both the slim dataframe (result)
-    # and a copy of the full_data used to build it.
         try({
           if (!is.null(result)) {
             df_gene0(result)
           }
-          # Do NOT store a second copy of the full matrix for the initial
-          # plot; keep only the small slim dataframe to avoid extra memory.
         }, silent = TRUE)
 
     return(result)
   })
 
-  # Explicit reactiveVals to hold the initial gene-expression slim dataframe
-  # and a copy of the full matrix used to create it.
   df_gene0 <- reactiveVal(NULL)
-
 
   # Initialize dropdown
   observeEvent(
@@ -1150,8 +1135,6 @@ server <- function(input, output, session) {
     )
   })
 
-  # Initial (static) gene expression plot — use the df_gene0 snapshot so it
-  # remains independent of dynamic plot additions. df_gene0 is populated by
   # df_exp_0 when the user selects a gene/group.
   output$gene_exp_plotly <- renderPlotly({
     req(input$genes_exp_0, input$group_exp)
@@ -1160,12 +1143,9 @@ server <- function(input, output, session) {
       return(NULL)
     }
 
-    # Prefer the explicit snapshot; fall back to computing df_exp_0 once if
-    # snapshot is not available.
     plot_data <- df_gene0()
     if (is.null(plot_data)) {
       plot_data <- df_exp_0()
-      # store snapshot for future renders
       try({ df_gene0(plot_data) }, silent = TRUE)
     }
     req(plot_data)
@@ -1174,7 +1154,7 @@ server <- function(input, output, session) {
       return(NULL)
     }
 
-    # Create cache key (still useful for fast switching of gene/group)
+    # Create cache key (for fast switching of gene/group)
     plot_cache_key <- make_cache_key(
       "gene_exp_plot",
       input$genes_exp_0,
@@ -1314,9 +1294,6 @@ server <- function(input, output, session) {
       ## add ui block to button
       id <- id + 1
       newBlock(id, counter, choice_exp(), subBlock, session)
-
-      # Create a properly scoped reactive for this specific plot with shorter delay
-      # Capture choices now and schedule selectize update
       selectize_choices <- NULL
       try(
         {
@@ -1346,7 +1323,6 @@ server <- function(input, output, session) {
       output[[paste0("gene_exp_plotly_", id)]] <- local({
         plot_id <- id
         renderPlotly({
-          # Only proceed if we have data and inputs
           req(
             gene_data(),
             input[[paste0("genes_exp_", plot_id)]],
@@ -1360,10 +1336,6 @@ server <- function(input, output, session) {
 
           tryCatch(
             {
-              # Simpler and memory-safe: build the tiny plot dataframe on-demand
-              # from the filtered metadata and the full matrix. Do NOT copy the
-              # full matrix into per-plot session snapshots (that caused memory
-              # to grow with the number of dynamic plots).
               fg <- filtered_gene_exp_data()
               cur_gene <- isolate(input[[paste0("genes_exp_", plot_id)]])
               cur_group <- isolate(input[[paste0("group_exp_", plot_id)]])
@@ -1415,21 +1387,9 @@ server <- function(input, output, session) {
         silent = TRUE
       )
 
-      # Also remove any cached reactive for this dynamic plot to avoid
-      # Also remove any cached static dataframe for this dynamic plot to avoid
-      # keeping a reference to the slim dataframe in memory.
-        try(
-        {
-          # No per-plot cached objects to clear (we build on-demand)
-        },
-        silent = TRUE
-      )
-
-      # Remove UI element immediately on both server and client to ensure the
       # whole dynamic block is removed (fallbacks for robustness)
       try(
         {
-          # Server-side removal (immediate to send remove instruction to client)
           removeUI(selector = paste0("#dynamic_col_", id), multiple = FALSE, immediate = TRUE)
         },
         silent = TRUE
@@ -1812,19 +1772,61 @@ server <- function(input, output, session) {
 
     # Generate plot without progress bar
     isolate({
-      color_column <- switch(input$color,
-        "genes" = get_gene_id(input$genes_n, gene_data()$genes),
-        # "RNA_snn" = input$genes_n,
-        input$color
-      )
+      # Work on a local copy so we can attach a temporary gene-expression column
+      df_local <- data()
 
-      # Validate color_column - if it's NA or NULL, fallback to a safe default
-      if (is.null(color_column) || is.na(color_column) || color_column == "") {
+      color_column <- NULL
+
+      if (isTRUE(input$color == "genes")) {
+        # Resolve gene input robustly: user may supply a display name or a gene id
+        gene_input <- input$genes_n
+        gene_data_obj <- tryCatch(gene_data()$genes, error = function(e) NULL)
+        full_mat <- if (!is.null(cached_data[[get_current_data_type()]])) cached_data[[get_current_data_type()]] else gene_data()$data
+        row_idx <- attr(df_local, "row_idx")
+
+        resolved_gene_col <- NULL
+
+        # If the UI 'check' toggle indicates the user entered a gene id, try that first
+        if (!is.null(gene_input) && nzchar(as.character(gene_input)) && isTRUE(input$check)) {
+          candidate <- as.character(gene_input)
+          if (!is.null(full_mat) && candidate %in% colnames(full_mat)) {
+            resolved_gene_col <- candidate
+          }
+        }
+
+        # If still not resolved, try mapping display name -> gene id using helper
+        if (is.null(resolved_gene_col) && !is.null(gene_input) && nzchar(as.character(gene_input))) {
+          mapped <- tryCatch(get_gene_id(as.character(gene_input), gene_data_obj), error = function(e) NULL)
+          if (!is.null(mapped) && !is.na(mapped) && !is.null(full_mat) && mapped %in% colnames(full_mat)) {
+            resolved_gene_col <- as.character(mapped)
+          }
+        }
+
+        # Final fallback: maybe the input text itself is the column name in the matrix
+        if (is.null(resolved_gene_col) && !is.null(gene_input) && !is.null(full_mat) && as.character(gene_input) %in% colnames(full_mat)) {
+          resolved_gene_col <- as.character(gene_input)
+        }
+
+        # Attach temporary gene color column if we have a valid resolved column and row indices
+        if (!is.null(resolved_gene_col) && !is.na(resolved_gene_col) && !is.null(full_mat) && resolved_gene_col %in% colnames(full_mat) && !is.null(row_idx) && length(row_idx) > 0) {
+          gene_color_col <- paste0(".gene_color_", gsub("[^A-Za-z0-9]", "_", resolved_gene_col))
+          df_local[[gene_color_col]] <- full_mat[[resolved_gene_col]][row_idx]
+          color_column <- gene_color_col
+        } else {
+          color_column <- "sample_type"
+          message("Could not attach gene expression column for embedding coloring; using 'sample_type' fallback")
+        }
+      } else {
+        color_column <- input$color
+      }
+
+      # Final safety check: ensure the resolved color column exists in df_local
+      if (is.null(color_column) || is.na(color_column) || color_column == "" || !(color_column %in% colnames(df_local))) {
         color_column <- "sample_type"
       }
 
       p <- embedding_plot(
-        data(),
+        df_local,
         input$xaxis,
         input$yaxis,
         color_column,

@@ -106,35 +106,6 @@
 
 }
 
-/* .logo.mosquito {
-  top: 10px;
-  z-index: 1000;
-  width: 100px;
-  pointer-events: none;
-}
-
-.logo.mosquito img {
-  height: 100%;
-  position: relative;
-  transform: scale(0.5);
-  border-radius: 50%;
-  animation: fly 20s ease-in-out infinite;
-} */
-
-/* @keyframes fly {
-  0% {
-    transform: translate(0, 0) scale(0.5);
-  }
-
-  50% {
-    transform: translate(20px, -10px) scale(0.8);
-  }
-
-  100% {
-    transform: translate(0, 0) scale(0.5);
-  }
-} */
-
 
 .title-text {
   display: flex;
@@ -186,7 +157,6 @@
 .menu-items a .fas {
   padding-right: 5px;
 }
-
 
 
 .menu-items span {
@@ -1549,7 +1519,7 @@ input:checked+.slider:before {
 
 /* Gene Expression Tab - Gene Selection Row Indentation */
 .gene-exp-row {
-  padding-left: 40px;
+  padding-left: 20px;
 }
 
 /* Ensure gene selection inputs have consistent styling */
