@@ -163,6 +163,7 @@ server <- function(input, output, session) {
   app_initialized <- reactiveVal(FALSE)
   data_loading_trigger <- reactiveVal(0)
   syncing_tabs <- reactiveVal(FALSE)
+  global_loading <- reactiveVal(FALSE)
 
   cached_data <- reactiveValues(
     raw = NULL,
@@ -1825,10 +1826,6 @@ server <- function(input, output, session) {
     event <- click_event()
     req(event)
 
-    # The plotting dataframe (metadata used for plotting) contains an
-    # attribute 'row_idx' which maps plotting rows back to the full
-    # gene-expression matrix. Use that to find the correct full-matrix row
-    # and then extract expression values from gene_data()$data.
     meta_df <- filtered_gene_data()$data
     full_mat <- gene_data()$data
     cell_key <- event$key
@@ -1877,8 +1874,6 @@ server <- function(input, output, session) {
       return()
     }
 
-    # Extract the expression row from the full matrix
-    # Ensure full_mat is a data.frame for tidy operations
     if (!is.data.frame(full_mat)) full_mat <- as.data.frame(full_mat)
 
     # Build a one-row data.frame with an 'id' column for pivoting

@@ -19,11 +19,9 @@ filtered_gene_exp_cache_key <- function(input) {
     if (is.null(input)) {
       return(NULL)
     }
-    # If input is a list-like object (reactive input is a list proxy), try list access
     if (is.list(input) && !is.null(input[[name]])) {
       return(input[[name]])
     }
-    # Otherwise try direct [[ access and catch errors
     tryCatch(
       input[[name]],
       error = function(e) NULL
@@ -356,7 +354,7 @@ apply_secondary_filters <- function(data, inputs, keep_gene_matrix = TRUE, genes
       filter(n_feature_rna > 0 & n_count_rna > 0)
   }
 
-  # Select relevant columns (keep all existing columns if they don't match the expected metadata columns)
+  # Select relevant columns 
   metadata_cols <- c(
     "study_label",
     "host_species",
@@ -383,14 +381,11 @@ apply_secondary_filters <- function(data, inputs, keep_gene_matrix = TRUE, genes
   if (!keep_gene_matrix) {
     # If caller provided a genes vector, use it to explicitly drop gene columns
     if (!is.null(genes) && length(genes) > 0) {
-      # Drop any columns that match the provided gene list
       keep_cols <- setdiff(names(filtered), genes)
       keep_cols <- intersect(keep_cols, names(filtered))
-      # Ensure metadata columns are preserved
       keep_cols <- unique(c(keep_cols, available_metadata_cols))
       filtered <- filtered %>% select(any_of(keep_cols))
     } else {
-      # Fallback: select metadata columns only
       filtered <- filtered %>% select(any_of(metadata_cols))
     }
   } else {
@@ -409,9 +404,6 @@ apply_secondary_filters <- function(data, inputs, keep_gene_matrix = TRUE, genes
     }
   }
 
-  # Compute row_idx relative to the original input `data` so callers can
-  # subset the full expression matrix without re-running filters. We build
-  # the same logical mask using the original data frame.
   original <- data
   if (!is.null(original) && nrow(original) > 0) {
     keep_rows <- rep(TRUE, nrow(original))
@@ -587,52 +579,37 @@ newBlock <- function(new_count, counter, choice_exp, dynamicBlock, session) {
 
 # Generate df for gene_exp0
 df_exp0 <- function(gene_data, gene_input, group_input, check_exp, full_data = NULL, cache_env = NULL) {
-  start_time <- Sys.time()
-  # full_data is the large expression matrix; gene_data$data should be the
-  # filtered metadata (small). Use meta_source for metadata and full_mat for
-  # the full expression matrix. We avoid subsetting the full matrix to keep
-  # memory usage low and instead extract a single column vector by index.
   full_mat <- if (!is.null(full_data)) full_data else NULL
   meta_source <- if (!is.null(gene_data) && !is.null(gene_data$data)) gene_data$data else data.frame()
-  # If the filtered metadata provided row indices, record them
   row_idx <- if (!is.null(gene_data) && !is.null(gene_data$data)) attr(gene_data$data, "row_idx") else NULL
   genes <- gene_data$genes
 
-  # Determine the gene column to use
   gene_exp <- if (!check_exp) {
     get_gene_id(gene_input, genes)
   } else {
     gene_input
   }
 
-  # Identify gene columns from the genes annotation; fall back to a pattern
   gene_cols <- character(0)
   if (!is.null(genes) && nrow(genes) > 0 && "gene" %in% colnames(genes)) {
     gene_cols <- genes$gene
   }
 
-  # Identify metadata columns (everything that's not a gene column)
   meta_cols <- setdiff(colnames(meta_source), gene_cols)
-
-  # Remove embedding coordinate columns
   embed_patterns <- c("^umap", "^pca", "^t_sne", "^tsne", "^tSNE")
   embed_regex <- paste(embed_patterns, collapse = "|")
   meta_cols <- meta_cols[!grepl(embed_regex, meta_cols, ignore.case = TRUE)]
 
-  # Ensure the grouping column is present
   if (!(group_input %in% meta_cols)) {
     meta_cols <- unique(c(meta_cols, group_input))
   }
 
-  # Build cache key for metadata and check cache first (if provided)
   row_idx_len <- NA
   if (!is.null(gene_data) && !is.null(gene_data$data)) row_idx_len <- length(attr(gene_data$data, "row_idx"))
   cache_key_meta <- make_cache_key("slim_meta", row_idx_len)
   if (!is.null(cache_env) && exists(cache_key_meta, envir = cache_env, inherits = FALSE)) {
     slim_meta <- cache_env[[cache_key_meta]]
-    message(sprintf("df_exp0: meta cache hit key=%s", cache_key_meta))
   } else {
-    # Build slim dataframe: metadata columns only
     slim_meta <- meta_source %>% select(any_of(meta_cols))
     if (!is.null(cache_env)) {
       try(cache_env[[cache_key_meta]] <- slim_meta, silent = TRUE)
@@ -643,15 +620,12 @@ df_exp0 <- function(gene_data, gene_input, group_input, check_exp, full_data = N
   cache_key <- make_cache_key("slim_df", gene_exp, group_input, row_idx_len)
   if (!is.null(cache_env) && exists(cache_key, envir = cache_env, inherits = FALSE)) {
     cached <- cache_env[[cache_key]]
-    message(sprintf("df_exp0: cache hit key=%s", cache_key))
     return(cached)
   }
 
   # Use helper to build the minimal slim dataframe for plotting
   slim_meta <- build_plot_slim(slim_meta, full_mat, gene_exp, group_input)
 
-  # Free the large full dataframe
-  obj_size <- object.size(slim_meta)
   # Free the potentially large full matrix reference
   if (is.null(full_data)) rm(df_full)
   invisible(gc(verbose = FALSE))
@@ -702,10 +676,6 @@ df_expi <- function(id, input, gene_data, get_gene_id, full_data = NULL, cache_e
           gene_cols <- gene_data$genes$gene
         }
 
-        # Metadata columns are columns in the metadata source that are not
-        # gene expression columns. Use the provided filtered metadata (meta_source)
-        # rather than an undefined/full global object to avoid mismatches and
-        # accidental inclusion of gene columns.
         meta_cols <- setdiff(colnames(meta_source), gene_cols)
 
         # Remove embedding coordinate columns to keep the slim dataframe small
@@ -726,9 +696,7 @@ df_expi <- function(id, input, gene_data, get_gene_id, full_data = NULL, cache_e
         cache_key_meta <- make_cache_key("slim_meta", row_idx_len)
         if (!is.null(cache_env) && exists(cache_key_meta, envir = cache_env, inherits = FALSE)) {
           slim_df <- cache_env[[cache_key_meta]]
-          message(sprintf("df_expi(id=%s): meta cache hit key=%s", id, cache_key_meta))
         } else {
-          # Build slim dataframe and add gene_expr column via helper
             slim_df <- meta_source %>% select(any_of(meta_cols))
           if (!is.null(cache_env)) {
             try(cache_env[[cache_key_meta]] <- slim_df, silent = TRUE)
@@ -738,29 +706,16 @@ df_expi <- function(id, input, gene_data, get_gene_id, full_data = NULL, cache_e
         # Build cache key for full slim_df and check cache first (if provided)
         cache_key <- make_cache_key("slim_df", gene_exp, group_col, row_idx_len, id)
         if (!is.null(cache_env) && exists(cache_key, envir = cache_env, inherits = FALSE)) {
-          message(sprintf("df_expi(id=%s): cache hit key=%s", id, cache_key))
           return(cache_env[[cache_key]])
         }
 
   slim_df <- build_plot_slim(slim_df, full_mat, gene_exp, group_col)
-
-  # Free the full dataframe reference (don't try to remove undefined
-  # variables). Allow GC to reclaim temporary objects.
-  obj_size <- object.size(slim_df)
   invisible(gc(verbose = FALSE))
 
-        dur <- as.numeric(difftime(Sys.time(), start_time, units = "secs"))
-        # message(sprintf(
-        #   "df_expi(id=%s): rows=%d cols=%d size=%s dur=%.3fs",
-        #   id, nrow(slim_df), ncol(slim_df), format(obj_size, units = "auto"), dur
-        # ))
-
         if (!is.null(cache_env)) try(cache_env[[cache_key]] <- slim_df, silent = TRUE)
-
         return(slim_df)
       },
       error = function(e) {
-        message("Error in df_expi for id ", id, ": ", e$message)
         return(NULL)
       }
     )
@@ -779,7 +734,6 @@ df_expi_nr <- function(id, input_list, gene_data, get_gene_id, full_data = NULL,
   }
 
   # Avoid subsetting the potentially huge full matrix; keep the full matrix
-  # reference and use the filtered metadata for the slim dataframe.
   full_mat <- if (!is.null(full_data)) full_data else NULL
   meta_source <- if (!is.null(gene_data) && !is.null(gene_data$data)) gene_data$data else data.frame()
   # row indices in the original full matrix
@@ -815,9 +769,7 @@ df_expi_nr <- function(id, input_list, gene_data, get_gene_id, full_data = NULL,
   cache_key_meta <- make_cache_key("slim_meta", row_idx_len)
   if (!is.null(cache_env) && exists(cache_key_meta, envir = cache_env, inherits = FALSE)) {
     slim_df <- cache_env[[cache_key_meta]]
-    message(sprintf("df_expi_nr(id=%s): meta cache hit key=%s", id, cache_key_meta))
   } else {
-    # Build slim metadata dataframe and optionally cache it
     slim_df <- meta_source %>% select(any_of(meta_cols))
     if (!is.null(cache_env)) {
       try(cache_env[[cache_key_meta]] <- slim_df, silent = TRUE)
@@ -827,7 +779,6 @@ df_expi_nr <- function(id, input_list, gene_data, get_gene_id, full_data = NULL,
   # Caching for full slim_df
   cache_key <- make_cache_key("slim_df", gene_exp, group_col, row_idx_len, id)
   if (!is.null(cache_env) && exists(cache_key, envir = cache_env, inherits = FALSE)) {
-    message(sprintf("df_expi_nr(id=%s): cache hit key=%s", id, cache_key))
     return(cache_env[[cache_key]])
   }
 
@@ -837,7 +788,6 @@ df_expi_nr <- function(id, input_list, gene_data, get_gene_id, full_data = NULL,
   invisible(gc(verbose = FALSE))
 
   dur <- as.numeric(difftime(Sys.time(), start_time, units = "secs"))
-  # message(sprintf("df_expi_nr(id=%s): rows=%d cols=%d size=%s dur=%.3fs", id, nrow(slim_df), ncol(slim_df), format(obj_size, units = "auto"), dur))
 
   if (!is.null(cache_env)) try(cache_env[[cache_key]] <- slim_df, silent = TRUE)
 
@@ -1255,12 +1205,6 @@ prepare_categorical_colors <- function(df, color) {
   return(list(df = df, colors = colors))
 }
 
-
-# Build a minimal slim dataframe for plotting: include the group column (and
-# optionally extra columns) from the filtered metadata and a single gene
-# expression vector extracted from the full expression matrix by indexing the
-# gene column with the metadata row indices. This avoids copying the entire
-# full matrix while producing the small dataframe used by plotting code.
 build_plot_slim <- function(meta, full_mat, gene_exp, group_col, extra_cols = NULL) {
   if (is.null(meta)) meta <- data.frame()
 
@@ -1316,6 +1260,44 @@ get_legend_layout <- function(legend_title) {
   )
 }
 
+# Helper to build hover text for 2D and 3D plots to avoid duplication
+build_hover_text <- function(df, legend_title, display_color, x_vals = NULL, y_vals = NULL, z_vals = NULL) {
+  # Conditionally include Z label/value only when provided
+  z_label <- if (is.null(z_vals)) "" else "<br>Z:"
+  z_value <- if (is.null(z_vals)) "" else z_vals
+
+  return(~ paste(
+    "Cell_id:",
+    df$barcode,
+    "<br>Color by",
+    legend_title,
+    ":",
+    display_color,
+    "<br>Cluster:",
+    df$seurat_clusters,
+    "<br>Study:",
+    df$study_label,
+    "<br>Life cycle stage:",
+    df$life_cycle_stage,
+  "<br>Host species:",
+  format_species_name(df$host_species),
+    "<br>Sample type:",
+    df$sample_type,
+    "<br>Sequencer:",
+    df$sequencer,
+    "<br>Strain:",
+    df$strain,
+    "<br>n_Features_RNA:",
+    df$n_feature_rna,
+    "<br>X:",
+    x_vals,
+    "<br>Y:",
+    y_vals,
+    z_label,
+    z_value
+  ))
+}
+
 # Generate 2d plot
 plot_2d <- function(
     df,
@@ -1334,34 +1316,7 @@ plot_2d <- function(
     selected_color
   }
 
-  hover_text <- ~ paste(
-    "Cell:",
-    df$barcode,
-    "<br>Cluster:",
-    df$seurat_clusters,
-    "<br>Study:",
-    df$study_label,
-    "<br>Life cycle stage:",
-    df$life_cycle_stage,
-    "<br>Host species:",
-    df$host_species,
-    "<br>Sample type:",
-    df$sample_type,
-    "<br>Sequencer:",
-    df$sequencer,
-    "<br>Strain:",
-    df$strain,
-    "<br>n_Features_RNA:",
-    df$n_feature_rna,
-    "<br>Color by",
-    legend_title,
-    ":",
-    display_color,
-    "<br>X:",
-    x,
-    "<br>Y:",
-    y
-  )
+  hover_text <- build_hover_text(df, legend_title, display_color, x, y)
 
   legend_layout <- get_legend_layout(legend_title)
   df$plotly_key <- seq_len(nrow(df))
@@ -1448,28 +1403,7 @@ plot_3d <- function(
     selected_color
   }
 
-  hover_text <- paste(
-    "Cell:",
-    df$barcode,
-    "<br>Cluster:",
-    df$seurat_clusters,
-    "<br>Study:",
-    df$study_label,
-    "<br>Life cycle stage:",
-    df$life_cycle_stage,
-    "<br>Color by",
-    legend_title,
-    ":",
-    display_color,
-    "<br>n_Features_RNA:",
-    df$n_feature_rna,
-    "<br>X:",
-    x_vals,
-    "<br>Y:",
-    y_vals,
-    "<br>Z:",
-    z_vals
-  )
+  hover_text <- build_hover_text(df, legend_title, display_color, x_vals, y_vals, z_vals)
 
   legend_layout <- get_legend_layout(legend_title)
 
