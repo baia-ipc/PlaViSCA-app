@@ -32,3 +32,11 @@ source_suffix = {
 #html_theme = "furo"
 html_theme = "sphinx_rtd_theme"
 html_title = "PlaViSca"
+html_theme_options = {
+    # Show navigation sidebar entries for deeper levels
+    'navigation_depth': 3,
+    # Keep the sidebar expanded instead of collapsing sections
+    'collapse_navigation': False,
+    # Display the version selector if available
+    'display_version': True,
+}

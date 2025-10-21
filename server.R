@@ -1865,7 +1865,7 @@ server <- function(input, output, session) {
       ))
 
       showModal(modalDialog(
-        title = paste("Selected Cell ID:", as.character(cell_key)),
+        title = paste("Selected cell ID:", as.character(cell_key)),
         div(style = "width: 100%;", DT::DTOutput("cell_expression_table")),
         size = "xl",
         easyClose = TRUE,
@@ -1907,8 +1907,18 @@ server <- function(input, output, session) {
 
     selected_table(long_tbl)
 
+    # Showing the actual barcode 
+    # mapped full row. Fall back to the original cell_key if barcode is missing.
+    sel_barcode <- tryCatch({
+      if (!is.null(mapped_full_row) && !is.na(mapped_full_row) && "barcode" %in% colnames(full_mat)) {
+        as.character(full_mat$barcode[mapped_full_row])
+      } else {
+        as.character(cell_key)
+      }
+    }, error = function(e) as.character(cell_key))
+
     showModal(modalDialog(
-      title = paste("Selected Cell ID:", as.character(cell_key)),
+      title = paste("Selected cell ID:", sel_barcode),
       div(style = "width: 100%;", DT::DTOutput("cell_expression_table")),
       size = "xl",
       easyClose = TRUE,
@@ -1939,7 +1949,7 @@ server <- function(input, output, session) {
       formatRound("exp_value", digits = 3)
   })
 
-  # Clear selected table and cell cache when modal is dismissed (memory cleanup)
+  # Clear selected table and cell cache when modal is dismissed 
   observeEvent(input$shiny_modal, {
     if (!isTruthy(input$shiny_modal)) {
       selected_table(NULL)

@@ -19,7 +19,7 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="PlaViSca User Manual" href="user_manual.html" /> 
+    <link rel="next" title="User Manual" href="user_manual.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -43,8 +43,39 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="user_manual.html">PlaViSca User Manual</a></li>
-<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="user_manual.html">User Manual</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="user_manual.html#overview-of-plavisca-features">Overview of PlaViSca Features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user_manual.html#home-page">Home page</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user_manual.html#analysis-page">Analysis page</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="user_manual.html#metadata">Metadata</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_manual.html#quality-control">Quality Control</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_manual.html#data-source">Data source</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_manual.html#gene-expression">Gene expression</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_manual.html#embedding">Embedding</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="user_manual.html#about-page">About page</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="user_manual.html#project-background">Project Background</a></li>
+<li class="toctree-l3"><a class="reference internal" href="user_manual.html#open-source-and-collaboration">Open-source and Collaboration</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="user_manual.html#tips-for-effective-use">Tips for Effective Use</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user_manual.html#support-and-feedback">Support and Feedback</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="setup_guide.html">Setup Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="setup_guide.html#system-requirements">System Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="setup_guide.html#installation-steps">Installation Steps</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="setup_guide.html#clone-the-repository">1. Clone the Repository</a></li>
+<li class="toctree-l3"><a class="reference internal" href="setup_guide.html#install-dependencies">2. Install Dependencies</a></li>
+<li class="toctree-l3"><a class="reference internal" href="setup_guide.html#run-the-application">3. Run the Application</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="setup_guide.html#troubleshooting">Troubleshooting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="setup_guide.html#development-team-contact-information">Development Team &amp; Contact Information</a></li>
+<li class="toctree-l2"><a class="reference internal" href="setup_guide.html#source-code">Source Code</a></li>
+</ul>
+</li>
 </ul>
 
         </div>
@@ -73,13 +104,17 @@
              
   <section id="welcome-to-plavisca">
 <h1>Welcome to PlaViSca<a class="headerlink" href="#welcome-to-plavisca" title="Link to this heading"></a></h1>
+<a class="reference external image-reference" href="https://github.com/Sopheap15/pvsca"><img alt="https://img.shields.io/badge/version-1.0-blue?style=flat" src="https://img.shields.io/badge/version-1.0-blue?style=flat" />
+</a>
+<img alt="https://img.shields.io/badge/last_updated-October%2021%2C%202025-blue?style=flat" src="https://img.shields.io/badge/last_updated-October%2021%2C%202025-blue?style=flat" />
+<a class="reference external image-reference" href="https://github.com/Sopheap15/pvsca"><img alt="https://img.shields.io/badge/PlaViSca-black?style=flat&amp;logo=github" src="https://img.shields.io/badge/PlaViSca-black?style=flat&amp;logo=github" />
+</a>
 <p><strong>PlaViSca</strong> is a free, open-source, interactive R Shiny application designed for the analysis and visualization of single-cell RNA sequencing (scRNA-seq) data from <em>Plasmodium vivax</em>. It empowers researchers, especially those in the malaria research community, to explore and interpret complex datasets through an intuitive, code-free interface.</p>
 <p>This manual provides users with detailed guidance on effectively utilizing the PlaViSca software. It covers the application’s purpose, installation process, and essential features, ensuring a comprehensive understanding for optimal use.</p>
-<p>![Version](<a class="reference external" href="https://img.shields.io/badge/version-1.0-blue?style=flat">https://img.shields.io/badge/version-1.0-blue?style=flat</a>) ![Last Updated](<a class="reference external" href="https://img.shields.io/badge/last%20updated-October%2017%2C%202025-blue?style=flat">https://img.shields.io/badge/last%20updated-October%2017%2C%202025-blue?style=flat</a>) [![GitHub](<a class="reference external" href="https://img.shields.io/badge/GitHub-Repo-black?style=flat&amp;logo=github)](https://github.com/Sopheap15/pvsca">https://img.shields.io/badge/GitHub-Repo-black?style=flat&amp;logo=github)](https://github.com/Sopheap15/pvsca</a>)</p>
 <div class="toctree-wrapper compound">
 <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="user_manual.html">PlaViSca User Manual</a><ul>
+<li class="toctree-l1"><a class="reference internal" href="user_manual.html">User Manual</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="user_manual.html#overview-of-plavisca-features">Overview of PlaViSca Features</a></li>
 <li class="toctree-l2"><a class="reference internal" href="user_manual.html#home-page">Home page</a></li>
 <li class="toctree-l2"><a class="reference internal" href="user_manual.html#analysis-page">Analysis page</a><ul>
@@ -99,17 +134,17 @@
 <li class="toctree-l2"><a class="reference internal" href="user_manual.html#support-and-feedback">Support and Feedback</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation Guide</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="installation.html#system-requirements">System Requirements</a></li>
-<li class="toctree-l2"><a class="reference internal" href="installation.html#installation-steps">Installation Steps</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="installation.html#clone-the-repository">1. Clone the Repository</a></li>
-<li class="toctree-l3"><a class="reference internal" href="installation.html#install-dependencies">2. Install Dependencies</a></li>
-<li class="toctree-l3"><a class="reference internal" href="installation.html#run-the-application">3. Run the Application</a></li>
+<li class="toctree-l1"><a class="reference internal" href="setup_guide.html">Setup Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="setup_guide.html#system-requirements">System Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="setup_guide.html#installation-steps">Installation Steps</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="setup_guide.html#clone-the-repository">1. Clone the Repository</a></li>
+<li class="toctree-l3"><a class="reference internal" href="setup_guide.html#install-dependencies">2. Install Dependencies</a></li>
+<li class="toctree-l3"><a class="reference internal" href="setup_guide.html#run-the-application">3. Run the Application</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="installation.html#troubleshooting">Troubleshooting</a></li>
-<li class="toctree-l2"><a class="reference internal" href="installation.html#development-team-contact-information">Development Team &amp; Contact Information</a></li>
-<li class="toctree-l2"><a class="reference internal" href="installation.html#source-code">Source Code</a></li>
+<li class="toctree-l2"><a class="reference internal" href="setup_guide.html#troubleshooting">Troubleshooting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="setup_guide.html#development-team-contact-information">Development Team &amp; Contact Information</a></li>
+<li class="toctree-l2"><a class="reference internal" href="setup_guide.html#source-code">Source Code</a></li>
 </ul>
 </li>
 </ul>
@@ -120,7 +155,7 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="user_manual.html" class="btn btn-neutral float-right" title="PlaViSca User Manual" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="user_manual.html" class="btn btn-neutral float-right" title="User Manual" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
