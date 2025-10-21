@@ -1,10 +1,10 @@
-  library(shiny)
-  library(shinyjs)
-  library(DT)
-  library(plotly)
-  library(RColorBrewer)
-  library(tidyverse)
-  library(later)
+library(shiny)
+library(shinyjs)
+library(DT)
+library(plotly)
+library(RColorBrewer)
+library(tidyverse)
+library(later)
 
 server <- function(input, output, session) {
   sessionData <- new.env(parent = emptyenv())
@@ -275,16 +275,16 @@ server <- function(input, output, session) {
           genes = genes(dataset, gff_data)
         )
 
-  # Cache the current state (only data type, no filter)
-  cached_data$current_type <- current_type
-  sessionData$last_gene_data <- result
+        # Cache the current state (only data type, no filter)
+        cached_data$current_type <- current_type
+        sessionData$last_gene_data <- result
         return(result)
       })
     },
     ignoreNULL = FALSE
   )
 
-  # Separate reactive for filtered gene data 
+  # Separate reactive for filtered gene data
   filtered_gene_data <- reactive({
     req(gene_data())
 
@@ -323,12 +323,15 @@ server <- function(input, output, session) {
       }
     }
 
-    filtered_meta <- tryCatch({
-      apply_secondary_filters(gene_data()$data, parsed_inputs, keep_gene_matrix = FALSE, genes = if (!is.null(gene_data()$genes)) gene_data()$genes$gene else NULL)
-    }, error = function(e) {
-      # Fallback to safe fun_filter_df behavior if something unexpected
-      fun_filter_df(gene_data()$data, selections)
-    })
+    filtered_meta <- tryCatch(
+      {
+        apply_secondary_filters(gene_data()$data, parsed_inputs, keep_gene_matrix = FALSE, genes = if (!is.null(gene_data()$genes)) gene_data()$genes$gene else NULL)
+      },
+      error = function(e) {
+        # Fallback to safe fun_filter_df behavior if something unexpected
+        fun_filter_df(gene_data()$data, selections)
+      }
+    )
 
     result <- list(
       data = filtered_meta,
@@ -465,13 +468,14 @@ server <- function(input, output, session) {
         "sample_type",
         choices = unique(filt_data$sample_type)
       )
-      updateSelectInput(
+      updateSelectizeInput(
         session,
         "host_species",
         choices = setNames(
           unique(filt_data$host_species),
           format_species_name(unique(filt_data$host_species))
-        )
+        ),
+        server = TRUE
       )
       updateSelectInput(
         session,
@@ -519,13 +523,14 @@ server <- function(input, output, session) {
         "sample_type_qc",
         choices = unique(filt_data$sample_type)
       )
-      updateSelectInput(
+      updateSelectizeInput(
         session,
         "host_species_qc",
         choices = setNames(
           unique(filt_data$host_species),
           format_species_name(unique(filt_data$host_species))
-        )
+        ),
+        server = TRUE
       )
       updateSelectInput(
         session,
@@ -573,13 +578,14 @@ server <- function(input, output, session) {
         "sample_type_exp",
         choices = unique(filt_data$sample_type)
       )
-      updateSelectInput(
+      updateSelectizeInput(
         session,
         "host_species_exp",
         choices = setNames(
           unique(filt_data$host_species),
           format_species_name(unique(filt_data$host_species))
-        )
+        ),
+        server = TRUE
       )
       updateSelectInput(
         session,
@@ -713,6 +719,7 @@ server <- function(input, output, session) {
 
           DT::datatable(
             processed_data,
+            escape = FALSE,
             extensions = "Buttons",
             options = list(
               pageLength = 10,
@@ -918,8 +925,8 @@ server <- function(input, output, session) {
     }
     tryCatch(
       {
-  # Get the full expression matrix from the cached_data storage where
-  full_df <- if (!is.null(cached_data[[get_current_data_type()]])) cached_data[[get_current_data_type()]] else filtered_gene_data()$data
+        # Get the full expression matrix from the cached_data storage where
+        full_df <- if (!is.null(cached_data[[get_current_data_type()]])) cached_data[[get_current_data_type()]] else filtered_gene_data()$data
 
         filt_meta <- apply_secondary_filters(
           filtered_gene_data()$data,
@@ -938,7 +945,7 @@ server <- function(input, output, session) {
           row_idx = row_idx
         )
 
-  sessionData[[cache_key]] <- result
+        sessionData[[cache_key]] <- result
 
         return(result)
       },
@@ -1042,11 +1049,14 @@ server <- function(input, output, session) {
     if (!is.null(result) && nrow(result) > 0) {
       sessionData[[cache_key]] <- result
     }
-        try({
-          if (!is.null(result)) {
-            df_gene0(result)
-          }
-        }, silent = TRUE)
+    try(
+      {
+        if (!is.null(result)) {
+          df_gene0(result)
+        }
+      },
+      silent = TRUE
+    )
 
     return(result)
   })
@@ -1114,7 +1124,12 @@ server <- function(input, output, session) {
     plot_data <- df_gene0()
     if (is.null(plot_data)) {
       plot_data <- df_exp_0()
-      try({ df_gene0(plot_data) }, silent = TRUE)
+      try(
+        {
+          df_gene0(plot_data)
+        },
+        silent = TRUE
+      )
     }
     req(plot_data)
 
@@ -1135,10 +1150,13 @@ server <- function(input, output, session) {
       return(sessionData[[plot_cache_key]])
     }
 
-    result <- tryCatch({
-      group <- tolower(input$group_exp)
-      gene_exp_plot(plot_data, group)
-    }, error = function(e) NULL)
+    result <- tryCatch(
+      {
+        group <- tolower(input$group_exp)
+        gene_exp_plot(plot_data, group)
+      },
+      error = function(e) NULL
+    )
 
     if (!is.null(result)) sessionData[[plot_cache_key]] <- result
     return(result)
@@ -1228,12 +1246,15 @@ server <- function(input, output, session) {
               # Resolve gene id when the user selects by name
               gene_exp_val <- if (isTRUE(cur_check)) cur_gene else get_gene_id(cur_gene, fg$genes)
 
-              static_df <- tryCatch({
-                build_plot_slim(fg$data, fg$full, gene_exp_val, cur_group)
-              }, error = function(e) {
-                message(sprintf("dynamic gene plot %s: error building slim df: %s", plot_id, e$message))
-                NULL
-              })
+              static_df <- tryCatch(
+                {
+                  build_plot_slim(fg$data, fg$full, gene_exp_val, cur_group)
+                },
+                error = function(e) {
+                  message(sprintf("dynamic gene plot %s: error building slim df: %s", plot_id, e$message))
+                  NULL
+                }
+              )
 
               if (is.null(static_df) || nrow(static_df) == 0) {
                 message(sprintf("dynamic gene plot %s: no data after building slim df (gene=%s)", plot_id, as.character(gene_exp_val)))
@@ -1307,12 +1328,15 @@ server <- function(input, output, session) {
 
               gene_exp_val <- if (isTRUE(cur_check)) cur_gene else get_gene_id(cur_gene, fg$genes)
 
-              static_df <- tryCatch({
-                build_plot_slim(fg$data, fg$full, gene_exp_val, cur_group)
-              }, error = function(e) {
-                message(sprintf("dynamic gene plot %s: error building slim df: %s", plot_id, e$message))
-                NULL
-              })
+              static_df <- tryCatch(
+                {
+                  build_plot_slim(fg$data, fg$full, gene_exp_val, cur_group)
+                },
+                error = function(e) {
+                  message(sprintf("dynamic gene plot %s: error building slim df: %s", plot_id, e$message))
+                  NULL
+                }
+              )
 
               if (is.null(static_df) || nrow(static_df) == 0) {
                 message(sprintf("dynamic gene plot %s: no data after building slim df (gene=%s)", plot_id, as.character(gene_exp_val)))
@@ -1835,25 +1859,28 @@ server <- function(input, output, session) {
 
     # Map the plotly key back to a full-matrix row index
     mapped_full_row <- integer(0)
-    try({
-      numeric_id <- suppressWarnings(as.integer(as.character(cell_key)))
-      if (!is.na(numeric_id) && !is.null(meta_df) && numeric_id >= 1 && numeric_id <= nrow(meta_df)) {
-        ridx_attr <- attr(meta_df, "row_idx")
-        if (!is.null(ridx_attr) && length(ridx_attr) >= numeric_id) {
-          mapped_full_row <- ridx_attr[numeric_id]
+    try(
+      {
+        numeric_id <- suppressWarnings(as.integer(as.character(cell_key)))
+        if (!is.na(numeric_id) && !is.null(meta_df) && numeric_id >= 1 && numeric_id <= nrow(meta_df)) {
+          ridx_attr <- attr(meta_df, "row_idx")
+          if (!is.null(ridx_attr) && length(ridx_attr) >= numeric_id) {
+            mapped_full_row <- ridx_attr[numeric_id]
+          }
+        } else if (!is.null(cell_key) && !is.null(meta_df) && any(cell_key == meta_df$barcode, na.rm = TRUE)) {
+          # map using metadata barcode -> row_idx
+          which_meta <- which(meta_df$barcode == cell_key)[1]
+          ridx_attr <- attr(meta_df, "row_idx")
+          if (!is.null(which_meta) && !is.null(ridx_attr) && length(ridx_attr) >= which_meta) {
+            mapped_full_row <- ridx_attr[which_meta]
+          }
+        } else if (!is.null(cell_key) && any(cell_key == full_mat$barcode, na.rm = TRUE)) {
+          # fallback: match directly in the full matrix's barcode column
+          mapped_full_row <- which(full_mat$barcode == cell_key)[1]
         }
-      } else if (!is.null(cell_key) && !is.null(meta_df) && any(cell_key == meta_df$barcode, na.rm = TRUE)) {
-        # map using metadata barcode -> row_idx
-        which_meta <- which(meta_df$barcode == cell_key)[1]
-        ridx_attr <- attr(meta_df, "row_idx")
-        if (!is.null(which_meta) && !is.null(ridx_attr) && length(ridx_attr) >= which_meta) {
-          mapped_full_row <- ridx_attr[which_meta]
-        }
-      } else if (!is.null(cell_key) && any(cell_key == full_mat$barcode, na.rm = TRUE)) {
-        # fallback: match directly in the full matrix's barcode column
-        mapped_full_row <- which(full_mat$barcode == cell_key)[1]
-      }
-    }, silent = TRUE)
+      },
+      silent = TRUE
+    )
 
     # If we couldn't find a matching full row, return an empty table
     if (length(mapped_full_row) == 0 || is.na(mapped_full_row)) {
@@ -1907,15 +1934,18 @@ server <- function(input, output, session) {
 
     selected_table(long_tbl)
 
-    # Showing the actual barcode 
+    # Showing the actual barcode
     # mapped full row. Fall back to the original cell_key if barcode is missing.
-    sel_barcode <- tryCatch({
-      if (!is.null(mapped_full_row) && !is.na(mapped_full_row) && "barcode" %in% colnames(full_mat)) {
-        as.character(full_mat$barcode[mapped_full_row])
-      } else {
-        as.character(cell_key)
-      }
-    }, error = function(e) as.character(cell_key))
+    sel_barcode <- tryCatch(
+      {
+        if (!is.null(mapped_full_row) && !is.na(mapped_full_row) && "barcode" %in% colnames(full_mat)) {
+          as.character(full_mat$barcode[mapped_full_row])
+        } else {
+          as.character(cell_key)
+        }
+      },
+      error = function(e) as.character(cell_key)
+    )
 
     showModal(modalDialog(
       title = paste("Selected cell ID:", sel_barcode),
@@ -1949,7 +1979,7 @@ server <- function(input, output, session) {
       formatRound("exp_value", digits = 3)
   })
 
-  # Clear selected table and cell cache when modal is dismissed 
+  # Clear selected table and cell cache when modal is dismissed
   observeEvent(input$shiny_modal, {
     if (!isTruthy(input$shiny_modal)) {
       selected_table(NULL)

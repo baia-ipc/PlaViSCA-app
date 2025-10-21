@@ -205,7 +205,17 @@ ui <- fluidPage(
                 choices = NULL,
                 multiple = TRUE,
                 options = list(
-                  placeholder = "No filter applied"
+                  placeholder = "No filter applied",
+                  render = I(
+                    '{
+                      option: function(item, escape) {
+                        return "<div>" + item.label + "</div>";
+                      },
+                      item: function(item, escape) {
+                        return "<div>" + item.label + "</div>";
+                      }
+                    }'
+                  )
                 )
               ),
               tags$div(class = "dropdown-arrow", title = "Open dropdown", "▼")
