@@ -1,115 +1,146 @@
+# PlaViSCA — Plasmodium vivax Single-Cell Analysis (Interactive Shiny App)
 
-# Interactive Web Application PlaViSCA for Single-Cell Transcriptomic Analysis and Visualization of Plasmodium vivax
+[![R](https://img.shields.io/badge/R-%3E%3D%204.0-blue?logo=r&logoColor=white)](https://www.r-project.org/)
+[![Shiny](https://img.shields.io/badge/Shiny-%3E%3D%201.7.0-brightgreen?logo=r&logoColor=white)](https://shiny.rstudio.com/)
+[![Version](https://img.shields.io/badge/version-0.1.0-orange.svg)](https://github.com/Sopheap15/pvsca/releases)
 
-**PlaViSCA** is an interactive, code-free R Shiny application designed to make  
-single-cell RNA sequencing (scRNA-seq) data from *Plasmodium vivax* accessible  
-to the broader scientific, public health, and educational communities.
+PlaViSCA is an interactive R/Shiny application for exploring single-cell RNA-seq
+data from Plasmodium vivax. The app is intended for researchers, public health
+professionals, and educators who want to visualize embeddings, explore gene
+expression across stages, and filter datasets without writing code.
 
-## Key Highlights
+## Key features
 
-- Explore scRNA-seq data from *P. vivax* across different parasite and infection stages.
-- Dynamic, interactive visualizations using Plotly (2D & 3D).
-- Gene expression viewer for stage-specific or gene-specific profiling.
-- Filter and subset data by condition, stage, species, and more.
-- Embeddings viewer (PCA, UMAP, t-SNE) for both integrated and unintegrated datasets.
-- Downloadable metadata and plots for downstream analysis.
+- Interactive 2D and 3D visualizations (Plotly-powered PCA / UMAP / t-SNE).
+- Per-cell metadata exploration (filter, subset, and download results).
+- Gene expression viewer with direct links to PlasmoDB and NCBI.
+- Export plots and metadata for downstream analysis.
 
----
+## Repository layout
 
-## Features
+After cloning, the repository contains:
 
-### Home
-- Overview of PlaViSCA goals and applications.
-- Interactive life cycle image map of *P. vivax*.
-- Icons link to various sections of the application including manual, data exploration, and about page.
+```
+.
+├── app.R           # Shiny app entry point (loads ui.R and server.R)
+├── global.R        # Shared setup (data loading, helpers)
+├── ui.R            # User interface
+├── server.R        # Shiny server logic
+├── functions/      # Plotting/helpers and preprocessing scripts
+├── data/           # Example and processed RDS files (not all data included)
+├── www/            # Static assets (images, CSS, JS)
+├── renv/           # Local R environment (optional)
+└── README.md       # This file
+```
 
-### About
-- Information about the web application’s development and contributors.
+## Getting started (quick)
 
-### Explore Data
-- Filter data by infection stage, parasite stage, coloring factor, gene, and more.
-- Choose from raw, normalized, or scaled data.
-- Toggle between 2D and 3D visualizations with customizable axes.
-- Explore metadata in an interactive table with flexible filters.
-- View integrated or unintegrated datasets using PCA, UMAP, or t-SNE embeddings.
-- Access gene expression data with links to [PlasmoDB](https://plasmodb.org/) and [NCBI](https://www.ncbi.nlm.nih.gov/).
-
----
-
-## Getting Started
-
-### 1. Clone the Repository
+1. Clone the repository
 
 ```bash
 git clone https://github.com/Sopheap15/pvsca.git
+cd pvsca
 ```
-After cloning the repository, the project directory will contain the following
-structure:
-.
-├── app.R              # Main entry point, sources ui.R and server.R
-├── data/              # Directory to store input datasets
-├── functions/         # Custom functions and preprocessing scripts
-├── global.R           # Loads data and functions into the global environment
-├── pvsca.Rproj        # RStudio project file
-├── README.md          # Project overview and installation instructions
-├── ref/               # Reference data directory
-├── renv/              # R environment directory managed by `renv`
-├── renv.lock          # Snapshot of R packages for reproducibility
-├── server.R           # Shiny server logic
-├── ui.R               # Shiny user interface definition
-└── www/               # Static assets (images, CSS, JavaScript)
 
+Version: 0.1.0
 
-### 2. Install Dependencies in RStudio
+2. Install R dependencies
 
-#### Option A: Use `renv`
+Preferred (reproducible):
+
 ```r
+# from within R
+install.packages('renv')
 renv::restore()
 ```
 
-#### Option B: Manual Installation
+Manual (if you don't use renv):
+
 ```r
 install.packages(c(
-  "shiny", "shinyjs", "shinycssloader", 
-  "plotly", "DT", "RColorBrewer", 
-  "tidyverse", "later"
+  'shiny', 'shinyjs', 'shinycssloader', 'plotly', 'DT',
+  'RColorBrewer', 'tidyverse', 'later'
 ))
 ```
 
----
+3. Run the app
 
-### 3. Run the Application
+From RStudio: open `app.R` and click "Run App".
 
-#### Option A: From RStudio
-- Open `app.R` (or `server.R` / `ui.R`) in RStudio.
-- Click the **Run App** button in the top-right of the editor.
+From a terminal (GUI):
 
-#### Option B: Terminal command for computer with GUI
 ```bash
 R -e "shiny::runApp('.', launch.browser = TRUE)"
 ```
 
-#### Option C: Terminal command for computer without GUI
+From a server (no GUI):
+
 ```bash
 R -e "shiny::runApp('.', host='0.0.0.0', port=3838)"
 ```
-Then open a web browser and navigate to `http://<your-computer-ip>:3838`.
----
 
-#### 4. Data
+Then open `http://<server-ip>:3838` in a browser.
 
-The data used in this web application are derived from a flattened Seurat object.
-A preprocessing pipeline is applied to clean and prepare the data before 
-visualization. You can review the complete preprocessing workflow in 
-functions/preprocessing.R. Data are store in directory `data/` and consist of:
-clearned_dataset.rds, data_source.csv, normalize_df.rds, scale_df.rds,raw_df.rds
-and gff_data.rds
----
+## Data
 
-## Feedback & Contributions
+The app expects preprocessed data stored under `data/`. The repository includes
+examples and processed RDS snapshots used for development. The preprocessing
+pipeline is available in `functions/preprocessing.R` — it flattens a Seurat
+object and produces the RDS files that the app reads.
 
-We welcome contributions and feedback from the community.  
-Please open issues or submit pull requests on our [GitHub repository](https://github.com/Sopheap15/pvsca).
+Typical files in `data/` (examples):
+
+- `cleaned_dataset.rds`
+- `data_source.csv`
+- `normalize_df.rds`
+- `scale_df.rds`
+- `raw_df.rds`
+- `PvivaxP01_gff_data.rds` (reference GFF)
+
+If you use your own data, ensure it follows the same structure (metadata
+columns, embedding column names like `umap_i_1`, `umap_i_2`, and gene
+expression columns). See `functions/build_plot_slim()` for details on expected
+columns.
+
+## Features and navigation
+
+- Home: high-level overview and links to the manual and data sources.
+- Explore Data: filter datasets, change color/symbol mapping, switch
+  between integrated/unintegrated embeddings, and toggle between 2D/3D.
+- Gene Expression: view per-gene expression across groups and download
+  results.
+
+## Customization and developer notes
+
+- Plotting helpers: `functions/helpers.R` contains the main plotting logic
+  (2D/3D plot builders, hover text, color handling).
+- Preprocessing: `functions/preprocessing.R` shows how the Seurat object is
+  converted to the flattened RDS format used by the app.
+- To tweak default palettes or symbols, edit the constants in
+  `functions/helpers.R` (symbol mapping, color palettes).
+
+## Contributing
+
+Contributions are welcome! Please:
+
+1. Open an issue to discuss major changes or bugs.
+2. Fork the repository and create a feature branch.
+3. Submit a pull request with a clear description and, where applicable,
+   reproducible examples.
+
+## License & attribution
+
+This project is provided under the CC-BY 4.0 license (see `LICENSE`).
+
+## Acknowledgements
+
+PlaViSCA was developed by the BAIA Team with contributions from the
+Plasmodium research community.
+
+## Contact
+
+For questions or support, open an issue on GitHub or contact the maintainers
+via the repository.
 
 ---
 
