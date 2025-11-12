@@ -416,7 +416,7 @@ ui <- fluidPage(
                 type = 6,
                 size = 0.5,
                 color = "#3498db",
-                plotlyOutput("all_plotly", height = "600px")
+                plotlyOutput("all_plotly", height = "700px")
               )
             )
           ),
