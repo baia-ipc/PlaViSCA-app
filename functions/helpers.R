@@ -2043,8 +2043,8 @@ plot_3d <- function(
         ),
         text = hover_text,
         hoverinfo = "text",
-        width = 1000,
-        height = 700,
+        width = NULL,
+        height = NULL,
         source = "embedding",
         key = ~ df$id
       ) %>%
@@ -2052,7 +2052,8 @@ plot_3d <- function(
           scene = list(
             xaxis = list(title = paste("X-", x_col)),
             yaxis = list(title = paste("Y-", y_col)),
-            zaxis = list(title = paste("Z-", z_col))
+            zaxis = list(title = paste("Z-", z_col)),
+            aspectratio = list(x = 1.5, y = 1.5, z = 1)
           ),
           font = list(size = 14),
           margin = list(l = 50, r = 50, t = 25, b = 50)
@@ -2097,6 +2098,11 @@ embedding_plot <- function(
 
   x <- df[[xaxis_input]]
   y <- df[[yaxis_input]]
+
+  # ensure stable per-row idenfitifier for plotly key usage
+  if (!"id" %in% names(df)) df$id <- seq_len(nrow(df))
+  if (!"plotly_key" %in% names(df)) df$plotly_key <- seq_len(nrow(df))
+
   selected_color <- df[[color]]
   is_categorical <- is_categorical_data(selected_color)
 
