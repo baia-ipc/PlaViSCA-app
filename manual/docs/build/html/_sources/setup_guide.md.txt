@@ -40,6 +40,8 @@ install.packages(c("shiny", "shinyjs", "shinycssloaders", "plotly", "DT", "RColo
 
 - **If using RStudio (desktop):**
 
+  - Navigate to project folder and click on `.Rproj`
+  - Open either `ui.R` or `server.R` or `app.R`
   - Click the "Run App" button in the top-right corner of the script editor.
   - Or run the following command in the R console:
 
