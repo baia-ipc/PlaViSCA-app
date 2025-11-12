@@ -11,7 +11,6 @@
 /pre_process_data/results
 vivaxP01.gff_data.tsv
 
-renv.lock
 pre_process_data/32365102_knee_plots.pdf
 pre_process_data/35926062_knee_plots.pdf
 pre_process_data/36093191_knee_plots.pdf
@@ -30,6 +29,3 @@ pre_process_data/ruberto2022_1.rds
 pre_process_data/ruberto2022_2.rds
 pre_process_data/sa2020.rds
 pre_process_data/scripts/ref/
-# pixi environments
-.pixi/*
-!.pixi/config.toml
