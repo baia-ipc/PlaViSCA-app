@@ -40,10 +40,11 @@ install.packages(c("shiny", "shinyjs", "shinycssloaders", "plotly", "DT", "RColo
 
 - **If using RStudio (desktop):**
 
-  - Navigate to project folder and click on `.Rproj`
-  - Open either `ui.R` or `server.R` or `app.R`
-  - Click the "Run App" button in the top-right corner of the script editor.
-  - Or run the following command in the R console:
+  1. Navigate to project folder and click on `.Rproj`
+  2. Open `app.R` (it would work also with `ui.R` or `server.R`)
+  3. Click the "Run App" button in the top-right corner of the script editor.
+
+  Or run the following command in the R console:
 
   ```r
   shiny::runApp('.')
@@ -51,17 +52,18 @@ install.packages(c("shiny", "shinyjs", "shinycssloaders", "plotly", "DT", "RColo
 
 - **If using a Linux server (no GUI):**
 
-  - Run the following command in your terminal to start the app and make it accessible from other machines:
+  1. Run the following command in your terminal to start the app and make it accessible from other machines:
 
   ```bash
   R -e "shiny::runApp('.', host='0.0.0.0', port=3838)"
   ```
 
-  - Then, open a web browser on your local machine and go to: `http://<server-ip>:3838`
-  - Replace `<server-ip>` with the actual IP address of your server. You can find it with:
-    ```bash
-    hostname -I
-    ```
+  2. Then, open a web browser on your local machine and go to: `http://<server-ip>:3838`
+  3. Replace `<server-ip>` with the actual IP address of your server. You can find it with:
+
+  ```bash
+  hostname -I
+  ```
 
 The application will launch in your default web browser (or be accessible remotely if running on a server).
 

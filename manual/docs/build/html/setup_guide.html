@@ -141,31 +141,30 @@
 <h3>3. Run the Application<a class="headerlink" href="#run-the-application" title="Link to this heading"></a></h3>
 <ul>
 <li><p><strong>If using RStudio (desktop):</strong></p>
-<ul class="simple">
+<ol class="arabic simple">
 <li><p>Navigate to project folder and click on <code class="docutils literal notranslate"><span class="pre">.Rproj</span></code></p></li>
-<li><p>Open either <code class="docutils literal notranslate"><span class="pre">ui.R</span></code> or <code class="docutils literal notranslate"><span class="pre">server.R</span></code> or <code class="docutils literal notranslate"><span class="pre">app.R</span></code></p></li>
+<li><p>Open <code class="docutils literal notranslate"><span class="pre">app.R</span></code> (it would work also with <code class="docutils literal notranslate"><span class="pre">ui.R</span></code> or <code class="docutils literal notranslate"><span class="pre">server.R</span></code>)</p></li>
 <li><p>Click the “Run App” button in the top-right corner of the script editor.</p></li>
-<li><p>Or run the following command in the R console:</p></li>
-</ul>
+</ol>
+<p>Or run the following command in the R console:</p>
 <div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="n">shiny</span><span class="o">::</span><span class="nf">runApp</span><span class="p">(</span><span class="s">&#39;.&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 </li>
 <li><p><strong>If using a Linux server (no GUI):</strong></p>
-<ul class="simple">
+<ol class="arabic simple">
 <li><p>Run the following command in your terminal to start the app and make it accessible from other machines:</p></li>
-</ul>
+</ol>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>R<span class="w"> </span>-e<span class="w"> </span><span class="s2">&quot;shiny::runApp(&#39;.&#39;, host=&#39;0.0.0.0&#39;, port=3838)&quot;</span>
 </pre></div>
 </div>
-<ul>
+<ol class="arabic simple" start="2">
 <li><p>Then, open a web browser on your local machine and go to: <code class="docutils literal notranslate"><span class="pre">http://&lt;server-ip&gt;:3838</span></code></p></li>
-<li><p>Replace <code class="docutils literal notranslate"><span class="pre">&lt;server-ip&gt;</span></code> with the actual IP address of your server. You can find it with:</p>
+<li><p>Replace <code class="docutils literal notranslate"><span class="pre">&lt;server-ip&gt;</span></code> with the actual IP address of your server. You can find it with:</p></li>
+</ol>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>hostname<span class="w"> </span>-I
 </pre></div>
 </div>
-</li>
-</ul>
 </li>
 </ul>
 <p>The application will launch in your default web browser (or be accessible remotely if running on a server).</p>
