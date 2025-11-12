@@ -245,6 +245,8 @@ ui <- fluidPage(
             selected = "study_label"
           )
         ),
+        ## Symbol selector (formatted like Color)
+
         column(
           width = 12,
           class = "col-12",
@@ -297,6 +299,21 @@ ui <- fluidPage(
                 )
               )
             )
+          )
+        ),
+        column(
+          width = 12,
+          class = "col-12",
+          radioButtons(
+            "symbol",
+            "Symbol",
+            choices = list(
+              "Unselected" = "",
+              "Study" = "study_label",
+              "Sample type" = "sample_type",
+              "Life cycle" = "life_cycle_stage"
+            ),
+            selected = ""
           )
         ),
         column(

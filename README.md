@@ -1,6 +1,6 @@
 # PlaViSCA — Plasmodium vivax Single-Cell Analysis (Interactive Shiny App)
 
-[![R](https://img.shields.io/badge/R-%3E%3D%204.0-blue?logo=r&logoColor=white)](https://www.r-project.org/)
+[![R](https://img.shields.io/badge/R-%3E%3D%204.5-blue?logo=r&logoColor=white)](https://www.r-project.org/)
 [![Shiny](https://img.shields.io/badge/Shiny-%3E%3D%201.7.0-brightgreen?logo=r&logoColor=white)](https://shiny.rstudio.com/)
 [![Version](https://img.shields.io/badge/version-0.1.0-orange.svg)](https://github.com/Sopheap15/pvsca/releases)
 

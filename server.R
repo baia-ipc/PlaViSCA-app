@@ -1707,7 +1707,6 @@ server <- function(input, output, session) {
 
   # Comprehensive dependency checker with gene selection stability
   all_dependencies_ready <- reactive({
-    # Core data requirements
     if (is.null(data()) || nrow(data()) == 0) {
       return(FALSE)
     }
@@ -1732,7 +1731,6 @@ server <- function(input, output, session) {
       # Check if gene selection has been stable
       if (last_gene_selection() != current_gene) {
         last_gene_selection(current_gene)
-        # Give a moment for the gene selection to stabilize
         invalidateLater(150)
         return(FALSE)
       }
@@ -1748,14 +1746,25 @@ server <- function(input, output, session) {
   output$all_plotly <- renderPlotly({
     req(all_dependencies_ready(), embedding_ready())
 
-    # Triple-check data is still valid
     if (is.null(data()) || nrow(data()) == 0) {
       return(NULL)
     }
 
     # Generate plot without progress bar
+    symbol_choice <- NULL
+    if (!is.null(input$symbol)) {
+      sym_val <- as.character(input$symbol)
+      if (!is.na(sym_val)) {
+        sym_val <- trimws(sym_val)
+        if (nzchar(sym_val) && tolower(sym_val) != "unselected") {
+          symbol_choice <- sym_val
+        } else {
+          symbol_choice <- NULL
+        }
+      }
+    }
+
     isolate({
-      # Work on a local copy so we can attach a temporary gene-expression column
       df_local <- data()
 
       color_column <- NULL
@@ -1797,7 +1806,6 @@ server <- function(input, output, session) {
           color_column <- gene_color_col
         } else {
           color_column <- "sample_type"
-          message("Could not attach gene expression column for embedding coloring; using 'sample_type' fallback")
         }
       } else {
         color_column <- input$color
@@ -1816,7 +1824,8 @@ server <- function(input, output, session) {
         input$genes_n,
         input$size,
         plot_type = get_plot_type(),
-        plot_dim = input$plot
+        plot_dim = input$plot,
+        symbol = symbol_choice
       )
 
       p <- p %>%

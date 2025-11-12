@@ -703,6 +703,7 @@ ul li:not(:last-child) {
 
 #size label,
 #color label,
+#symbol label,
 #plot label {
   display: flex;
   flex: 1;
@@ -724,6 +725,7 @@ ul li:not(:last-child) {
 
 #size-label:hover,
 #color-label:hover,
+#symbol-label:hover,
 #plot-label:hover {
   cursor: default;
 }
@@ -736,6 +738,7 @@ ul li:not(:last-child) {
 }
 
 #color .shiny-options-group,
+#symbol .shiny-options-group,
 #embedding .shiny-options-group,
 #data_type .shiny-options-group,
 #data_type_exp .shiny-options-group {
@@ -753,9 +756,10 @@ ul li:not(:last-child) {
   flex: 1 0 48%;
 }
 
-#color .shiny-options-group .radio,
-#stagelr .shiny-options-group .checkbox,
-#size .shiny-options-group .radio {
+ #color .shiny-options-group .radio,
+ #symbol .shiny-options-group .radio,
+ #stagelr .shiny-options-group .checkbox,
+ #size .shiny-options-group .radio {
   flex: 1 0 31%;
 }
 
@@ -820,11 +824,12 @@ ul li:not(:last-child) {
 
 
 /* Hide default checkbox and radio */
-#stagei input[type="checkbox"],
-#size input[type="radio"],
-#color input[type="radio"],
-#data_opt input[type="radio"],
-#plot input[type="radio"] {
+ #stagei input[type="checkbox"],
+ #size input[type="radio"],
+ #color input[type="radio"],
+ #symbol input[type="radio"],
+ #data_opt input[type="radio"],
+ #plot input[type="radio"] {
   display: none;
 }
 
@@ -833,7 +838,8 @@ ul li:not(:last-child) {
   align-items: center;
 }
 
-#embedding .radio-inline {
+#embedding .radio-inline,
+#symbol .radio-inline {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -849,7 +855,8 @@ ul li:not(:last-child) {
   display: none;
 }
 
-#embedding .radio-inline.checked-label {
+#embedding .radio-inline.checked-label,
+#symbol .radio-inline.checked-label {
   background-color: #d6eaf8;
   border-color: #3498db;
   font-weight: bold;
@@ -1242,11 +1249,16 @@ input:checked+.slider:before {
   #data_type .shiny-options-group,
   #data_type_exp .shiny-options-group,
   #plot .shiny-options-group,
+  #symbol .shiny-options-group,
+  #symbol .radio-inline {
+    align-items: flex-end;
+  }
   #embedding .shiny-options-group{
     display: flex;
     flex-direction: row;
     flex-grow: 1;
   }
+  #symbol .shiny-options-group .radio,
 
   #gene_snn_ui {
     position: relative;
@@ -1254,6 +1266,9 @@ input:checked+.slider:before {
 
   #gene_snn_ui .col-sm-2 {
     position: absolute;
+  }
+  #symbol input[type="radio"] {
+    display: none;
   }
 
   #gene_snn_ui .col-sm-7 {

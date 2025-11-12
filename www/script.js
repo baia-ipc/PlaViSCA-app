@@ -14,6 +14,20 @@ function updateLabelStyles($input) {
   }
 }
 
+// Ensure symbol group labels behave like color group labels
+function clearAndSetRadioGroup($input) {
+  const name = $input.attr('name');
+  if (!name) return;
+  // Remove checked-label from other radios in same group
+  $('input[name="' + name + '"]').each(function () {
+    $(this).closest('label').removeClass('checked-label');
+  });
+  // Add to the clicked one if checked
+  if ($input.is(':checked')) {
+    $input.closest('label').addClass('checked-label');
+  }
+}
+
 // Smooth sidebar transition optimization
 function optimizeSidebarTransition() {
   const sidebar = document.getElementById('sidebar');
@@ -207,6 +221,8 @@ function setupPlotlyHighlight() {
   plotlyHighlightSetup = true;
 }
 
+// Legend click handler removed: per-user request to avoid JavaScript legend logic.
+
 function updateHighlight(xVal, yVal, highlightSize) {
   if (!plotlyElement || !plotlyElement.data) return;
 
@@ -352,12 +368,10 @@ $(document).ready(function () {
   $inputs.on('change', function () {
     const $i = $(this);
     if ($i.attr('type') === 'radio') {
-      $('input[name="' + $i.attr('name') + '"]')
-        .not('[name="stagelr"], [name="data_type"]')
-        .closest('label')
-        .removeClass('checked-label');
+      clearAndSetRadioGroup($i);
+    } else {
+      updateLabelStyles($i);
     }
-    updateLabelStyles($i);
 
     // Debounce tooltip updates
     clearTimeout(updateTimeout);
@@ -370,6 +384,8 @@ $(document).ready(function () {
   $(document).on('click', '.btn_add', function () {
     Shiny.setInputValue('click_add_btn', this.id, { priority: 'event' });
   });
+
+  // Custom plotly legend click behavior removed by request
 
   // ID collection with caching
   $(document).on('click', '.btn_remove', function () {
@@ -479,5 +495,8 @@ $(document).ready(function () {
     modalInstances.clear();
   });
 });
+
+
+  
 
 
