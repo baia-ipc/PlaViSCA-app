@@ -83,9 +83,13 @@ For questions, feedback, or collaboration inquiries, please contact:
   _Bioinformatic System Engineer, Institut Pasteur du Cambodge_  
   📧 [osopheap@pasteur-kh.org](mailto:osopheap@pasteur-kh.org)
 
-- **Brice FEUFACK DONFACK**  
+- **Brice Feufack Donfack**  
   _Postdoctoral researcher, Malaria Research Unit, Institut Pasteur du Cambodge_  
   📧 [idonfack@pasteur-kh.org](mailto:idonfack@pasteur-kh.org)
+
+  - **Thomas Obdian**
+    _, Institut Pasteur du French_  
+    📧 [thomas.obadia@pasteur.fr](mailto:thomas.obadia@pasteur.fr)
 
 - **Anthony Ruberto**  
   _Postdoctoral Researcher, Center for Tropical and Emerging Global Diseases, University of Georgia, USA_  
