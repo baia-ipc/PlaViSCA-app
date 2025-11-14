@@ -673,9 +673,9 @@ ui <- fluidPage(
         "PlaViSca is built using the R Shiny framework. For more detail, please
         visit GitHub repo:",
         a(
-          href = "https://github.com/Sopheap15/pvsca",
+          href = "https://github.com/Sopheap15/PlaViSca",
           HTML(
-            'https://github.com/Sopheap15/pvsca
+            'https://github.com/Sopheap15/PlaViSca
               <span class="point-emoji">👈 </span>'
           ),
           target = "_blank"
