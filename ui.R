@@ -648,7 +648,8 @@ ui <- fluidPage(
         ),
         tags$li(
           strong("Thomas Obadia"),
-          " - Bioinformatics and Biostatistcs Hub, Institut Pasteur, Paris, France and G5 Infectious Diseases Epidemiology and Analytics, Institut Pasteur, Paris, France
+          " - Bioinformatics and Biostatistcs Hub, Institut Pasteur, Paris, France.
+            - G5 Infectious Diseases Epidemiology and Analytics, Institut Pasteur, Paris, France,
           email: ",
           a(href = "mailto:thomas.obadia@pasteur.fr", "thomas.obadia@pasteur.fr")
         ),

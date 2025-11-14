@@ -1,9 +1,5 @@
 # Setup Guide
 
-<!-- <a href="https://github.com/Sopheap15/pvsca"><img alt="Version" src="https://img.shields.io/badge/version-1.0-blue?style=flat" /></a>
-<img alt="Last Updated" src="https://img.shields.io/badge/last_updated-October%2021%2C%202025-blue?style=flat" />
-<a href="https://github.com/Sopheap15/pvsca"><img alt="PlaViSca" src="https://img.shields.io/badge/PlaViSca-black?style=flat&logo=github" /></a> -->
-
 This guide provides step-by-step instructions for installing and running PlaViSca locally. For online access, visit <a href="https://xxxx.com">PlaViSca Web Application</a>.
 
 ## System Requirements
@@ -85,20 +81,21 @@ For questions, feedback, or collaboration inquiries, please contact:
 
 - **Sopheap Oeng**  
   _Bioinformatic System Engineer, Institut Pasteur du Cambodge_  
-  📧 [osopheap@pasteur-kh.org](mailto:osopheap@pasteur-kh.org)
+  📧 [osopheap@pasteur-kh.org](mailto:osopheap@pasteur-kh.org);
 
-- **Brice Feufack Donfack**  
-  _Postdoctoral researcher, Malaria Research Unit, Institut Pasteur du Cambodge_  
-  📧 [idonfack@pasteur-kh.org](mailto:idonfack@pasteur-kh.org)
+- **Anthony Ruberto**  
+  _Postdoctoral Researcher, Center for Tropical and Emerging Global Diseases, University of Georgia, USA_  
+  📧 [aruberto@uga.edu](mailto:aruberto@uga.edu)
 
 - **Thomas Obadia**  
   _Bioinformatics and Biostatistcs Hub, Institut Pasteur, Paris, France_
 
   _G5 Infectious Diseases Epidemiology and Analytics, Institut Pasteur, Paris, France_
+  📧 [thomas.obadia@pasteur.fr](mailto:thomas.obadia@pasteur.fr)
 
-- **Anthony Ruberto**  
-  _Postdoctoral Researcher, Center for Tropical and Emerging Global Diseases, University of Georgia, USA_  
-  📧 [aruberto@uga.edu](mailto:aruberto@uga.edu)
+- **Brice Feufack Donfack**  
+  _Postdoctoral researcher, Malaria Research Unit, Institut Pasteur du Cambodge_  
+  📧 [idonfack@pasteur-kh.org](mailto:idonfack@pasteur-kh.org)
 
 - **Giorgio Gonnella**  
   _Head, Bioinformatics and Artificial Intelligence Unit (BAIA), Institut Pasteur du Cambodge_  
