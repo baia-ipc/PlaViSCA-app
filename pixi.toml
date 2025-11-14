@@ -6,7 +6,7 @@ platforms = ["linux-64"]
 version = "0.1.0"
 
 [tasks]
-app = "R -e 'shiny::runApp(\"app.R\")'"
+PlaViSca = "R -e 'shiny::runApp(\"app.R\")'"
 
 [dependencies]
 r = ">=4.5,<4.6"
