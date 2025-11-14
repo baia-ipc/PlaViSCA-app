@@ -1,0 +1,264 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Introduction &mdash; PlaViSca</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=5dcad5ca"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="PlaViSca features" href="main_page.html" />
+    <link rel="prev" title="Welcome to PlaViSca" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            PlaViSca
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#hosting-and-access">Hosting and access</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#local-installation">Local installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#requirements">Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#getting-source-code-from-the-repository">Getting source code from the repository</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#gene-expression-data-and-metadata">Gene expression data and metadata</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#preparing-data">Preparing data</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#install-dependencies">Install dependencies</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="#run-application">Run Application</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#option-a-from-rstudio">Option A: from RStudio</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#option-b-terminal-for-gui-computer">Option B: terminal for GUI computer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#option-c-terminal-for-computer-without-gui-like-server">Option C: terminal for computer without GUI like server</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="main_page.html">PlaViSca features</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">PlaViSca</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Introduction</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/introduction.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="introduction">
+<h1>Introduction<a class="headerlink" href="#introduction" title="Link to this heading"></a></h1>
+<p><strong>PlaViSca</strong> is a free, open-source, interactive R Shiny application designed for the analysis and visualization of single-cell RNA sequencing (scRNA-seq) data from <em>Plasmodium vivax</em>. It empowers researchers, especially those in the malaria research community, to explore and interpret complex datasets through an intuitive, code-free interface.</p>
+<p><strong>Key features</strong>:</p>
+<ul class="simple">
+<li><p><strong>Metadata</strong> – Browse, filter, and export metadata interactively, enabling selection by study, sample type, parasite stage, or other variables.</p></li>
+<li><p><strong>Quality Control</strong> – Assess data quality through violin plots and filter cells based on metrics across studies.</p></li>
+<li><p><strong>Data Sources</strong> – Access information and references for all integrated datasets.</p></li>
+<li><p><strong>Gene Expression</strong> – Visualize stage- or gene-specific expression patterns, dynamically add or remove plots, and compare multiple genes in real time.</p></li>
+<li><p><strong>Embeddings</strong> – Explore cells in 2D or 3D using PCA, UMAP, or t-SNE, for both integrated and unintegrated datasets. Cells can be selected to reveal expression profiles in downloadable tables.</p></li>
+</ul>
+</section>
+<section id="hosting-and-access">
+<h1>Hosting and access<a class="headerlink" href="#hosting-and-access" title="Link to this heading"></a></h1>
+<p>PlaViSca is hosted online, providing users with direct access to the web application via the following website: <a class="reference external" href="https://xxxx.com">PlaViSca Web Application</a>. This platform serves as the central hub for exploring and analyzing scRNA-seq of <em>Plasmodium vivax</em> data without requiring local installation.</p>
+<p>For users who prefer to run the application on their local computer, the following steps provide detailed guidance on setting up PlaViSca locally.</p>
+</section>
+<section id="local-installation">
+<h1>Local installation<a class="headerlink" href="#local-installation" title="Link to this heading"></a></h1>
+<p>PlaViSca is compatible with macOS, Windows, and Linux operating systems. Follow the steps below to set up the application on your system</p>
+<section id="requirements">
+<h2>Requirements<a class="headerlink" href="#requirements" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><strong>R</strong>: Version 4.5 or later (<a class="reference external" href="https://cran.r-project.org/">Download R</a>)</p></li>
+<li><p><strong>RStudio</strong>: Version 2025 or later (<a class="reference external" href="https://posit.co/download/rstudio-desktop/">Download RStudio</a>)</p></li>
+<li><p><strong>Git</strong>: Version 2.43 or later (<a class="reference external" href="https://git-scm.com/downloads">Download Git</a>)</p></li>
+<li><p><strong>Recommended RAM</strong>: 8GB or more</p></li>
+</ul>
+</section>
+<section id="getting-source-code-from-the-repository">
+<h2>Getting source code from the repository<a class="headerlink" href="#getting-source-code-from-the-repository" title="Link to this heading"></a></h2>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/Sopheap15/pvsca.git
+</pre></div>
+</div>
+<p>Struture of the project directory:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>.
+├── app.R              # Sources ui.R and server.R
+├── data/              # Store input datasets
+├── functions/         # Custom functions and preprocessing scripts
+├── global.R           # Loads data and functions into the global environment
+├── pvsca.Rproj        # RStudio project file
+├── README.md          # Project overview and installation instructions
+├── manual.R           # User manual for effective using PlaViSca web application
+├── ref/               # Reference data directory such as genome annotation
+├── server.R           # Shiny server logic
+├── ui.R               # Shiny user interface definition
+└── www/               # Static assets (images, CSS, JavaScript)
+</pre></div>
+</div>
+<p>After cloning the repository, open the <code class="docutils literal notranslate"><span class="pre">PlaViSca</span></code> directory or navigate to it using the terminal by running <code class="docutils literal notranslate"><span class="pre">cd</span> <span class="pre">PlaViSca</span></code>.</p>
+</section>
+<section id="gene-expression-data-and-metadata">
+<h2>Gene expression data and metadata<a class="headerlink" href="#gene-expression-data-and-metadata" title="Link to this heading"></a></h2>
+<p>PlaViSca requires gene expression data and metadata files. These files can be downloaded from XXX. Ensure that the data is formatted correctly and adheres to the application’s requirements.</p>
+<section id="preparing-data">
+<h3>Preparing data<a class="headerlink" href="#preparing-data" title="Link to this heading"></a></h3>
+<ol class="arabic simple">
+<li><p>Place the files in the <code class="docutils literal notranslate"><span class="pre">data/</span></code> directory within the project folder.</p></li>
+<li><p>Ensure the gene expression data is in <code class="docutils literal notranslate"><span class="pre">.rds</span></code> format and save in three files normliazed_df.rds, scale_df.rds, cleaned_dataset.rds</p></li>
+<li><p>Metadata should be provided in a compatible format (e.g., <code class="docutils literal notranslate"><span class="pre">.csv</span></code> or <code class="docutils literal notranslate"><span class="pre">.rds</span></code>).</p></li>
+</ol>
+<p><strong>metadata columns</strong>:</p>
+<ul class="simple">
+<li><p>nCount_RNA: Total number of RNA molecules (UMI counts) detected per cell.</p></li>
+<li><p>nFeature_RNA: Number of unique genes detected per cell.</p></li>
+<li><p>study_pmid: PubMed ID of the publication associated with the dataset.</p></li>
+<li><p>study_label: Short identifier for the study (e.g., Hazzard2022).</p></li>
+<li><p>run_id: Identifier of the sequencing run/sample (e.g., SRR11008272).</p></li>
+<li><p>num_srr: Number of sequencing runs (SRA accessions) per sample (e.g., 10 run for Sa2022).</p></li>
+<li><p>pub_year: Year of publication (e.g., Ruberto2022_1 published in 2022).</p></li>
+<li><p>geographic_location: Location where the study was performed (e.g., Modulkiri Cambodia).</p></li>
+<li><p>sc_technology: Single-cell technology used (e.g., 10x Genomics Chromium v3).</p></li>
+<li><p>sequencer: Sequencing platform (e.g., Illumina NovaSeq 6000).</p></li>
+<li><p>host_species: Host species from which the sample was derived (e.g., Anopheles stephensi, Saimiri boliviensis).</p></li>
+<li><p>host_id: Identifier for the individual host organism (Saimiri boliviensis 3879).</p></li>
+<li><p>sample_type: Type of biological material collected (e.g., vector salivary gland, host blood).</p></li>
+<li><p>parasite_stage: Parasite lifecycle stage represented in the sample (e.g., blood stage).</p></li>
+<li><p>strain: Parasite strain or isolate (e.g., Sal1, Sal1/Chesson).</p></li>
+<li><p>day_post_infection: Number of days after infection when the sample was collected.</p></li>
+<li><p>life_cycle_stage: Annotated lifecycle stage of the parasite (e.g., ring, trophozoite, schizont, gametocyte).</p></li>
+<li><p>treatment: Experimental treatment applied to the sample (e.g., drug, control; NA if none).</p></li>
+<li><p>biological_replicate: Replicate number for independent biological samples.</p></li>
+<li><p>barcode: Unique single-cell barcode identifier from the sequencing library.</p></li>
+<li><p>RNA_snn_res.0.01 … RNA_snn_res.0.1: Clustering assignments from Seurat at multiple resolution parameters (0.01–0.1). Each column corresponds to one resolution setting.</p></li>
+<li><p>hour_post_invasion: Number of hours after parasite invasion of host cells, derived from SingleR prediction.</p></li>
+</ul>
+<p>There are also columns that were retained in the Seurat object but not used in the analysis, including:</p>
+<ul class="simple">
+<li><p>liver_form: Metadata carried over from the study, indicating whether a cell was annotated as a liver-stage parasite.</p></li>
+<li><p>pred_gametocyte: Predicted annotation of whether the cell is a gametocyte, based on a module score–based gametocyte prediction.</p></li>
+<li><p>seurat_clusters: Clustering solution generated by Seurat prior to assigning module score–based identities.</p></li>
+</ul>
+<p>Once the data is in place, open the <code class="docutils literal notranslate"><span class="pre">pvsca.Rproj</span></code> file. This action will launch RStudio and automatically set the working directory to the appropriate project folder, preparing the environment for running the application.</p>
+</section>
+</section>
+<section id="install-dependencies">
+<h2>Install dependencies<a class="headerlink" href="#install-dependencies" title="Link to this heading"></a></h2>
+<p>PlaViSca requires several R packages to be installed. We can install the required dependencies in Rstudio console: <code class="docutils literal notranslate"><span class="pre">install.packages(c(&quot;shiny&quot;,</span> <span class="pre">&quot;shinyjs&quot;,</span> <span class="pre">&quot;shinycssloaders&quot;,</span> <span class="pre">&quot;plotly&quot;,</span> <span class="pre">&quot;DT&quot;,</span> <span class="pre">&quot;RColorBrewer&quot;,</span> <span class="pre">&quot;tidyverse&quot;,</span> <span class="pre">&quot;later&quot;))</span></code>. or in stall the specific version of packages using the following code:</p>
+<div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="nf">install.packages</span><span class="p">(</span><span class="s">&quot;remote&quot;</span><span class="p">)</span>
+
+<span class="n">remote</span><span class="o">::</span><span class="nf">install_version</span><span class="p">(</span><span class="s">&quot;shiny&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">version</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;1.10.0&quot;</span><span class="p">)</span>
+<span class="n">remote</span><span class="o">::</span><span class="nf">install_version</span><span class="p">(</span><span class="s">&quot;shinyjs&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">version</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;2.1.10&quot;</span><span class="p">)</span>
+<span class="n">remote</span><span class="o">::</span><span class="nf">install_version</span><span class="p">(</span><span class="s">&quot;shinycssloaders&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">version</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;1.1.0&quot;</span><span class="p">)</span>
+<span class="n">remote</span><span class="o">::</span><span class="nf">install_version</span><span class="p">(</span><span class="s">&quot;plotly&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">version</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;4.10.4&quot;</span><span class="p">)</span>
+<span class="n">remote</span><span class="o">::</span><span class="nf">install_version</span><span class="p">(</span><span class="s">&quot;DT&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">version</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;0.33&quot;</span><span class="p">)</span>
+<span class="n">remote</span><span class="o">::</span><span class="nf">install_version</span><span class="p">(</span><span class="s">&quot;RColorBrewer&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">version</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;1.1.3&quot;</span><span class="p">)</span>
+<span class="n">remote</span><span class="o">::</span><span class="nf">install_version</span><span class="p">(</span><span class="s">&quot;tidyverse&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">version</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;2.0.0&quot;</span><span class="p">)</span>
+<span class="n">remote</span><span class="o">::</span><span class="nf">install_version</span><span class="p">(</span><span class="s">&quot;later&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">version</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;1.4.2&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="run-application">
+<h1>Run Application<a class="headerlink" href="#run-application" title="Link to this heading"></a></h1>
+<p><img alt="Figure 1: Rstudio image" src="_images/Rstudio.png" />
+<strong>Figure 1:</strong> Rstudio</p>
+<section id="option-a-from-rstudio">
+<h2>Option A: from RStudio<a class="headerlink" href="#option-a-from-rstudio" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Open either <code class="docutils literal notranslate"><span class="pre">app.R</span></code> or <code class="docutils literal notranslate"><span class="pre">server.R</span></code> or <code class="docutils literal notranslate"><span class="pre">ui.R</span></code></p></li>
+<li><p>Click the <strong>Run App</strong> button in the top-right of the Rstudio see in <strong>Figure 1</strong>.</p></li>
+</ul>
+</section>
+<section id="option-b-terminal-for-gui-computer">
+<h2>Option B: terminal for GUI computer<a class="headerlink" href="#option-b-terminal-for-gui-computer" title="Link to this heading"></a></h2>
+<p>Navigate to the project directory and run the following command in your terminal:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>R<span class="w"> </span>-e<span class="w"> </span><span class="s2">&quot;shiny::runApp(&#39;.&#39;, launch.browser = TRUE)&quot;</span>
+</pre></div>
+</div>
+</section>
+<section id="option-c-terminal-for-computer-without-gui-like-server">
+<h2>Option C: terminal for computer without GUI like server<a class="headerlink" href="#option-c-terminal-for-computer-without-gui-like-server" title="Link to this heading"></a></h2>
+<p>Navigate to the project directory and run the following command in your terminal:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>R<span class="w"> </span>-e<span class="w"> </span><span class="s2">&quot;shiny::runApp(&#39;.&#39;, host=&#39;0.0.0.0&#39;, port=3838)&quot;</span>
+</pre></div>
+</div>
+<p>Open your browser with <code class="docutils literal notranslate"><span class="pre">http://server_ip:3838</span></code>.
+You can find your server ip with <code class="docutils literal notranslate"><span class="pre">ip</span> <span class="pre">addr</span> <span class="pre">show</span> <span class="pre">|</span> <span class="pre">inet</span></code></p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="Welcome to PlaViSca" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="main_page.html" class="btn btn-neutral float-right" title="PlaViSca features" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright BAIA 2025, Sopheap Oeng.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
