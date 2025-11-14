@@ -104,9 +104,6 @@
              
   <section id="setup-guide">
 <h1>Setup Guide<a class="headerlink" href="#setup-guide" title="Link to this heading"></a></h1>
-<!-- <a href="https://github.com/Sopheap15/pvsca"><img alt="Version" src="https://img.shields.io/badge/version-1.0-blue?style=flat" /></a>
-<img alt="Last Updated" src="https://img.shields.io/badge/last_updated-October%2021%2C%202025-blue?style=flat" />
-<a href="https://github.com/Sopheap15/pvsca"><img alt="PlaViSca" src="https://img.shields.io/badge/PlaViSca-black?style=flat&logo=github" /></a> -->
 <p>This guide provides step-by-step instructions for installing and running PlaViSca locally. For online access, visit <a href="https://xxxx.com">PlaViSca Web Application</a>.</p>
 <section id="system-requirements">
 <h2>System Requirements<a class="headerlink" href="#system-requirements" title="Link to this heading"></a></h2>
@@ -125,7 +122,7 @@
 <p>PlaViSca is compatible with macOS, Windows, and Linux operating systems. Follow the steps below to set up the application on your system.</p>
 <section id="clone-the-repository">
 <h3>1. Clone the Repository<a class="headerlink" href="#clone-the-repository" title="Link to this heading"></a></h3>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/Sopheap15/pvsca.git
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/Sopheap15/PlaViSca.git
 </pre></div>
 </div>
 <p>This will create a directory named <code class="docutils literal notranslate"><span class="pre">PlaViSca</span></code> containing the application files.</p>
@@ -141,29 +138,31 @@
 <h3>3. Run the Application<a class="headerlink" href="#run-the-application" title="Link to this heading"></a></h3>
 <ul>
 <li><p><strong>If using RStudio (desktop):</strong></p>
-<ul class="simple">
+<ol class="arabic simple">
+<li><p>Navigate to project folder and click on <code class="docutils literal notranslate"><span class="pre">.Rproj</span></code></p></li>
+<li><p>Open <code class="docutils literal notranslate"><span class="pre">app.R</span></code> (it would work also with <code class="docutils literal notranslate"><span class="pre">ui.R</span></code> or <code class="docutils literal notranslate"><span class="pre">server.R</span></code>)</p></li>
 <li><p>Click the “Run App” button in the top-right corner of the script editor.</p></li>
-<li><p>Or run the following command in the R console:</p></li>
-</ul>
+</ol>
+</li>
+<li><p>Or run the following command in the R console:</p>
 <div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="n">shiny</span><span class="o">::</span><span class="nf">runApp</span><span class="p">(</span><span class="s">&#39;.&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 </li>
 <li><p><strong>If using a Linux server (no GUI):</strong></p>
-<ul class="simple">
+<ol class="arabic simple">
 <li><p>Run the following command in your terminal to start the app and make it accessible from other machines:</p></li>
-</ul>
+</ol>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>R<span class="w"> </span>-e<span class="w"> </span><span class="s2">&quot;shiny::runApp(&#39;.&#39;, host=&#39;0.0.0.0&#39;, port=3838)&quot;</span>
 </pre></div>
 </div>
-<ul>
+<ol class="arabic simple" start="2">
 <li><p>Then, open a web browser on your local machine and go to: <code class="docutils literal notranslate"><span class="pre">http://&lt;server-ip&gt;:3838</span></code></p></li>
-<li><p>Replace <code class="docutils literal notranslate"><span class="pre">&lt;server-ip&gt;</span></code> with the actual IP address of your server. You can find it with:</p>
+<li><p>Replace <code class="docutils literal notranslate"><span class="pre">&lt;server-ip&gt;</span></code> with the actual IP address of your server. You can find it with:</p></li>
+</ol>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>hostname<span class="w"> </span>-I
 </pre></div>
 </div>
-</li>
-</ul>
 </li>
 </ul>
 <p>The application will launch in your default web browser (or be accessible remotely if running on a server).</p>
@@ -184,16 +183,21 @@
 <section id="development-team-contact-information">
 <h2>Development Team &amp; Contact Information<a class="headerlink" href="#development-team-contact-information" title="Link to this heading"></a></h2>
 <p>For questions, feedback, or collaboration inquiries, please contact:</p>
-<ul class="simple">
+<ul>
 <li><p><strong>Sopheap Oeng</strong><br />
 <em>Bioinformatic System Engineer, Institut Pasteur du Cambodge</em><br />
 📧 <a class="reference external" href="mailto:osopheap&#37;&#52;&#48;pasteur-kh&#46;org">osopheap<span>&#64;</span>pasteur-kh<span>&#46;</span>org</a></p></li>
-<li><p><strong>Brice FEUFACK DONFACK</strong><br />
-<em>Postdoctoral researcher, Malaria Research Unit, Institut Pasteur du Cambodge</em><br />
-📧 <a class="reference external" href="mailto:idonfack&#37;&#52;&#48;pasteur-kh&#46;org">idonfack<span>&#64;</span>pasteur-kh<span>&#46;</span>org</a></p></li>
 <li><p><strong>Anthony Ruberto</strong><br />
 <em>Postdoctoral Researcher, Center for Tropical and Emerging Global Diseases, University of Georgia, USA</em><br />
 📧 <a class="reference external" href="mailto:aruberto&#37;&#52;&#48;uga&#46;edu">aruberto<span>&#64;</span>uga<span>&#46;</span>edu</a></p></li>
+<li><p><strong>Thomas Obadia</strong><br />
+<em>Bioinformatics and Biostatistcs Hub, Institut Pasteur, Paris, France</em></p>
+<p><em>G5 Infectious Diseases Epidemiology and Analytics, Institut Pasteur, Paris, France</em></p>
+<p>📧 <a class="reference external" href="mailto:thomas&#46;obadia&#37;&#52;&#48;pasteur&#46;fr">thomas<span>&#46;</span>obadia<span>&#64;</span>pasteur<span>&#46;</span>fr</a></p>
+</li>
+<li><p><strong>Brice Feufack Donfack</strong><br />
+<em>Postdoctoral researcher, Malaria Research Unit, Institut Pasteur du Cambodge</em><br />
+📧 <a class="reference external" href="mailto:idonfack&#37;&#52;&#48;pasteur-kh&#46;org">idonfack<span>&#64;</span>pasteur-kh<span>&#46;</span>org</a></p></li>
 <li><p><strong>Giorgio Gonnella</strong><br />
 <em>Head, Bioinformatics and Artificial Intelligence Unit (BAIA), Institut Pasteur du Cambodge</em><br />
 📧 <a class="reference external" href="mailto:ggonnella&#37;&#52;&#48;pasteur-kh&#46;org">ggonnella<span>&#64;</span>pasteur-kh<span>&#46;</span>org</a></p></li>
@@ -203,7 +207,6 @@
 <h2>Source Code<a class="headerlink" href="#source-code" title="Link to this heading"></a></h2>
 <p>PlaViSca is freely available under an open-source license. The authors maintain authority to update and improve the application. Developers and contributors are welcome to explore, modify, or extend the app by visiting the official GitHub repository:</p>
 <p>🔗 <a class="reference external" href="https://github.com/Sopheap15/pvsca">GitHub Repository – PlaViSca</a></p>
-<p>For more help, check the <code class="docutils literal notranslate"><span class="pre">README.md</span></code> in the repository or contact the developers.</p>
 <p>© 2025 BAIA Team, Institut Pasteur du Cambodge. All rights reserved.</p>
 </section>
 </section>

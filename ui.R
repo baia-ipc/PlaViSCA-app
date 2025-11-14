@@ -630,7 +630,15 @@ ui <- fluidPage(
           a(href = "mailto:aruberto@uga.edu", "aruberto@uga.edu")
         ),
         tags$li(
-          strong("Brice FEUFACK DONFACK"),
+          strong("Thomas Obadia"),
+          " - Bioinformatics and Biostatistcs Hub, Institut Pasteur, Paris, France.
+  _         - G5 Infectious Diseases Epidemiology and Analytics, Institut Pasteur, Paris,
+              France,
+          email: ",
+          a(href = "mailto:thomas.obadia@pasteur.fr", "thomas.obadia@pasteur.fr")
+        ),
+        tags$li(
+          strong("Brice Feufack Donfack"),
           " - Postdoctoral researcher, Malaria Research Unit, IPC, email: ",
           a(
             href = "mailto:ldonfack@pasteur-kh.org",
@@ -650,9 +658,9 @@ ui <- fluidPage(
         "PlaViSca is built using the R Shiny framework. For more detail, please
         visit GitHub repo:",
         a(
-          href = "https://github.com/Sopheap15/pvsca",
+          href = "https://github.com/Sopheap15/PlaViSca",
           HTML(
-            'https://github.com/Sopheap15/pvsca
+            'https://github.com/Sopheap15/PlaViSca
               <span class="point-emoji">👈 </span>'
           ),
           target = "_blank"

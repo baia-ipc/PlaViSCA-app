@@ -1,9 +1,5 @@
 # Setup Guide
 
-<!-- <a href="https://github.com/Sopheap15/pvsca"><img alt="Version" src="https://img.shields.io/badge/version-1.0-blue?style=flat" /></a>
-<img alt="Last Updated" src="https://img.shields.io/badge/last_updated-October%2021%2C%202025-blue?style=flat" />
-<a href="https://github.com/Sopheap15/pvsca"><img alt="PlaViSca" src="https://img.shields.io/badge/PlaViSca-black?style=flat&logo=github" /></a> -->
-
 This guide provides step-by-step instructions for installing and running PlaViSca locally. For online access, visit <a href="https://xxxx.com">PlaViSca Web Application</a>.
 
 ## System Requirements
@@ -23,7 +19,7 @@ PlaViSca is compatible with macOS, Windows, and Linux operating systems. Follow 
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/Sopheap15/pvsca.git
+git clone https://github.com/Sopheap15/PlaViSca.git
 ```
 
 This will create a directory named `PlaViSca` containing the application files.
@@ -40,8 +36,11 @@ install.packages(c("shiny", "shinyjs", "shinycssloaders", "plotly", "DT", "RColo
 
 - **If using RStudio (desktop):**
 
-  - Click the "Run App" button in the top-right corner of the script editor.
-  - Or run the following command in the R console:
+  1. Navigate to project folder and click on `.Rproj`
+  2. Open `app.R` (it would work also with `ui.R` or `server.R`)
+  3. Click the "Run App" button in the top-right corner of the script editor.
+
+- Or run the following command in the R console:
 
   ```r
   shiny::runApp('.')
@@ -49,17 +48,18 @@ install.packages(c("shiny", "shinyjs", "shinycssloaders", "plotly", "DT", "RColo
 
 - **If using a Linux server (no GUI):**
 
-  - Run the following command in your terminal to start the app and make it accessible from other machines:
+  1. Run the following command in your terminal to start the app and make it accessible from other machines:
 
   ```bash
   R -e "shiny::runApp('.', host='0.0.0.0', port=3838)"
   ```
 
-  - Then, open a web browser on your local machine and go to: `http://<server-ip>:3838`
-  - Replace `<server-ip>` with the actual IP address of your server. You can find it with:
-    ```bash
-    hostname -I
-    ```
+  2. Then, open a web browser on your local machine and go to: `http://<server-ip>:3838`
+  3. Replace `<server-ip>` with the actual IP address of your server. You can find it with:
+
+  ```bash
+  hostname -I
+  ```
 
 The application will launch in your default web browser (or be accessible remotely if running on a server).
 
@@ -83,13 +83,20 @@ For questions, feedback, or collaboration inquiries, please contact:
   _Bioinformatic System Engineer, Institut Pasteur du Cambodge_  
   📧 [osopheap@pasteur-kh.org](mailto:osopheap@pasteur-kh.org)
 
-- **Brice FEUFACK DONFACK**  
-  _Postdoctoral researcher, Malaria Research Unit, Institut Pasteur du Cambodge_  
-  📧 [idonfack@pasteur-kh.org](mailto:idonfack@pasteur-kh.org)
-
 - **Anthony Ruberto**  
   _Postdoctoral Researcher, Center for Tropical and Emerging Global Diseases, University of Georgia, USA_  
   📧 [aruberto@uga.edu](mailto:aruberto@uga.edu)
+
+- **Thomas Obadia**  
+  _Bioinformatics and Biostatistcs Hub, Institut Pasteur, Paris, France_
+
+  _G5 Infectious Diseases Epidemiology and Analytics, Institut Pasteur, Paris, France_
+
+  📧 [thomas.obadia@pasteur.fr](mailto:thomas.obadia@pasteur.fr)
+
+- **Brice Feufack Donfack**  
+  _Postdoctoral researcher, Malaria Research Unit, Institut Pasteur du Cambodge_  
+  📧 [idonfack@pasteur-kh.org](mailto:idonfack@pasteur-kh.org)
 
 - **Giorgio Gonnella**  
   _Head, Bioinformatics and Artificial Intelligence Unit (BAIA), Institut Pasteur du Cambodge_  
@@ -100,7 +107,5 @@ For questions, feedback, or collaboration inquiries, please contact:
 PlaViSca is freely available under an open-source license. The authors maintain authority to update and improve the application. Developers and contributors are welcome to explore, modify, or extend the app by visiting the official GitHub repository:
 
 🔗 [GitHub Repository – PlaViSca](https://github.com/Sopheap15/pvsca)
-
-For more help, check the `README.md` in the repository or contact the developers.
 
 © 2025 BAIA Team, Institut Pasteur du Cambodge. All rights reserved.

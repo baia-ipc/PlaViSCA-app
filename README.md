@@ -2,7 +2,7 @@
 
 [![R](https://img.shields.io/badge/R-%3E%3D%204.0-blue?logo=r&logoColor=white)](https://www.r-project.org/)
 [![Shiny](https://img.shields.io/badge/Shiny-%3E%3D%201.7.0-brightgreen?logo=r&logoColor=white)](https://shiny.rstudio.com/)
-[![Version](https://img.shields.io/badge/version-0.1.0-orange.svg)](https://github.com/Sopheap15/pvsca/releases)
+[![Version](https://img.shields.io/badge/version-0.1.0-orange.svg)](https://github.com/Sopheap15/PlaViSca/releases)
 
 PlaViSCA is an interactive R/Shiny application for exploring single-cell RNA-seq
 data from Plasmodium vivax. The app is intended for researchers, public health
@@ -22,34 +22,30 @@ After cloning, the repository contains:
 
 ```
 .
-├── app.R           # Shiny app entry point (loads ui.R and server.R)
-├── global.R        # Shared setup (data loading, helpers)
-├── ui.R            # User interface
-├── server.R        # Shiny server logic
-├── functions/      # Plotting/helpers and preprocessing scripts
-├── data/           # Example and processed RDS files (not all data included)
-├── www/            # Static assets (images, CSS, JS)
-├── renv/           # Local R environment (optional)
-└── README.md       # This file
+├── app.R                   # Shiny app entry point (loads ui.R and server.R)
+├── global.R                # Shared setup (data loading, helpers)
+├── ui.R                    # User interface
+├── server.R                # Shiny server logic
+├── functions/              # Plotting/helpers and preprocessing scripts
+├── data/                   # Example and processed RDS files (not all data included)
+├── ref/                    # Reference data (e.g gene annotation)
+├── www/                    # Static assets (images, CSS, JS)
+├── manual/                 # Manual to setup and run the application
+└── README.md               # This file
 ```
 
-## Getting started (quick)
+## Getting started
 
 1. Clone the repository
 
 ```bash
-git clone https://github.com/Sopheap15/pvsca.git
-cd pvsca
+git clone https://github.com/Sopheap15/PlaViSca.git
+cd PlaViSca
 ```
-
-Version: 0.1.0
 
 2. Install R dependencies
 
-Preferred (reproducible):
-
 ```r
-# from within R
 install.packages('renv')
 renv::restore()
 ```
@@ -93,7 +89,6 @@ Typical files in `data/` (examples):
 - `cleaned_dataset.rds`
 - `data_source.csv`
 - `normalize_df.rds`
-- `scale_df.rds`
 - `raw_df.rds`
 - `PvivaxP01_gff_data.rds` (reference GFF)
 
@@ -109,15 +104,6 @@ columns.
   between integrated/unintegrated embeddings, and toggle between 2D/3D.
 - Gene Expression: view per-gene expression across groups and download
   results.
-
-## Customization and developer notes
-
-- Plotting helpers: `functions/helpers.R` contains the main plotting logic
-  (2D/3D plot builders, hover text, color handling).
-- Preprocessing: `functions/preprocessing.R` shows how the Seurat object is
-  converted to the flattened RDS format used by the app.
-- To tweak default palettes or symbols, edit the constants in
-  `functions/helpers.R` (symbol mapping, color palettes).
 
 ## Contributing
 
