@@ -647,7 +647,13 @@ ui <- fluidPage(
           a(href = "mailto:aruberto@uga.edu", "aruberto@uga.edu")
         ),
         tags$li(
-          strong("Brice FEUFACK DONFACK"),
+          strong("Thomas Obadia"),
+          " - Bioinformatics and Biostatistcs Hub, Institut Pasteur, Paris, France and G5 Infectious Diseases Epidemiology and Analytics, Institut Pasteur, Paris, France
+          email: ",
+          a(href = "mailto:thomas.obadia@pasteur.fr", "thomas.obadia@pasteur.fr")
+        ),
+        tags$li(
+          strong("Brice feufack Donfack"),
           " - Postdoctoral researcher, Malaria Research Unit, IPC, email: ",
           a(
             href = "mailto:ldonfack@pasteur-kh.org",

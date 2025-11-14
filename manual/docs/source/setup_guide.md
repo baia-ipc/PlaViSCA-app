@@ -91,9 +91,10 @@ For questions, feedback, or collaboration inquiries, please contact:
   _Postdoctoral researcher, Malaria Research Unit, Institut Pasteur du Cambodge_  
   📧 [idonfack@pasteur-kh.org](mailto:idonfack@pasteur-kh.org)
 
-  - **Thomas Obdian**
-    _, Institut Pasteur du French_  
-    📧 [thomas.obadia@pasteur.fr](mailto:thomas.obadia@pasteur.fr)
+- **Thomas Obadia**  
+  _Bioinformatics and Biostatistcs Hub, Institut Pasteur, Paris, France_
+
+  _G5 Infectious Diseases Epidemiology and Analytics, Institut Pasteur, Paris, France_
 
 - **Anthony Ruberto**  
   _Postdoctoral Researcher, Center for Tropical and Emerging Global Diseases, University of Georgia, USA_  
@@ -108,7 +109,5 @@ For questions, feedback, or collaboration inquiries, please contact:
 PlaViSca is freely available under an open-source license. The authors maintain authority to update and improve the application. Developers and contributors are welcome to explore, modify, or extend the app by visiting the official GitHub repository:
 
 🔗 [GitHub Repository – PlaViSca](https://github.com/Sopheap15/pvsca)
-
-For more help, check the `README.md` in the repository or contact the developers.
 
 © 2025 BAIA Team, Institut Pasteur du Cambodge. All rights reserved.

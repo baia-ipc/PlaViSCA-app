@@ -14,14 +14,6 @@ server <- function(input, output, session) {
     readr::read_csv("data/data_source.csv", show_col_types = FALSE)
   })
 
-  observeEvent(filtered_gene_exp_data(), {
-    try(
-      {
-        df_gene0(NULL)
-      },
-      silent = TRUE
-    )
-  })
   # Navigate home and data section
   observeEvent(input$home, {
     shinyjs::hide("analysis_section")
@@ -952,6 +944,15 @@ server <- function(input, output, session) {
       error = function(e) {
         return(NULL)
       }
+    )
+  })
+
+  observeEvent(filtered_gene_exp_data(), {
+    try(
+      {
+        df_gene0(NULL)
+      },
+      silent = TRUE
     )
   })
 
