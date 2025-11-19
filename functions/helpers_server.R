@@ -122,188 +122,10 @@ format_species_name <- function(species_names) {
   return(formatted_names)
 }
 
-# Function that builds the full Metadata tab
-create_meta_filter_row <- function(suffix = "") {
-  tagList(
-    # First row (5 boxes)
-    fluidRow(
-      class = "meta-filter",
-      style = "display: flex; flex-wrap: wrap; justify-content: space-between;",
-      column(
-        width = 2,
-        selectizeInput(
-          inputId = paste0("study_label", suffix),
-          "Study label:",
-          choices = c(""),
-          multiple = TRUE,
-          options = list(
-            placeholder = "Select options...",
-            onInitialize = I('function() { this.setValue(""); }')
-          )
-        )
-      ),
-      column(
-        width = 2,
-        selectizeInput(
-          inputId = paste0("sample_type", suffix),
-          "Sample type:",
-          choices = c(""),
-          multiple = TRUE,
-          options = list(
-            placeholder = "Select options...",
-            onInitialize = I('function() { this.setValue(""); }')
-          )
-        )
-      ),
-      column(
-        width = 2,
-        selectizeInput(
-          inputId = paste0("host_species", suffix),
-          "Host species:",
-          choices = c(""),
-          multiple = TRUE,
-          options = list(
-            placeholder = "Select options...",
-            onInitialize = I('function() { this.setValue(""); }'),
-            render = I(
-              '{
-              option: function(item, escape) {
-                return "<div>" + item.label + "</div>";
-              },
-              item: function(item, escape) {
-                return "<div>" + item.label + "</div>";
-              }
-            }'
-            )
-          )
-        )
-      ),
-      column(
-        width = 2,
-        selectizeInput(
-          inputId = paste0("life_cycle_stage", suffix),
-          "Life cycle stage:",
-          choices = c(""),
-          multiple = TRUE,
-          options = list(
-            placeholder = "Select options...",
-            onInitialize = I('function() { this.setValue(""); }')
-          )
-        )
-      ),
-      column(
-        width = 2,
-        selectizeInput(
-          inputId = paste0("treatment", suffix),
-          "Treatment:",
-          choices = c(""),
-          multiple = TRUE,
-          options = list(
-            placeholder = "Select options...",
-            onInitialize = I('function() { this.setValue(""); }')
-          )
-        )
-      )
-    ),
-
-    # Second row (5 boxes)
-    fluidRow(
-      class = "meta-filter",
-      style = "display: flex; flex-wrap: wrap; justify-content: space-between;",
-      column(
-        width = 2,
-        selectizeInput(
-          inputId = paste0("parasite_stage", suffix),
-          "Parasite stage:",
-          choices = c(""),
-          multiple = TRUE,
-          options = list(
-            placeholder = "Select options...",
-            onInitialize = I('function() { this.setValue(""); }')
-          )
-        )
-      ),
-      column(
-        width = 2,
-        selectizeInput(
-          inputId = paste0("strain", suffix),
-          "Strain:",
-          choices = c(""),
-          multiple = TRUE,
-          options = list(
-            placeholder = "Select options...",
-            onInitialize = I('function() { this.setValue(""); }')
-          )
-        )
-      ),
-      column(
-        width = 2,
-        selectizeInput(
-          inputId = paste0("hour_post_invasion", suffix),
-          "Hour post invasion:",
-          choices = c(""),
-          multiple = TRUE,
-          options = list(
-            placeholder = "Select options...",
-            onInitialize = I('function() { this.setValue(""); }')
-          )
-        )
-      ),
-      column(
-        width = 2,
-        selectizeInput(
-          inputId = paste0("sequencer", suffix),
-          "Sequencer:",
-          choices = c(""),
-          multiple = TRUE,
-          options = list(
-            placeholder = "Select options...",
-            onInitialize = I('function() { this.setValue(""); }')
-          )
-        )
-      ),
-      column(
-        width = 2,
-        selectizeInput(
-          inputId = paste0("sc_technology", suffix),
-          "Single-cell technology:",
-          choices = c(""),
-          multiple = TRUE,
-          options = list(
-            placeholder = "Select options...",
-            onInitialize = I('function() { this.setValue(""); }')
-          )
-        )
-      )
-    )
-  )
-}
-
-
-# Navigate tabsetpanel
-navigate_tabset <- function(session, menu_id, tab_name = NULL) {
-  shinyjs::hide("home_section")
-  shinyjs::hide("about_section")
-  shinyjs::show("analysis_section")
-
-  js_code <- sprintf(
-    "
-    $('.menu-link').removeClass('active');
-    $('#%s').addClass('active');
-  ",
-    menu_id
-  )
-  shinyjs::runjs(js_code)
-
-  if (!is.null(tab_name)) {
-    updateTabsetPanel(session, inputId = "tabset", selected = tab_name)
-  }
-}
-
-
 fun_filter_df <- function(data, selections) {
-  # Defensive: if data is NULL, just return NULL so callers can handle it
-  if (is.null(data)) return(NULL)
+  if (is.null(data)) {
+    return(NULL)
+  }
   if (is.null(selections) || length(selections) == 0) {
     return(data)
   }
@@ -347,14 +169,13 @@ fun_filter_df <- function(data, selections) {
 
 # Helper function to apply secondary filters
 apply_secondary_filters <- function(data, inputs, keep_gene_matrix = TRUE, genes = NULL) {
-  # Filter out rows with invalid RNA data only if these columns exist
   filtered <- data
   if ("n_feature_rna" %in% names(data) && "n_count_rna" %in% names(data)) {
     filtered <- filtered %>%
       filter(n_feature_rna > 0 & n_count_rna > 0)
   }
 
-  # Select relevant columns 
+  # Select relevant columns
   metadata_cols <- c(
     "study_label",
     "host_species",
@@ -379,7 +200,6 @@ apply_secondary_filters <- function(data, inputs, keep_gene_matrix = TRUE, genes
   non_metadata_cols_count <- length(setdiff(names(filtered), metadata_cols))
 
   if (!keep_gene_matrix) {
-    # If caller provided a genes vector, use it to explicitly drop gene columns
     if (!is.null(genes) && length(genes) > 0) {
       keep_cols <- setdiff(names(filtered), genes)
       keep_cols <- intersect(keep_cols, names(filtered))
@@ -475,108 +295,6 @@ get_gene_id <- function(gene_name, gene_names) {
 }
 
 
-# Generate UI subBlock in gene expression
-subBlock <- function(i) {
-  tagList(
-    fluidRow(
-      class = "gene-select-input",
-      column(
-        width = 6,
-        selectizeInput(
-          paste0("genes_exp_", i),
-          label = "Gene Name",
-          choices = NULL
-        ),
-        column(
-          width = 2,
-          class = "switch_exp",
-          tags$label(
-            class = "switch",
-            tags$input(
-              id = paste0("check_exp_", i),
-              type = "checkbox",
-              class = "toggle_exp"
-            ),
-            tags$span(class = "slider")
-          )
-        ),
-        column(
-          width = 4,
-          id = paste0("gene_link_exp_", i),
-          class = "gene_link_exp",
-          tags$div(
-            id = paste0("gene_link_ui_exp_", i),
-            class = "gene_link_ui_exp",
-            tags$a(
-              id = paste0("plasmo_link_exp_", i),
-              href = "#",
-              target = "_blank",
-              "🔬 PlasmoDB"
-            ),
-            span("|"),
-            tags$a(
-              id = paste0("ncbi_link_exp_", i),
-              href = "#",
-              target = "_blank",
-              "🧬 NCBI"
-            )
-          )
-        )
-      ),
-      column(
-        width = 6,
-        selectInput(
-          paste0("group_exp_", i),
-          "Group by",
-          choices = group_choices,
-          selected = if (!is.null(group_choices) && length(group_choices) > 0) group_choices[1] else "life_cycle_stage"
-        )
-      )
-    ),
-    fluidRow(
-      width = 12,
-      fluidRow(withSpinner(plotlyOutput(paste0("gene_exp_plotly_", i)), type = 6, size = 0.5, color = "#3498db")),
-      fluidRow(
-        class = "btn-add-rm-container",
-        actionButton(
-          paste0("remove_btn_", i),
-          label = icon("minus"),
-          class = "btn btn-danger btn_remove"
-        ),
-        actionButton(
-          paste0("add_btn_", i),
-          label = icon("plus"),
-          class = "btn btn-success btn_add"
-        )
-      )
-    )
-  )
-}
-
-# Create new block helper
-newBlock <- function(new_count, counter, choice_exp, dynamicBlock, session) {
-  counter(new_count)
-  insertUI(
-    selector = "#gene_exp_container",
-    where = "beforeEnd",
-    ui = column(
-      width = 6,
-      id = paste0("dynamic_col_", new_count),
-      dynamicBlock(new_count)
-    )
-  )
-
-  shinyjs::delay(100, {
-    updateSelectizeInput(
-      session,
-      inputId = paste0("genes_exp_", new_count),
-      choices = choice_exp,
-      server = TRUE
-    )
-  })
-}
-
-
 # Generate df for gene_exp0
 df_exp0 <- function(gene_data, gene_input, group_input, check_exp, full_data = NULL, cache_env = NULL) {
   full_mat <- if (!is.null(full_data)) full_data else NULL
@@ -640,7 +358,6 @@ df_exp0 <- function(gene_data, gene_input, group_input, check_exp, full_data = N
 # Generate df for gene_expi
 df_expi <- function(id, input, gene_data, get_gene_id, full_data = NULL, cache_env = NULL) {
   reactive({
-    start_time <- Sys.time()
     tryCatch(
       {
         req(
@@ -697,7 +414,7 @@ df_expi <- function(id, input, gene_data, get_gene_id, full_data = NULL, cache_e
         if (!is.null(cache_env) && exists(cache_key_meta, envir = cache_env, inherits = FALSE)) {
           slim_df <- cache_env[[cache_key_meta]]
         } else {
-            slim_df <- meta_source %>% select(any_of(meta_cols))
+          slim_df <- meta_source %>% select(any_of(meta_cols))
           if (!is.null(cache_env)) {
             try(cache_env[[cache_key_meta]] <- slim_df, silent = TRUE)
           }
@@ -709,8 +426,8 @@ df_expi <- function(id, input, gene_data, get_gene_id, full_data = NULL, cache_e
           return(cache_env[[cache_key]])
         }
 
-  slim_df <- build_plot_slim(slim_df, full_mat, gene_exp, group_col)
-  invisible(gc(verbose = FALSE))
+        slim_df <- build_plot_slim(slim_df, full_mat, gene_exp, group_col)
+        invisible(gc(verbose = FALSE))
 
         if (!is.null(cache_env)) try(cache_env[[cache_key]] <- slim_df, silent = TRUE)
         return(slim_df)
@@ -724,9 +441,6 @@ df_expi <- function(id, input, gene_data, get_gene_id, full_data = NULL, cache_e
 
 # Non-reactive variant of df_expi for headless testing and batch runs.
 df_expi_nr <- function(id, input_list, gene_data, get_gene_id, full_data = NULL, cache_env = NULL) {
-  start_time <- Sys.time()
-
-  # Emulate req by checking required fields
   gene_input <- input_list[[paste0("genes_exp_", id)]]
   group_input <- input_list[[paste0("group_exp_", id)]]
   if (is.null(gene_input) || is.null(group_input)) {
@@ -736,7 +450,6 @@ df_expi_nr <- function(id, input_list, gene_data, get_gene_id, full_data = NULL,
   # Avoid subsetting the potentially huge full matrix; keep the full matrix
   full_mat <- if (!is.null(full_data)) full_data else NULL
   meta_source <- if (!is.null(gene_data) && !is.null(gene_data$data)) gene_data$data else data.frame()
-  # row indices in the original full matrix
   row_idx <- if (!is.null(gene_data) && !is.null(gene_data$data)) attr(gene_data$data, "row_idx") else NULL
 
   # check_exp
@@ -786,8 +499,6 @@ df_expi_nr <- function(id, input_list, gene_data, get_gene_id, full_data = NULL,
 
   obj_size <- object.size(slim_df)
   invisible(gc(verbose = FALSE))
-
-  dur <- as.numeric(difftime(Sys.time(), start_time, units = "secs"))
 
   if (!is.null(cache_env)) try(cache_env[[cache_key]] <- slim_df, silent = TRUE)
 
@@ -921,7 +632,6 @@ var_genes_plot <- function(df, study, top_n = 10) {
   df <- df %>%
     filter(study == !!study)
 
-  # Calculate counts AFTER filtering by study
   counts <- table(df$variable)
   var_count <- counts["TRUE"]
   nonvar_count <- counts["FALSE"]
@@ -939,7 +649,6 @@ var_genes_plot <- function(df, study, top_n = 10) {
     anti_join(top_hvf, by = "name")
 
   plot_ly() %>%
-    # Non-variable genes (black)
     add_trace(
       data = non_variable_genes,
       x = ~mean,
@@ -1086,124 +795,6 @@ gene_exp_plot <- function(data, x_col) {
   return(p)
 }
 
-# Generate PlasmoDB and NCBI links
-gene_links <- function(gene_id) {
-  plasmo_url <- paste0("https://plasmodb.org/plasmo/app/record/gene/", gene_id)
-  ncbi_url <- paste0("https://www.ncbi.nlm.nih.gov/protein/", gene_id)
-
-  shinyjs::runjs(sprintf(
-    "
-    document.querySelectorAll('[id^=plasmo_link]').forEach(function(el) {
-      el.href = '%s';
-    });
-  ",
-    plasmo_url
-  ))
-
-  shinyjs::runjs(sprintf(
-    "
-    document.querySelectorAll('[id^=ncbi_link]').forEach(function(el) {
-      el.href = '%s';
-    });
-  ",
-    ncbi_url
-  ))
-}
-
-y_col <- function(check_input, x_col, unintegrated, integrated) {
-  if (check_input) {
-    setdiff(unintegrated, x_col)
-  } else {
-    setdiff(integrated, x_col)
-  }
-}
-
-# Generate color column based on input option
-get_color_column <- function(color_type, gene_input, gene_data_obj) {
-  switch(color_type,
-    "genes" = get_gene_id(gene_input, gene_data_obj),
-    "cca_snn" = gene_input,
-    color_type
-  )
-}
-
-# Assign colors based on the number of categories
-assign_colors <- function(num_categories) {
-  if (num_categories <= 8) {
-    return(RColorBrewer::brewer.pal(
-      n = max(num_categories, 3),
-      name = "Set2"
-    )[1:num_categories])
-  } else {
-    return(rep(
-      RColorBrewer::brewer.pal(8, "Set2"),
-      length.out = num_categories
-    ))
-  }
-}
-
-
-# Check if the data is categorical
-is_categorical_data <- function(x) {
-  is.character(x) || is.factor(x)
-}
-
-# Helper function to prepare colors for categorical data
-prepare_categorical_colors <- function(df, color) {
-  # Ensure the column is character for manipulation, and handle NAs
-  df[[color]] <- as.character(df[[color]])
-  df[[color]][is.na(df[[color]])] <- "NA (missing)"
-
-  unique_values <- unique(df[[color]])
-
-  # Separate "NA (missing)" to keep it at the top of the legend
-  has_na <- "NA (missing)" %in% unique_values
-  if (has_na) {
-    actual_values <- unique_values[unique_values != "NA (missing)"]
-  } else {
-    actual_values <- unique_values
-  }
-
-  # Sort the actual values
-  if (length(actual_values) > 0) {
-    numeric_values <- suppressWarnings(as.numeric(actual_values))
-    if (all(!is.na(numeric_values))) {
-      # Sort numerically if all are numbers
-      sorted_values <- actual_values[order(numeric_values)]
-    } else {
-      # Otherwise, sort alphabetically
-      sorted_values <- sort(actual_values)
-    }
-  } else {
-    sorted_values <- character(0)
-  }
-
-  # Reconstruct the final sorted levels, with NA first if it exists
-  final_levels <- if (has_na) {
-    c("NA (missing)", sorted_values)
-  } else {
-    sorted_values
-  }
-
-  # Assign colors
-  num_actual_colors <- length(sorted_values)
-  palette <- if (num_actual_colors > 0) {
-    assign_colors(num_actual_colors)
-  } else {
-    character(0)
-  }
-
-  colors <- if (has_na) {
-    setNames(c("#A9A9A94D", palette), final_levels)
-  } else {
-    setNames(palette, final_levels)
-  }
-
-  # Crucially, create a factor with the correctly ordered levels
-  df[[color]] <- factor(df[[color]], levels = final_levels)
-
-  return(list(df = df, colors = colors))
-}
 
 build_plot_slim <- function(meta, full_mat, gene_exp, group_col, extra_cols = NULL) {
   if (is.null(meta)) meta <- data.frame()
@@ -1211,7 +802,6 @@ build_plot_slim <- function(meta, full_mat, gene_exp, group_col, extra_cols = NU
   # Ensure the group column exists in the returned slim df
   needed <- unique(c(group_col, extra_cols))
   available <- intersect(needed, colnames(meta))
-  # If group_col not present, create it with NA so plotting code fails clearly
   if (!(group_col %in% colnames(meta))) {
     meta[[group_col]] <- NA_character_
   }
@@ -1224,7 +814,6 @@ build_plot_slim <- function(meta, full_mat, gene_exp, group_col, extra_cols = NU
     if (!is.null(row_idx) && length(row_idx) > 0) {
       gene_vec <- full_mat[[gene_exp]][row_idx]
     } else {
-      # No row indices: fallback to full column but trim to meta rows if possible
       gene_vec <- full_mat[[gene_exp]]
       if (nrow(slim) > 0) gene_vec <- gene_vec[seq_len(nrow(slim))]
     }
@@ -1234,299 +823,4 @@ build_plot_slim <- function(meta, full_mat, gene_exp, group_col, extra_cols = NU
 
   slim$gene_expr <- gene_vec
   return(slim)
-}
-
-# Get plot dimension
-get_dim <- function(plot_type) {
-  list(
-    pca_u = c("pca_u_1", "pca_u_2", "pca_u_3"),
-    pca_i = c("pca_i_1", "pca_i_2", "pca_i_3"),
-    umap_i = c("umap_i_1", "umap_i_2", "umap_i_3"),
-    umap_u = c("umap_u_1", "umap_u_2", "umap_u_3"),
-    tSNE = c("t_sne_1", "t_sne_2", "t_sne_3")
-  )[[plot_type]]
-}
-
-# Get legend and format chart
-get_legend_layout <- function(legend_title) {
-  list(
-    title = list(text = legend_title),
-    orientation = "v",
-    x = 1.02,
-    xanchor = "left",
-    y = 1,
-    yanchor = "top",
-    len = 0.5
-  )
-}
-
-# Helper to build hover text for 2D and 3D plots to avoid duplication
-build_hover_text <- function(df, legend_title, display_color, x_vals = NULL, y_vals = NULL, z_vals = NULL) {
-  # Conditionally include Z label/value only when provided
-  z_label <- if (is.null(z_vals)) "" else "<br>Z:"
-  z_value <- if (is.null(z_vals)) "" else z_vals
-
-  return(~ paste(
-    "Cell_id:",
-    df$barcode,
-    "<br>Color by",
-    legend_title,
-    ":",
-    display_color,
-    "<br>Cluster:",
-    df$seurat_clusters,
-    "<br>Study:",
-    df$study_label,
-    "<br>Life cycle stage:",
-    df$life_cycle_stage,
-  "<br>Host species:",
-  format_species_name(df$host_species),
-    "<br>Sample type:",
-    df$sample_type,
-    "<br>Sequencer:",
-    df$sequencer,
-    "<br>Strain:",
-    df$strain,
-    "<br>n_Features_RNA:",
-    df$n_feature_rna,
-    "<br>X:",
-    x_vals,
-    "<br>Y:",
-    y_vals,
-    z_label,
-    z_value
-  ))
-}
-
-# Generate 2d plot
-plot_2d <- function(
-    df,
-    x,
-    y,
-    color,
-    legend_title,
-    size,
-    is_categorical,
-    selected_color,
-    colors) {
-  # Format selected_color for display if it's host_species
-  display_color <- if (color == "host_species") {
-    format_species_name(selected_color)
-  } else {
-    selected_color
-  }
-
-  hover_text <- build_hover_text(df, legend_title, display_color, x, y)
-
-  legend_layout <- get_legend_layout(legend_title)
-  df$plotly_key <- seq_len(nrow(df))
-
-  if (is_categorical) {
-    p <- plot_ly(
-      data = df,
-      x = x,
-      y = y,
-      type = "scatter",
-      mode = "markers",
-      color = ~ factor(df[[color]]),
-      marker = list(size = size),
-      text = hover_text,
-      hoverinfo = "text",
-      colors = colors,
-      width = 1000,
-      height = 700,
-      source = "embedding",
-      key = ~plotly_key
-    ) %>%
-      layout(
-        xaxis = list(title = paste("X-", x)),
-        yaxis = list(title = paste("Y-", y)),
-        legend = legend_layout,
-        font = list(size = 14),
-        margin = list(l = 50, r = 50, t = 25, b = 50)
-      )
-  } else {
-    p <- plot_ly(
-      data = df,
-      x = x,
-      y = y,
-      type = "scatter",
-      mode = "markers",
-      text = hover_text,
-      hoverinfo = "text",
-      width = 1000,
-      height = 700,
-      key = ~plotly_key,
-      source = "embedding",
-      marker = list(
-        size = size,
-        color = selected_color,
-        colorscale = list(c(0, "#0000FF4C"), c(1, "red")),
-        showscale = TRUE,
-        colorbar = legend_layout
-      )
-    ) %>%
-      layout(
-        xaxis = list(title = paste("X-", x)),
-        yaxis = list(title = paste("Y-", y)),
-        font = list(size = 14),
-        margin = list(l = 50, r = 50, t = 25, b = 50)
-      )
-  }
-  return(p)
-}
-
-# Generate 3d plot
-plot_3d <- function(
-    df,
-    color,
-    legend_title,
-    size,
-    selected_color,
-    is_categorical,
-    colors,
-    coords) {
-  x_col <- coords[1]
-  y_col <- coords[2]
-  z_col <- coords[3]
-
-  x_vals <- df[[x_col]]
-  y_vals <- df[[y_col]]
-  z_vals <- df[[z_col]]
-
-  # Format selected_color for display if it's host_species
-  display_color <- if (
-    !is.null(color) && !is.na(color) && color == "host_species"
-  ) {
-    format_species_name(selected_color)
-  } else {
-    selected_color
-  }
-
-  hover_text <- build_hover_text(df, legend_title, display_color, x_vals, y_vals, z_vals)
-
-  legend_layout <- get_legend_layout(legend_title)
-
-  if (is_categorical) {
-    p <- plot_ly(
-      x = x_vals,
-      y = y_vals,
-      z = z_vals,
-      type = "scatter3d",
-      mode = "markers",
-      color = factor(df[[color]]),
-      key = ~ df$id,
-      source = "embedding",
-      marker = list(size = as.numeric(size) * 0.4),
-      colors = colors,
-      text = hover_text,
-      hoverinfo = "text",
-      width = 1000,
-      height = 700
-    ) %>%
-      layout(
-        scene = list(
-          xaxis = list(title = paste("X-", x_col)),
-          yaxis = list(title = paste("Y-", y_col)),
-          zaxis = list(title = paste("Z-", z_col))
-        ),
-        legend = legend_layout,
-        font = list(size = 14),
-        margin = list(l = 50, r = 50, t = 25, b = 50)
-      )
-  } else {
-    p <- plot_ly(
-      x = x_vals,
-      y = y_vals,
-      z = z_vals,
-      type = "scatter3d",
-      mode = "markers",
-      marker = list(
-        size = as.numeric(size) * 0.4,
-        color = selected_color,
-        colorscale = list(c(0, "#0000FF4C"), c(1, "red")),
-        showscale = TRUE,
-        colorbar = legend_layout
-      ),
-      text = hover_text,
-      hoverinfo = "text",
-      width = 1000,
-      height = 700,
-      source = "embedding",
-      key = ~ df$id
-    ) %>%
-      layout(
-        scene = list(
-          xaxis = list(title = paste("X-", x_col)),
-          yaxis = list(title = paste("Y-", y_col)),
-          zaxis = list(title = paste("Z-", z_col))
-        ),
-        font = list(size = 14),
-        margin = list(l = 50, r = 50, t = 25, b = 50)
-      )
-  }
-  return(p)
-}
-
-
-# Main pca, umap and tsne plotting function
-embedding_plot <- function(
-    df,
-    xaxis_input,
-    yaxis_input,
-    color,
-    legend_title,
-    size,
-    plot_type = "pca_u",
-    plot_dim = "2d") {
-  # Validate inputs
-  if (is.null(color) || is.na(color) || color == "" || !color %in% names(df)) {
-    color <- "sample_type" # Safe fallback
-    warning("Invalid color column, using 'sample_type' as fallback")
-  }
-
-  x <- df[[xaxis_input]]
-  y <- df[[yaxis_input]]
-  selected_color <- df[[color]]
-  is_categorical <- is_categorical_data(selected_color)
-
-  if (!is.numeric(selected_color)) {
-    legend_title <- color
-  }
-
-  if (is_categorical) {
-    prep <- prepare_categorical_colors(df, color)
-    df <- prep$df
-    colors <- prep$colors
-  } else {
-    colors <- NULL
-  }
-
-  if (plot_dim == "2d") {
-    p <- plot_2d(
-      df,
-      x,
-      y,
-      color,
-      legend_title,
-      size,
-      is_categorical,
-      selected_color,
-      colors
-    )
-  } else {
-    coords <- get_dim(plot_type)
-    p <- plot_3d(
-      df,
-      color,
-      legend_title,
-      size,
-      selected_color,
-      is_categorical,
-      colors,
-      coords
-    )
-  }
-
-  return(p)
 }
