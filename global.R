@@ -1,5 +1,7 @@
 # sourcer function
-source("functions/helpers.R")
+source("functions/helpers_server.R")
+source("functions/helpers_UI.R")
+source("functions/embedding_plots.R")
 library(memoise)
 
 # Define a function for memoized data loading.
