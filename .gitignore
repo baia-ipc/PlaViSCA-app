@@ -1,3 +1,4 @@
 .pixi/
 *.Rproj.user
 .Rhistory
+data/*
