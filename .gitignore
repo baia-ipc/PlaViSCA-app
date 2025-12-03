@@ -4,13 +4,15 @@
 .Ruserdata
 .Rproj
 .gitignore
+.venv/
+.renv/library/
+.renv/staging/
 /backup
 /Anthony
 /pre_process_data/ref
 /pre_process_data/results
 vivaxP01.gff_data.tsv
 
-renv.lock
 pre_process_data/32365102_knee_plots.pdf
 pre_process_data/35926062_knee_plots.pdf
 pre_process_data/36093191_knee_plots.pdf
