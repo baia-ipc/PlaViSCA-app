@@ -1,0 +1,83 @@
+Bootstrap:docker
+From: ubuntu:22.04
+
+%labels
+    Author Sopheap
+	Version 1.0
+	Description pixi-based environment for testing
+
+%environment
+	export PATH=/opt/pixi/bin:/opt/pixi/envs/default/bin:$PATH
+	export timezone=Asia/Phnom_Penh
+
+%post
+    echo ">>> 1. Updating system..."
+	apt-get update && apt-get upgrade -y
+
+	echo ">>> 2. Installing dependencies..."
+	# Install development and runtime libraries needed by many R packages
+	# (graphics, font, and build dependencies). This prevents runtime crashes
+	# caused by missing system libraries when R packages load native code.
+	apt-get install -y \
+	    git \
+		wget \
+		curl \
+		vim \
+		build-essential \
+		libcurl4-openssl-dev \
+		libssl-dev \
+		libxml2-dev \
+		libcairo2-dev \
+		libxt-dev \
+		libfreetype6-dev \
+		libpng-dev \
+		libjpeg-dev \
+		libfontconfig1 \
+		fonts-dejavu-core \
+		locales \
+		&& apt-get clean
+
+	# Generate a UTF-8 locale to avoid LC_* warnings inside R
+	locale-gen en_US.UTF-8 || true
+	
+	echo ">>> Installing pixi..."
+	mkdir -p /opt/pixi
+	curl -fsSL https://pixi.sh/install.sh | PIXI_HOME=/opt/pixi sh
+
+	ln -s /opt/pixi/bin/pixi /usr/local/bin/pixi
+
+    echo ">>> 3. Creating default pixi workspace..."
+	mkdir -p /app
+	cd /app
+	pixi init
+
+    # Add channels to workspace
+    pixi workspace channel add https://conda.anaconda.org/conda-forge/
+    pixi workspace channel add https://conda.anaconda.org/bioconda/
+
+	# add pixi task
+    pixi task add PlaViSca "R -e 'shiny::runApp(\"app.R\", host=\"0.0.0.0\", port=3838)'"
+	
+	echo ">>> 4. Installing modules..."
+	pixi add r
+	pixi add r-shiny
+	pixi add r-shinyjs
+	pixi add r-dt
+	pixi add r-plotly
+	pixi add r-rcolorbrewer
+	pixi add r-tidyverse
+	pixi add r-later
+	pixi add r-shinycssloaders
+	pixi add r-memoise
+	pixi add r-viridis
+
+	echo ">>> 5. Setup complete."
+
+%runscript
+	echo ">>> 6. This is a pixi-based environment for testing."
+	exec "$@"
+
+%test
+	echo ">>> 7. Running tests..."
+	pixi --version
+	which pixi
