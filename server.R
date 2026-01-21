@@ -1127,6 +1127,15 @@ server <- function(input, output, session) {
       input$genes_exp_0,
       input$group_exp,
       input$study_label_exp,
+      input$host_species_exp,
+      input$life_cycle_stage_exp,
+      input$treatment_exp,
+      input$parasite_stage_exp,
+      input$sample_type_exp,
+      input$strain_exp,
+      input$hour_post_invasion_exp,
+      input$sequencer_exp,
+      input$sc_technology_exp,
       input$check_exp_0,
       get_current_data_type()
     )
