@@ -247,6 +247,9 @@ plot_3d <- function(
     y_col <- coords[2]
     z_col <- coords[3]
 
+    # Stable key for click events and tibble conversion
+    df$plotly_key <- seq_len(nrow(df))
+
     x_vals <- df[[x_col]]
     y_vals <- df[[y_col]]
     z_vals <- df[[z_col]]
@@ -266,13 +269,14 @@ plot_3d <- function(
 
     if (is_categorical) {
         p <- plot_ly(
-            x = x_vals,
-            y = y_vals,
-            z = z_vals,
+            data = df,
+            x = ~.data[[x_col]],
+            y = ~.data[[y_col]],
+            z = ~.data[[z_col]],
             type = "scatter3d",
             mode = "markers",
-            color = factor(df[[color]]),
-            key = ~ df$id,
+            color = ~factor(.data[[color]]),
+            key = ~plotly_key,
             source = "embedding",
             marker = list(size = as.numeric(size) * 0.4),
             colors = colors,
@@ -293,9 +297,10 @@ plot_3d <- function(
             )
     } else {
         p <- plot_ly(
-            x = x_vals,
-            y = y_vals,
-            z = z_vals,
+            data = df,
+            x = ~.data[[x_col]],
+            y = ~.data[[y_col]],
+            z = ~.data[[z_col]],
             type = "scatter3d",
             mode = "markers",
             marker = list(
@@ -310,7 +315,7 @@ plot_3d <- function(
             width = 1000,
             height = 700,
             source = "embedding",
-            key = ~ df$id
+            key = ~plotly_key
         ) %>%
             layout(
                 scene = list(

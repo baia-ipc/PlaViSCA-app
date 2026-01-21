@@ -1,22 +1,30 @@
 [workspace]
 authors = ["Sopheap15 <sopheap15@gmail.com>"]
-channels = ["conda-forge", "bioconda", "r", "default"]
 name = "plavisca"
-platforms = ["linux-64", "osx-64", "osx-arm64", "win-64"]
 version = "0.1.0"
+platforms = ["linux-64", "osx-64", "osx-arm64"]
+channels = ["conda-forge", "bioconda", "r", "default"]
 
-[tasks]
-PlaViSca = "R -e 'shiny::runApp(\"app.R\", host=\"0.0.0.0\", port=3838)'"
+[tasks.PlaViSca]
+cmd = ["Rscript", "/srv/baia/prj/pvsca/run_shiny.R"]
+
 
 [dependencies]
 r = ">=4.5,<4.6"
+
+# Shiny ecosystem
 r-shiny = ">=1.11.1,<2"
 r-shinyjs = ">=2.1.0,<3"
+r-shinycssloaders = ">=1.1.0,<2"
+
+# Data handling / visualization
 r-dt = ">=0.34.0,<0.35"
 r-plotly = ">=4.11.0,<5"
 r-rcolorbrewer = ">=1.1_3,<2"
 r-tidyverse = ">=2.0.0,<3"
 r-later = ">=1.4.4,<2"
-r-shinycssloaders = ">=1.1.0,<2"
 r-memoise = ">=2.0.1,<3"
 r-viridis = ">=0.6.5,<0.7"
+
+
+

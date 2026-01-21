@@ -137,49 +137,39 @@
 
 .menu-items {
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   font-family: var(--font-primary);
   font-size: 1.8rem;
-  gap: 5px;
+  gap: 10px;
   color: black;
-  padding-bottom: 10px;
-}
-
-.menu-items a {
-  flex: 1 1 auto;
-  width: clamp(60px, 14vw, 100px);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  border-radius: 20px;
-}
-
-.menu-items a .fas {
-  padding-right: 5px;
-}
-
-
-.menu-items span {
-  color: #553333;
-  user-select: none;
-  margin-bottom: 5px;
+  padding-bottom: 6px;
 }
 
 .menu-link {
   all: unset;
-  color: black;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #2c3e50;
   text-transform: uppercase;
   cursor: pointer;
-  padding: 5px 15px;
-  transition: background-color 0.3s ease, color 0.3s ease;
+  padding: 8px 16px;
+  border-radius: 18px;
+  line-height: 1;
+  transition: background-color var(--transition-base), color var(--transition-base), box-shadow var(--transition-base);
+}
+
+.menu-link i {
+  font-size: 1.2rem;
+  margin-right: 4px;
 }
 
 .menu-link:hover,
 .menu-link.active {
-  color: white;
-  background-color: #9777d2;
+  color: #fff;
+  background-color: #6c56a5;
   text-decoration: none;
-  font-weight: bold;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.15);
 }
 
 .point-emoji {
