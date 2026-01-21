@@ -172,12 +172,12 @@
 
 .menu-link {
   all: unset;
-  color: #2c3e50;
+  color: #000000 !important;
   text-transform: uppercase;
   cursor: pointer;
   padding: 8px 15px;
   transition: background-color 0.3s ease, color 0.3s ease;
-  font-weight: 500;
+  font-weight: bold;
   white-space: nowrap;
   display: inline-flex;
   align-items: center;
@@ -185,13 +185,13 @@
 }
 
 .menu-link:hover {
-  color: white;
+  color: white !important;
   background-color: #b48cf5;
   text-decoration: none;
 }
 
 .menu-link.active {
-  color: white;
+  color: white !important;
   background-color: #b39cda;
   text-decoration: none;
   font-weight: bold;
