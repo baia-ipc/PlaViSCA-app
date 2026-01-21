@@ -58,8 +58,8 @@ fi
 echo
 echo "=== Starting PlaViSca ==="
 echo "Application will be available at: http://localhost:3838"
-echo "Press Ctrl+C to stop the application"
-echo "First load may take longer due to data caching..."
+echo "Press Ctrl+c to stop the application"
+echo "First load may take longer ..."
 echo
 
 # -------- Run Shiny app --------
