@@ -5,12 +5,22 @@ This guide provides step-by-step instructions for installing and running PlaViSc
 ## System Requirements
 
 - **Operating System**: macOS, Windows, or Linux
-- **R Version**: 4.5 or later ([Download R](https://cran.r-project.org/))
-- **RStudio**: 2025 or later (recommended) ([Download RStudio](https://posit.co/download/rstudio-desktop/))
+- **R Version**: 4.3.3 (tested) ([Download R](https://cran.r-project.org/))
+- **RStudio**: 2024.09 or later (recommended) ([Download RStudio](https://posit.co/download/rstudio-desktop/))
 - **Git**: 2.43 or later ([Download Git](https://git-scm.com/downloads))
 - **RAM**: 16 GB minimum
 - **CPU**: 4 cores minimum
 - **Disk Space**: 5 GB free
+
+## Environment Snapshot (current)
+
+The live app was run with the following versions:
+
+- **R**: 4.3.3
+- **renv**: 1.1.5
+- **Core packages**: DT (0.34.0), later (1.4.5), memoise (2.0.1), plotly (4.11.0), RColorBrewer (1.1-3), readr (2.1.6), shiny (1.12.1), shinycssloaders (1.1.0), shinyjs (2.1.1), tibble (3.3.1), tidyverse (2.0.0), viridis (0.6.5)
+
+If you restore with `renv`, these exact versions will be installed automatically.
 
 ## Installation Steps
 
@@ -26,10 +36,18 @@ This will create a directory named `PlaViSca` containing the application files.
 
 ### 2. Install Dependencies
 
-Run the following command in the R console to install the required R packages:
+**Recommended (matched to this project):**
 
 ```r
-install.packages(c("shiny", "shinyjs", "shinycssloaders", "plotly", "DT", "RColorBrewer", "tidyverse", "later"))
+# inside the project folder
+install.packages("renv")
+renv::restore()
+```
+
+This installs the exact package versions listed above. If you prefer a minimal install without `renv`, use:
+
+```r
+install.packages(c("shiny", "shinyjs", "shinycssloaders", "plotly", "DT", "RColorBrewer", "tidyverse", "later", "memoise", "viridis", "readr", "tibble"))
 ```
 
 ### 3. Run the Application
@@ -67,7 +85,7 @@ The application will launch in your default web browser (or be accessible remote
 
 If you encounter issues during installation or running the app, refer to the following common problems and solutions:
 
-- **App does not start**: Ensure all dependencies are installed correctly. Check that your R version is 4.5 or later. Try restarting RStudio.
+- **App does not start**: Ensure all dependencies are installed correctly. Check that your R version is 4.3.3 (tested) or newer. Try restarting RStudio.
 - **Data not loading**: Verify that data files are placed in the `data/` directory with the correct names and formats (see User Manual for details).
 - **Browser issues**: Clear your browser cache or try a different browser. Ensure JavaScript is enabled.
 - **Performance issues**: PlaViSca requires at least 16 GB RAM. Close other applications if needed.

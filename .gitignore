@@ -8,6 +8,7 @@
 .venv/
 .renv/library/
 .renv/staging/
+data/*
 /backup
 /Anthony
 /pre_process_data/ref

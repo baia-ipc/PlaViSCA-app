@@ -2,13 +2,13 @@
 
 Welcome to PlaViSca, an interactive web application for exploring single-cell RNA-seq data from _Plasmodium vivax_. This manual provides comprehensive guidance on navigating and utilizing the application's features for malaria research.
 
-**Data Sources**: PlaViSca integrates data from five studies processed using Nextflow pipelines for downloading, alignment, and feature counting. For details on data acquisition and processing, refer to the Installation section.
+**Quick Start:**
+1. Filter data using the **Metadata** tab to focus on relevant samples
+2. Explore expression patterns and quality metrics via interactive visualizations
+3. Compare multiple genes in the **Gene Expression** tab
+4. Download plots and data for external analysis
 
-- Start with the Metadata tab to filter data relevant to your research.
-- Use interactive plots to explore patterns; hover for details and download for reports.
-- For gene expression, add multiple plots to compare genes across conditions.
-- Check the Quality Control tab to ensure data reliability.
-- Export data and plots for further analysis in external tools.
+**Data Integration**: PlaViSca processes data from five studies using standardized Nextflow pipelines. See the Data Processing Pipeline section for technical details.
 
 ## Overview of PlaViSca Features
 
@@ -62,10 +62,9 @@ The Analysis page is designed to facilitate interactive exploration of both meta
 
 A short video demonstration of the Metadata tab **Video 1**. This video provides an overview of how to filter datasets by biological and experimental attributes, such as host species, life cycle stage, treatment, parasite stage, and sample type. Applying filters dynamically updates both plots and tables, enabling users to focus on relevant data subsets for further analysis.
 
-Interactive features include:
-
-- **Plotly Charts**: Hover to view detailed values. Additional controls (zoom, pan, selection, download) are accessible in the chart's top-right corner.
-- **DT Table**: Provides a global search box for keyword-based filtering and column-specific filters for precise data selection and export as a CSV file.
+**Interactive Features:**
+- **Plotly Charts**: Hover for details. Use controls (zoom, pan, download) in the top-right corner.
+- **DT Table**: Search globally or filter by column. Export as CSV.
 
 ### Quality Control
 
@@ -104,15 +103,15 @@ For technical details on data preparation, refer to the Installation section.
 
 **Video 2**: Gene expression tab functionality
 
-The Gene Expression tab provides an interactive interface for exploring gene expression across various biological conditions **Video 2**. Users can:
+The Gene Expression tab provides an interactive interface for exploring gene expression across various biological conditions **Video 2**. Key features:
 
-- Add or remove plots as needed
-- Select data type (Raw, Normalized, Scaled)
-- Toggle between Gene Names and Gene IDs
-- Search and select specific genes
-- Group data by variables such as stage, species, or reproductive form
+- **Flexible Plot Management**: Add/remove plots to compare multiple genes
+- **Data Options**: Choose Raw, Normalized, or Scaled data
+- **Gene Search**: Toggle between Gene Names and Gene IDs
+- **Grouping**: Organize by life cycle stage, host species, or parasitic form
+- **Annotations**: Direct links to PlasmoDB and NCBI
 
-Each selection generates a dynamic violin plot with interactive filtering, hover tooltips, and download options. Direct links to PlasmoDB and NCBI facilitate access to gene annotations.
+Each plot displays dynamic violin plots with hover tooltips and export options.
 
 ### Embedding
 
@@ -120,20 +119,16 @@ Each selection generates a dynamic violin plot with interactive filtering, hover
 
 **Video 3**: Embedding tab functionality
 
-The Embedding tab offers tools for dimensionality reduction and customizable filtering of single-cell data **Video 3**. Users can:
+The Embedding tab offers dimensionality reduction and customizable visualization of single-cell data **Video 3**. Key capabilities:
 
-- Apply multiple filters using OR logic within fields and AND logic between fields
-- Color scatter plots by any metadata column or gene expression
-- Select clustering-based coloring (CCA_sn) with adjustable resolution
-- Choose data type and gene identifier for expression-based coloring
-- Customize plot appearance (point size, 2D/3D, axis selection)
-- Toggle between integrated and unintegrated datasets
-- Select dimensionality reduction method (UMAP, t-SNE, PCA)
-- Download plots for further use
+- **Filtering**: Combine multiple criteria (OR within fields, AND between fields)
+- **Coloring**: Color by metadata, gene expression, or clustering results
+- **Dimensionality Methods**: UMAP, t-SNE, or PCA
+- **Customization**: Adjust point size, 2D/3D view, and axes
+- **Data Views**: Toggle between integrated and unintegrated datasets
+- **Export**: Download publication-ready plots
 
-#### Interactive cell selection
-
-Clicking on individual cells displays a popup table with gene names, IDs, expression values, and descriptions. This data can be exported as CSV for downstream analysis.
+**Interactive Cell Selection**: Click cells to view detailed information (gene names, IDs, expression values, annotations). Export as CSV.
 
 ## About page
 
@@ -157,15 +152,13 @@ PlaViSca is an open-source initiative, and we welcome contributions from the sci
 
 ... are warmly encouraged to get in touch with the development team.
 
-## Tips for Effective Use
+## Best Practices
 
-- Start with the Metadata tab to filter data relevant to your research.
-- Use interactive plots to explore patterns; hover for details and download for reports.
-- For gene expression, add multiple plots to compare genes across conditions.
-- Check the Quality Control tab to ensure data reliability.
-- Export data and plots for further analysis in external tools.
-
-For technical setup, refer to the Installation section. If you encounter issues, consult the troubleshooting guide or contact the team.
+- **Filter First**: Always start with the Metadata tab to focus on relevant data.
+- **Leverage Interactivity**: Hover for tooltips, download plots, and export data for external tools.
+- **Quality Check**: Verify data reliability in the Quality Control tab before drawing conclusions.
+- **Compare Systematically**: Add multiple Gene Expression plots side-by-side for cross-condition comparison.
+- **Document Findings**: Download all plots and data for reproducibility.
 
 ## Support and Feedback
 

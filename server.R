@@ -901,7 +901,7 @@ server <- function(input, output, session) {
   })
 
 
-  # Gene Expression tabset
+  # Gene Expression tabset - with optimized caching and debouncing
   filtered_gene_exp_data <- reactive({
     req(filtered_gene_data())
 
@@ -953,7 +953,7 @@ server <- function(input, output, session) {
         return(NULL)
       }
     )
-  })
+  }) %>% debounce(500)  # Add 500ms debounce to batch filter changes
 
   observeEvent(
     list(
@@ -996,7 +996,7 @@ server <- function(input, output, session) {
     get_gene_choices(gene_data()$genes, input$check_exp_0)
   })
 
-  # df_exp data for genes_exp_0 with simplified reactive approach
+  # df_exp data for genes_exp_0 with simplified reactive approach and debouncing
   df_exp_0 <- reactive({
     req(filtered_gene_exp_data(), input$genes_exp_0, input$group_exp)
 
@@ -1059,7 +1059,7 @@ server <- function(input, output, session) {
     )
 
     return(result)
-  })
+  }) %>% debounce(300)  # Add 300ms debounce to reduce unnecessary re-renders
 
   df_gene0 <- reactiveVal(NULL)
 
@@ -1113,12 +1113,27 @@ server <- function(input, output, session) {
     )
   })
 
-  # df_exp_0 when the user selects a gene/group.
+  # df_exp_0 when the user selects a gene/group - with improved caching
   output$gene_exp_plotly <- renderPlotly({
     req(input$genes_exp_0, input$group_exp)
 
     if (global_loading()) {
-      return(NULL)
+      return(plotly::plot_ly() %>% plotly::layout(title = "Loading..."))
+    }
+
+    # Create cache key first to check if plot already exists
+    plot_cache_key <- make_cache_key(
+      "gene_exp_plot",
+      input$genes_exp_0,
+      input$group_exp,
+      input$study_label_exp,
+      input$check_exp_0,
+      get_current_data_type()
+    )
+
+    # Return cached plot immediately if available
+    if (exists(plot_cache_key, envir = sessionData, inherits = FALSE)) {
+      return(sessionData[[plot_cache_key]])
     }
 
     plot_data <- df_gene0()
@@ -1134,20 +1149,7 @@ server <- function(input, output, session) {
     req(plot_data)
 
     if (nrow(plot_data) == 0 || !"gene_expr" %in% names(plot_data)) {
-      return(NULL)
-    }
-
-    # Create cache key (for fast switching of gene/group)
-    plot_cache_key <- make_cache_key(
-      "gene_exp_plot",
-      input$genes_exp_0,
-      input$group_exp,
-      input$study_label_exp,
-      input$check_exp_0
-    )
-
-    if (exists(plot_cache_key, envir = sessionData, inherits = FALSE)) {
-      return(sessionData[[plot_cache_key]])
+      return(plotly::plot_ly() %>% plotly::layout(title = "No data available"))
     }
 
     result <- tryCatch(
@@ -1155,7 +1157,9 @@ server <- function(input, output, session) {
         group <- tolower(input$group_exp)
         gene_exp_plot(plot_data, group)
       },
-      error = function(e) NULL
+      error = function(e) {
+        plotly::plot_ly() %>% plotly::layout(title = paste("Error:", e$message))
+      }
     )
 
     if (!is.null(result)) sessionData[[plot_cache_key]] <- result
@@ -1215,7 +1219,6 @@ server <- function(input, output, session) {
             }
           },
           error = function(e) {
-            message("Error updating selectize input for dynamic gene: ", e$message)
           }
         )
       }, 0.25)
@@ -1251,25 +1254,17 @@ server <- function(input, output, session) {
                   build_plot_slim(fg$data, fg$full, gene_exp_val, cur_group)
                 },
                 error = function(e) {
-                  message(sprintf("dynamic gene plot %s: error building slim df: %s", plot_id, e$message))
                   NULL
                 }
               )
 
               if (is.null(static_df) || nrow(static_df) == 0) {
-                message(sprintf("dynamic gene plot %s: no data after building slim df (gene=%s)", plot_id, as.character(gene_exp_val)))
                 return(plotly::plot_ly() %>% plotly::layout(title = "No data"))
               }
 
               gene_exp_plot(static_df, tolower(cur_group))
             },
             error = function(e) {
-              message(
-                "Error in dynamic gene expression plot ",
-                plot_id,
-                ": ",
-                e$message
-              )
               return(NULL)
             }
           )
@@ -1299,7 +1294,6 @@ server <- function(input, output, session) {
             }
           },
           error = function(e) {
-            message("Error updating selectize input for dynamic gene: ", e$message)
           }
         )
       }, 0.25)
@@ -1333,25 +1327,17 @@ server <- function(input, output, session) {
                   build_plot_slim(fg$data, fg$full, gene_exp_val, cur_group)
                 },
                 error = function(e) {
-                  message(sprintf("dynamic gene plot %s: error building slim df: %s", plot_id, e$message))
                   NULL
                 }
               )
 
               if (is.null(static_df) || nrow(static_df) == 0) {
-                message(sprintf("dynamic gene plot %s: no data after building slim df (gene=%s)", plot_id, as.character(gene_exp_val)))
                 return(plotly::plot_ly() %>% plotly::layout(title = "No data"))
               }
 
               gene_exp_plot(static_df, tolower(cur_group))
             },
             error = function(e) {
-              message(
-                "Error in dynamic gene expression plot ",
-                plot_id,
-                ": ",
-                e$message
-              )
               return(NULL)
             }
           )
@@ -1538,7 +1524,6 @@ server <- function(input, output, session) {
         )
       },
       error = function(e) {
-        message("Error updating gene choices: ", e$message)
         genes_loading(FALSE)
       }
     )
@@ -1663,7 +1648,6 @@ server <- function(input, output, session) {
         autoUpdatePlot(FALSE)
       },
       error = function(e) {
-        message("Error setting plot not ready: ", e$message)
       }
     )
 
@@ -1679,7 +1663,6 @@ server <- function(input, output, session) {
             })
           },
           error = function(e) {
-            message("Error in plot update debounce: ", e$message)
             plot_ready(TRUE)
             autoUpdatePlot(TRUE)
           }
@@ -1797,7 +1780,6 @@ server <- function(input, output, session) {
           color_column <- gene_color_col
         } else {
           color_column <- "sample_type"
-          message("Could not attach gene expression column for embedding coloring; using 'sample_type' fallback")
         }
       } else {
         color_column <- input$color
@@ -2033,11 +2015,8 @@ server <- function(input, output, session) {
 
         # Run garbage collection
         gc()
-
-        message("Session ended. Memory cleaned.")
       },
       error = function(e) {
-        message("Error during cleanup: ", e$message)
       }
     )
   })

@@ -137,7 +137,7 @@
 
 .menu-items {
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   font-family: var(--font-primary);
   font-size: 1.8rem;
   gap: 5px;
@@ -151,11 +151,16 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  gap: 8px;
   border-radius: 20px;
 }
 
-.menu-items a .fas {
-  padding-right: 5px;
+.menu-items a .fas,
+.menu-items a .fa {
+  font-size: 1.5rem;
+  vertical-align: middle;
+  margin: 0;
+  line-height: 1;
 }
 
 
@@ -167,19 +172,30 @@
 
 .menu-link {
   all: unset;
-  color: black;
+  color: #2c3e50;
   text-transform: uppercase;
   cursor: pointer;
-  padding: 5px 15px;
+  padding: 8px 15px;
   transition: background-color 0.3s ease, color 0.3s ease;
+  font-weight: 500;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.menu-link:hover,
+.menu-link:hover {
+  color: white;
+  background-color: #b48cf5;
+  text-decoration: none;
+}
+
 .menu-link.active {
   color: white;
-  background-color: #9777d2;
+  background-color: #b39cda;
   text-decoration: none;
   font-weight: bold;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
 }
 
 .point-emoji {

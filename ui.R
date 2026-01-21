@@ -15,6 +15,7 @@ ui <- fluidPage(
     ),
     tags$link(rel = "preconnect", href = "https://fonts.googleapis.com"),
     tags$link(rel = "preconnect", href = "https://fonts.gstatic.com"),
+            # Removed tip banner
     tags$link(
       href = "https://fonts.googleapis.com/css2?family=Roboto:wght@900&display=swap",
       rel = "stylesheet"
