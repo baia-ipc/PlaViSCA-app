@@ -8,14 +8,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Setup Guide &mdash; PlaViSca</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
 
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
       <script src="_static/documentation_options.js?v=5dcad5ca"></script>
-      <script src="_static/doctools.js?v=fd6eb6e6"></script>
-      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -156,16 +156,13 @@
 <section id="option-a-using-the-provided-helper-script-linux-macos">
 <h4>Option A: Using the provided helper script (Linux/macOS)<a class="headerlink" href="#option-a-using-the-provided-helper-script-linux-macos" title="Link to this heading"></a></h4>
 <p>We have provided a bash script to make running the application easier, especially on servers.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Run with default settings (127.0.0.1:3838)</span>
-./run_app.sh
-
-<span class="c1"># Run and make it accessible from other machines</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Run and make it accessible from other machines</span>
 ./run_app.sh<span class="w"> </span>--host<span class="w"> </span><span class="m">0</span>.0.0.0<span class="w"> </span>--port<span class="w"> </span><span class="m">3838</span>
 </pre></div>
 </div>
 <p><strong>Common options:</strong></p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">-h,</span> <span class="pre">--host</span></code>: Set the host IP (default: 127.0.0.1).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-h,</span> <span class="pre">--host</span></code>: Set the host IP (default: 0.0.0.0).</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">-p,</span> <span class="pre">--port</span></code>: Set the port number (default: 3838).</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">-b,</span> <span class="pre">--browser</span></code>: Enable auto-opening the browser (default is disabled to avoid errors on servers).</p></li>
 </ul>

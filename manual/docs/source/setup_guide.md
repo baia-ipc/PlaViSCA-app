@@ -62,7 +62,7 @@ We have provided a bash script to make running the application easier, especiall
 ```
 
 **Common options:**
-- `-h, --host`: Set the host IP (default: 0.0.0.1).
+- `-h, --host`: Set the host IP (default: 0.0.0.0).
 - `-p, --port`: Set the port number (default: 3838).
 - `-b, --browser`: Enable auto-opening the browser (default is disabled to avoid errors on servers).
 
