@@ -106,7 +106,7 @@ For technical details on data preparation, refer to the Installation section.
 The Gene Expression tab provides an interactive interface for exploring gene expression across various biological conditions **Video 2**. Key features:
 
 - **Flexible Plot Management**: Add/remove plots to compare multiple genes
-- **Data Options**: Choose Raw, Normalized, or Scaled data
+- **Data Options**: Choose Raw or Normalized data (Scaled data is currently disabled)
 - **Gene Search**: Toggle between Gene Names and Gene IDs
 - **Grouping**: Organize by life cycle stage, host species, or parasitic form
 - **Annotations**: Direct links to PlasmoDB and NCBI

@@ -8,14 +8,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Setup Guide &mdash; PlaViSca</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
 
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
       <script src="_static/documentation_options.js?v=5dcad5ca"></script>
-      <script src="_static/doctools.js?v=9bcbadda"></script>
-      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -153,26 +153,25 @@
 </section>
 <section id="run-the-application">
 <h3>3. Run the Application<a class="headerlink" href="#run-the-application" title="Link to this heading"></a></h3>
-<ul>
-<li><p><strong>If using RStudio (desktop):</strong></p>
-<ol class="arabic simple">
-<li><p>Navigate to project folder and click on <code class="docutils literal notranslate"><span class="pre">.Rproj</span></code></p></li>
-<li><p>Open <code class="docutils literal notranslate"><span class="pre">app.R</span></code> (it would work also with <code class="docutils literal notranslate"><span class="pre">ui.R</span></code> or <code class="docutils literal notranslate"><span class="pre">server.R</span></code>)</p></li>
-<li><p>Click the “Run App” button in the top-right corner of the script editor.</p></li>
-</ol>
-</li>
-<li><p>Or run the following command in the R console:</p>
-<div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="n">shiny</span><span class="o">::</span><span class="nf">runApp</span><span class="p">(</span><span class="s">&#39;.&#39;</span><span class="p">)</span>
+<section id="option-a-using-the-provided-helper-script-linux-macos">
+<h4>Option A: Using the provided helper script (Linux/macOS)<a class="headerlink" href="#option-a-using-the-provided-helper-script-linux-macos" title="Link to this heading"></a></h4>
+<p>We have provided a bash script to make running the application easier, especially on servers.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Run with default settings (127.0.0.1:3838)</span>
+./run_app.sh
+
+<span class="c1"># Run and make it accessible from other machines</span>
+./run_app.sh<span class="w"> </span>--host<span class="w"> </span><span class="m">0</span>.0.0.0<span class="w"> </span>--port<span class="w"> </span><span class="m">3838</span>
 </pre></div>
 </div>
-</li>
-<li><p><strong>If using a Linux server (no GUI):</strong></p>
-<ol class="arabic simple">
-<li><p>Run the following command in your terminal to start the app and make it accessible from other machines:</p></li>
-</ol>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>R<span class="w"> </span>-e<span class="w"> </span><span class="s2">&quot;shiny::runApp(&#39;.&#39;, host=&#39;0.0.0.0&#39;, port=3838)&quot;</span>
-</pre></div>
-</div>
+<p><strong>Common options:</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">-h,</span> <span class="pre">--host</span></code>: Set the host IP (default: 127.0.0.1).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-p,</span> <span class="pre">--port</span></code>: Set the port number (default: 3838).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-b,</span> <span class="pre">--browser</span></code>: Enable auto-opening the browser (default is disabled to avoid errors on servers).</p></li>
+</ul>
+</section>
+<section id="option-b-using-rstudio-desktop">
+<h4>Option B: Using RStudio (Desktop)<a class="headerlink" href="#option-b-using-rstudio-desktop" title="Link to this heading"></a></h4>
 <ol class="arabic simple" start="2">
 <li><p>Then, open a web browser on your local machine and go to: <code class="docutils literal notranslate"><span class="pre">http://&lt;server-ip&gt;:3838</span></code></p></li>
 <li><p>Replace <code class="docutils literal notranslate"><span class="pre">&lt;server-ip&gt;</span></code> with the actual IP address of your server. You can find it with:</p></li>
@@ -180,16 +179,16 @@
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>hostname<span class="w"> </span>-I
 </pre></div>
 </div>
-</li>
-</ul>
 <p>The application will launch in your default web browser (or be accessible remotely if running on a server).</p>
+</section>
 </section>
 </section>
 <section id="troubleshooting">
 <h2>Troubleshooting<a class="headerlink" href="#troubleshooting" title="Link to this heading"></a></h2>
 <p>If you encounter issues during installation or running the app, refer to the following common problems and solutions:</p>
 <ul class="simple">
-<li><p><strong>App does not start</strong>: Ensure all dependencies are installed correctly. Check that your R version is 4.3.3 (tested) or newer. Try restarting RStudio.</p></li>
+<li><p><strong>App fails with browser error</strong>: If you see <code class="docutils literal notranslate"><span class="pre">Error</span> <span class="pre">in</span> <span class="pre">utils::browseURL(appUrl)</span> <span class="pre">:</span> <span class="pre">'browser'</span> <span class="pre">must</span> <span class="pre">be</span> <span class="pre">a</span> <span class="pre">non-empty</span> <span class="pre">character</span> <span class="pre">string</span></code>, it means R is trying to open a browser in an environment without one (like a remote server). Use <code class="docutils literal notranslate"><span class="pre">./run_app.sh</span></code> (which disables browser by default) or add <code class="docutils literal notranslate"><span class="pre">launch.browser=FALSE</span></code> to your <code class="docutils literal notranslate"><span class="pre">runApp</span></code> command.</p></li>
+<li><p><strong>Missing packages</strong>: If <code class="docutils literal notranslate"><span class="pre">renv::restore()</span></code> fails or you see “package not found” errors, ensure you have the necessary system libraries installed (see point above). You can also try <code class="docutils literal notranslate"><span class="pre">R</span> <span class="pre">-e</span> <span class="pre">&quot;renv::status()&quot;</span></code> to identify which packages are missing.</p></li>
 <li><p><strong>Data not loading</strong>: Verify that data files are placed in the <code class="docutils literal notranslate"><span class="pre">data/</span></code> directory with the correct names and formats (see User Manual for details).</p></li>
 <li><p><strong>Browser issues</strong>: Clear your browser cache or try a different browser. Ensure JavaScript is enabled.</p></li>
 <li><p><strong>Performance issues</strong>: PlaViSca requires at least 16 GB RAM. Close other applications if needed.</p></li>

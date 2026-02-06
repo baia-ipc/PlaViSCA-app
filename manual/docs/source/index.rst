@@ -9,7 +9,7 @@ Welcome to PlaViSca
 .. image:: https://img.shields.io/badge/version-1.0-blue?style=flat
    :target: https://github.com/Sopheap15/pvsca
 
-.. image:: https://img.shields.io/badge/last_updated-October%2021%2C%202025-blue?style=flat
+.. image:: https://img.shields.io/badge/last_updated-February%2006%2C%202026-blue?style=flat
 
 .. image:: https://img.shields.io/badge/PlaViSca-black?style=flat&logo=github
    :target: https://github.com/Sopheap15/pvsca

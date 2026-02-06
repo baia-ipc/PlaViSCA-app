@@ -59,20 +59,21 @@ install.packages(c(
 ))
 ```
 
-3. Run the app
+### 3. Run the app
 
-From RStudio: open `app.R` and click "Run App".
+#### Option A: Using the helper script (Recommended)
+```bash
+chmod +x run_app.sh
+./run_app.sh
+```
+Run `./run_app.sh --help` for options (host, port, etc.).
 
-From a terminal (GUI):
+#### Option B: From RStudio
+Open `app.R` and click "Run App".
 
+#### Option C: From terminal
 ```bash
 R -e "shiny::runApp('.', launch.browser = TRUE)"
-```
-
-From a server (no GUI):
-
-```bash
-R -e "shiny::runApp('.', host='0.0.0.0', port=3838)"
 ```
 
 Then open `http://<server-ip>:3838` in a browser.
