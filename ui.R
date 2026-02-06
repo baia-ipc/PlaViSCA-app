@@ -497,6 +497,11 @@ ui <- fluidPage(
                     ),
                     fluidRow(
                       class = "btn-add-rm-container",
+                      downloadButton(
+                        "download_gene_exp_0",
+                        label = "",
+                        class = "btn btn-secondary btn_add"
+                      ),
                       actionButton(
                         "add_btn_0",
                         label = icon("plus"),

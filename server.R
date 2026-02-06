@@ -5,6 +5,7 @@ library(plotly)
 library(RColorBrewer)
 library(tidyverse)
 library(later)
+library(writexl)
 
 server <- function(input, output, session) {
   sessionData <- new.env(parent = emptyenv())
@@ -1182,13 +1183,33 @@ server <- function(input, output, session) {
     gene_links(gene_id)
   })
 
+  # Initialize gene choices for the first plot
+  observe({
+    req(filtered_gene_exp_data())
+    choices <- get_gene_choices(filtered_gene_exp_data()$genes, FALSE)
+    updateSelectizeInput(
+      session,
+      "genes_exp_0",
+      choices = choices,
+      server = TRUE
+    )
+  })
+
   # gene_exp_i block
   # observe add button click from js
   choice_exp <- reactiveVal()
   counter <- reactiveVal(0)
   observeEvent(input$click_add_btn, {
     btn_id <- input$click_add_btn
+    req(btn_id)
+    
     id <- as.numeric(gsub("add_btn_?", "", btn_id))
+    
+    # Validate that id is a valid number
+    if (is.na(id)) {
+      return(NULL)
+    }
+    
     shinyjs::hide(paste0("add_btn_", id))
 
     # Use the filtered gene-expression data for choices so selection respects metadata filters
@@ -2012,6 +2033,201 @@ server <- function(input, output, session) {
       })
     }
   )
+
+  # Handle download for first gene expression plot (plot 0)
+  output$download_gene_exp_0 <- downloadHandler(
+    filename = function() {
+      gene_name <- tryCatch(input$genes_exp_0, error = function(e) "gene")
+      paste0("gene_expression_", gene_name, "_", Sys.Date(), ".xlsx")
+    },
+    content = function(file) {
+      withProgress(message = "Processing Data", value = 0, {
+        incProgress(0.3, detail = "Preparing data...")
+        
+        tryCatch({
+          fg <- filtered_gene_exp_data()
+          cur_gene <- isolate(input$genes_exp_0)
+          cur_group <- isolate(input$group_exp)
+          cur_check <- isolate(input$check_exp_0)
+          
+          if (!is.null(cur_gene) && !is.null(cur_group)) {
+            gene_exp_val <- if (isTRUE(cur_check)) cur_gene else get_gene_id(cur_gene, fg$genes)
+            plot_data <- build_plot_slim(fg$data, fg$full, gene_exp_val, cur_group)
+            
+            if (!is.null(plot_data) && nrow(plot_data) > 0) {
+              incProgress(0.5, detail = "Creating metadata...")
+              
+              # Create metadata sheet with analysis parameters
+              metadata <- data.frame(
+                Parameter = c(
+                  "Data Type",
+                  "Gene ID", 
+                  "Gene Name",
+                  "Group By",
+                  "Study Label",
+                  "Host Species",
+                  "Life Cycle Stage",
+                  "Treatment",
+                  "Parasite Stage",
+                  "Sample Type",
+                  "Strain",
+                  "Hour Post Invasion",
+                  "Sequencer",
+                  "SC Technology",
+                  "Download Date"
+                ),
+                Value = c(
+                  isolate(input$data_type_exp),
+                  as.character(gene_exp_val),
+                  as.character(cur_gene),
+                  as.character(cur_group),
+                  paste(isolate(input$study_label_exp), collapse = ", "),
+                  paste(isolate(input$host_species_exp), collapse = ", "),
+                  paste(isolate(input$life_cycle_stage_exp), collapse = ", "),
+                  paste(isolate(input$treatment_exp), collapse = ", "),
+                  paste(isolate(input$parasite_stage_exp), collapse = ", "),
+                  paste(isolate(input$sample_type_exp), collapse = ", "),
+                  paste(isolate(input$strain_exp), collapse = ", "),
+                  paste(isolate(input$hour_post_invasion_exp), collapse = ", "),
+                  paste(isolate(input$sequencer_exp), collapse = ", "),
+                  paste(isolate(input$sc_technology_exp), collapse = ", "),
+                  as.character(Sys.time())
+                ),
+                stringsAsFactors = FALSE
+              )
+              
+              incProgress(0.7, detail = "Saving file...")
+              
+              # Create Excel file with two sheets
+              write_xlsx(
+                list(
+                  "Data" = plot_data,
+                  "Metadata" = metadata
+                ),
+                path = file
+              )
+              
+              incProgress(1, detail = "Download complete")
+            }
+          }
+        }, error = function(e) {
+          warning(paste("Error downloading plot data:", e$message))
+        })
+      })
+    }
+  )
+
+  # Create download handlers dynamically for additional gene expression plots (1+)
+  observe({
+    for (i in 1:20) {
+      local({
+        plot_id <- i
+        output_name <- paste0("download_gene_exp_", plot_id)
+        
+        output[[output_name]] <- downloadHandler(
+          filename = function() {
+            gene_name <- tryCatch({
+              gn <- input[[paste0("genes_exp_", plot_id)]]
+              if (is.null(gn) || is.na(gn) || nchar(as.character(gn)) == 0) "gene" else gn
+            }, error = function(e) "gene")
+            paste0("gene_expression_", gene_name, "_", Sys.Date(), ".xlsx")
+          },
+          content = function(file) {
+            withProgress(message = "Processing Data", value = 0, {
+              incProgress(0.3, detail = "Preparing data...")
+              
+              tryCatch({
+                # Validate all required inputs exist
+                cur_gene <- input[[paste0("genes_exp_", plot_id)]]
+                cur_group <- input[[paste0("group_exp_", plot_id)]]
+                cur_check <- input[[paste0("check_exp_", plot_id)]]
+                
+                if (is.null(cur_gene) || is.null(cur_group)) {
+                  showNotification("Please select a gene and grouping option first", type = "error")
+                  return(NULL)
+                }
+                
+                fg <- filtered_gene_exp_data()
+                if (is.null(fg) || is.null(fg$genes)) {
+                  showNotification("No data available for download", type = "error")
+                  return(NULL)
+                }
+                
+                gene_exp_val <- if (isTRUE(cur_check)) cur_gene else get_gene_id(cur_gene, fg$genes)
+                
+                if (is.null(gene_exp_val) || is.na(gene_exp_val)) {
+                  showNotification("Invalid gene selection", type = "error")
+                  return(NULL)
+                }
+                
+                plot_data <- build_plot_slim(fg$data, fg$full, gene_exp_val, cur_group)
+                
+                if (!is.null(plot_data) && nrow(plot_data) > 0) {
+                  incProgress(0.5, detail = "Creating metadata...")
+                  
+                  # Create metadata sheet with analysis parameters
+                  metadata <- data.frame(
+                    Parameter = c(
+                      "Data Type",
+                      "Gene ID", 
+                      "Gene Name",
+                      "Group By",
+                      "Study Label",
+                      "Host Species",
+                      "Life Cycle Stage",
+                      "Treatment",
+                      "Parasite Stage",
+                      "Sample Type",
+                      "Strain",
+                      "Hour Post Invasion",
+                      "Sequencer",
+                      "SC Technology",
+                      "Download Date"
+                    ),
+                    Value = c(
+                      isolate(input$data_type_exp),
+                      as.character(gene_exp_val),
+                      as.character(cur_gene),
+                      as.character(cur_group),
+                      paste(isolate(input$study_label_exp), collapse = ", "),
+                      paste(isolate(input$host_species_exp), collapse = ", "),
+                      paste(isolate(input$life_cycle_stage_exp), collapse = ", "),
+                      paste(isolate(input$treatment_exp), collapse = ", "),
+                      paste(isolate(input$parasite_stage_exp), collapse = ", "),
+                      paste(isolate(input$sample_type_exp), collapse = ", "),
+                      paste(isolate(input$strain_exp), collapse = ", "),
+                      paste(isolate(input$hour_post_invasion_exp), collapse = ", "),
+                      paste(isolate(input$sequencer_exp), collapse = ", "),
+                      paste(isolate(input$sc_technology_exp), collapse = ", "),
+                      as.character(Sys.time())
+                    ),
+                    stringsAsFactors = FALSE
+                  )
+                  
+                  incProgress(0.7, detail = "Saving file...")
+                  
+                  # Create Excel file with two sheets
+                  write_xlsx(
+                    list(
+                      "Data" = plot_data,
+                      "Metadata" = metadata
+                    ),
+                    path = file
+                  )
+                  
+                  incProgress(1, detail = "Download complete")
+                } else {
+                  showNotification("No data to download", type = "warning")
+                }
+              }, error = function(e) {
+                showNotification(paste("Error downloading:", e$message), type = "error")
+              })
+            })
+          }
+        )
+      })
+    }
+  })
 
   # Simple memory cleanup on session end
   onSessionEnded(function() {

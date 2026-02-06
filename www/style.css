@@ -140,19 +140,20 @@
   align-items: center;
   font-family: var(--font-primary);
   font-size: 1.8rem;
-  gap: 5px;
+  gap: 10px;
   color: black;
   padding-bottom: 10px;
 }
 
 .menu-items a {
-  flex: 1 1 auto;
-  width: clamp(60px, 14vw, 100px);
+  flex: 0 0 auto;
+  min-width: 130px;
   display: flex;
   justify-content: center;
   align-items: center;
   gap: 8px;
-  border-radius: 20px;
+  border-radius: 8px;
+  white-space: nowrap;
 }
 
 .menu-items a .fas,
@@ -172,30 +173,38 @@
 
 .menu-link {
   all: unset;
-  color: #000000 !important;
-  text-transform: uppercase;
-  cursor: pointer;
-  padding: 8px 15px;
-  transition: background-color 0.3s ease, color 0.3s ease;
-  font-weight: bold;
-  white-space: nowrap;
   display: inline-flex;
   align-items: center;
-  justify-content: center;
+  gap: 8px;
+  color: #555555;
+  text-transform: uppercase;
+  cursor: pointer;
+  padding: 10px 20px;
+  border-radius: 8px;
+  line-height: 1;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.menu-link i {
+  font-size: 1.2rem;
+  margin-right: 4px;
 }
 
 .menu-link:hover {
-  color: white !important;
-  background-color: #b48cf5;
+  color: #ffffff;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   text-decoration: none;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+  transform: translateY(-2px);
 }
 
 .menu-link.active {
-  color: white !important;
-  background-color: #b39cda;
+  color: #ffffff;
+  background: linear-gradient(135deg, #5e72e4 0%, #825ee4 100%);
   text-decoration: none;
-  font-weight: bold;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 6px 16px rgba(94, 114, 228, 0.5);
+  font-weight: 600;
 }
 
 .point-emoji {
@@ -1048,6 +1057,34 @@ input:checked+.slider:before {
   gap: 5px;
   margin-right: 40px;
   justify-content: flex-end;
+}
+
+/* Download button for gene expression plots */
+.btn-add-rm-container .btn-secondary {
+  background-color: #3498db;
+  border-color: #3498db;
+  color: white;
+  padding: 6px 12px;
+  font-size: 14px;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+  min-width: 40px;
+}
+
+.btn-add-rm-container .btn-secondary:hover {
+  background-color: #2980b9;
+  border-color: #2980b9;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(52, 152, 219, 0.3);
+}
+
+.btn-add-rm-container .btn-secondary:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(52, 152, 219, 0.2);
+}
+
+.btn-add-rm-container .btn-secondary .fa-download {
+  font-size: 14px;
 }
 
 

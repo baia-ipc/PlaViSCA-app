@@ -263,6 +263,11 @@ subBlock <- function(i) {
             fluidRow(withSpinner(plotlyOutput(paste0("gene_exp_plotly_", i)), type = 6, size = 0.5, color = "#3498db")),
             fluidRow(
                 class = "btn-add-rm-container",
+                downloadButton(
+                    paste0("download_gene_exp_", i),
+                    label = "",
+                    class = "btn btn-secondary btn_add"
+                ),
                 actionButton(
                     paste0("remove_btn_", i),
                     label = icon("minus"),
