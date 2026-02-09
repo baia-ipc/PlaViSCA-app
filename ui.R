@@ -226,29 +226,6 @@ ui <- fluidPage(
         column(
           width = 12,
           class = "col-12",
-          radioButtons(
-            "color",
-            "Color",
-            choices = list(
-              "Study" = "study_label",
-              "Life cycle" = "life_cycle_stage",
-              "Parasite stage" = "parasite_stage",
-              "Strain" = "strain",
-              "Treatment" = "treatment",
-              "Sample type" = "sample_type",
-              "Host species" = "host_species",
-              "Sequencer" = "sequencer",
-              "SC. technology" = "sc_technology",
-              "DPI" = "day_post_infection",
-              "HPI" = "hour_post_invasion",
-              "Genes" = "genes"
-            ),
-            selected = "study_label"
-          )
-        ),
-        column(
-          width = 12,
-          class = "col-12",
           fluidRow(
             column(
               width = 12,
@@ -395,12 +372,114 @@ ui <- fluidPage(
                 )
               )
             ),
+            # Color controls for dual plots
             fluidRow(
-              withSpinner(
-                type = 6,
-                size = 0.5,
-                color = "#3498db",
-                plotlyOutput("all_plotly")
+              column(
+                width = 6,
+                h4("Left Plot", style = "text-align: center; margin-bottom: 10px;"),
+                radioButtons(
+                  "color_left",
+                  "Color by:",
+                  choices = list(
+                    "Study" = "study_label",
+                    "Life cycle" = "life_cycle_stage",
+                    "Parasite stage" = "parasite_stage",
+                    "Strain" = "strain",
+                    "Treatment" = "treatment",
+                    "Sample type" = "sample_type",
+                    "Host species" = "host_species",
+                    "Sequencer" = "sequencer",
+                    "SC. technology" = "sc_technology",
+                    "DPI" = "day_post_infection",
+                    "HPI" = "hour_post_invasion",
+                    "Genes" = "genes"
+                  ),
+                  selected = "study_label",
+                  inline = TRUE
+                ),
+                # Gene selection for left plot
+                conditionalPanel(
+                  condition = "input.color_left == 'genes'",
+                  fluidRow(
+                    column(
+                      width = 8,
+                      selectizeInput("genes_left", "Gene", choices = "", multiple = TRUE, options = list(maxItems = 4))
+                    ),
+                    column(
+                      width = 4,
+                      tags$label(
+                        class = "switch",
+                        style = "margin-top: 25px;",
+                        tags$input(id = "check_left", type = "checkbox"),
+                        tags$span(class = "slider")
+                      )
+                    )
+                  )
+                )
+              ),
+              column(
+                width = 6,
+                h4("Right Plot", style = "text-align: center; margin-bottom: 10px;"),
+                radioButtons(
+                  "color_right",
+                  "Color by:",
+                  choices = list(
+                    "Study" = "study_label",
+                    "Life cycle" = "life_cycle_stage",
+                    "Parasite stage" = "parasite_stage",
+                    "Strain" = "strain",
+                    "Treatment" = "treatment",
+                    "Sample type" = "sample_type",
+                    "Host species" = "host_species",
+                    "Sequencer" = "sequencer",
+                    "SC. technology" = "sc_technology",
+                    "DPI" = "day_post_infection",
+                    "HPI" = "hour_post_invasion",
+                    "Genes" = "genes"
+                  ),
+                  selected = "sample_type",
+                  inline = TRUE
+                ),
+                # Gene selection for right plot
+                conditionalPanel(
+                  condition = "input.color_right == 'genes'",
+                  fluidRow(
+                    column(
+                      width = 8,
+                      selectizeInput("genes_right", "Gene", choices = "", multiple = TRUE, options = list(maxItems = 4))
+                    ),
+                    column(
+                      width = 4,
+                      tags$label(
+                        class = "switch",
+                        style = "margin-top: 25px;",
+                        tags$input(id = "check_right", type = "checkbox"),
+                        tags$span(class = "slider")
+                      )
+                    )
+                  )
+                )
+              )
+            ),
+            # Dual plots
+            fluidRow(
+              column(
+                width = 6,
+                withSpinner(
+                  type = 6,
+                  size = 0.5,
+                  color = "#3498db",
+                  plotlyOutput("left_plotly", height = "600px")
+                )
+              ),
+              column(
+                width = 6,
+                withSpinner(
+                  type = 6,
+                  size = 0.5,
+                  color = "#3498db",
+                  plotlyOutput("right_plotly", height = "600px")
+                )
               )
             )
           ),
