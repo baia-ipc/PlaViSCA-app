@@ -1009,10 +1009,16 @@ gene_exp_plot <- function(data, x_col, add_title = NULL) {
                     name = group_name,
                     box = list(visible = TRUE),
                     meanline = list(visible = TRUE),
-                    marker = list(color = colors[color_idx]),
+                    marker = list(
+                        color = colors[color_idx],
+                        size = 3,
+                        opacity = 0.7
+                    ),
                     line = list(color = colors[color_idx]),
                     fillcolor = colors[color_idx],
-                    points = FALSE,          # Hide individual points for cleaner appearance
+                    points = "all",          # Show all points
+                    jitter = 0.3,            # Add jitter for point separation
+                    pointpos = 0,            # Center points inside violin (0 = inside)
                     scalemode = "count",     # Scale violin by count for better comparison
                     side = "both",           # Show both sides of violin
                     bandwidth = 0.2,         # Adjust bandwidth for smoother curves
