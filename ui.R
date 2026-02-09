@@ -193,198 +193,258 @@ ui <- fluidPage(
         column(
           width = 12,
           class = "col-12",
-          radioButtons(
-            "color",
-            "Color",
-            choices = list(
-              "Study" = "study_label",
-              "Life cycle" = "life_cycle_stage",
-              "Parasite stage" = "parasite_stage",
-              "Strain" = "strain",
-              "Treatment" = "treatment",
-              "Sample type" = "sample_type",
-              "Host species" = "host_species",
-              "Sequencer" = "sequencer",
-              "SC. technology" = "sc_technology",
-              "DPI" = "day_post_infection",
-              "HPI" = "hour_post_invasion",
-              "Genes" = "genes"
-            ),
-            selected = "study_label"
+          # Data Filters Section
+          tags$div(
+            style = "margin-bottom: 20px;",
+            tags$h5("Data Filters", style = "color: #495057; margin-bottom: 10px; font-weight: 600;"),
+            div(
+              class = "form-group shiny-input-container",
+              id = "apply_filter",
+              div(
+                id = "apply_filter_wrapper",
+                class = "dropdown-container",
+                selectizeInput(
+                  "apply_filter",
+                  label = NULL,
+                  choices = NULL,
+                  multiple = TRUE,
+                  options = list(
+                    placeholder = "No filter applied",
+                    render = I(
+                      '{
+                        option: function(item, escape) {
+                          return "<div>" + item.label + "</div>";
+                        },
+                        item: function(item, escape) {
+                          return "<div>" + item.label + "</div>";
+                        }
+                      }'
+                    )
+                  )
+                ),
+                tags$div(class = "dropdown-arrow", title = "Open dropdown", "▼")
+              )
+            )
           )
         ),
         column(
           width = 12,
           class = "col-12",
-          tags$hr(style = "margin: 15px 0; border-top: 1px solid #dee2e6;"),
-          checkboxInput(
-            "enable_comparison",
-            HTML("<strong>Compare Two Plots</strong>"),
-            value = FALSE
-          ),
-          tags$small("Check to show a second plot with different coloring", style = "color: #666; margin-top: -10px; display: block;"),
-          conditionalPanel(
-            condition = "input.enable_comparison",
-            tags$div(
-              style = "background-color: #f8f9fa; padding: 12px; border-radius: 6px; margin-top: 15px; border-left: 4px solid #28a745;",
-              h6("Second Plot Color", style = "margin-bottom: 8px; color: #495057;"),
-              tags$small("Choose a different color scheme for the second plot", style = "color: #666; margin-bottom: 10px; display: block;"),
-              radioButtons(
-                "color_second",
-                NULL,
-                choices = list(
-                  "Study" = "study_label",
-                  "Life cycle" = "life_cycle_stage", 
-                  "Parasite stage" = "parasite_stage",
-                  "Strain" = "strain",
-                  "Treatment" = "treatment",
-                  "Sample type" = "sample_type",
-                  "Host species" = "host_species",
-                  "Sequencer" = "sequencer",
-                  "SC. technology" = "sc_technology",
-                  "DPI" = "day_post_infection",
-                  "HPI" = "hour_post_invasion",
-                  "Genes" = "genes"
-                ),
-                selected = "sample_type",
-                inline = FALSE
+          # Main Color Section  
+          tags$div(
+            style = "margin-bottom: 20px;",
+            tags$h5("Plot Color", style = "color: #495057; margin-bottom: 10px; font-weight: 600;"),
+            radioButtons(
+              "color",
+              NULL,
+              choices = list(
+                "Study" = "study_label",
+                "Life cycle" = "life_cycle_stage",
+                "Parasite stage" = "parasite_stage",
+                "Strain" = "strain",
+                "Treatment" = "treatment",
+                "Sample type" = "sample_type",
+                "Host species" = "host_species",
+                "Sequencer" = "sequencer",
+                "SC. technology" = "sc_technology",
+                "DPI" = "day_post_infection",
+                "HPI" = "hour_post_invasion",
+                "Genes" = "genes"
               ),
-              # Gene selection for second plot
-              conditionalPanel(
-                condition = "input.color_second == 'genes'",
-                tags$div(
-                  style = "margin-top: 10px; padding-top: 10px; border-top: 1px solid #dee2e6;",
-                  selectizeInput(
-                    "genes_second", 
-                    "Gene(s) for Second Plot:", 
-                    choices = "", 
-                    multiple = TRUE, 
-                    options = list(maxItems = 4)
+              selected = "study_label"
+            )
+          )
+        ),
+        column(
+          width = 12,
+          class = "col-12",
+          # Plot Comparison Section
+          tags$div(
+            style = "margin-bottom: 20px;",
+            tags$h5("Plot Comparison", style = "color: #495057; margin-bottom: 10px; font-weight: 600;"),
+            checkboxInput(
+              "enable_comparison",
+              HTML("<strong>Compare Two Plots</strong>"),
+              value = FALSE
+            ),
+            tags$small("Check to show a second plot with different coloring", style = "color: #666; margin-top: -5px; display: block;"),
+            conditionalPanel(
+              condition = "input.enable_comparison",
+              tags$div(
+                style = "background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin-top: 15px; border-left: 4px solid #28a745;",
+                tags$h6("Second Plot Color", style = "margin-bottom: 12px; color: #495057; font-weight: 600;"),
+                tags$small("Choose a different color scheme for the second plot", style = "color: #666; margin-bottom: 12px; display: block;"),
+                radioButtons(
+                  "color_second",
+                  NULL,
+                  choices = list(
+                    "Study" = "study_label",
+                    "Life cycle" = "life_cycle_stage", 
+                    "Parasite stage" = "parasite_stage",
+                    "Strain" = "strain",
+                    "Treatment" = "treatment",
+                    "Sample type" = "sample_type",
+                    "Host species" = "host_species",
+                    "Sequencer" = "sequencer",
+                    "SC. technology" = "sc_technology",
+                    "DPI" = "day_post_infection",
+                    "HPI" = "hour_post_invasion",
+                    "Genes" = "genes"
                   ),
-                  checkboxInput(
-                    "check_second", 
-                    "Use Gene ID", 
-                    value = FALSE
+                  selected = "sample_type"
+                ),
+                # Gene selection for second plot
+                conditionalPanel(
+                  condition = "input.color_second == 'genes'",
+                  tags$div(
+                    style = "margin-top: 12px; padding-top: 12px; border-top: 1px solid #dee2e6;",
+                    selectizeInput(
+                      "genes_second", 
+                      "Gene(s) for Second Plot:", 
+                      choices = "", 
+                      multiple = TRUE, 
+                      options = list(maxItems = 4)
+                    ),
+                    checkboxInput(
+                      "check_second", 
+                      "Use Gene ID", 
+                      value = FALSE
+                    )
+                  )
+                ),
+                tags$div(
+                  style = "text-align: center; margin-top: 15px;",
+                  actionButton(
+                    "remove_comparison",
+                    "Remove Second Plot",
+                    class = "btn-sm btn-outline-secondary",
+                    icon = icon("times")
+                  )
+                )
+              )
+            )
+          )
+        ),
+        # Gene Selection Section (only show when main color is "genes")
+        conditionalPanel(
+          condition = "input.color == 'genes'",
+          column(
+            width = 12,
+            class = "col-12",
+            tags$div(
+              style = "margin-bottom: 20px;",
+              tags$h5("Gene Selection", style = "color: #495057; margin-bottom: 10px; font-weight: 600;"),
+              fluidRow(
+                column(
+                  width = 12,
+                  radioButtons(
+                    "data_type",
+                    "Data type",
+                    choices = list(
+                      "Raw" = "raw",
+                      "Normalized" = "normalize"
+                      # "Scaled" = "scale"
+                    ),
+                    selected = "normalize"
                   )
                 )
               ),
-              tags$div(
+              fluidRow(
+                id = "gene_snn_ui",
+                column(
+                  width = 7,
+                  selectizeInput("genes_n", "Gene", choices = "", multiple = TRUE, options = list(maxItems = 4))
+                ),
+                column(
+                  id = "switch_id",
+                  width = 2,
+                  tags$label(
+                    class = "switch",
+                    tags$input(id = "check", type = "checkbox"),
+                    tags$span(class = "slider")
+                  )
+                ),
+                column(
+                  width = 5,
+                  tags$div(
+                    id = "gene_link_ui",
+                    class = "col-12",
+                    tags$a(
+                      id = "plasmo_link",
+                      href = "#",
+                      target = "_blank",
+                      "🔬 PlasmoDB"
+                    ),
+                    tags$a(
+                      id = "ncbi_link",
+                      href = "#",
+                      target = "_blank",
+                      "🧬 NCBI"
+                    )
+                  )
+                )
+              )
+            )
+          )
+        ),
+        # Plot Settings Section
+        column(
+          width = 12,
+          class = "col-12",
+          tags$div(
+            style = "margin-bottom: 20px;",
+            tags$h5("Plot Settings", style = "color: #495057; margin-bottom: 10px; font-weight: 600;"),
+            fluidRow(
+              column(
+                width = 6,
+                radioButtons(
+                  "size",
+                  "Point Size",
+                  choices = list("Small" = 2, "Medium" = 4, "Large" = 6),
+                  selected = 4
+                )
+              ),
+              column(
+                width = 6,
+                radioButtons(
+                  "plot",
+                  "Dimensions",
+                  choices = list("2D" = "2d", "3D" = "3d"),
+                  selected = "3d"
+                )
+              )
+            ),
+            fluidRow(
+              id = "axis",
+              column(
+                width = 6,
+                id = "xaxis-container",
+                selectInput(
+                  "xaxis",
+                  "X-axis",
+                  choices = c("pc_1"),
+                  selected = "pc_1"
+                )
+              ),
+              column(
+                width = 6,
+                id = "yaxis-container",
+                selectInput(
+                  "yaxis",
+                  "Y-axis",
+                  choices = c("pc_2"),
+                  selected = "pc_2"
+                )
+              )
+            ),
+            fluidRow(
+              column(
+                width = 12,
                 style = "text-align: center; margin-top: 15px;",
-                actionButton(
-                  "remove_comparison",
-                  "Remove Second Plot",
-                  class = "btn-sm btn-outline-secondary",
-                  icon = icon("times")
-                )
+                downloadButton("download_data", "Download Plot Data", class = "btn btn-primary", icon = icon("download"))
               )
             )
           )
-        ),
-        column(
-          width = 12,
-          class = "col-12",
-          fluidRow(
-            column(
-              width = 12,
-              radioButtons(
-                "data_type",
-                "Data type",
-                choices = list(
-                  "Raw" = "raw",
-                  "Normalized" = "normalize"
-                  # "Scaled" = "scale"
-                ),
-                selected = "normalize"
-              )
-            )
-          ),
-          fluidRow(
-            id = "gene_snn_ui",
-            column(
-              width = 7,
-              selectizeInput("genes_n", "Gene", choices = "", multiple = TRUE, options = list(maxItems = 4))
-            ),
-            column(
-              id = "switch_id",
-              width = 2,
-              tags$label(
-                class = "switch",
-                tags$input(id = "check", type = "checkbox"),
-                tags$span(class = "slider")
-              )
-            ),
-            column(
-              width = 5,
-              tags$div(
-                id = "gene_link_ui",
-                class = "col-12",
-                tags$a(
-                  id = "plasmo_link",
-                  href = "#",
-                  target = "_blank",
-                  "🔬 PlasmoDB"
-                ),
-                tags$a(
-                  id = "ncbi_link",
-                  href = "#",
-                  target = "_blank",
-                  "🧬 NCBI"
-                )
-              )
-            )
-          )
-        ),
-        column(
-          width = 12,
-          class = "col-12",
-          radioButtons(
-            "size",
-            "Size",
-            choices = list("S" = 2, "M" = 4, "L" = 6),
-            selected = 4
-          )
-        ),
-        column(
-          width = 12,
-          class = "col-12",
-          radioButtons(
-            "plot",
-            "Plot",
-            choices = list("2D" = "2d", "3D" = "3d"),
-            selected = "3d"
-          )
-        ),
-        column(
-          width = 12,
-          class = "col-12",
-          fluidRow(
-            id = "axis",
-            column(
-              width = 6,
-              id = "xaxis-container",
-              selectInput(
-                "xaxis",
-                "X-axis",
-                choices = c("pc_1"),
-                selected = "pc_1"
-              )
-            ),
-            column(
-              width = 6,
-              id = "yaxis-container",
-              selectInput(
-                "yaxis",
-                "Y-axis",
-                choices = c("pc_2"),
-                selected = "pc_2"
-              )
-            )
-          )
-        ),
-        column(
-          width = 12,
-          class = "col-12",
-          downloadButton("download_data", "Download", class = "bt-download")
         )
       ),
       column(
@@ -582,7 +642,94 @@ ui <- fluidPage(
                       color = "#3498db",
                       plotlyOutput("gene_exp_plotly")
                     ),
-                    fluidRow(
+          # Gene Selection Section
+          tags$div(
+            style = "margin-bottom: 20px;",
+            tags$h5("Gene Selection", style = "color: #495057; margin-bottom: 10px; font-weight: 600;"),
+            fluidRow(
+              column(
+                width = 12,
+                radioButtons(
+                  "data_type",
+                  "Data type",
+                  choices = list(
+                    "Raw" = "raw",
+                    "Normalized" = "normalize"
+                    # "Scaled" = "scale"
+                  ),
+                  selected = "normalize",
+                  inline = TRUE
+                )
+              )
+            ),
+            fluidRow(
+              id = "gene_snn_ui",
+              column(
+                width = 7,
+                selectizeInput("genes_n", "Gene", choices = "", multiple = TRUE, options = list(maxItems = 4))
+              ),
+              column(
+                id = "switch_id",
+                width = 2,
+                tags$label(
+                  class = "switch",
+                  tags$input(id = "check", type = "checkbox"),
+                  tags$span(class = "slider")
+                )
+              ),
+              column(
+                width = 3,
+                tags$div(
+                  id = "gene_link_ui",
+                  class = "col-12",
+                  style = "margin-top: 25px;",
+                  tags$a(
+                    id = "plasmo_link",
+                    href = "#",
+                    target = "_blank",
+                    "🔬 PlasmoDB",
+                    style = "display: block; font-size: 11px; margin-bottom: 2px;"
+                  ),
+                  tags$a(
+                    id = "ncbi_link", 
+                    href = "#",
+                    target = "_blank",
+                    "🧬 NCBI",
+                    style = "display: block; font-size: 11px;"
+                  )
+                )
+              )
+            )
+          )
+        ),
+        column(
+          width = 12,
+          class = "col-12",
+          # Plot Settings Section
+          tags$div(
+            style = "margin-bottom: 20px;",
+            tags$h5("Plot Settings", style = "color: #495057; margin-bottom: 10px; font-weight: 600;"),
+            fluidRow(
+              column(
+                width = 6,
+                radioButtons(
+                  "size",
+                  "Size",
+                  choices = list("S" = 2, "M" = 4, "L" = 6),
+                  selected = 4
+                )
+              ),
+              column(
+                width = 6,
+                radioButtons(
+                  "plot",
+                  "Plot",
+                  choices = list("2D" = "2d", "3D" = "3d"),
+                  selected = "3d"
+                )
+              )
+            ),
+            fluidRow(
                       class = "btn-add-rm-container",
                       downloadButton(
                         "download_gene_exp_0",
