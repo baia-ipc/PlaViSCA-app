@@ -1009,18 +1009,13 @@ gene_exp_plot <- function(data, x_col, add_title = NULL) {
                     name = group_name,
                     box = list(visible = TRUE),
                     meanline = list(visible = TRUE),
-                    marker = list(
-                        color = colors[color_idx],
-                        size = 4,
-                        opacity = 0.6
-                    ),
+                    marker = list(color = colors[color_idx]),
                     line = list(color = colors[color_idx]),
                     fillcolor = colors[color_idx],
-                    points = "all",          # Show all points to see the data distribution
-                    jitter = 0.4,            # More jitter for better point separation
-                    pointpos = -1.5,         # Position points to the side
-                    scalemode = "width",     # Scale violin width consistently
-                    width = 0.8,             # Make violins wider
+                    points = FALSE,          # Hide individual points for cleaner appearance
+                    scalemode = "count",     # Scale violin by count for better comparison
+                    side = "both",           # Show both sides of violin
+                    bandwidth = 0.2,         # Adjust bandwidth for smoother curves
                     text = text_data,
                     hoverinfo = "text",
                     showlegend = FALSE
