@@ -17,7 +17,7 @@ load_data <- memoise(function(file_path) {
 
 # Define paths to the data files for easy access
 DATA_PATHS <- list(
-  norm_df = "data/normalize_df.rds",
+  norm_df = "data/normalize_df_real.rds",  # Fixed: Use actual normalized data with decimal values
   raw_df = "data/raw_df.rds",
   # scale_df = "data/scale_df.rds",
   cleaned_dataset = "data/cleaned_dataset.rds"
