@@ -216,6 +216,73 @@ ui <- fluidPage(
         column(
           width = 12,
           class = "col-12",
+          tags$hr(style = "margin: 15px 0; border-top: 1px solid #dee2e6;"),
+          h5("Plot Comparison", style = "color: #495057; margin-bottom: 10px;"),
+          checkboxInput(
+            "enable_comparison",
+            "Compare Two Plots",
+            value = FALSE
+          ),
+          conditionalPanel(
+            condition = "input.enable_comparison",
+            tags$div(
+              style = "background-color: #f8f9fa; padding: 12px; border-radius: 6px; margin-top: 10px;",
+              h6("Second Plot Color", style = "margin-bottom: 8px; color: #495057;"),
+              radioButtons(
+                "color_second",
+                NULL,
+                choices = list(
+                  "Study" = "study_label",
+                  "Life cycle" = "life_cycle_stage", 
+                  "Parasite stage" = "parasite_stage",
+                  "Strain" = "strain",
+                  "Treatment" = "treatment",
+                  "Sample type" = "sample_type",
+                  "Host species" = "host_species",
+                  "Sequencer" = "sequencer",
+                  "SC. technology" = "sc_technology",
+                  "DPI" = "day_post_infection",
+                  "HPI" = "hour_post_invasion",
+                  "Genes" = "genes"
+                ),
+                selected = "sample_type",
+                inline = FALSE
+              ),
+              # Gene selection for second plot
+              conditionalPanel(
+                condition = "input.color_second == 'genes'",
+                tags$div(
+                  style = "margin-top: 10px; padding-top: 10px; border-top: 1px solid #dee2e6;",
+                  selectizeInput(
+                    "genes_second", 
+                    "Gene(s) for Second Plot:", 
+                    choices = "", 
+                    multiple = TRUE, 
+                    options = list(maxItems = 4)
+                  ),
+                  checkboxInput(
+                    "check_second", 
+                    "Use Gene ID", 
+                    value = FALSE
+                  )
+                )
+              ),
+              tags$div(
+                style = "text-align: center; margin-top: 10px;",
+                actionButton(
+                  "remove_comparison",
+                  "Remove Second Plot",
+                  class = "btn-sm btn-outline-danger",
+                  icon = icon("times")
+                )
+              )
+            )
+          )
+        ),
+        column(
+          width = 12,
+          class = "col-12",
+          tags$hr(style = "margin: 15px 0; border-top: 1px solid #dee2e6;"),
           fluidRow(
             column(
               width = 12,
@@ -333,7 +400,7 @@ ui <- fluidPage(
             fluidRow(
               column(
                 id = "tab_switch",
-                width = 4,
+                width = 5,
                 tags$span(class = "left-label", "Unintegrated"),
                 tags$label(
                   class = "switch",
@@ -347,7 +414,7 @@ ui <- fluidPage(
                 tags$span(class = "right-label", "Integrated")
               ),
               column(
-                width = 4,
+                width = 7,
                 class = "radio",
                 radioButtons(
                   "embedding",
@@ -360,21 +427,11 @@ ui <- fluidPage(
                   ),
                   selected = "umap"
                 )
-              ),
-              column(
-                width = 4,
-                style = "text-align: right; padding-top: 10px;",
-                actionButton(
-                  "compare_plots_btn", 
-                  "Compare Two Plots", 
-                  class = "btn-primary",
-                  icon = icon("columns")
-                )
               )
             ),
-            # Single plot (default)
+            # Single plot (when comparison is disabled)
             conditionalPanel(
-              condition = "!input.dual_plot_mode || typeof input.dual_plot_mode === 'undefined'",
+              condition = "!input.enable_comparison",
               fluidRow(
                 withSpinner(
                   type = 6,
@@ -384,35 +441,30 @@ ui <- fluidPage(
                 )
               )
             ),
-            # Dual plots (when comparison mode is active)
+            # Dual plots (when comparison is enabled)
             conditionalPanel(
-              condition = "input.dual_plot_mode === true",
-              # Control panel for dual plots
+              condition = "input.enable_comparison",
+              # Plot headers
               fluidRow(
-                style = "background-color: #f8f9fa; padding: 10px; margin-bottom: 15px; border-radius: 5px;",
+                style = "margin-bottom: 10px;",
                 column(
-                  width = 5,
-                  h5("Left Plot", style = "color: #007bff; margin: 0;"),
-                  tags$small(id = "left_plot_color", "Color by: Study", style = "color: #666;")
-                ),
-                column(
-                  width = 2,
-                  style = "text-align: center; padding-top: 10px;",
-                  actionButton(
-                    "configure_plots_btn",
-                    "",
-                    icon = icon("cog"),
-                    class = "btn-sm btn-outline-secondary",
-                    title = "Configure plot colors"
+                  width = 6,
+                  tags$div(
+                    style = "text-align: center; padding: 8px; background-color: #007bff; color: white; border-radius: 4px;",
+                    h5("First Plot", style = "margin: 0;"),
+                    tags$small(id = "first_plot_label", "Color by: Study")
                   )
                 ),
                 column(
-                  width = 5,
-                  h5("Right Plot", style = "color: #28a745; margin: 0; text-align: right;"),
-                  tags$small(id = "right_plot_color", "Color by: Sample type", style = "color: #666; float: right;")
+                  width = 6,
+                  tags$div(
+                    style = "text-align: center; padding: 8px; background-color: #28a745; color: white; border-radius: 4px;",
+                    h5("Second Plot", style = "margin: 0;"),
+                    tags$small(id = "second_plot_label", "Color by: Sample type")
+                  )
                 )
               ),
-              # Dual plots row
+              # Dual plots
               fluidRow(
                 column(
                   width = 6,
@@ -420,7 +472,7 @@ ui <- fluidPage(
                     type = 6,
                     size = 0.5,
                     color = "#007bff",
-                    plotlyOutput("left_plotly", height = "600px")
+                    plotlyOutput("first_plotly", height = "600px")
                   )
                 ),
                 column(
@@ -429,18 +481,8 @@ ui <- fluidPage(
                     type = 6,
                     size = 0.5,
                     color = "#28a745",
-                    plotlyOutput("right_plotly", height = "600px")
+                    plotlyOutput("second_plotly", height = "600px")
                   )
-                )
-              ),
-              # Exit dual plot mode
-              fluidRow(
-                style = "text-align: center; margin-top: 10px;",
-                actionButton(
-                  "exit_dual_mode_btn",
-                  "Return to Single Plot",
-                  class = "btn-outline-secondary btn-sm",
-                  icon = icon("arrow-left")
                 )
               )
             )
@@ -721,12 +763,5 @@ ui <- fluidPage(
     ),
     fluidRow(id = "particles-js-about", class = "particles-js"),
     fluidRow(p(class = "copyright", "© 2025 BAIA Team. All rights reserved."))
-  ),
-  
-  # Hidden inputs for dual plot mode
-  tags$script("
-    Shiny.addCustomMessageHandler('set_dual_plot_mode', function(value) {
-      Shiny.setInputValue('dual_plot_mode', value);
-    });
-  ")
+  )
 )
