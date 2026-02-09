@@ -866,7 +866,7 @@ var_genes_plot <- function(df, study, top_n = 10) {
 }
 
 
-# Generate boxplot for gene expression data
+# Generate violin plot for gene expression data
 gene_exp_plot <- function(data, x_col, add_title = NULL) {
     actual_col <- colnames(data)[tolower(colnames(data)) == tolower(x_col)]
 
@@ -938,7 +938,7 @@ gene_exp_plot <- function(data, x_col, add_title = NULL) {
     # Convert back to data.frame after dplyr operations
     clean_data <- as.data.frame(clean_data)
 
-    # Create boxplot for better visualization of gene expression distributions
+    # Create violin plot for gene expression distribution visualization
     # Ensure we have a regular data.frame, not tibble
     
     # Validate that required columns exist
@@ -1005,21 +1005,18 @@ gene_exp_plot <- function(data, x_col, add_title = NULL) {
                     p,
                     x = x_data,
                     y = y_data,
-                    type = "box",
+                    type = "violin",
                     name = group_name,
+                    box = list(visible = TRUE),
+                    meanline = list(visible = TRUE),
                     marker = list(color = colors[color_idx]),
                     line = list(color = colors[color_idx]),
                     fillcolor = colors[color_idx],
-                    boxpoints = FALSE,       # Hide outlier points for cleaner appearance
+                    points = "outliers",     # Show only outlier points
+                    jitter = 0.3,            # Add jitter to see overlapping points
+                    pointpos = 0,            # Center points on violin
                     text = text_data,
-                    hovertemplate = paste0(
-                        "<b>", group_name, "</b><br>",
-                        "Median: %{median}<br>",
-                        "Q1: %{q1}<br>", 
-                        "Q3: %{q3}<br>",
-                        "Sample size: ", sum(!is.na(y_data)),
-                        "<extra></extra>"
-                    ),
+                    hoverinfo = "text",
                     showlegend = FALSE
                 )
             }
