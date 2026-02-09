@@ -350,49 +350,6 @@ ui <- fluidPage(
         column(
           width = 12,
           class = "col-12",
-          tags$label(class = "control-label", "Dual Plot Comparison"),
-          checkboxInput(
-            "enable_comparison",
-            "Compare Two Plots",
-            value = FALSE
-          ),
-          tags$small("Check to show two plots side-by-side for comparison", style = "color: #666; margin-top: -5px; display: block;"),
-          conditionalPanel(
-            condition = "input.enable_comparison",
-            tags$div(
-              style = "background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin-top: 10px;",
-              tags$label(class = "control-label", "Second Plot Color"),
-              radioButtons(
-                "color_second",
-                NULL,
-                choices = list(
-                  "Study" = "study_label",
-                  "Life cycle" = "life_cycle_stage",
-                  "Parasite stage" = "parasite_stage",
-                  "Strain" = "strain",
-                  "Treatment" = "treatment",
-                  "Sample type" = "sample_type",
-                  "Host species" = "host_species",
-                  "Sequencer" = "sequencer",
-                  "SC. technology" = "sc_technology",
-                  "DPI" = "day_post_infection",
-                  "HPI" = "hour_post_invasion",
-                  "Genes" = "genes"
-                ),
-                selected = "sample_type"
-              ),
-              # Gene selection for second plot when genes is selected
-              conditionalPanel(
-                condition = "input.color_second == 'genes'",
-                selectizeInput("genes_second", "Gene(s) for Second Plot:", choices = ""),
-                checkboxInput("check_second", "Use Gene ID", value = FALSE)
-              )
-            )
-          )
-        ),
-        column(
-          width = 12,
-          class = "col-12",
           downloadButton("download_data", "Download", class = "bt-download")
         )
       ),
@@ -534,8 +491,51 @@ ui <- fluidPage(
                             class = "toggle_exp"
                           ),
                           tags$span(class = "slider")
-                        )
-                      ),
+          )
+        ),
+        column(
+          width = 12,
+          class = "col-12",
+          tags$label(class = "control-label", "Dual Plot Comparison"),
+          checkboxInput(
+            "enable_comparison",
+            "Compare Two Plots",
+            value = FALSE
+          ),
+          tags$small("Check to show two plots side-by-side for comparison", style = "color: #666; margin-top: -5px; display: block;"),
+          conditionalPanel(
+            condition = "input.enable_comparison",
+            tags$div(
+              style = "background-color: #f0f8ff; padding: 20px; border-radius: 8px; margin-top: 15px; border: 1px solid #cce7ff;",
+              tags$label(class = "control-label", "Second Plot Color"),
+              radioButtons(
+                "color_second",
+                NULL,
+                choices = list(
+                  "Study" = "study_label",
+                  "Life cycle" = "life_cycle_stage",
+                  "Parasite stage" = "parasite_stage",
+                  "Strain" = "strain",
+                  "Treatment" = "treatment",
+                  "Sample type" = "sample_type",
+                  "Host species" = "host_species",
+                  "Sequencer" = "sequencer",
+                  "SC. technology" = "sc_technology",
+                  "DPI" = "day_post_infection",
+                  "HPI" = "hour_post_invasion",
+                  "Genes" = "genes"
+                ),
+                selected = "sample_type"
+              ),
+              # Gene selection for second plot when genes is selected
+              conditionalPanel(
+                condition = "input.color_second == 'genes'",
+                selectizeInput("genes_second", "Gene(s) for Second Plot:", choices = ""),
+                checkboxInput("check_second", "Use Gene ID", value = FALSE)
+              )
+            )
+          )
+        ),
                       column(
                         width = 4,
                         id = "gene_link_exp",
