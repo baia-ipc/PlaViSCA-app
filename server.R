@@ -1181,25 +1181,28 @@ server <- function(input, output, session) {
       return(create_empty_plot("Loading..."))
     }
 
-    # DIRECT APPROACH: Get fresh data every time, bypass all caching
+    # FIXED: Use filtered_gene_exp_data() which includes ALL filters, not just parasite_stage
     tryCatch({
-      # 1. Get the raw data
-      raw_data <- gene_data()
-      if (is.null(raw_data) || is.null(raw_data$data)) {
+      # 1. Get the filtered data with ALL filters applied
+      filtered_gene_exp <- filtered_gene_exp_data()
+      if (is.null(filtered_gene_exp) || is.null(filtered_gene_exp$data)) {
         return(create_empty_plot("Data not loaded"))
       }
       
-      # 2. Apply parasite stage filter if selected
-      filtered_data <- raw_data$data
-      if (!is.null(input$parasite_stage_exp) && length(input$parasite_stage_exp) > 0) {
-        # Filter for any selected parasite stage(s)
-        filtered_data <- filtered_data[filtered_data$parasite_stage %in% input$parasite_stage_exp, ]
-      }
+      # 2. Use the already filtered data instead of applying only parasite_stage filter
+      filtered_data <- filtered_gene_exp$data
+      raw_data <- list(
+        data = filtered_gene_exp$full,  # Full expression matrix
+        genes = filtered_gene_exp$genes
+      )
       
-      # 3. Get full expression matrix
-      full_matrix <- raw_data$data
+      # 3. Get full expression matrix from the filtered data object
+      full_matrix <- filtered_gene_exp$full
       
-      # 4. Process each selected gene and collect expression values
+      # 4. Use row indices from the filtered metadata if available
+      row_idx <- attr(filtered_data, "row_idx")
+      
+      # 5. Process each selected gene and collect expression values
       gene_expression_matrix <- list()
       valid_gene_names <- c()
       
@@ -1221,15 +1224,22 @@ server <- function(input, output, session) {
         }
         
         # Get row indices for filtered data
-        row_indices <- match(rownames(filtered_data), rownames(full_matrix))
-        valid_indices <- !is.na(row_indices)
-        
-        if (sum(valid_indices) == 0) {
-          next  # Skip if no matching data
+        if (!is.null(row_idx) && length(row_idx) > 0) {
+          # Use row indices from filtered metadata (this is the correct approach)
+          gene_expression <- full_matrix[[gene_id]][row_idx]
+        } else {
+          # Fallback: match by rownames (less efficient but safer)
+          row_indices <- match(rownames(filtered_data), rownames(full_matrix))
+          valid_indices <- !is.na(row_indices)
+          
+          if (sum(valid_indices) == 0) {
+            next  # Skip if no matching data
+          }
+          
+          # Extract expression values for filtered cells
+          gene_expression <- full_matrix[[gene_id]][row_indices[valid_indices]]
         }
         
-        # Extract expression values for filtered cells
-        gene_expression <- full_matrix[[gene_id]][row_indices[valid_indices]]
         gene_expression_matrix[[gene_name]] <- gene_expression
         valid_gene_names <- c(valid_gene_names, gene_name)
       }
@@ -1254,9 +1264,15 @@ server <- function(input, output, session) {
       }
       
       # 6. Get group values (make sure they match the expression data length)
-      row_indices <- match(rownames(filtered_data), rownames(full_matrix))
-      valid_indices <- !is.na(row_indices)
-      group_values <- filtered_data[[selected_group]][valid_indices]
+      if (!is.null(row_idx) && length(row_idx) > 0) {
+        # Use the same row indices for group values to ensure consistency
+        group_values <- filtered_data[[selected_group]]
+      } else {
+        # Fallback: match by rownames
+        row_indices <- match(rownames(filtered_data), rownames(full_matrix))
+        valid_indices <- !is.na(row_indices)
+        group_values <- filtered_data[[selected_group]][valid_indices]
+      }
       
       # Ensure lengths match
       if (length(avg_expression) != length(group_values)) {
