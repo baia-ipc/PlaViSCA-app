@@ -1010,8 +1010,16 @@ gene_exp_plot <- function(data, x_col, add_title = NULL) {
                     marker = list(color = colors[color_idx]),
                     line = list(color = colors[color_idx]),
                     fillcolor = colors[color_idx],
+                    boxpoints = FALSE,       # Hide outlier points for cleaner appearance
                     text = text_data,
-                    hoverinfo = "text",
+                    hovertemplate = paste0(
+                        "<b>", group_name, "</b><br>",
+                        "Median: %{median}<br>",
+                        "Q1: %{q1}<br>", 
+                        "Q3: %{q3}<br>",
+                        "Sample size: ", sum(!is.na(y_data)),
+                        "<extra></extra>"
+                    ),
                     showlegend = FALSE
                 )
             }
