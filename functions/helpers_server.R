@@ -866,7 +866,7 @@ var_genes_plot <- function(df, study, top_n = 10) {
 }
 
 
-# Generate violin plot with jittered points overlay
+# Generate boxplot for gene expression data
 gene_exp_plot <- function(data, x_col, add_title = NULL) {
     actual_col <- colnames(data)[tolower(colnames(data)) == tolower(x_col)]
 
@@ -938,7 +938,7 @@ gene_exp_plot <- function(data, x_col, add_title = NULL) {
     # Convert back to data.frame after dplyr operations
     clean_data <- as.data.frame(clean_data)
 
-    # Create violin plot without using split parameter to avoid issues
+    # Create boxplot for better visualization of gene expression distributions
     # Ensure we have a regular data.frame, not tibble
     
     # Validate that required columns exist
@@ -1005,16 +1005,11 @@ gene_exp_plot <- function(data, x_col, add_title = NULL) {
                     p,
                     x = x_data,
                     y = y_data,
-                    type = "violin",
+                    type = "box",
                     name = group_name,
-                    box = list(visible = FALSE),
-                    meanline = list(visible = FALSE),
                     marker = list(color = colors[color_idx]),
                     line = list(color = colors[color_idx]),
                     fillcolor = colors[color_idx],
-                    points = "all",
-                    jitter = 0.3,
-                    pointpos = 0,
                     text = text_data,
                     hoverinfo = "text",
                     showlegend = FALSE
