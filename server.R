@@ -1670,17 +1670,6 @@ server <- function(input, output, session) {
     req(gene_data()$genes)
     get_gene_choices(gene_data()$genes, input$check)
   })
-  
-  # Dual plot gene choice reactives
-  choice_left <- eventReactive(list(input$check_left, input$data_type), {
-    req(gene_data()$genes)
-    get_gene_choices(gene_data()$genes, input$check_left)
-  })
-  
-  choice_right <- eventReactive(list(input$check_right, input$data_type), {
-    req(gene_data()$genes)
-    get_gene_choices(gene_data()$genes, input$check_right)
-  })
 
   ## dynamic UI for gene selection (RNA_snn commented out)
   shinyjs::hide("gene_snn_ui")
@@ -1715,25 +1704,6 @@ server <- function(input, output, session) {
             selected = default_selection,  # Add default selection
             server = TRUE
           )
-          
-          # Also update the dual plot gene inputs
-          updateSelectizeInput(
-            session,
-            "genes_left",
-            label = if (isTRUE(input$check_left)) "Gene ID" else "Gene name",
-            choices = get_gene_choices(gene_data()$genes, input$check_left),
-            selected = default_selection,
-            server = TRUE
-          )
-          
-          updateSelectizeInput(
-            session,
-            "genes_right", 
-            label = if (isTRUE(input$check_right)) "Gene ID" else "Gene name",
-            choices = get_gene_choices(gene_data()$genes, input$check_right),
-            selected = default_selection,
-            server = TRUE
-          )
 
           # Reset loading state after update
           later(
@@ -1749,23 +1719,6 @@ server <- function(input, output, session) {
             session,
             "genes_n",
             label = if (isTRUE(input$check)) "Gene ID" else "Gene name",
-            choices = "",
-            server = TRUE
-          )
-          
-          # Also update dual plot inputs in error case
-          updateSelectizeInput(
-            session,
-            "genes_left",
-            label = if (isTRUE(input$check_left)) "Gene ID" else "Gene name",
-            choices = "",
-            server = TRUE
-          )
-          
-          updateSelectizeInput(
-            session,
-            "genes_right",
-            label = if (isTRUE(input$check_right)) "Gene ID" else "Gene name", 
             choices = "",
             server = TRUE
           )
@@ -2163,14 +2116,207 @@ server <- function(input, output, session) {
     })
   }
   
-  # Left plot output
-  output$left_plotly <- renderPlotly({
-    generate_embedding_plot(input$color_left, input$genes_left, input$check_left)
+  # Dual plot mode management
+  dual_plot_active <- reactiveVal(FALSE)
+  left_plot_config <- reactiveVal(list(color = "study_label", genes = NULL, check = FALSE))
+  right_plot_config <- reactiveVal(list(color = "sample_type", genes = NULL, check = FALSE))
+  
+  # Show modal for dual plot comparison
+  observeEvent(input$compare_plots_btn, {
+    showModal(modalDialog(
+      title = "Configure Dual Plot Comparison",
+      size = "l",
+      fluidRow(
+        column(
+          width = 6,
+          wellPanel(
+            h4("Left Plot Configuration", style = "color: #007bff;"),
+            radioButtons(
+              "modal_color_left",
+              "Color by:",
+              choices = list(
+                "Study" = "study_label",
+                "Life cycle" = "life_cycle_stage",
+                "Parasite stage" = "parasite_stage",
+                "Strain" = "strain",
+                "Treatment" = "treatment",
+                "Sample type" = "sample_type",
+                "Host species" = "host_species",
+                "Sequencer" = "sequencer",
+                "SC. technology" = "sc_technology",
+                "DPI" = "day_post_infection",
+                "HPI" = "hour_post_invasion",
+                "Genes" = "genes"
+              ),
+              selected = left_plot_config()$color
+            ),
+            conditionalPanel(
+              condition = "input.modal_color_left == 'genes'",
+              selectizeInput(
+                "modal_genes_left",
+                "Select Gene(s):",
+                choices = "",
+                multiple = TRUE,
+                options = list(maxItems = 4),
+                selected = left_plot_config()$genes
+              ),
+              checkboxInput(
+                "modal_check_left",
+                "Use Gene ID instead of Gene Name",
+                value = left_plot_config()$check
+              )
+            )
+          )
+        ),
+        column(
+          width = 6,
+          wellPanel(
+            h4("Right Plot Configuration", style = "color: #28a745;"),
+            radioButtons(
+              "modal_color_right",
+              "Color by:",
+              choices = list(
+                "Study" = "study_label",
+                "Life cycle" = "life_cycle_stage",
+                "Parasite stage" = "parasite_stage",
+                "Strain" = "strain",
+                "Treatment" = "treatment",
+                "Sample type" = "sample_type",
+                "Host species" = "host_species",
+                "Sequencer" = "sequencer",
+                "SC. technology" = "sc_technology",
+                "DPI" = "day_post_infection",
+                "HPI" = "hour_post_invasion",
+                "Genes" = "genes"
+              ),
+              selected = right_plot_config()$color
+            ),
+            conditionalPanel(
+              condition = "input.modal_color_right == 'genes'",
+              selectizeInput(
+                "modal_genes_right",
+                "Select Gene(s):",
+                choices = "",
+                multiple = TRUE,
+                options = list(maxItems = 4),
+                selected = right_plot_config()$genes
+              ),
+              checkboxInput(
+                "modal_check_right",
+                "Use Gene ID instead of Gene Name",
+                value = right_plot_config()$check
+              )
+            )
+          )
+        )
+      ),
+      footer = tagList(
+        modalButton("Cancel"),
+        actionButton("apply_dual_config", "Apply Configuration", class = "btn-primary")
+      )
+    ))
   })
   
-  # Right plot output
+  # Update modal gene choices when data changes
+  observe({
+    req(gene_data()$genes)
+    
+    # Update gene choices in modal
+    gene_choices <- tryCatch({
+      get_gene_choices(gene_data()$genes, FALSE)  # Default to gene names
+    }, error = function(e) "")
+    
+    updateSelectizeInput(
+      session,
+      "modal_genes_left",
+      choices = gene_choices,
+      server = TRUE
+    )
+    
+    updateSelectizeInput(
+      session,
+      "modal_genes_right",
+      choices = gene_choices,
+      server = TRUE
+    )
+  })
+  
+  # Apply dual plot configuration
+  observeEvent(input$apply_dual_config, {
+    # Update configurations
+    left_config <- list(
+      color = if (!is.null(input$modal_color_left)) input$modal_color_left else "study_label",
+      genes = input$modal_genes_left,
+      check = isTRUE(input$modal_check_left)
+    )
+    right_config <- list(
+      color = if (!is.null(input$modal_color_right)) input$modal_color_right else "sample_type",
+      genes = input$modal_genes_right,
+      check = isTRUE(input$modal_check_right)
+    )
+    
+    left_plot_config(left_config)
+    right_plot_config(right_config)
+    
+    # Activate dual plot mode
+    dual_plot_active(TRUE)
+    session$sendCustomMessage("set_dual_plot_mode", TRUE)
+    
+    # Update UI labels
+    left_label <- names(which(c(
+      "study_label" = "Study",
+      "life_cycle_stage" = "Life cycle",
+      "parasite_stage" = "Parasite stage",
+      "strain" = "Strain",
+      "treatment" = "Treatment",
+      "sample_type" = "Sample type",
+      "host_species" = "Host species",
+      "sequencer" = "Sequencer",
+      "sc_technology" = "SC technology",
+      "day_post_infection" = "DPI",
+      "hour_post_invasion" = "HPI",
+      "genes" = "Genes"
+    ) == left_config$color))[1]
+    
+    right_label <- names(which(c(
+      "study_label" = "Study",
+      "life_cycle_stage" = "Life cycle", 
+      "parasite_stage" = "Parasite stage",
+      "strain" = "Strain",
+      "treatment" = "Treatment",
+      "sample_type" = "Sample type",
+      "host_species" = "Host species",
+      "sequencer" = "Sequencer",
+      "sc_technology" = "SC technology",
+      "day_post_infection" = "DPI",
+      "hour_post_invasion" = "HPI",
+      "genes" = "Genes"
+    ) == right_config$color))[1]
+    
+    runjs(paste0("$('#left_plot_color').text('Color by: ", left_label, "');"))
+    runjs(paste0("$('#right_plot_color').text('Color by: ", right_label, "');"))
+    
+    removeModal()
+  })
+  
+  # Exit dual plot mode
+  observeEvent(input$exit_dual_mode_btn, {
+    dual_plot_active(FALSE)
+    session$sendCustomMessage("set_dual_plot_mode", FALSE)
+  })
+  
+  # Left plot output (updated to use modal config)
+  output$left_plotly <- renderPlotly({
+    req(dual_plot_active())
+    config <- left_plot_config()
+    generate_embedding_plot(config$color, config$genes, config$check)
+  })
+  
+  # Right plot output (updated to use modal config)
   output$right_plotly <- renderPlotly({
-    generate_embedding_plot(input$color_right, input$genes_right, input$check_right)
+    req(dual_plot_active())
+    config <- right_plot_config()
+    generate_embedding_plot(config$color, config$genes, config$check)
   })
   
   # Keep the original plot for backward compatibility

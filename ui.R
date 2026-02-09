@@ -193,34 +193,24 @@ ui <- fluidPage(
         column(
           width = 12,
           class = "col-12",
-          div(
-            class = "form-group shiny-input-container",
-            id = "apply_filter",
-            tags$label("Data filters:", `for` = "apply_filter"),
-            div(
-              id = "apply_filter_wrapper",
-              class = "dropdown-container",
-              selectizeInput(
-                "apply_filter",
-                label = NULL,
-                choices = NULL,
-                multiple = TRUE,
-                options = list(
-                  placeholder = "No filter applied",
-                  render = I(
-                    '{
-                      option: function(item, escape) {
-                        return "<div>" + item.label + "</div>";
-                      },
-                      item: function(item, escape) {
-                        return "<div>" + item.label + "</div>";
-                      }
-                    }'
-                  )
-                )
-              ),
-              tags$div(class = "dropdown-arrow", title = "Open dropdown", "▼")
-            )
+          radioButtons(
+            "color",
+            "Color",
+            choices = list(
+              "Study" = "study_label",
+              "Life cycle" = "life_cycle_stage",
+              "Parasite stage" = "parasite_stage",
+              "Strain" = "strain",
+              "Treatment" = "treatment",
+              "Sample type" = "sample_type",
+              "Host species" = "host_species",
+              "Sequencer" = "sequencer",
+              "SC. technology" = "sc_technology",
+              "DPI" = "day_post_infection",
+              "HPI" = "hour_post_invasion",
+              "Genes" = "genes"
+            ),
+            selected = "study_label"
           )
         ),
         column(
@@ -343,7 +333,7 @@ ui <- fluidPage(
             fluidRow(
               column(
                 id = "tab_switch",
-                width = 5,
+                width = 4,
                 tags$span(class = "left-label", "Unintegrated"),
                 tags$label(
                   class = "switch",
@@ -357,7 +347,7 @@ ui <- fluidPage(
                 tags$span(class = "right-label", "Integrated")
               ),
               column(
-                width = 6,
+                width = 4,
                 class = "radio",
                 radioButtons(
                   "embedding",
@@ -370,115 +360,87 @@ ui <- fluidPage(
                   ),
                   selected = "umap"
                 )
-              )
-            ),
-            # Color controls for dual plots
-            fluidRow(
-              column(
-                width = 6,
-                h4("Left Plot", style = "text-align: center; margin-bottom: 10px;"),
-                radioButtons(
-                  "color_left",
-                  "Color by:",
-                  choices = list(
-                    "Study" = "study_label",
-                    "Life cycle" = "life_cycle_stage",
-                    "Parasite stage" = "parasite_stage",
-                    "Strain" = "strain",
-                    "Treatment" = "treatment",
-                    "Sample type" = "sample_type",
-                    "Host species" = "host_species",
-                    "Sequencer" = "sequencer",
-                    "SC. technology" = "sc_technology",
-                    "DPI" = "day_post_infection",
-                    "HPI" = "hour_post_invasion",
-                    "Genes" = "genes"
-                  ),
-                  selected = "study_label",
-                  inline = TRUE
-                ),
-                # Gene selection for left plot
-                conditionalPanel(
-                  condition = "input.color_left == 'genes'",
-                  fluidRow(
-                    column(
-                      width = 8,
-                      selectizeInput("genes_left", "Gene", choices = "", multiple = TRUE, options = list(maxItems = 4))
-                    ),
-                    column(
-                      width = 4,
-                      tags$label(
-                        class = "switch",
-                        style = "margin-top: 25px;",
-                        tags$input(id = "check_left", type = "checkbox"),
-                        tags$span(class = "slider")
-                      )
-                    )
-                  )
-                )
               ),
               column(
-                width = 6,
-                h4("Right Plot", style = "text-align: center; margin-bottom: 10px;"),
-                radioButtons(
-                  "color_right",
-                  "Color by:",
-                  choices = list(
-                    "Study" = "study_label",
-                    "Life cycle" = "life_cycle_stage",
-                    "Parasite stage" = "parasite_stage",
-                    "Strain" = "strain",
-                    "Treatment" = "treatment",
-                    "Sample type" = "sample_type",
-                    "Host species" = "host_species",
-                    "Sequencer" = "sequencer",
-                    "SC. technology" = "sc_technology",
-                    "DPI" = "day_post_infection",
-                    "HPI" = "hour_post_invasion",
-                    "Genes" = "genes"
-                  ),
-                  selected = "sample_type",
-                  inline = TRUE
-                ),
-                # Gene selection for right plot
-                conditionalPanel(
-                  condition = "input.color_right == 'genes'",
-                  fluidRow(
-                    column(
-                      width = 8,
-                      selectizeInput("genes_right", "Gene", choices = "", multiple = TRUE, options = list(maxItems = 4))
-                    ),
-                    column(
-                      width = 4,
-                      tags$label(
-                        class = "switch",
-                        style = "margin-top: 25px;",
-                        tags$input(id = "check_right", type = "checkbox"),
-                        tags$span(class = "slider")
-                      )
-                    )
-                  )
+                width = 4,
+                style = "text-align: right; padding-top: 10px;",
+                actionButton(
+                  "compare_plots_btn", 
+                  "Compare Two Plots", 
+                  class = "btn-primary",
+                  icon = icon("columns")
                 )
               )
             ),
-            # Dual plots
-            fluidRow(
-              column(
-                width = 6,
+            # Single plot (default)
+            conditionalPanel(
+              condition = "!input.dual_plot_mode || typeof input.dual_plot_mode === 'undefined'",
+              fluidRow(
                 withSpinner(
                   type = 6,
                   size = 0.5,
                   color = "#3498db",
-                  plotlyOutput("left_plotly", height = "600px")
+                  plotlyOutput("all_plotly", height = "700px")
+                )
+              )
+            ),
+            # Dual plots (when comparison mode is active)
+            conditionalPanel(
+              condition = "input.dual_plot_mode === true",
+              # Control panel for dual plots
+              fluidRow(
+                style = "background-color: #f8f9fa; padding: 10px; margin-bottom: 15px; border-radius: 5px;",
+                column(
+                  width = 5,
+                  h5("Left Plot", style = "color: #007bff; margin: 0;"),
+                  tags$small(id = "left_plot_color", "Color by: Study", style = "color: #666;")
+                ),
+                column(
+                  width = 2,
+                  style = "text-align: center; padding-top: 10px;",
+                  actionButton(
+                    "configure_plots_btn",
+                    "",
+                    icon = icon("cog"),
+                    class = "btn-sm btn-outline-secondary",
+                    title = "Configure plot colors"
+                  )
+                ),
+                column(
+                  width = 5,
+                  h5("Right Plot", style = "color: #28a745; margin: 0; text-align: right;"),
+                  tags$small(id = "right_plot_color", "Color by: Sample type", style = "color: #666; float: right;")
                 )
               ),
-              column(
-                width = 6,
-                withSpinner(
-                  type = 6,
-                  size = 0.5,
-                  color = "#3498db",
-                  plotlyOutput("right_plotly", height = "600px")
+              # Dual plots row
+              fluidRow(
+                column(
+                  width = 6,
+                  withSpinner(
+                    type = 6,
+                    size = 0.5,
+                    color = "#007bff",
+                    plotlyOutput("left_plotly", height = "600px")
+                  )
+                ),
+                column(
+                  width = 6,
+                  withSpinner(
+                    type = 6,
+                    size = 0.5,
+                    color = "#28a745",
+                    plotlyOutput("right_plotly", height = "600px")
+                  )
+                )
+              ),
+              # Exit dual plot mode
+              fluidRow(
+                style = "text-align: center; margin-top: 10px;",
+                actionButton(
+                  "exit_dual_mode_btn",
+                  "Return to Single Plot",
+                  class = "btn-outline-secondary btn-sm",
+                  icon = icon("arrow-left")
                 )
               )
             )
@@ -759,5 +721,12 @@ ui <- fluidPage(
     ),
     fluidRow(id = "particles-js-about", class = "particles-js"),
     fluidRow(p(class = "copyright", "© 2025 BAIA Team. All rights reserved."))
-  )
+  ),
+  
+  # Hidden inputs for dual plot mode
+  tags$script("
+    Shiny.addCustomMessageHandler('set_dual_plot_mode', function(value) {
+      Shiny.setInputValue('dual_plot_mode', value);
+    });
+  ")
 )
