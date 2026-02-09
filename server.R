@@ -1675,6 +1675,7 @@ server <- function(input, output, session) {
   shinyjs::hide("gene_snn_ui")
   shinyjs::hide("data_type")
   observe({
+    req(input$color)  # Ensure input$color is available
     if (input$color == "genes") {
       shinyjs::show("data_type")
       shinyjs::show("gene_snn_ui")
@@ -1863,6 +1864,7 @@ server <- function(input, output, session) {
 
   ## choose data based on input color
   data <- reactive({
+    req(input$color)  # Ensure input$color is available
     if (input$color == "genes") {
       filtered_gene_data()$data
     } else {
@@ -1941,8 +1943,9 @@ server <- function(input, output, session) {
 
   # Comprehensive dependency checker with gene selection stability
   all_dependencies_ready <- reactive({
-    # Core data requirements
-    if (is.null(data()) || nrow(data()) == 0) {
+    # Core data requirements - safely check data()
+    data_result <- try(data(), silent = TRUE)
+    if (inherits(data_result, "try-error") || is.null(data_result) || nrow(data_result) == 0) {
       return(FALSE)
     }
 
@@ -1976,7 +1979,10 @@ server <- function(input, output, session) {
 
   # Observer to set ready state when dependencies are met
   observe({
-    embedding_ready(all_dependencies_ready())
+    ready_state <- try(all_dependencies_ready(), silent = TRUE)
+    if (!inherits(ready_state, "try-error")) {
+      embedding_ready(ready_state)
+    }
   })
 
   
