@@ -217,17 +217,18 @@ ui <- fluidPage(
           width = 12,
           class = "col-12",
           tags$hr(style = "margin: 15px 0; border-top: 1px solid #dee2e6;"),
-          h5("Plot Comparison", style = "color: #495057; margin-bottom: 10px;"),
           checkboxInput(
             "enable_comparison",
-            "Compare Two Plots",
+            HTML("<strong>Compare Two Plots</strong>"),
             value = FALSE
           ),
+          tags$small("Check to show a second plot with different coloring", style = "color: #666; margin-top: -10px; display: block;"),
           conditionalPanel(
             condition = "input.enable_comparison",
             tags$div(
-              style = "background-color: #f8f9fa; padding: 12px; border-radius: 6px; margin-top: 10px;",
+              style = "background-color: #f8f9fa; padding: 12px; border-radius: 6px; margin-top: 15px; border-left: 4px solid #28a745;",
               h6("Second Plot Color", style = "margin-bottom: 8px; color: #495057;"),
+              tags$small("Choose a different color scheme for the second plot", style = "color: #666; margin-bottom: 10px; display: block;"),
               radioButtons(
                 "color_second",
                 NULL,
@@ -268,11 +269,11 @@ ui <- fluidPage(
                 )
               ),
               tags$div(
-                style = "text-align: center; margin-top: 10px;",
+                style = "text-align: center; margin-top: 15px;",
                 actionButton(
                   "remove_comparison",
                   "Remove Second Plot",
-                  class = "btn-sm btn-outline-danger",
+                  class = "btn-sm btn-outline-secondary",
                   icon = icon("times")
                 )
               )
@@ -282,7 +283,6 @@ ui <- fluidPage(
         column(
           width = 12,
           class = "col-12",
-          tags$hr(style = "margin: 15px 0; border-top: 1px solid #dee2e6;"),
           fluidRow(
             column(
               width = 12,
@@ -452,7 +452,7 @@ ui <- fluidPage(
                   tags$div(
                     style = "text-align: center; padding: 8px; background-color: #007bff; color: white; border-radius: 4px;",
                     h5("First Plot", style = "margin: 0;"),
-                    tags$small(id = "first_plot_label", "Color by: Study")
+                    tags$small(id = "first_plot_label", "Uses main Color control")
                   )
                 ),
                 column(
@@ -460,7 +460,7 @@ ui <- fluidPage(
                   tags$div(
                     style = "text-align: center; padding: 8px; background-color: #28a745; color: white; border-radius: 4px;",
                     h5("Second Plot", style = "margin: 0;"),
-                    tags$small(id = "second_plot_label", "Color by: Sample type")
+                    tags$small(id = "second_plot_label", "Uses Second Plot Color")
                   )
                 )
               ),
