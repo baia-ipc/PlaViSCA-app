@@ -360,8 +360,8 @@ ui <- fluidPage(
           conditionalPanel(
             condition = "input.enable_comparison",
             tags$div(
-              style = "background-color: #f8f9fa; padding: 10px; border-radius: 5px; margin-top: 10px;",
-              tags$strong("Second Plot Color:"),
+              style = "background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin-top: 10px;",
+              tags$label(class = "control-label", "Second Plot Color"),
               radioButtons(
                 "color_second",
                 NULL,

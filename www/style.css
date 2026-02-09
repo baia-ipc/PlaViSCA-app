@@ -743,6 +743,7 @@ ul li:not(:last-child) {
 
 #size label,
 #color label,
+#color_second label,
 #plot label {
   display: flex;
   flex: 1;
@@ -764,6 +765,7 @@ ul li:not(:last-child) {
 
 #size-label:hover,
 #color-label:hover,
+#color_second-label:hover,
 #plot-label:hover {
   cursor: default;
 }
