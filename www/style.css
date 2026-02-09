@@ -667,6 +667,21 @@ ul li:not(:last-child) {
   text-align: center;
 }
 
+/* Sidebar section headers with green styling */
+.sidebar-section-header {
+  background-color: #c8e6c9;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  width: 100%;
+  margin-bottom: 15px;
+  color: #2e7d32;
+  font-weight: bold;
+  font-size: 18px;
+  padding: 10px;
+  text-align: center;
+  display: block;
+}
+
 .col-12 .row .control-label {
   all: unset
 }
