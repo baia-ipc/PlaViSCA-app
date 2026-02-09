@@ -360,12 +360,22 @@ server <- function(input, output, session) {
       }
     )
 
-        result <- list(
-          data = filt_meta,
-          full = full_df,
-          row_idx = row_idx,
-          genes = gene_data()$genes  # Use gene_data() instead of filtered_gene_data()
-        )
+    # Get row indices if available from the filtered metadata
+    row_idx <- attr(filtered_meta, "row_idx")
+    
+    # Get the full dataset (with gene expression matrix)
+    full_df <- if (!is.null(cached_data[[get_current_data_type()]])) {
+      cached_data[[get_current_data_type()]]
+    } else {
+      gene_data()$data
+    }
+    
+    result <- list(
+      data = filtered_meta,
+      full = full_df,
+      row_idx = row_idx,
+      genes = gene_data()$genes  # Use gene_data() instead of filtered_gene_data()
+    )
 
     # Cache the result
     sessionData[[cache_key]] <- result
@@ -1117,8 +1127,14 @@ server <- function(input, output, session) {
     # Get choices based on checkbox state
     choices <- get_gene_choices(gene_data()$genes, input$check_exp_0)
     
-    # Ensure we always have a valid selection
-    default_selection <- if (length(choices) > 0) choices[1] else NULL
+    # Try to preserve current selection if it's still valid in new choices
+    current_selection <- input$genes_exp_0
+    if (!is.null(current_selection) && all(current_selection %in% choices)) {
+      default_selection <- current_selection
+    } else {
+      # If current selection is not valid, keep first choice
+      default_selection <- if (length(choices) > 0) choices[1] else NULL
+    }
 
     tryCatch(
       {
@@ -1141,11 +1157,24 @@ server <- function(input, output, session) {
     return(HTML(""))
   })
 
-  # df_exp_0 when the user selects a gene/group - SIMPLIFIED VERSION
+  # Debounced gene selection to prevent flickering
+  genes_exp_0_debounced <- reactive({
+    input$genes_exp_0
+  }) %>% debounce(800)  # Wait 800ms after user stops typing/selecting
+  
+  group_exp_debounced <- reactive({
+    input$group_exp
+  }) %>% debounce(500)
+
+  # df_exp_0 when the user selects a gene/group - IMPROVED VERSION
   output$gene_exp_plotly <- renderPlotly({
+    # Use debounced inputs to prevent flickering
+    selected_genes <- genes_exp_0_debounced()
+    selected_group <- group_exp_debounced()
+    
     # Validate inputs
-    if (is.null(input$genes_exp_0) || is.null(input$group_exp)) {
-      return(create_empty_plot("Please select a gene and grouping option"))
+    if (is.null(selected_genes) || length(selected_genes) == 0 || is.null(selected_group)) {
+      return(create_empty_plot("Please select at least one gene and a grouping option"))
     }
 
     if (global_loading()) {
@@ -1167,61 +1196,94 @@ server <- function(input, output, session) {
         filtered_data <- filtered_data[filtered_data$parasite_stage %in% input$parasite_stage_exp, ]
       }
       
-      # 3. Get gene expression data
-      gene_name <- input$genes_exp_0
-      gene_id <- NULL
-      if (!is.null(raw_data$genes)) {
-        gene_match <- raw_data$genes[raw_data$genes$name == gene_name, ]
-        if (nrow(gene_match) > 0) {
-          gene_id <- gene_match$gene[1]
+      # 3. Get full expression matrix
+      full_matrix <- raw_data$data
+      
+      # 4. Process each selected gene and collect expression values
+      gene_expression_matrix <- list()
+      valid_gene_names <- c()
+      
+      for (gene_name in selected_genes) {
+        gene_id <- NULL
+        if (!is.null(raw_data$genes)) {
+          gene_match <- raw_data$genes[raw_data$genes$name == gene_name, ]
+          if (nrow(gene_match) > 0) {
+            gene_id <- gene_match$gene[1]
+          }
         }
+        
+        if (is.null(gene_id)) {
+          next  # Skip this gene if not found
+        }
+        
+        if (!(gene_id %in% colnames(full_matrix))) {
+          next  # Skip if gene expression not found
+        }
+        
+        # Get row indices for filtered data
+        row_indices <- match(rownames(filtered_data), rownames(full_matrix))
+        valid_indices <- !is.na(row_indices)
+        
+        if (sum(valid_indices) == 0) {
+          next  # Skip if no matching data
+        }
+        
+        # Extract expression values for filtered cells
+        gene_expression <- full_matrix[[gene_id]][row_indices[valid_indices]]
+        gene_expression_matrix[[gene_name]] <- gene_expression
+        valid_gene_names <- c(valid_gene_names, gene_name)
       }
       
-      if (is.null(gene_id)) {
-        return(create_empty_plot(paste("Gene not found:", gene_name)))
+      # Check if we have any valid data
+      if (length(gene_expression_matrix) == 0) {
+        return(create_empty_plot("No data available for selected genes"))
       }
       
-
-      
-      # 4. Get full expression matrix and extract gene column
-      full_matrix <- raw_data$data  # This should have both metadata and expression data
-      if (!(gene_id %in% colnames(full_matrix))) {
-        return(create_empty_plot(paste("Gene expression data not found:", gene_id)))
+      # 5. Calculate average expression across all selected genes
+      if (length(valid_gene_names) == 1) {
+        # Single gene - use expression directly as vector
+        avg_expression <- gene_expression_matrix[[1]]
+        plot_title <- valid_gene_names[1]
+      } else {
+        # Multiple genes - calculate mean across genes for each cell
+        # Convert to matrix and calculate row means
+        expr_matrix <- do.call(cbind, gene_expression_matrix)
+        avg_expression <- rowMeans(expr_matrix, na.rm = TRUE)
+        plot_title <- paste("Average of", length(valid_gene_names), "genes:", 
+                           paste(valid_gene_names, collapse = ", "))
       }
       
-      # 5. Create plot data by matching filtered metadata with expression data
+      # 6. Get group values (make sure they match the expression data length)
       row_indices <- match(rownames(filtered_data), rownames(full_matrix))
       valid_indices <- !is.na(row_indices)
+      group_values <- filtered_data[[selected_group]][valid_indices]
       
-      if (sum(valid_indices) == 0) {
-        return(create_empty_plot("No matching expression data found"))
+      # Ensure lengths match
+      if (length(avg_expression) != length(group_values)) {
+        # This should not happen, but handle it gracefully
+        min_len <- min(length(avg_expression), length(group_values))
+        avg_expression <- avg_expression[1:min_len]
+        group_values <- group_values[1:min_len]
       }
       
-      # Extract expression values for filtered cells
-      gene_expression <- full_matrix[[gene_id]][row_indices[valid_indices]]
-      group_values <- filtered_data[[input$group_exp]][valid_indices]
-      
-      # Create final plot data
+      # 7. Create final plot data
       plot_data <- data.frame(
-        gene_expr = gene_expression,
+        gene_expr = avg_expression,
         group = group_values,
         stringsAsFactors = FALSE
       )
-      names(plot_data)[2] <- input$group_exp  # Set correct column name for grouping
+      names(plot_data)[2] <- selected_group  # Set correct column name for grouping
       
       # Remove NA values
-      plot_data <- plot_data[!is.na(plot_data$gene_expr) & !is.na(plot_data[[input$group_exp]]), ]
-      
-
+      plot_data <- plot_data[!is.na(plot_data$gene_expr) & !is.na(plot_data[[selected_group]]), ]
       
       if (nrow(plot_data) == 0) {
         return(create_empty_plot("No data available for selected filters"))
       }
       
-      # 6. Create the plot
-      group_col <- tolower(input$group_exp)
-      result <- gene_exp_plot(plot_data, group_col)
-
+      # 8. Create the plot with title showing which genes were averaged
+      group_col <- tolower(selected_group)
+      result <- gene_exp_plot(plot_data, group_col, add_title = plot_title)
       
       return(result)
       
@@ -1230,10 +1292,16 @@ server <- function(input, output, session) {
     })
   })
 
-  ## gene expression link
+  ## gene expression link - updated for multiple genes
   observeEvent(input$genes_exp_0, {
     req(input$genes_exp_0)
-    gene_id <- get_gene_id(input$genes_exp_0, gene_data()$genes)
+    # For multiple genes, use the first one for the link
+    first_gene <- if (is.character(input$genes_exp_0) && length(input$genes_exp_0) > 0) {
+      input$genes_exp_0[1]
+    } else {
+      input$genes_exp_0
+    }
+    gene_id <- get_gene_id(first_gene, gene_data()$genes)
     gene_links(gene_id)
   })
 
@@ -1299,10 +1367,14 @@ server <- function(input, output, session) {
         tryCatch(
           {
             if (!is.null(selectize_choices)) {
+              # Set default selection to first available choice
+              default_selection <- if (length(selectize_choices) > 0) selectize_choices[1] else NULL
+              
               updateSelectizeInput(
                 session,
                 inputId = paste0("genes_exp_", id),
                 choices = selectize_choices,
+                selected = default_selection,  # Add default selection
                 server = TRUE
               )
             }
@@ -1331,16 +1403,38 @@ server <- function(input, output, session) {
           tryCatch(
             {
               fg <- filtered_gene_exp_data()
-              cur_gene <- isolate(input[[paste0("genes_exp_", plot_id)]])
+              cur_genes <- isolate(input[[paste0("genes_exp_", plot_id)]])
               cur_group <- isolate(input[[paste0("group_exp_", plot_id)]])
               cur_check <- isolate(input[[paste0("check_exp_", plot_id)]])
 
-              # Resolve gene id when the user selects by name
-              gene_exp_val <- if (isTRUE(cur_check)) cur_gene else get_gene_id(cur_gene, fg$genes)
+              # Handle multiple genes
+              if (is.null(cur_genes) || length(cur_genes) == 0) {
+                return(create_empty_plot("No genes selected"))
+              }
+              
+              # Convert gene names to IDs
+              gene_ids <- c()
+              if (isTRUE(cur_check)) {
+                # User entered gene IDs directly
+                gene_ids <- cur_genes
+              } else {
+                # User selected gene names - convert to IDs
+                for (gene_name in cur_genes) {
+                  gene_id <- get_gene_id(gene_name, fg$genes)
+                  if (!is.na(gene_id)) {
+                    gene_ids <- c(gene_ids, gene_id)
+                  }
+                }
+              }
+              
+              if (length(gene_ids) == 0) {
+                return(create_empty_plot("No valid genes found"))
+              }
 
+              # Build plot data with average if multiple genes
               static_df <- tryCatch(
                 {
-                  build_plot_slim(fg$data, fg$full, gene_exp_val, cur_group)
+                  build_plot_slim(fg$data, fg$full, gene_ids, cur_group)
                 },
                 error = function(e) {
                   NULL
@@ -1350,8 +1444,15 @@ server <- function(input, output, session) {
               if (is.null(static_df) || nrow(static_df) == 0) {
                 return(create_empty_plot("No data"))
               }
+              
+              # Create title showing gene info
+              plot_title <- if (length(gene_ids) == 1) {
+                cur_genes[1]
+              } else {
+                paste("Average of", length(gene_ids), "genes:", paste(cur_genes, collapse = ", "))
+              }
 
-              gene_exp_plot(static_df, tolower(cur_group))
+              gene_exp_plot(static_df, tolower(cur_group), add_title = plot_title)
             },
             error = function(e) {
               return(NULL)
@@ -1374,10 +1475,14 @@ server <- function(input, output, session) {
         tryCatch(
           {
             if (!is.null(selectize_choices)) {
+              # Set default selection to first available choice
+              default_selection <- if (length(selectize_choices) > 0) selectize_choices[1] else NULL
+              
               updateSelectizeInput(
                 session,
                 inputId = paste0("genes_exp_", id),
                 choices = selectize_choices,
+                selected = default_selection,  # Add default selection
                 server = TRUE
               )
             }
@@ -1405,15 +1510,33 @@ server <- function(input, output, session) {
           tryCatch(
             {
               fg <- filtered_gene_exp_data()
-              cur_gene <- isolate(input[[paste0("genes_exp_", plot_id)]])
+              cur_genes <- isolate(input[[paste0("genes_exp_", plot_id)]])
               cur_group <- isolate(input[[paste0("group_exp_", plot_id)]])
               cur_check <- isolate(input[[paste0("check_exp_", plot_id)]])
 
-              gene_exp_val <- if (isTRUE(cur_check)) cur_gene else get_gene_id(cur_gene, fg$genes)
+              # Handle multiple gene selection
+              if (length(cur_genes) == 0 || any(is.null(cur_genes)) || any(cur_genes == "")) {
+                return(create_empty_plot("No genes selected"))
+              }
+
+              # Convert gene names to IDs
+              gene_ids <- if (isTRUE(cur_check)) {
+                cur_genes
+              } else {
+                sapply(cur_genes, function(gene) get_gene_id(gene, fg$genes), USE.NAMES = FALSE)
+              }
+
+              # Remove any invalid gene IDs
+              valid_genes <- cur_genes[!is.na(gene_ids) & gene_ids != ""]
+              valid_gene_ids <- gene_ids[!is.na(gene_ids) & gene_ids != ""]
+              
+              if (length(valid_gene_ids) == 0) {
+                return(create_empty_plot("No valid genes found"))
+              }
 
               static_df <- tryCatch(
                 {
-                  build_plot_slim(fg$data, fg$full, gene_exp_val, cur_group)
+                  build_plot_slim(fg$data, fg$full, valid_gene_ids, cur_group)
                 },
                 error = function(e) {
                   NULL
@@ -1423,8 +1546,15 @@ server <- function(input, output, session) {
               if (is.null(static_df) || nrow(static_df) == 0) {
                 return(create_empty_plot("No data"))
               }
+              
+              # Create title showing gene info
+              plot_title <- if (length(valid_gene_ids) == 1) {
+                valid_genes[1]
+              } else {
+                paste("Average of", length(valid_gene_ids), "genes:", paste(valid_genes, collapse = ", "))
+              }
 
-              gene_exp_plot(static_df, tolower(cur_group))
+              gene_exp_plot(static_df, tolower(cur_group), add_title = plot_title)
             },
             error = function(e) {
               return(NULL)
@@ -1502,8 +1632,19 @@ server <- function(input, output, session) {
   observeEvent(input$change_gene_exp, {
     id <- input$change_gene_exp
     id <- as.numeric(gsub("genes_exp_", "", id))
-    gene_id <- get_gene_id(input[[paste0("genes_exp_", id)]], gene_data()$genes)
-    gene_links(gene_id)
+    current_genes <- input[[paste0("genes_exp_", id)]]
+    
+    # For multiple genes, use the first one for the link
+    first_gene <- if (is.character(current_genes) && length(current_genes) > 0) {
+      current_genes[1]
+    } else {
+      current_genes
+    }
+    
+    if (!is.null(first_gene) && first_gene != "") {
+      gene_id <- get_gene_id(first_gene, gene_data()$genes)
+      gene_links(gene_id)
+    }
   })
 
   ## update plot when data_type_exp_change from js with debouncing
@@ -2096,8 +2237,12 @@ server <- function(input, output, session) {
   # Handle download for first gene expression plot (plot 0)
   output$download_gene_exp_0 <- downloadHandler(
     filename = function() {
-      gene_name <- tryCatch(input$genes_exp_0, error = function(e) "gene")
-      paste0("gene_expression_", gene_name, "_", Sys.Date(), ".xlsx")
+      gene_names <- tryCatch(input$genes_exp_0, error = function(e) "gene")
+      if (length(gene_names) > 1) {
+        paste0("gene_expression_", length(gene_names), "_genes_", Sys.Date(), ".xlsx")
+      } else {
+        paste0("gene_expression_", gene_names, "_", Sys.Date(), ".xlsx")
+      }
     },
     content = function(file) {
       withProgress(message = "Processing Data", value = 0, {
@@ -2105,23 +2250,52 @@ server <- function(input, output, session) {
         
         tryCatch({
           fg <- filtered_gene_exp_data()
-          cur_gene <- isolate(input$genes_exp_0)
+          cur_genes <- isolate(input$genes_exp_0)
           cur_group <- isolate(input$group_exp)
           cur_check <- isolate(input$check_exp_0)
           
-          if (!is.null(cur_gene) && !is.null(cur_group)) {
-            gene_exp_val <- if (isTRUE(cur_check)) cur_gene else get_gene_id(cur_gene, fg$genes)
-            plot_data <- build_plot_slim(fg$data, fg$full, gene_exp_val, cur_group)
+          if (!is.null(cur_genes) && !is.null(cur_group) && length(cur_genes) > 0) {
+            # Handle multiple gene selection
+            if (isTRUE(cur_check)) {
+              gene_exp_val <- cur_genes
+            } else {
+              gene_exp_val <- sapply(cur_genes, function(gene) get_gene_id(gene, fg$genes), USE.NAMES = FALSE)
+            }
+            
+            # Remove any invalid gene IDs
+            valid_genes <- cur_genes[!is.na(gene_exp_val) & gene_exp_val != ""]
+            valid_gene_ids <- gene_exp_val[!is.na(gene_exp_val) & gene_exp_val != ""]
+            
+            if (length(valid_gene_ids) == 0) {
+              stop("No valid genes found for the current selection")
+            }
+            
+            plot_data <- build_plot_slim(fg$data, fg$full, valid_gene_ids, cur_group)
             
             if (!is.null(plot_data) && nrow(plot_data) > 0) {
               incProgress(0.5, detail = "Creating metadata...")
               
               # Create metadata sheet with analysis parameters
+              gene_info <- if (length(valid_gene_ids) == 1) {
+                list(
+                  gene_id = as.character(valid_gene_ids[1]),
+                  gene_name = as.character(valid_genes[1]),
+                  analysis_type = "Single Gene"
+                )
+              } else {
+                list(
+                  gene_id = paste(valid_gene_ids, collapse = ", "),
+                  gene_name = paste(valid_genes, collapse = ", "),
+                  analysis_type = paste("Average of", length(valid_gene_ids), "genes")
+                )
+              }
+              
               metadata <- data.frame(
                 Parameter = c(
+                  "Analysis Type",
                   "Data Type",
-                  "Gene ID", 
-                  "Gene Name",
+                  "Gene ID(s)", 
+                  "Gene Name(s)",
                   "Group By",
                   "Study Label",
                   "Host Species",
@@ -2136,9 +2310,10 @@ server <- function(input, output, session) {
                   "Download Date"
                 ),
                 Value = c(
+                  gene_info$analysis_type,
                   isolate(input$data_type_exp),
-                  as.character(gene_exp_val),
-                  as.character(cur_gene),
+                  gene_info$gene_id,
+                  gene_info$gene_name,
                   as.character(cur_group),
                   paste(isolate(input$study_label_exp), collapse = ", "),
                   paste(isolate(input$host_species_exp), collapse = ", "),
@@ -2196,11 +2371,16 @@ server <- function(input, output, session) {
         
         output[[output_name]] <- downloadHandler(
           filename = function() {
-            gene_name <- tryCatch({
+            gene_names <- tryCatch({
               gn <- input[[paste0("genes_exp_", plot_id)]]
-              if (is.null(gn) || is.na(gn) || nchar(as.character(gn)) == 0) "gene" else gn
+              if (is.null(gn) || length(gn) == 0) "gene" else gn
             }, error = function(e) "gene")
-            paste0("gene_expression_", gene_name, "_", Sys.Date(), ".xlsx")
+            
+            if (length(gene_names) > 1) {
+              paste0("gene_expression_", length(gene_names), "_genes_", Sys.Date(), ".xlsx")
+            } else {
+              paste0("gene_expression_", gene_names[1], "_", Sys.Date(), ".xlsx")
+            }
           },
           content = function(file) {
             withProgress(message = "Processing Data", value = 0, {
@@ -2208,11 +2388,11 @@ server <- function(input, output, session) {
               
               tryCatch({
                 # Validate all required inputs exist
-                cur_gene <- input[[paste0("genes_exp_", plot_id)]]
+                cur_genes <- input[[paste0("genes_exp_", plot_id)]]
                 cur_group <- input[[paste0("group_exp_", plot_id)]]
                 cur_check <- input[[paste0("check_exp_", plot_id)]]
                 
-                if (is.null(cur_gene) || is.null(cur_group)) {
+                if (is.null(cur_genes) || is.null(cur_group) || length(cur_genes) == 0) {
                   showNotification("Please select a gene and grouping option first", type = "error")
                   return(NULL)
                 }
@@ -2223,24 +2403,49 @@ server <- function(input, output, session) {
                   return(NULL)
                 }
                 
-                gene_exp_val <- if (isTRUE(cur_check)) cur_gene else get_gene_id(cur_gene, fg$genes)
+                # Handle multiple gene selection
+                if (isTRUE(cur_check)) {
+                  gene_exp_val <- cur_genes
+                } else {
+                  gene_exp_val <- sapply(cur_genes, function(gene) get_gene_id(gene, fg$genes), USE.NAMES = FALSE)
+                }
                 
-                if (is.null(gene_exp_val) || is.na(gene_exp_val)) {
-                  showNotification("Invalid gene selection", type = "error")
+                # Remove any invalid gene IDs
+                valid_genes <- cur_genes[!is.na(gene_exp_val) & gene_exp_val != ""]
+                valid_gene_ids <- gene_exp_val[!is.na(gene_exp_val) & gene_exp_val != ""]
+                
+                if (length(valid_gene_ids) == 0) {
+                  showNotification("No valid genes found for the current selection", type = "error")
                   return(NULL)
                 }
                 
-                plot_data <- build_plot_slim(fg$data, fg$full, gene_exp_val, cur_group)
+                plot_data <- build_plot_slim(fg$data, fg$full, valid_gene_ids, cur_group)
                 
                 if (!is.null(plot_data) && nrow(plot_data) > 0) {
                   incProgress(0.5, detail = "Creating metadata...")
                   
+                  # Create gene info for metadata
+                  gene_info <- if (length(valid_gene_ids) == 1) {
+                    list(
+                      gene_id = as.character(valid_gene_ids[1]),
+                      gene_name = as.character(valid_genes[1]),
+                      analysis_type = "Single Gene"
+                    )
+                  } else {
+                    list(
+                      gene_id = paste(valid_gene_ids, collapse = ", "),
+                      gene_name = paste(valid_genes, collapse = ", "),
+                      analysis_type = paste("Average of", length(valid_gene_ids), "genes")
+                    )
+                  }
+                  
                   # Create metadata sheet with analysis parameters
                   metadata <- data.frame(
                     Parameter = c(
+                      "Analysis Type",
                       "Data Type",
-                      "Gene ID", 
-                      "Gene Name",
+                      "Gene ID(s)", 
+                      "Gene Name(s)",
                       "Group By",
                       "Study Label",
                       "Host Species",
@@ -2255,9 +2460,10 @@ server <- function(input, output, session) {
                       "Download Date"
                     ),
                     Value = c(
+                      gene_info$analysis_type,
                       isolate(input$data_type_exp),
-                      as.character(gene_exp_val),
-                      as.character(cur_gene),
+                      gene_info$gene_id,
+                      gene_info$gene_name,
                       as.character(cur_group),
                       paste(isolate(input$study_label_exp), collapse = ", "),
                       paste(isolate(input$host_species_exp), collapse = ", "),

@@ -440,7 +440,10 @@ ui <- fluidPage(
                   fluidRow(
                     column(
                       width = 6,
-                      selectizeInput("genes_exp_0", "Gene", choices = NULL),
+                      selectizeInput("genes_exp_0", "Gene", 
+                                     choices = NULL, 
+                                     multiple = TRUE,
+                                     options = list(maxItems = 4, placeholder = "Select genes...")),
                       column(
                         width = 2,
                         class = "switch_exp",

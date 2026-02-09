@@ -1,4 +1,66 @@
 # Helper function for creating safe cache keys
+# Helper functions for server-side operations
+
+# Function to create multi-gene violin plots
+create_multi_gene_plot <- function(gene_data_list, x_col) {
+    # gene_data_list is a named list where each element is a data frame for one gene
+    # Each data frame should have columns: gene_expr, <x_col>, gene_name
+    
+    if (length(gene_data_list) == 0) {
+        return(plotly::plot_ly() %>% 
+               plotly::add_trace(x = c(), y = c(), type = 'scatter', mode = 'markers') %>%
+               plotly::layout(title = "", showlegend = FALSE))
+    }
+    
+    # Create subplot layout based on number of genes
+    n_genes <- length(gene_data_list)
+    
+    if (n_genes == 2) {
+        nrows <- 1
+        ncols <- 2
+    } else if (n_genes == 3) {
+        nrows <- 1
+        ncols <- 3
+    } else {
+        nrows <- 2
+        ncols <- 2
+    }
+    
+    # Create individual plots for each gene
+    plot_list <- list()
+    
+    for (i in seq_along(gene_data_list)) {
+        gene_name <- names(gene_data_list)[i]
+        gene_df <- gene_data_list[[i]]
+        
+        # Create plot for this gene with title
+        p <- tryCatch({
+            gene_exp_plot(gene_df, x_col, add_title = gene_name)
+        }, error = function(e) {
+            plotly::plot_ly() %>% 
+                plotly::add_trace(x = c(), y = c(), type = 'scatter', mode = 'markers') %>%
+                plotly::layout(title = paste(gene_name, "(error)"))
+        })
+        
+        plot_list[[i]] <- p
+    }
+    
+    # Combine into subplot
+    subplot_args <- c(plot_list, list(
+        nrows = nrows,
+        shareX = TRUE,
+        shareY = FALSE,
+        titleX = TRUE,
+        titleY = TRUE,
+        margin = 0.05
+    ))
+    
+    combined_plot <- do.call(plotly::subplot, subplot_args)
+    
+    return(combined_plot)
+}
+
+# Cache key generator
 make_cache_key <- function(...) {
     args <- list(...)
     parts <- lapply(args, function(x) {
@@ -345,12 +407,24 @@ get_gene_choices <- function(genes_df, checked) {
 
 # Get gene id
 get_gene_id <- function(gene_name, gene_names) {
-    if (is.null(gene_name) || is.na(gene_name) || gene_name == "") {
+    # Handle NULL or empty input
+    if (is.null(gene_name) || length(gene_name) == 0) {
+        return(NA)
+    }
+    
+    # Handle vector input - return only the first match
+    if (length(gene_name) > 1) {
+        gene_name <- gene_name[1]
+    }
+    
+    # Handle NA or empty string
+    if (is.na(gene_name) || gene_name == "") {
         return(NA)
     }
 
     if (gene_name %in% gene_names$name) {
-        return(gene_names$gene[gene_names$name == gene_name])
+        result <- gene_names$gene[gene_names$name == gene_name]
+        return(result[1])  # Return only first match
     } else {
         return(NA)
     }
@@ -793,7 +867,7 @@ var_genes_plot <- function(df, study, top_n = 10) {
 
 
 # Generate violin plot with jittered points overlay
-gene_exp_plot <- function(data, x_col) {
+gene_exp_plot <- function(data, x_col, add_title = NULL) {
     actual_col <- colnames(data)[tolower(colnames(data)) == tolower(x_col)]
 
     if (length(actual_col) == 0) {
@@ -956,6 +1030,11 @@ gene_exp_plot <- function(data, x_col) {
                 title = "",
                 type = "category"
             ),
+            title = if (!is.null(add_title)) {
+                list(text = add_title, font = list(size = 14))
+            } else {
+                NULL
+            },
             showlegend = FALSE
         )
 
@@ -1022,17 +1101,45 @@ build_plot_slim <- function(meta, full_mat, gene_exp, group_col, extra_cols = NU
     # Extract gene expression vector from the full matrix using row_idx
     row_idx <- attr(meta, "row_idx")
     
-    if (!is.null(full_mat) && !is.null(gene_exp) && gene_exp %in% colnames(full_mat)) {
-        if (!is.null(row_idx) && length(row_idx) > 0) {
-            # Use row indices - this is the correct filtered subset
-            gene_vec <- full_mat[[gene_exp]][row_idx]
-        } else {
-            # Fallback: use sequential indices (this might be wrong for filtered data)
-            gene_vec <- full_mat[[gene_exp]]
-            if (nrow(slim) > 0) gene_vec <- gene_vec[seq_len(nrow(slim))]
+    # Handle multiple genes (for averaging)
+    if (length(gene_exp) > 1) {
+        # Multiple genes - calculate average
+        gene_matrices <- list()
+        
+        for (gene_id in gene_exp) {
+            if (!is.null(full_mat) && gene_id %in% colnames(full_mat)) {
+                if (!is.null(row_idx) && length(row_idx) > 0) {
+                    gene_vec <- full_mat[[gene_id]][row_idx]
+                } else {
+                    gene_vec <- full_mat[[gene_id]]
+                    if (nrow(slim) > 0) gene_vec <- gene_vec[seq_len(nrow(slim))]
+                }
+                gene_matrices[[gene_id]] <- gene_vec
+            }
         }
+        
+        # Calculate average if we have any valid genes
+        if (length(gene_matrices) > 0) {
+            gene_matrix <- do.call(cbind, gene_matrices)
+            gene_vec <- rowMeans(gene_matrix, na.rm = TRUE)
+        } else {
+            gene_vec <- rep(NA, nrow(slim))
+        }
+        
     } else {
-        gene_vec <- rep(NA, nrow(slim))
+        # Single gene - original logic
+        if (!is.null(full_mat) && !is.null(gene_exp) && gene_exp %in% colnames(full_mat)) {
+            if (!is.null(row_idx) && length(row_idx) > 0) {
+                # Use row indices - this is the correct filtered subset
+                gene_vec <- full_mat[[gene_exp]][row_idx]
+            } else {
+                # Fallback: use sequential indices (this might be wrong for filtered data)
+                gene_vec <- full_mat[[gene_exp]]
+                if (nrow(slim) > 0) gene_vec <- gene_vec[seq_len(nrow(slim))]
+            }
+        } else {
+            gene_vec <- rep(NA, nrow(slim))
+        }
     }
 
     # CRITICAL FIX: Ensure gene expression vector length matches slim dataframe

@@ -210,7 +210,9 @@ subBlock <- function(i) {
                 selectizeInput(
                     paste0("genes_exp_", i),
                     label = "Gene Name",
-                    choices = NULL
+                    choices = NULL,
+                    multiple = TRUE,
+                    options = list(maxItems = 4, placeholder = "Select genes...")
                 ),
                 column(
                     width = 2,
