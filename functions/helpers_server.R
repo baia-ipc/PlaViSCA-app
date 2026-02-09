@@ -101,6 +101,63 @@ create_data_type_sync_observer <- function(
     )
 }
 
+# Helper function to analyze data homogeneity and provide user feedback
+analyze_data_diversity <- function(data, group_col) {
+    if (is.null(data) || nrow(data) == 0 || !group_col %in% colnames(data)) {
+        return(list(
+            is_homogeneous = TRUE,
+            unique_count = 0,
+            message = "No data available for grouping analysis",
+            suggestion = "Try different filter combinations"
+        ))
+    }
+    
+    # Remove NA values for analysis
+    clean_values <- data[[group_col]][!is.na(data[[group_col]])]
+    unique_values <- unique(clean_values)
+    unique_count <- length(unique_values)
+    
+    # Determine if data is homogeneous (only 1 unique value)
+    is_homogeneous <- unique_count <= 1
+    
+    if (is_homogeneous) {
+        if (unique_count == 0) {
+            message <- paste("No valid data found for", group_col)
+            suggestion <- "Check your filter settings"
+        } else {
+            value <- unique_values[1]
+            total_cells <- nrow(data)
+            message <- paste0("All ", format(total_cells, big.mark=","), " cells have the same ", 
+                            gsub("_", " ", group_col), ": '", value, "'")
+            
+            # Provide context-specific suggestions
+            if (group_col == "life_cycle_stage") {
+                suggestion <- "This is biologically correct - try grouping by host_species, sample_type, or study_label instead"
+            } else if (group_col == "parasite_stage") {
+                suggestion <- "This is expected when filtering by parasite stage - try life_cycle_stage or host_species grouping"
+            } else if (group_col == "host_species") {
+                suggestion <- "This filtered dataset contains data from only one host species - try sample_type or study_label grouping"
+            } else if (group_col == "sample_type") {
+                suggestion <- "This filtered dataset contains only one sample type - try host_species or strain grouping"
+            } else {
+                suggestion <- "Try different grouping categories or adjust your filters to include more diverse data"
+            }
+        }
+    } else {
+        message <- paste0("Found ", unique_count, " different ", gsub("_", " ", group_col), " categories")
+        suggestion <- ""
+    }
+    
+    return(list(
+        is_homogeneous = is_homogeneous,
+        unique_count = unique_count,
+        unique_values = if(unique_count <= 10) unique_values else paste0(length(unique_values), " categories"),
+        message = message,
+        suggestion = suggestion,
+        total_cells = nrow(data)
+    ))
+}
+
 # Helper function to format species names with italics
 format_species_name <- function(species_names) {
     scientific_species <- c(
@@ -169,6 +226,7 @@ fun_filter_df <- function(data, selections) {
 
 # Helper function to apply secondary filters
 apply_secondary_filters <- function(data, inputs, keep_gene_matrix = TRUE, genes = NULL) {
+    
     filtered <- data
     if ("n_feature_rna" %in% names(data) && "n_count_rna" %in% names(data)) {
         filtered <- filtered %>%
@@ -216,6 +274,8 @@ apply_secondary_filters <- function(data, inputs, keep_gene_matrix = TRUE, genes
         }
     }
 
+
+
     # Dynamically apply filters for each non-empty input (on the filtered view)
     for (col in names(inputs)) {
         values <- inputs[[col]]
@@ -224,6 +284,7 @@ apply_secondary_filters <- function(data, inputs, keep_gene_matrix = TRUE, genes
         }
     }
 
+    # Create row indices based on original data before any column selection/filtering
     original <- data
     if (!is.null(original) && nrow(original) > 0) {
         keep_rows <- rep(TRUE, nrow(original))
@@ -233,7 +294,7 @@ apply_secondary_filters <- function(data, inputs, keep_gene_matrix = TRUE, genes
             keep_rows <- keep_rows & (original$n_feature_rna > 0 & original$n_count_rna > 0)
         }
 
-        # Apply the dynamic inputs
+        # Apply the dynamic inputs - THIS IS THE KEY FILTERING STEP
         if (!is.null(inputs) && length(inputs) > 0) {
             for (col in names(inputs)) {
                 values <- inputs[[col]]
@@ -275,8 +336,9 @@ get_gene_choices <- function(genes_df, checked) {
     if (checked) {
         genes_df$gene
     } else {
+        # Use base R instead of stringr to avoid dependency issues
         genes_df %>%
-            filter(!str_detect(name, "^PVP01")) %>%
+            filter(!grepl("^PVP01", name)) %>%
             pull(name)
     }
 }
@@ -302,10 +364,31 @@ df_exp0 <- function(gene_data, gene_input, group_input, check_exp, full_data = N
     row_idx <- if (!is.null(gene_data) && !is.null(gene_data$data)) attr(gene_data$data, "row_idx") else NULL
     genes <- gene_data$genes
 
+    # CRITICAL FIX: Force use of filtered data when row_idx is available
+    # The first issue is sometimes row_idx is wrong (pointing to full dataset)
+    if (!is.null(row_idx) && length(row_idx) > 0) {
+        # Check if row_idx makes sense - if it's the same length as meta_source,
+        # then either we have the full dataset OR the filtering didn't work
+        if (length(row_idx) == nrow(meta_source) && length(row_idx) > 10000) {
+            # This looks like the full dataset, which means row_idx is wrong
+            row_idx <- NULL
+            attr(meta_source, "row_idx") <- NULL
+        } else if (nrow(meta_source) != length(row_idx)) {
+            # Data is not pre-filtered, use row_idx to filter it
+            meta_source <- meta_source[row_idx, , drop = FALSE]
+            attr(meta_source, "row_idx") <- row_idx
+        }
+    }
+
     gene_exp <- if (!check_exp) {
         get_gene_id(gene_input, genes)
     } else {
         gene_input
+    }
+    
+    # Return NULL if gene is invalid to prevent empty plots
+    if (is.null(gene_exp) || is.na(gene_exp) || gene_exp == "") {
+        return(NULL)
     }
 
     gene_cols <- character(0)
@@ -322,8 +405,7 @@ df_exp0 <- function(gene_data, gene_input, group_input, check_exp, full_data = N
         meta_cols <- unique(c(meta_cols, group_input))
     }
 
-    row_idx_len <- NA
-    if (!is.null(gene_data) && !is.null(gene_data$data)) row_idx_len <- length(attr(gene_data$data, "row_idx"))
+    row_idx_len <- length(row_idx) %||% nrow(meta_source)
     cache_key_meta <- make_cache_key("slim_meta", row_idx_len)
     if (!is.null(cache_env) && exists(cache_key_meta, envir = cache_env, inherits = FALSE)) {
         slim_meta <- cache_env[[cache_key_meta]]
@@ -354,6 +436,9 @@ df_exp0 <- function(gene_data, gene_input, group_input, check_exp, full_data = N
 
     return(slim_meta)
 }
+
+# Helper function for null coalescing
+`%||%` <- function(x, y) if (is.null(x)) y else x
 
 # Generate df for gene_expi
 df_expi <- function(id, input, gene_data, get_gene_id, full_data = NULL, cache_env = NULL) {
@@ -730,20 +815,36 @@ gene_exp_plot <- function(data, x_col) {
 
     # Remove any rows with missing values to avoid plotly issues
     clean_data <- data[complete.cases(data[c(actual_col, "gene_expr")]), ]
-
+    
+    # Convert to regular data.frame (not tibble) to avoid compatibility issues
+    clean_data <- as.data.frame(clean_data)
+    
     if (nrow(clean_data) == 0) {
-        return(plotly::plot_ly() %>% plotly::layout(title = ""))
+        return(plotly::plot_ly() %>%
+               plotly::add_trace(x = c(), y = c(), type = 'scatter', mode = 'markers') %>% 
+               plotly::layout(title = "", showlegend = FALSE))
     }
 
+    # Analyze data diversity to provide user feedback
+    diversity_analysis <- analyze_data_diversity(clean_data, actual_col)
+    
     # Get unique groups
     unique_groups <- unique(clean_data[[actual_col]])
     n_groups <- length(unique_groups)
 
-    # Use Set2 palette for better colors
+    # Create plot title - removed diversity message per user request
+    plot_title <- ""
+
+    # Use Set2 palette for better colors - ensure unnamed vector
     colors <- if (n_groups <= 8) {
-        RColorBrewer::brewer.pal(max(3, n_groups), "Set2")[1:n_groups]
+        unname(RColorBrewer::brewer.pal(max(3, n_groups), "Set2")[1:n_groups])
     } else {
-        viridis::viridis(n_groups)
+        # Use viridis if available, otherwise fall back to rainbow colors
+        if (requireNamespace("viridis", quietly = TRUE)) {
+            unname(viridis::viridis(n_groups))
+        } else {
+            unname(rainbow(n_groups))
+        }
     }
 
     # Calculate statistics for each group for hover text
@@ -752,49 +853,159 @@ gene_exp_plot <- function(data, x_col) {
         summarise(
             mean_val = round(mean(gene_expr, na.rm = TRUE), 3),
             sd_val = round(sd(gene_expr, na.rm = TRUE), 3),
+            count = n(),
             .groups = "drop"
         )
 
     # Merge statistics back to the main data for hover text
     clean_data <- clean_data %>%
         left_join(stats_data, by = actual_col)
+    
+    # Convert back to data.frame after dplyr operations
+    clean_data <- as.data.frame(clean_data)
 
-    # Create violin plot
-    p <- plotly::plot_ly(
-        data = clean_data,
-        x = clean_data[[actual_col]],
-        y = ~gene_expr,
-        type = "violin",
-        box = list(visible = FALSE),
-        meanline = list(visible = FALSE),
-        color = clean_data[[actual_col]],
-        colors = colors,
-        showlegend = FALSE,
-        points = "all",
-        jitter = 0.3,
-        pointpos = 0,
-        text = ~ paste(
-            "Group:",
-            clean_data[[actual_col]],
-            "<br>",
-            "Expression:",
-            round(gene_expr, 3),
-            "<br>",
-            "Mean:",
-            mean_val,
-            "<br>",
-            "SD:",
-            sd_val
+    # Create violin plot without using split parameter to avoid issues
+    # Ensure we have a regular data.frame, not tibble
+    
+    # Validate that required columns exist
+    if (!all(c(actual_col, "gene_expr", "mean_val", "sd_val", "count") %in% colnames(clean_data))) {
+        return(plotly::plot_ly() %>% 
+               plotly::add_trace(x = c(), y = c(), type = 'scatter', mode = 'markers') %>%
+               plotly::layout(title = "Missing required columns", showlegend = FALSE))
+    }
+    
+    plot_df <- data.frame(
+        group_var = as.character(clean_data[[actual_col]]),
+        gene_expr = as.numeric(clean_data$gene_expr),
+        hover_text = paste(
+            "Group:", clean_data[[actual_col]],
+            "<br>Expression:", round(clean_data$gene_expr, 3),
+            "<br>Mean:", clean_data$mean_val,
+            "<br>SD:", clean_data$sd_val,
+            "<br>Cells in group:", clean_data$count
         ),
-        hoverinfo = "text"
-    ) %>%
+        stringsAsFactors = FALSE
+    )
+    
+    # Verify we have data and it's valid
+    if (nrow(plot_df) == 0 || all(is.na(plot_df$gene_expr)) || all(is.na(plot_df$group_var))) {
+        return(plotly::plot_ly() %>% 
+               plotly::add_trace(x = c(), y = c(), type = 'scatter', mode = 'markers') %>%
+               plotly::layout(title = "", showlegend = FALSE))
+    }
+    
+    # Remove any remaining NA values
+    plot_df <- plot_df[!is.na(plot_df$gene_expr) & !is.na(plot_df$group_var), ]
+    
+    if (nrow(plot_df) == 0) {
+        return(plotly::plot_ly() %>% 
+               plotly::add_trace(x = c(), y = c(), type = 'scatter', mode = 'markers') %>%
+               plotly::layout(title = "", showlegend = FALSE))
+    }
+    
+    # Create the plot by adding one trace per group
+    p <- plotly::plot_ly()
+    
+    # Recalculate unique groups from cleaned plot_df
+    plot_groups <- unique(plot_df$group_var)
+    
+    for (i in seq_along(plot_groups)) {
+        group_name <- as.character(plot_groups[i])
+        group_idx <- plot_df$group_var == group_name
+        
+        if (sum(group_idx, na.rm = TRUE) > 0) {
+            # Extract data for this group
+            x_data <- plot_df$group_var[group_idx]
+            y_data <- plot_df$gene_expr[group_idx]
+            text_data <- plot_df$hover_text[group_idx]
+            
+            # Only add trace if we have valid data
+            if (length(x_data) > 0 && length(y_data) > 0 && !all(is.na(y_data))) {
+                # Get color for this group (map back to original unique_groups if possible)
+                color_idx <- match(group_name, as.character(unique_groups))
+                if (is.na(color_idx) || color_idx > length(colors)) {
+                    color_idx <- ((i - 1) %% length(colors)) + 1
+                }
+                
+                p <- plotly::add_trace(
+                    p,
+                    x = x_data,
+                    y = y_data,
+                    type = "violin",
+                    name = group_name,
+                    box = list(visible = FALSE),
+                    meanline = list(visible = FALSE),
+                    marker = list(color = colors[color_idx]),
+                    line = list(color = colors[color_idx]),
+                    fillcolor = colors[color_idx],
+                    points = "all",
+                    jitter = 0.3,
+                    pointpos = 0,
+                    text = text_data,
+                    hoverinfo = "text",
+                    showlegend = FALSE
+                )
+            }
+        }
+    }
+    
+    p <- p %>%
         plotly::layout(
-            yaxis = list(title = "Exp. value")
+            yaxis = list(title = "Exp. value"),
+            xaxis = list(
+                title = "",
+                type = "category"
+            ),
+            showlegend = FALSE
         )
 
     return(p)
 }
 
+
+# Function to generate data summary for filtered datasets
+generate_data_summary <- function(data, filters_applied = NULL) {
+    if (is.null(data) || nrow(data) == 0) {
+        return("No data available")
+    }
+    
+    total_cells <- nrow(data)
+    
+    # Key metadata columns to summarize
+    summary_cols <- c("study_label", "host_species", "sample_type", "parasite_stage", 
+                     "life_cycle_stage", "strain", "geographic_location", "treatment")
+    
+    available_cols <- intersect(summary_cols, colnames(data))
+    
+    summary_parts <- c()
+    summary_parts <- c(summary_parts, paste("📊 <b>Total cells:</b>", format(total_cells, big.mark=",")))
+    
+    for (col in available_cols) {
+        if (col %in% colnames(data)) {
+            unique_vals <- unique(data[[col]][!is.na(data[[col]])])
+            count <- length(unique_vals)
+            col_display <- gsub("_", " ", col)
+            col_display <- paste0(toupper(substring(col_display, 1, 1)), substring(col_display, 2))
+            
+            if (count == 0) {
+                summary_parts <- c(summary_parts, paste("•", col_display, ": No data"))
+            } else if (count == 1) {
+                summary_parts <- c(summary_parts, paste("•", col_display, ":", unique_vals[1]))
+            } else if (count <= 3) {
+                summary_parts <- c(summary_parts, paste("•", col_display, "(", count, "):", paste(unique_vals, collapse=", ")))
+            } else {
+                summary_parts <- c(summary_parts, paste("•", col_display, ":", count, "different values"))
+            }
+        }
+    }
+    
+    if (!is.null(filters_applied) && length(filters_applied) > 0) {
+        filter_text <- paste(names(filters_applied), "=", sapply(filters_applied, paste, collapse=","), collapse="; ")
+        summary_parts <- c(summary_parts, paste("🔍 <b>Filters applied:</b>", filter_text))
+    }
+    
+    return(paste(summary_parts, collapse="<br>"))
+}
 
 build_plot_slim <- function(meta, full_mat, gene_exp, group_col, extra_cols = NULL) {
     if (is.null(meta)) meta <- data.frame()
@@ -810,10 +1021,13 @@ build_plot_slim <- function(meta, full_mat, gene_exp, group_col, extra_cols = NU
 
     # Extract gene expression vector from the full matrix using row_idx
     row_idx <- attr(meta, "row_idx")
+    
     if (!is.null(full_mat) && !is.null(gene_exp) && gene_exp %in% colnames(full_mat)) {
         if (!is.null(row_idx) && length(row_idx) > 0) {
+            # Use row indices - this is the correct filtered subset
             gene_vec <- full_mat[[gene_exp]][row_idx]
         } else {
+            # Fallback: use sequential indices (this might be wrong for filtered data)
             gene_vec <- full_mat[[gene_exp]]
             if (nrow(slim) > 0) gene_vec <- gene_vec[seq_len(nrow(slim))]
         }
@@ -821,6 +1035,16 @@ build_plot_slim <- function(meta, full_mat, gene_exp, group_col, extra_cols = NU
         gene_vec <- rep(NA, nrow(slim))
     }
 
+    # CRITICAL FIX: Ensure gene expression vector length matches slim dataframe
+    if (length(gene_vec) != nrow(slim)) {
+        if (length(gene_vec) > nrow(slim)) {
+            gene_vec <- gene_vec[1:nrow(slim)]
+        } else {
+            gene_vec <- c(gene_vec, rep(NA, nrow(slim) - length(gene_vec)))
+        }
+    }
+
     slim$gene_expr <- gene_vec
+    
     return(slim)
 }

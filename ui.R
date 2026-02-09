@@ -487,6 +487,7 @@ ui <- fluidPage(
                       )
                     )
                   ),
+                  # Data summary information panel
                   fluidRow(
                     width = 12,
                     withSpinner(

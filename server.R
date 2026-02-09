@@ -3,9 +3,35 @@ library(shinyjs)
 library(DT)
 library(plotly)
 library(RColorBrewer)
-library(tidyverse)
+suppressPackageStartupMessages(library(conflicted))  # Load BEFORE tidyverse
+suppressPackageStartupMessages(library(tidyverse))
 library(later)
-library(writexl)
+library(writexl)  # For Excel file writing
+
+# Resolve namespace conflicts - set these AFTER loading packages
+suppressMessages({
+  conflict_prefer("filter", "dplyr")
+  conflict_prefer("lag", "dplyr")
+  conflict_prefer("show", "methods")
+  conflict_prefer("layout", "plotly")
+})
+
+# Helper function to create empty plots without warnings
+create_empty_plot <- function(title = "") {
+  plotly::plot_ly() %>%
+    plotly::add_trace(
+      x = c(), 
+      y = c(), 
+      type = 'scatter', 
+      mode = 'markers'
+    ) %>%
+    plotly::layout(
+      title = title,
+      xaxis = list(title = ""),
+      yaxis = list(title = ""),
+      showlegend = FALSE
+    )
+}
 
 server <- function(input, output, session) {
   sessionData <- new.env(parent = emptyenv())
@@ -334,10 +360,12 @@ server <- function(input, output, session) {
       }
     )
 
-    result <- list(
-      data = filtered_meta,
-      genes = gene_data()$genes
-    )
+        result <- list(
+          data = filt_meta,
+          full = full_df,
+          row_idx = row_idx,
+          genes = gene_data()$genes  # Use gene_data() instead of filtered_gene_data()
+        )
 
     # Cache the result
     sessionData[[cache_key]] <- result
@@ -904,7 +932,7 @@ server <- function(input, output, session) {
 
   # Gene Expression tabset - with optimized caching and debouncing
   filtered_gene_exp_data <- reactive({
-    req(filtered_gene_data())
+    req(gene_data())  # Use raw gene_data() instead of filtered_gene_data()
 
     current_inputs <- list(
       study_label = input$study_label_exp,
@@ -924,16 +952,17 @@ server <- function(input, output, session) {
     if (exists(cache_key, envir = sessionData, inherits = FALSE)) {
       return(sessionData[[cache_key]])
     }
+
     tryCatch(
       {
         # Get the full expression matrix from the cached_data storage where
-        full_df <- if (!is.null(cached_data[[get_current_data_type()]])) cached_data[[get_current_data_type()]] else filtered_gene_data()$data
+        full_df <- if (!is.null(cached_data[[get_current_data_type()]])) cached_data[[get_current_data_type()]] else gene_data()$data
 
         filt_meta <- apply_secondary_filters(
-          filtered_gene_data()$data,
+          gene_data()$data,  # Use raw gene_data() instead of filtered_gene_data()
           current_inputs,
           keep_gene_matrix = FALSE,
-          genes = if (!is.null(filtered_gene_data()$genes)) filtered_gene_data()$genes$gene else NULL
+          genes = if (!is.null(gene_data()$genes)) gene_data()$genes$gene else NULL
         )
 
         # Ensure row indices are available on the metadata result
@@ -941,7 +970,7 @@ server <- function(input, output, session) {
 
         result <- list(
           data = filt_meta,
-          genes = filtered_gene_data()$genes,
+          genes = gene_data()$genes,  # FIXED: Use gene_data() instead of filtered_gene_data()
           full = full_df,
           row_idx = row_idx
         )
@@ -1025,18 +1054,21 @@ server <- function(input, output, session) {
       input$sc_technology_exp
     )
 
-    # Check cache first for instant gene switching - use exists() for safety
+    # Check cache first for instant gene switching
     if (exists(cache_key, envir = sessionData, inherits = FALSE)) {
       return(sessionData[[cache_key]])
     }
 
     # Compute result efficiently
+    # CRITICAL: Check the actual data being passed to df_exp0
+    filtered_data <- filtered_gene_exp_data()
+
     result <- tryCatch(
       {
         df_exp0(
-          gene_data = filtered_gene_exp_data(),
-          gene_input = input$genes_exp_0,
-          group_input = input$group_exp,
+          filtered_gene_exp_data(),
+          input$genes_exp_0,
+          input$group_exp,
           check_exp = input$check_exp_0,
           full_data = filtered_gene_exp_data()$full
         )
@@ -1045,20 +1077,7 @@ server <- function(input, output, session) {
         return(NULL)
       }
     )
-
-    # Cache only successful results
-    if (!is.null(result) && nrow(result) > 0) {
-      sessionData[[cache_key]] <- result
-    }
-    try(
-      {
-        if (!is.null(result)) {
-          df_gene0(result)
-        }
-      },
-      silent = TRUE
-    )
-
+    
     return(result)
   }) %>% debounce(300)  # Add 300ms debounce to reduce unnecessary re-renders
 
@@ -1097,15 +1116,17 @@ server <- function(input, output, session) {
 
     # Get choices based on checkbox state
     choices <- get_gene_choices(gene_data()$genes, input$check_exp_0)
+    
+    # Ensure we always have a valid selection
+    default_selection <- if (length(choices) > 0) choices[1] else NULL
 
     tryCatch(
       {
         updateSelectizeInput(
           session,
           "genes_exp_0",
-          label = if (isTRUE(input$check_exp_0)) "Gene ID" else "Gene name",
           choices = choices,
-          server = TRUE
+          selected = default_selection
         )
       },
       error = function(e) {
@@ -1114,66 +1135,99 @@ server <- function(input, output, session) {
     )
   })
 
-  # df_exp_0 when the user selects a gene/group - with improved caching
+  # Data summary output for gene expression tab
+  output$gene_exp_data_summary <- renderUI({
+    # Summary display removed per user request - keeping terminal debug only
+    return(HTML(""))
+  })
+
+  # df_exp_0 when the user selects a gene/group - SIMPLIFIED VERSION
   output$gene_exp_plotly <- renderPlotly({
-    req(input$genes_exp_0, input$group_exp)
+    # Validate inputs
+    if (is.null(input$genes_exp_0) || is.null(input$group_exp)) {
+      return(create_empty_plot("Please select a gene and grouping option"))
+    }
 
     if (global_loading()) {
-      return(plotly::plot_ly() %>% plotly::layout(title = "Loading..."))
+      return(create_empty_plot("Loading..."))
     }
 
-    # Create cache key first to check if plot already exists
-    plot_cache_key <- make_cache_key(
-      "gene_exp_plot",
-      input$genes_exp_0,
-      input$group_exp,
-      input$study_label_exp,
-      input$host_species_exp,
-      input$life_cycle_stage_exp,
-      input$treatment_exp,
-      input$parasite_stage_exp,
-      input$sample_type_exp,
-      input$strain_exp,
-      input$hour_post_invasion_exp,
-      input$sequencer_exp,
-      input$sc_technology_exp,
-      input$check_exp_0,
-      get_current_data_type()
-    )
-
-    # Return cached plot immediately if available
-    if (exists(plot_cache_key, envir = sessionData, inherits = FALSE)) {
-      return(sessionData[[plot_cache_key]])
-    }
-
-    plot_data <- df_gene0()
-    if (is.null(plot_data)) {
-      plot_data <- df_exp_0()
-      try(
-        {
-          df_gene0(plot_data)
-        },
-        silent = TRUE
-      )
-    }
-    req(plot_data)
-
-    if (nrow(plot_data) == 0 || !"gene_expr" %in% names(plot_data)) {
-      return(plotly::plot_ly() %>% plotly::layout(title = "No data available"))
-    }
-
-    result <- tryCatch(
-      {
-        group <- tolower(input$group_exp)
-        gene_exp_plot(plot_data, group)
-      },
-      error = function(e) {
-        plotly::plot_ly() %>% plotly::layout(title = paste("Error:", e$message))
+    # DIRECT APPROACH: Get fresh data every time, bypass all caching
+    tryCatch({
+      # 1. Get the raw data
+      raw_data <- gene_data()
+      if (is.null(raw_data) || is.null(raw_data$data)) {
+        return(create_empty_plot("Data not loaded"))
       }
-    )
+      
+      # 2. Apply parasite stage filter if selected
+      filtered_data <- raw_data$data
+      if (!is.null(input$parasite_stage_exp) && length(input$parasite_stage_exp) > 0) {
+        # Filter for any selected parasite stage(s)
+        filtered_data <- filtered_data[filtered_data$parasite_stage %in% input$parasite_stage_exp, ]
+      }
+      
+      # 3. Get gene expression data
+      gene_name <- input$genes_exp_0
+      gene_id <- NULL
+      if (!is.null(raw_data$genes)) {
+        gene_match <- raw_data$genes[raw_data$genes$name == gene_name, ]
+        if (nrow(gene_match) > 0) {
+          gene_id <- gene_match$gene[1]
+        }
+      }
+      
+      if (is.null(gene_id)) {
+        return(create_empty_plot(paste("Gene not found:", gene_name)))
+      }
+      
 
-    if (!is.null(result)) sessionData[[plot_cache_key]] <- result
-    return(result)
+      
+      # 4. Get full expression matrix and extract gene column
+      full_matrix <- raw_data$data  # This should have both metadata and expression data
+      if (!(gene_id %in% colnames(full_matrix))) {
+        return(create_empty_plot(paste("Gene expression data not found:", gene_id)))
+      }
+      
+      # 5. Create plot data by matching filtered metadata with expression data
+      row_indices <- match(rownames(filtered_data), rownames(full_matrix))
+      valid_indices <- !is.na(row_indices)
+      
+      if (sum(valid_indices) == 0) {
+        return(create_empty_plot("No matching expression data found"))
+      }
+      
+      # Extract expression values for filtered cells
+      gene_expression <- full_matrix[[gene_id]][row_indices[valid_indices]]
+      group_values <- filtered_data[[input$group_exp]][valid_indices]
+      
+      # Create final plot data
+      plot_data <- data.frame(
+        gene_expr = gene_expression,
+        group = group_values,
+        stringsAsFactors = FALSE
+      )
+      names(plot_data)[2] <- input$group_exp  # Set correct column name for grouping
+      
+      # Remove NA values
+      plot_data <- plot_data[!is.na(plot_data$gene_expr) & !is.na(plot_data[[input$group_exp]]), ]
+      
+
+      
+      if (nrow(plot_data) == 0) {
+        return(create_empty_plot("No data available for selected filters"))
+      }
+      
+      # 6. Create the plot
+      group_col <- tolower(input$group_exp)
+      result <- gene_exp_plot(plot_data, group_col)
+
+      
+      return(result)
+      
+    }, error = function(e) {
+      return(create_empty_plot(paste("Error:", e$message)))
+    })
   })
 
   ## gene expression link
@@ -1185,12 +1239,17 @@ server <- function(input, output, session) {
 
   # Initialize gene choices for the first plot
   observe({
-    req(filtered_gene_exp_data())
-    choices <- get_gene_choices(filtered_gene_exp_data()$genes, FALSE)
+    req(gene_data())  # Use unfiltered gene_data() instead of filtered_gene_exp_data()
+    choices <- get_gene_choices(gene_data()$genes, FALSE)
+    
+    # Ensure we always have a valid selection
+    default_selection <- if (length(choices) > 0) choices[1] else NULL
+    
     updateSelectizeInput(
       session,
       "genes_exp_0",
       choices = choices,
+      selected = default_selection,  # Add default selection
       server = TRUE
     )
   })
@@ -1289,7 +1348,7 @@ server <- function(input, output, session) {
               )
 
               if (is.null(static_df) || nrow(static_df) == 0) {
-                return(plotly::plot_ly() %>% plotly::layout(title = "No data"))
+                return(create_empty_plot("No data"))
               }
 
               gene_exp_plot(static_df, tolower(cur_group))
@@ -1362,7 +1421,7 @@ server <- function(input, output, session) {
               )
 
               if (is.null(static_df) || nrow(static_df) == 0) {
-                return(plotly::plot_ly() %>% plotly::layout(title = "No data"))
+                return(create_empty_plot("No data"))
               }
 
               gene_exp_plot(static_df, tolower(cur_group))
@@ -2099,19 +2158,30 @@ server <- function(input, output, session) {
               incProgress(0.7, detail = "Saving file...")
               
               # Create Excel file with two sheets
-              write_xlsx(
+              writexl::write_xlsx(
                 list(
-                  "Data" = plot_data,
+                  "Expression Data" = plot_data,
                   "Metadata" = metadata
                 ),
                 path = file
               )
               
               incProgress(1, detail = "Download complete")
+            } else {
+              stop("No data available for the selected gene and filters")
             }
+          } else {
+            stop("Please select a gene and grouping option")
           }
         }, error = function(e) {
-          warning(paste("Error downloading plot data:", e$message))
+          # Create a simple error Excel file instead of failing completely
+          error_data <- data.frame(
+            Error = "Download failed",
+            Message = e$message,
+            Suggestion = "Please try again or contact support",
+            stringsAsFactors = FALSE
+          )
+          writexl::write_xlsx(list("Error" = error_data), path = file)
         })
       })
     }
@@ -2207,9 +2277,9 @@ server <- function(input, output, session) {
                   incProgress(0.7, detail = "Saving file...")
                   
                   # Create Excel file with two sheets
-                  write_xlsx(
+                  writexl::write_xlsx(
                     list(
-                      "Data" = plot_data,
+                      "Expression Data" = plot_data,
                       "Metadata" = metadata
                     ),
                     path = file

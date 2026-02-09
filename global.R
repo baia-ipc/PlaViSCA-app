@@ -1,8 +1,14 @@
+# Load required libraries for global scope
+library(memoise)
+suppressPackageStartupMessages(library(conflicted))
+
+# Resolve namespace conflicts BEFORE sourcing function files
+suppressMessages(conflict_prefer("layout", "plotly"))
+
 # sourcer function
 source("functions/helpers_server.R")
 source("functions/helpers_UI.R")
 source("functions/embedding_plots.R")
-library(memoise)
 
 # Define a function for memoized data loading.
 load_data <- memoise(function(file_path) {
