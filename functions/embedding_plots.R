@@ -11,7 +11,16 @@ y_col <- function(check_input, x_col, unintegrated, integrated) {
 # Generate color column based on input option
 get_color_column <- function(color_type, gene_input, gene_data_obj) {
     switch(color_type,
-        "genes" = get_gene_id(gene_input, gene_data_obj),
+        "genes" = {
+            # Handle multiple gene selection by averaging
+            if (length(gene_input) > 1) {
+                # For multiple genes, return a special identifier that signals averaging
+                # The actual averaging will be handled in the server logic
+                paste0("multi_gene_avg_", length(gene_input))
+            } else {
+                get_gene_id(gene_input, gene_data_obj)
+            }
+        },
         "cca_snn" = gene_input,
         color_type
     )

@@ -268,7 +268,7 @@ ui <- fluidPage(
             id = "gene_snn_ui",
             column(
               width = 7,
-              selectizeInput("genes_n", "Gene", choices = "")
+              selectizeInput("genes_n", "Gene", choices = "", multiple = TRUE, options = list(maxItems = 4))
             ),
             column(
               id = "switch_id",

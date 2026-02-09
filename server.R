@@ -3,10 +3,10 @@ library(shinyjs)
 library(DT)
 library(plotly)
 library(RColorBrewer)
-suppressPackageStartupMessages(library(conflicted))  # Load BEFORE tidyverse
+suppressPackageStartupMessages(library(conflicted))
 suppressPackageStartupMessages(library(tidyverse))
 library(later)
-library(writexl)  # For Excel file writing
+library(writexl)
 
 # Resolve namespace conflicts - set these AFTER loading packages
 suppressMessages({
@@ -1677,11 +1677,15 @@ server <- function(input, output, session) {
             ""
           }
 
+          # Set default selection to first available choice
+          default_selection <- if (length(gene_choices) > 0) gene_choices[1] else NULL
+
           updateSelectizeInput(
             session,
             "genes_n",
             label = if (isTRUE(input$check)) "Gene ID" else "Gene name",
             choices = gene_choices,
+            selected = default_selection,  # Add default selection
             server = TRUE
           )
 
@@ -1938,12 +1942,12 @@ server <- function(input, output, session) {
     # For gene coloring, ensure stable gene selection
     if (input$color == "genes") {
       current_gene <- input$genes_n
-      if (is.null(current_gene) || current_gene == "") {
+      if (is.null(current_gene) || length(current_gene) == 0 || any(current_gene == "")) {
         return(FALSE)
       }
 
       # Check if gene selection has been stable
-      if (last_gene_selection() != current_gene) {
+      if (!identical(last_gene_selection(), current_gene)) {
         last_gene_selection(current_gene)
         # Give a moment for the gene selection to stabilize
         invalidateLater(150)
@@ -1974,40 +1978,102 @@ server <- function(input, output, session) {
       color_column <- NULL
 
       if (isTRUE(input$color == "genes")) {
-        # Resolve gene input robustly: user may supply a display name or a gene id
-        gene_input <- input$genes_n
+        # Resolve gene input robustly: user may supply display names or gene ids (multiple selection supported)
+        gene_inputs <- input$genes_n
         gene_data_obj <- tryCatch(gene_data()$genes, error = function(e) NULL)
         full_mat <- if (!is.null(cached_data[[get_current_data_type()]])) cached_data[[get_current_data_type()]] else gene_data()$data
         row_idx <- attr(df_local, "row_idx")
 
         resolved_gene_col <- NULL
+        
+        # Handle multiple gene selection
+        if (!is.null(gene_inputs) && length(gene_inputs) > 0) {
+          if (length(gene_inputs) > 1) {
+            # For multiple genes, calculate average expression
+            valid_gene_ids <- c()
+            
+            for (gene_input in gene_inputs) {
+              current_resolved <- NULL
+              
+              # If the UI 'check' toggle indicates the user entered gene ids, try that first
+              if (!is.null(gene_input) && nzchar(as.character(gene_input)) && isTRUE(input$check)) {
+                candidate <- as.character(gene_input)
+                if (!is.null(full_mat) && candidate %in% colnames(full_mat)) {
+                  current_resolved <- candidate
+                }
+              }
+              
+              # If still not resolved, try mapping display name -> gene id using helper
+              if (is.null(current_resolved) && !is.null(gene_input) && nzchar(as.character(gene_input))) {
+                mapped <- tryCatch(get_gene_id(as.character(gene_input), gene_data_obj), error = function(e) NULL)
+                if (!is.null(mapped) && !is.na(mapped) && !is.null(full_mat) && mapped %in% colnames(full_mat)) {
+                  current_resolved <- as.character(mapped)
+                }
+              }
+              
+              # Final fallback: maybe the input text itself is the column name in the matrix
+              if (is.null(current_resolved) && !is.null(gene_input) && !is.null(full_mat) && as.character(gene_input) %in% colnames(full_mat)) {
+                current_resolved <- as.character(gene_input)
+              }
+              
+              if (!is.null(current_resolved)) {
+                valid_gene_ids <- c(valid_gene_ids, current_resolved)
+              }
+            }
+            
+            # Calculate average expression if we have valid genes
+            if (length(valid_gene_ids) > 0 && !is.null(row_idx) && length(row_idx) > 0) {
+              gene_matrices <- list()
+              for (gene_id in valid_gene_ids) {
+                gene_matrices[[gene_id]] <- full_mat[[gene_id]][row_idx]
+              }
+              
+              if (length(gene_matrices) > 0) {
+                gene_matrix <- do.call(cbind, gene_matrices)
+                avg_expression <- rowMeans(gene_matrix, na.rm = TRUE)
+                gene_color_col <- paste0(".gene_color_avg_", length(valid_gene_ids), "_genes")
+                df_local[[gene_color_col]] <- avg_expression
+                resolved_gene_col <- gene_color_col
+              }
+            }
+            
+          } else {
+            # Single gene - use existing logic
+            gene_input <- gene_inputs[1]
+            
+            # If the UI 'check' toggle indicates the user entered a gene id, try that first
+            if (!is.null(gene_input) && nzchar(as.character(gene_input)) && isTRUE(input$check)) {
+              candidate <- as.character(gene_input)
+              if (!is.null(full_mat) && candidate %in% colnames(full_mat)) {
+                resolved_gene_col <- candidate
+              }
+            }
 
-        # If the UI 'check' toggle indicates the user entered a gene id, try that first
-        if (!is.null(gene_input) && nzchar(as.character(gene_input)) && isTRUE(input$check)) {
-          candidate <- as.character(gene_input)
-          if (!is.null(full_mat) && candidate %in% colnames(full_mat)) {
-            resolved_gene_col <- candidate
+            # If still not resolved, try mapping display name -> gene id using helper
+            if (is.null(resolved_gene_col) && !is.null(gene_input) && nzchar(as.character(gene_input))) {
+              mapped <- tryCatch(get_gene_id(as.character(gene_input), gene_data_obj), error = function(e) NULL)
+              if (!is.null(mapped) && !is.na(mapped) && !is.null(full_mat) && mapped %in% colnames(full_mat)) {
+                resolved_gene_col <- as.character(mapped)
+              }
+            }
+
+            # Final fallback: maybe the input text itself is the column name in the matrix
+            if (is.null(resolved_gene_col) && !is.null(gene_input) && !is.null(full_mat) && as.character(gene_input) %in% colnames(full_mat)) {
+              resolved_gene_col <- as.character(gene_input)
+            }
+            
+            # Attach single gene expression column
+            if (!is.null(resolved_gene_col) && !is.na(resolved_gene_col) && !is.null(full_mat) && resolved_gene_col %in% colnames(full_mat) && !is.null(row_idx) && length(row_idx) > 0) {
+              gene_color_col <- paste0(".gene_color_", gsub("[^A-Za-z0-9]", "_", resolved_gene_col))
+              df_local[[gene_color_col]] <- full_mat[[resolved_gene_col]][row_idx]
+              resolved_gene_col <- gene_color_col
+            }
           }
         }
 
-        # If still not resolved, try mapping display name -> gene id using helper
-        if (is.null(resolved_gene_col) && !is.null(gene_input) && nzchar(as.character(gene_input))) {
-          mapped <- tryCatch(get_gene_id(as.character(gene_input), gene_data_obj), error = function(e) NULL)
-          if (!is.null(mapped) && !is.na(mapped) && !is.null(full_mat) && mapped %in% colnames(full_mat)) {
-            resolved_gene_col <- as.character(mapped)
-          }
-        }
-
-        # Final fallback: maybe the input text itself is the column name in the matrix
-        if (is.null(resolved_gene_col) && !is.null(gene_input) && !is.null(full_mat) && as.character(gene_input) %in% colnames(full_mat)) {
-          resolved_gene_col <- as.character(gene_input)
-        }
-
-        # Attach temporary gene color column if we have a valid resolved column and row indices
-        if (!is.null(resolved_gene_col) && !is.na(resolved_gene_col) && !is.null(full_mat) && resolved_gene_col %in% colnames(full_mat) && !is.null(row_idx) && length(row_idx) > 0) {
-          gene_color_col <- paste0(".gene_color_", gsub("[^A-Za-z0-9]", "_", resolved_gene_col))
-          df_local[[gene_color_col]] <- full_mat[[resolved_gene_col]][row_idx]
-          color_column <- gene_color_col
+        # Set color column
+        if (!is.null(resolved_gene_col) && resolved_gene_col %in% colnames(df_local)) {
+          color_column <- resolved_gene_col
         } else {
           color_column <- "sample_type"
         }
@@ -2223,7 +2289,18 @@ server <- function(input, output, session) {
   # handle download data
   output$download_data <- downloadHandler(
     filename = function() {
-      paste("Plasmodium_vivax_data", Sys.Date(), ".csv")
+      base_name <- "Plasmodium_vivax_embedding_data"
+      
+      # Add gene information to filename if coloring by genes
+      if (!is.null(input$color) && input$color == "genes" && !is.null(input$genes_n) && length(input$genes_n) > 0) {
+        if (length(input$genes_n) == 1) {
+          base_name <- paste0(base_name, "_", input$genes_n[1])
+        } else {
+          base_name <- paste0(base_name, "_", length(input$genes_n), "_genes")
+        }
+      }
+      
+      paste0(base_name, "_", Sys.Date(), ".csv")
     },
     content = function(file) {
       withProgress(message = "Processing Data", value = 0, {
