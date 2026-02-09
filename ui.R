@@ -62,7 +62,7 @@ ui <- fluidPage(
         "about",
         label = tagList(icon("info-circle"), " About"),
         class = "menu-link"
-      ),
+      )
     ),
     div(class = "logo baia", img(src = "baia_logo.png"))
   ),
@@ -826,6 +826,7 @@ ui <- fluidPage(
           )
         )
       )
+    )
     )
   ),
 
