@@ -1987,7 +1987,7 @@ server <- function(input, output, session) {
 
   
   # Helper function to generate embedding plots with different color options
-  generate_embedding_plot <- function(color_input, genes_input, check_input) {
+  generate_embedding_plot <- function(color_input, genes_input, check_input, is_dual_plot = FALSE) {
     req(all_dependencies_ready(), embedding_ready())
     
     # Triple-check data is still valid
@@ -2103,7 +2103,7 @@ server <- function(input, output, session) {
         color_column <- "sample_type"
       }
       
-      p <- embedding_plot(
+       p <- embedding_plot(
         df_local,
         input$xaxis,
         input$yaxis,
@@ -2111,7 +2111,8 @@ server <- function(input, output, session) {
         genes_input,
         input$size,
         plot_type = get_plot_type(),
-        plot_dim = input$plot
+        plot_dim = input$plot,
+        is_dual_plot = is_dual_plot
       )
       
       p <- p %>%
@@ -2212,7 +2213,7 @@ server <- function(input, output, session) {
       req(genes_main)
     }
     
-    generate_embedding_plot(color_main, genes_main, check_main)
+    generate_embedding_plot(color_main, genes_main, check_main, is_dual_plot = TRUE)
   })
   
   # Second plot output (uses second color control)
@@ -2230,7 +2231,7 @@ server <- function(input, output, session) {
       req(genes_second)
     }
     
-    generate_embedding_plot(color_second, genes_second, check_second)
+    generate_embedding_plot(color_second, genes_second, check_second, is_dual_plot = TRUE)
   })
   
   # Keep the original plot for backward compatibility

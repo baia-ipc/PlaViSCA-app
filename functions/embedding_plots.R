@@ -112,55 +112,105 @@ get_dim <- function(plot_type) {
 }
 
 
-get_legend_layout <- function(legend_title, num_categories = NULL) {
+get_legend_layout <- function(legend_title, num_categories = NULL, is_dual_plot = FALSE) {
     # Determine layout based on number of categories
     if (!is.null(num_categories) && num_categories > 3) {
         # Use vertical layout for many categories (closer to plot, on the right)
-        list(
-            title = list(text = legend_title, font = list(size = 12, family = "Arial")),
-            orientation = "v",
-            x = 1.02,
-            xanchor = "left",
-            y = 0.5,
-            yanchor = "middle",
-            itemsizing = "constant",
-            font = list(size = 11, family = "Arial"),
-            bgcolor = "rgba(255,255,255,0.9)",
-            bordercolor = "rgba(0,0,0,0.3)",
-            borderwidth = 1,
-            itemclick = "toggleothers",
-            itemdoubleclick = "toggle"
-        )
+        if (is_dual_plot) {
+            # For dual plots, position legend closer to avoid overlap
+            list(
+                title = list(text = legend_title, font = list(size = 10, family = "Arial")),
+                orientation = "v",
+                x = 1.01,
+                xanchor = "left",
+                y = 0.5,
+                yanchor = "middle",
+                itemsizing = "constant",
+                font = list(size = 9, family = "Arial"),
+                bgcolor = "rgba(255,255,255,0.95)",
+                bordercolor = "rgba(0,0,0,0.4)",
+                borderwidth = 1,
+                itemclick = "toggleothers",
+                itemdoubleclick = "toggle"
+            )
+        } else {
+            list(
+                title = list(text = legend_title, font = list(size = 12, family = "Arial")),
+                orientation = "v",
+                x = 1.02,
+                xanchor = "left",
+                y = 0.5,
+                yanchor = "middle",
+                itemsizing = "constant",
+                font = list(size = 11, family = "Arial"),
+                bgcolor = "rgba(255,255,255,0.9)",
+                bordercolor = "rgba(0,0,0,0.3)",
+                borderwidth = 1,
+                itemclick = "toggleothers",
+                itemdoubleclick = "toggle"
+            )
+        }
     } else {
-        # Use horizontal layout for 3 or fewer categories (above plot)
-        list(
-            title = list(text = legend_title, font = list(size = 12, family = "Arial")),
-            orientation = "h",
-            x = 0.5,
-            xanchor = "center", 
-            y = 1.08,
-            yanchor = "bottom",
-            itemsizing = "constant",
-            itemwidth = 50,
-            tracegroupgap = 20,
-            font = list(size = 12, family = "Arial"),
-            bgcolor = "rgba(255,255,255,0.9)",
-            bordercolor = "rgba(0,0,0,0.3)",
-            borderwidth = 1,
-            itemclick = "toggleothers",
-            itemdoubleclick = "toggle"
-        )
+        # Use horizontal layout for 3 or fewer categories (positioned above plot, centered)
+        if (is_dual_plot) {
+            # For dual plots, position legend within the plot area at the top
+            list(
+                title = list(text = legend_title, font = list(size = 10, family = "Arial")),
+                orientation = "h",
+                x = 0.5,
+                xanchor = "center", 
+                y = 0.98,  # Position at the very top of the plot area
+                yanchor = "top",
+                itemsizing = "constant",
+                itemwidth = 45,
+                tracegroupgap = 15,
+                font = list(size = 9, family = "Arial"),
+                bgcolor = "rgba(255,255,255,0.95)",
+                bordercolor = "rgba(0,0,0,0.4)",
+                borderwidth = 1,
+                itemclick = "toggleothers",
+                itemdoubleclick = "toggle"
+            )
+        } else {
+            list(
+                title = list(text = legend_title, font = list(size = 12, family = "Arial")),
+                orientation = "h",
+                x = 0.5,
+                xanchor = "center", 
+                y = 1.02,  # Positioned closer to the plot
+                yanchor = "bottom",
+                itemsizing = "constant",
+                itemwidth = 60,  # Wider items for better spacing
+                tracegroupgap = 25,  # More space between items
+                font = list(size = 11, family = "Arial"),
+                bgcolor = "rgba(255,255,255,0.85)",
+                bordercolor = "rgba(0,0,0,0.2)",
+                borderwidth = 1,
+                itemclick = "toggleothers",
+                itemdoubleclick = "toggle"
+            )
+        }
     }
 }
 
 # Get appropriate margins based on legend orientation
-get_plot_margins <- function(num_categories = NULL) {
+get_plot_margins <- function(num_categories = NULL, is_dual_plot = FALSE) {
     if (!is.null(num_categories) && num_categories > 3) {
         # Vertical legend - more right margin, standard top margin
-        list(l = 50, r = 140, t = 50, b = 50)
+        if (is_dual_plot) {
+            # For dual plots, reduce right margin since space is limited
+            list(l = 40, r = 100, t = 40, b = 40)
+        } else {
+            list(l = 50, r = 140, t = 50, b = 50)
+        }
     } else {
         # Horizontal legend - standard right margin, more top margin
-        list(l = 50, r = 50, t = 70, b = 50)
+        if (is_dual_plot) {
+            # For dual plots, adjust margins for better fit
+            list(l = 40, r = 40, t = 50, b = 40)
+        } else {
+            list(l = 50, r = 50, t = 60, b = 50)
+        }
     }
 }
 
@@ -214,7 +264,8 @@ plot_2d <- function(
     size,
     is_categorical,
     selected_color,
-    colors) {
+    colors,
+    is_dual_plot = FALSE) {
     display_color <- if (color == "host_species") {
         format_species_name(selected_color)
     } else {
@@ -230,8 +281,8 @@ plot_2d <- function(
         NULL
     }
     
-    legend_layout <- get_legend_layout(legend_title, num_categories)
-    plot_margins <- get_plot_margins(num_categories)
+    legend_layout <- get_legend_layout(legend_title, num_categories, is_dual_plot)
+    plot_margins <- get_plot_margins(num_categories, is_dual_plot)
     df$plotly_key <- seq_len(nrow(df))
 
     if (is_categorical) {
@@ -302,7 +353,8 @@ plot_3d <- function(
     selected_color,
     is_categorical,
     colors,
-    coords) {
+    coords,
+    is_dual_plot = FALSE) {
     x_col <- coords[1]
     y_col <- coords[2]
     z_col <- coords[3]
@@ -329,8 +381,8 @@ plot_3d <- function(
         NULL
     }
 
-    legend_layout <- get_legend_layout(legend_title, num_categories)
-    plot_margins <- get_plot_margins(num_categories)
+    legend_layout <- get_legend_layout(legend_title, num_categories, is_dual_plot)
+    plot_margins <- get_plot_margins(num_categories, is_dual_plot)
 
     if (is_categorical) {
         p <- plot_ly(
@@ -403,7 +455,8 @@ embedding_plot <- function(
     legend_title,
     size,
     plot_type = "pca_u",
-    plot_dim = "2d") {
+    plot_dim = "2d",
+    is_dual_plot = FALSE) {
     if (is.null(color) || is.na(color) || color == "" || !color %in% names(df)) {
         color <- "sample_type"
         warning("Invalid color column, using 'sample_type' as fallback")
@@ -441,7 +494,8 @@ embedding_plot <- function(
             size,
             is_categorical,
             selected_color,
-            colors
+            colors,
+            is_dual_plot
         )
     } else {
         coords <- get_dim(plot_type)
@@ -453,7 +507,8 @@ embedding_plot <- function(
             selected_color,
             is_categorical,
             colors,
-            coords
+            coords,
+            is_dual_plot
         )
     }
 
