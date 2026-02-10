@@ -2204,42 +2204,59 @@ server <- function(input, output, session) {
     )
   })
   
-  # First plot output (uses main color control - same as single plot)
-  output$first_plotly <- renderPlotly({
-    req(input$enable_comparison)
-    req(input$color)
+  # Create reactive expressions for each plot that only depend on their specific inputs
+  first_plot_reactive <- reactive({
+    req(input$enable_comparison, input$color)
     
-    # Get input values - only first plot inputs
     color_main <- input$color
     genes_main <- if (is.null(input$genes_n)) "" else input$genes_n
     check_main <- if (is.null(input$check)) FALSE else input$check
     
-    # Only require genes_n when color is "genes"
     if (color_main == "genes") {
       req(genes_main)
     }
     
-    # Use generate_embedding_plot but with dual plot flag
-    generate_embedding_plot(color_main, genes_main, check_main, is_dual_plot = TRUE)
+    list(
+      color = color_main,
+      genes = genes_main,
+      check = check_main,
+      timestamp = Sys.time()  # Add timestamp to track when this changes
+    )
   })
   
-  # Second plot output (uses second color control)
-  output$second_plotly <- renderPlotly({
-    req(input$enable_comparison)
-    req(input$color_second)
+  second_plot_reactive <- reactive({
+    req(input$enable_comparison, input$color_second)
     
-    # Get input values - only second plot inputs  
     color_second <- input$color_second
     genes_second <- if (is.null(input$genes_second)) "" else input$genes_second
     check_second <- if (is.null(input$check_second)) FALSE else input$check_second
     
-    # Only require genes_second when color is "genes"
     if (color_second == "genes") {
       req(genes_second)
     }
     
-    # Use generate_embedding_plot but with dual plot flag
-    generate_embedding_plot(color_second, genes_second, check_second, is_dual_plot = TRUE)
+    list(
+      color = color_second,
+      genes = genes_second,
+      check = check_second,
+      timestamp = Sys.time()  # Add timestamp to track when this changes
+    )
+  })
+
+  # First plot output (uses main color control - same as single plot)
+  output$first_plotly <- renderPlotly({
+    # Only react to first plot's specific inputs
+    plot_params <- first_plot_reactive()
+    
+    generate_embedding_plot(plot_params$color, plot_params$genes, plot_params$check, is_dual_plot = TRUE)
+  })
+
+  # Second plot output (uses second color control)
+  output$second_plotly <- renderPlotly({
+    # Only react to second plot's specific inputs
+    plot_params <- second_plot_reactive()
+    
+    generate_embedding_plot(plot_params$color, plot_params$genes, plot_params$check, is_dual_plot = TRUE)
   })
   
   # Keep the original plot for backward compatibility
