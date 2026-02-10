@@ -17,7 +17,7 @@ load_data <- memoise(function(file_path) {
 
 # Define paths to the data files for easy access
 DATA_PATHS <- list(
-  norm_df = "data/normalize_df_real.rds",  # Fixed: Use actual normalized data with decimal values
+  norm_df = "data/normalize_df_real.rds", 
   raw_df = "data/raw_df.rds",
   # scale_df = "data/scale_df.rds",
   cleaned_dataset = "data/cleaned_dataset.rds"
@@ -60,7 +60,6 @@ umap_u <- grep(
   value = TRUE
 )
 tsne <- grep("t_sne", colnames(mr_data), ignore.case = TRUE, value = TRUE)
-# RNA_snn <- grep("RNA_snn", colnames(mr_data), ignore.case = TRUE, value = TRUE)  # Commented out as not displayed
 
 # Static definitions
 group_choices <- c(

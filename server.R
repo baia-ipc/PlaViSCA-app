@@ -2127,11 +2127,11 @@ server <- function(input, output, session) {
     updateCheckboxInput(session, "enable_comparison", value = FALSE)
   })
   
-  # Update UI labels when color selections change
+  # Update UI labels when color selections change - separate observers for independence
   observe({
-    # Only update labels if comparison is enabled
+    # Only update first plot label if comparison is enabled
     if (isTRUE(input$enable_comparison)) {
-      req(input$color, input$color_second)
+      req(input$color)
       
       # Map color values to display names
       color_names <- c(
@@ -2150,9 +2150,33 @@ server <- function(input, output, session) {
       )
       
       first_label <- if (!is.null(color_names[input$color])) color_names[input$color] else "Unknown"
-      second_label <- if (!is.null(color_names[input$color_second])) color_names[input$color_second] else "Unknown"
+      runjs(paste0("$('#first_plot_label').text('First Color: ", first_label, "');"))
+    }
+  })
+  
+  # Separate observer for second plot color
+  observe({
+    # Only update second plot label if comparison is enabled
+    if (isTRUE(input$enable_comparison)) {
+      req(input$color_second)
       
-      runjs(paste0("$('#first_plot_label').text('Main Color: ", first_label, "');"))
+      # Map color values to display names
+      color_names <- c(
+        "study_label" = "Study",
+        "life_cycle_stage" = "Life cycle",
+        "parasite_stage" = "Parasite stage", 
+        "strain" = "Strain",
+        "treatment" = "Treatment",
+        "sample_type" = "Sample type",
+        "host_species" = "Host species",
+        "sequencer" = "Sequencer",
+        "sc_technology" = "SC technology",
+        "day_post_infection" = "DPI",
+        "hour_post_invasion" = "HPI",
+        "genes" = "Genes"
+      )
+      
+      second_label <- if (!is.null(color_names[input$color_second])) color_names[input$color_second] else "Unknown"
       runjs(paste0("$('#second_plot_label').text('Second Color: ", second_label, "');"))
     }
   })
@@ -2176,14 +2200,37 @@ server <- function(input, output, session) {
   # First plot output (uses main color control - same as single plot)
   output$first_plotly <- renderPlotly({
     req(input$enable_comparison)
-    # Use the main color control and main gene selection
-    generate_embedding_plot(input$color, input$genes_n, input$check)
+    req(input$color)
+    
+    # Get input values - only first plot inputs
+    color_main <- input$color
+    genes_main <- if (is.null(input$genes_n)) "" else input$genes_n
+    check_main <- if (is.null(input$check)) FALSE else input$check
+    
+    # Only require genes_n when color is "genes"
+    if (color_main == "genes") {
+      req(genes_main)
+    }
+    
+    generate_embedding_plot(color_main, genes_main, check_main)
   })
   
   # Second plot output (uses second color control)
   output$second_plotly <- renderPlotly({
     req(input$enable_comparison)
-    generate_embedding_plot(input$color_second, input$genes_second, input$check_second)
+    req(input$color_second)
+    
+    # Get input values - only second plot inputs  
+    color_second <- input$color_second
+    genes_second <- if (is.null(input$genes_second)) "" else input$genes_second
+    check_second <- if (is.null(input$check_second)) FALSE else input$check_second
+    
+    # Only require genes_second when color is "genes"
+    if (color_second == "genes") {
+      req(genes_second)
+    }
+    
+    generate_embedding_plot(color_second, genes_second, check_second)
   })
   
   # Keep the original plot for backward compatibility

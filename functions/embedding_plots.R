@@ -115,12 +115,18 @@ get_dim <- function(plot_type) {
 get_legend_layout <- function(legend_title) {
     list(
         title = list(text = legend_title),
-        orientation = "v",
-        x = 1.02,
-        xanchor = "left",
-        y = 1,
-        yanchor = "top",
-        len = 0.5
+        orientation = "h",
+        x = 0.5,
+        xanchor = "center", 
+        y = 1.15,
+        yanchor = "bottom",
+        itemsizing = "constant",
+        itemwidth = 30,
+        tracegroupgap = 10,
+        font = list(size = 12),
+        bgcolor = "rgba(255,255,255,0.8)",
+        bordercolor = "rgba(0,0,0,0.2)",
+        borderwidth = 1
     )
 }
 
@@ -194,7 +200,10 @@ plot_2d <- function(
             type = "scatter",
             mode = "markers",
             color = ~ factor(df[[color]]),
-            marker = list(size = size),
+            marker = list(
+                size = size,
+                line = list(width = 0.5, color = "rgba(0,0,0,0.3)")
+            ),
             text = hover_text,
             hoverinfo = "text",
             colors = colors,
@@ -208,7 +217,7 @@ plot_2d <- function(
                 yaxis = list(title = paste("Y-", y)),
                 legend = legend_layout,
                 font = list(size = 14),
-                margin = list(l = 50, r = 50, t = 25, b = 50)
+                margin = list(l = 50, r = 50, t = 80, b = 50)
             )
     } else {
         p <- plot_ly(
@@ -235,7 +244,7 @@ plot_2d <- function(
                 xaxis = list(title = paste("X-", x)),
                 yaxis = list(title = paste("Y-", y)),
                 font = list(size = 14),
-                margin = list(l = 50, r = 50, t = 25, b = 50)
+                margin = list(l = 50, r = 50, t = 80, b = 50)
             )
     }
     return(p)
@@ -298,7 +307,7 @@ plot_3d <- function(
                 ),
                 legend = legend_layout,
                 font = list(size = 14),
-                margin = list(l = 50, r = 50, t = 25, b = 50)
+                margin = list(l = 50, r = 50, t = 80, b = 50)
             )
     } else {
         p <- plot_ly(
@@ -328,7 +337,7 @@ plot_3d <- function(
                     zaxis = list(title = paste("Z-", z_col))
                 ),
                 font = list(size = 14),
-                margin = list(l = 50, r = 50, t = 25, b = 50)
+                margin = list(l = 50, r = 50, t = 80, b = 50)
             )
     }
     return(p)

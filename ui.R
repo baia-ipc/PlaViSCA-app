@@ -226,9 +226,9 @@ ui <- fluidPage(
         column(
           width = 12,
           class = "col-12",
-          radioButtons(
+          selectInput(
             "color",
-            "Color",
+            "First Plot Color",
             choices = list(
               "Study" = "study_label",
               "Life cycle" = "life_cycle_stage",
@@ -244,6 +244,43 @@ ui <- fluidPage(
               "Genes" = "genes"
             ),
             selected = "study_label"
+          )
+        ),
+        column(
+          width = 12,
+          class = "col-12",
+          checkboxInput(
+            "enable_comparison",
+            "Compare Two Plots",
+            value = FALSE
+          ),
+          conditionalPanel(
+            condition = "input.enable_comparison",
+            selectInput(
+              "color_second",
+              "Second Plot Color",
+              choices = list(
+                "Study" = "study_label",
+                "Life cycle" = "life_cycle_stage",
+                "Parasite stage" = "parasite_stage",
+                "Strain" = "strain",
+                "Treatment" = "treatment",
+                "Sample type" = "sample_type",
+                "Host species" = "host_species",
+                "Sequencer" = "sequencer",
+                "SC. technology" = "sc_technology",
+                "DPI" = "day_post_infection",
+                "HPI" = "hour_post_invasion",
+                "Genes" = "genes"
+              ),
+              selected = "sample_type"
+            ),
+            # Gene selection for second plot when genes is selected
+            conditionalPanel(
+              condition = "input.color_second == 'genes'",
+              selectizeInput("genes_second", "Gene(s) for Second Plot:", choices = ""),
+              checkboxInput("check_second", "Use Gene ID", value = FALSE)
+            )
           )
         ),
         column(
@@ -403,41 +440,44 @@ ui <- fluidPage(
                   type = 6,
                   size = 0.5,
                   color = "#3498db",
-                  plotlyOutput("all_plotly", height = "700px")
+                  plotlyOutput("all_plotly", height = "600px")
                 )
               )
             ),
             # Dual plots (when comparison is enabled)
             conditionalPanel(
               condition = "input.enable_comparison",
-              tags$h4("Plot Comparison", style = "text-align: center; margin: 20px 0;"),
+              tags$h4(
+                style = "text-align: center; margin: 20px 0; font-weight: bold; color: #2c3e50;",
+                "Comparison"
+              ),
               fluidRow(
                 column(
                   width = 6,
                   tags$div(
                     style = "text-align: center; margin-bottom: 10px;",
-                    tags$h5("First Plot", style = "color: #007bff; margin: 0;"),
-                    tags$small("Uses main Color control", style = "color: #666;")
+                    tags$h5("First Plot", style = "color: #007bff; margin: 0; font-weight: bold;"),
+                    tags$small("Uses First Plot Color control", style = "color: #666;")
                   ),
                   withSpinner(
                     type = 6,
                     size = 0.4,
                     color = "#007bff",
-                    plotlyOutput("first_plotly", height = "600px")
+                    plotlyOutput("first_plotly", height = "450px")
                   )
                 ),
                 column(
                   width = 6,
                   tags$div(
                     style = "text-align: center; margin-bottom: 10px;",
-                    tags$h5("Second Plot", style = "color: #28a745; margin: 0;"),
+                    tags$h5("Second Plot", style = "color: #28a745; margin: 0; font-weight: bold;"),
                     tags$small("Uses Second Plot Color control", style = "color: #666;")
                   ),
                   withSpinner(
                     type = 6,
                     size = 0.4,
                     color = "#28a745",
-                    plotlyOutput("second_plotly", height = "600px")
+                    plotlyOutput("second_plotly", height = "450px")
                   )
                 )
               )
@@ -493,49 +533,6 @@ ui <- fluidPage(
                           tags$span(class = "slider")
           )
         ),
-        column(
-          width = 12,
-          class = "col-12",
-          tags$label(class = "control-label", "Dual Plot Comparison"),
-          checkboxInput(
-            "enable_comparison",
-            "Compare Two Plots",
-            value = FALSE
-          ),
-          tags$small("Check to show two plots side-by-side for comparison", style = "color: #666; margin-top: -5px; display: block;"),
-          conditionalPanel(
-            condition = "input.enable_comparison",
-            tags$div(
-              style = "background-color: #f0f8ff; padding: 20px; border-radius: 8px; margin-top: 15px; border: 1px solid #cce7ff;",
-              tags$label(class = "control-label", "Second Plot Color"),
-              radioButtons(
-                "color_second",
-                NULL,
-                choices = list(
-                  "Study" = "study_label",
-                  "Life cycle" = "life_cycle_stage",
-                  "Parasite stage" = "parasite_stage",
-                  "Strain" = "strain",
-                  "Treatment" = "treatment",
-                  "Sample type" = "sample_type",
-                  "Host species" = "host_species",
-                  "Sequencer" = "sequencer",
-                  "SC. technology" = "sc_technology",
-                  "DPI" = "day_post_infection",
-                  "HPI" = "hour_post_invasion",
-                  "Genes" = "genes"
-                ),
-                selected = "sample_type"
-              ),
-              # Gene selection for second plot when genes is selected
-              conditionalPanel(
-                condition = "input.color_second == 'genes'",
-                selectizeInput("genes_second", "Gene(s) for Second Plot:", choices = ""),
-                checkboxInput("check_second", "Use Gene ID", value = FALSE)
-              )
-            )
-          )
-        ),
                       column(
                         width = 4,
                         id = "gene_link_exp",
@@ -557,8 +554,8 @@ ui <- fluidPage(
                             "🧬 NCBI"
                           )
                         )
-                      )
-                    ),
+              )
+            ),
                     column(
                       width = 6,
                       selectInput(
