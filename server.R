@@ -2213,7 +2213,67 @@ server <- function(input, output, session) {
       req(genes_main)
     }
     
-    generate_embedding_plot(color_main, genes_main, check_main, is_dual_plot = TRUE)
+    # Isolate all shared dependencies to prevent cross-plot reactivity
+    isolate({
+      req(all_dependencies_ready(), embedding_ready())
+      
+      # Triple-check data is still valid
+      if (is.null(data()) || nrow(data()) == 0) {
+        return(NULL)
+      }
+      
+      # Work on a local copy so we can attach a temporary gene-expression column
+      df_local <- data()
+      
+      color_column <- NULL
+      
+      if (isTRUE(color_main == "genes")) {
+        # Resolve gene input robustly: user may supply display names or gene ids (multiple selection supported)
+        gene_inputs <- genes_main
+        gene_data_obj <- tryCatch(gene_data()$genes, error = function(e) NULL)
+        full_mat <- if (!is.null(cached_data[[get_current_data_type()]])) cached_data[[get_current_data_type()]] else gene_data()$data
+        row_idx <- attr(df_local, "row_idx")
+        
+        if (!is.null(gene_data_obj) && length(gene_inputs) > 0) {
+          resolved_genes <- handle_gene_input(gene_inputs, gene_data_obj, gene_obj_by_id = NULL, use_gene_id = check_main)
+          
+          if (is.null(resolved_genes) || length(resolved_genes) == 0) {
+            return(NULL)
+          }
+          
+          # Apply the genes to the local dataframe copy
+          apply_genes_result <- apply_genes_to_df(df_local, resolved_genes, full_mat, row_idx)
+          df_local <- apply_genes_result$df
+          color_column <- apply_genes_result$color_column
+        } else {
+          return(NULL)
+        }
+      } else {
+        color_column <- color_main
+      }
+      
+      if (is.null(color_column) || !color_column %in% names(df_local)) {
+        return(NULL)
+      }
+      
+      p <- embedding_plot(
+        df_local,
+        input$xaxis,
+        input$yaxis,
+        color_column,
+        genes_main,
+        input$size,
+        plot_type = get_plot_type(),
+        plot_dim = input$plot,
+        is_dual_plot = TRUE
+      )
+      
+      p <- p %>%
+        event_register("plotly_click") %>%
+        config(displaylogo = FALSE, scrollZoom = TRUE)
+      
+      return(p)
+    })
   })
   
   # Second plot output (uses second color control)
@@ -2231,7 +2291,67 @@ server <- function(input, output, session) {
       req(genes_second)
     }
     
-    generate_embedding_plot(color_second, genes_second, check_second, is_dual_plot = TRUE)
+    # Isolate all shared dependencies to prevent cross-plot reactivity
+    isolate({
+      req(all_dependencies_ready(), embedding_ready())
+      
+      # Triple-check data is still valid
+      if (is.null(data()) || nrow(data()) == 0) {
+        return(NULL)
+      }
+      
+      # Work on a local copy so we can attach a temporary gene-expression column
+      df_local <- data()
+      
+      color_column <- NULL
+      
+      if (isTRUE(color_second == "genes")) {
+        # Resolve gene input robustly: user may supply display names or gene ids (multiple selection supported)
+        gene_inputs <- genes_second
+        gene_data_obj <- tryCatch(gene_data()$genes, error = function(e) NULL)
+        full_mat <- if (!is.null(cached_data[[get_current_data_type()]])) cached_data[[get_current_data_type()]] else gene_data()$data
+        row_idx <- attr(df_local, "row_idx")
+        
+        if (!is.null(gene_data_obj) && length(gene_inputs) > 0) {
+          resolved_genes <- handle_gene_input(gene_inputs, gene_data_obj, gene_obj_by_id = NULL, use_gene_id = check_second)
+          
+          if (is.null(resolved_genes) || length(resolved_genes) == 0) {
+            return(NULL)
+          }
+          
+          # Apply the genes to the local dataframe copy
+          apply_genes_result <- apply_genes_to_df(df_local, resolved_genes, full_mat, row_idx)
+          df_local <- apply_genes_result$df
+          color_column <- apply_genes_result$color_column
+        } else {
+          return(NULL)
+        }
+      } else {
+        color_column <- color_second
+      }
+      
+      if (is.null(color_column) || !color_column %in% names(df_local)) {
+        return(NULL)
+      }
+      
+      p <- embedding_plot(
+        df_local,
+        input$xaxis,
+        input$yaxis,
+        color_column,
+        genes_second,
+        input$size,
+        plot_type = get_plot_type(),
+        plot_dim = input$plot,
+        is_dual_plot = TRUE
+      )
+      
+      p <- p %>%
+        event_register("plotly_click") %>%
+        config(displaylogo = FALSE, scrollZoom = TRUE)
+      
+      return(p)
+    })
   })
   
   # Keep the original plot for backward compatibility
