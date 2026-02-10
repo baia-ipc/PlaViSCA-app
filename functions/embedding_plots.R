@@ -119,14 +119,14 @@ get_legend_layout <- function(legend_title, num_categories = NULL, is_dual_plot 
         if (is_dual_plot) {
             # For dual plots, position legend at top-left of plot area, overlaid
             list(
-                title = list(text = legend_title, font = list(size = 10, family = "Arial")),
+                title = list(text = legend_title, font = list(size = 11, family = "Arial")),
                 orientation = "v",
                 x = 0.02,  # Far left of plot area
                 xanchor = "left",
                 y = 0.98,  # Top of plot area
                 yanchor = "top",
                 itemsizing = "constant",
-                font = list(size = 9, family = "Arial"),
+                font = list(size = 10, family = "Arial"),  # Increased from 9 to 10
                 bgcolor = "rgba(255,255,255,0.95)",
                 bordercolor = "rgba(0,0,0,0.5)",
                 borderwidth = 1,
@@ -156,14 +156,14 @@ get_legend_layout <- function(legend_title, num_categories = NULL, is_dual_plot 
         if (is_dual_plot) {
             # For dual plots, position legend at top-left of plot area, overlaid
             list(
-                title = list(text = legend_title, font = list(size = 10, family = "Arial")),
+                title = list(text = legend_title, font = list(size = 11, family = "Arial")),
                 orientation = "v",
                 x = 0.02,  # Far left of plot area
                 xanchor = "left",
                 y = 0.98,  # Top of plot area
                 yanchor = "top",
                 itemsizing = "constant",
-                font = list(size = 9, family = "Arial"),
+                font = list(size = 10, family = "Arial"),  # Increased from 9 to 10
                 bgcolor = "rgba(255,255,255,0.95)",
                 bordercolor = "rgba(0,0,0,0.5)",
                 borderwidth = 1,
