@@ -2243,6 +2243,60 @@ server <- function(input, output, session) {
     )
   })
 
+  # Observer for first plot gene links
+  observe({
+    req(input$enable_comparison, input$color == "genes", input$genes_n)
+    
+    # Get first gene for links
+    first_gene <- input$genes_n[1]
+    if (!is.null(first_gene) && nzchar(first_gene)) {
+      # Try to get gene ID
+      gene_data_obj <- tryCatch(gene_data()$genes, error = function(e) NULL)
+      if (!is.null(gene_data_obj)) {
+        gene_id <- tryCatch(get_gene_id(first_gene, gene_data_obj), error = function(e) first_gene)
+        if (!is.null(gene_id) && nzchar(gene_id)) {
+          gene_links(gene_id)
+        }
+      }
+    }
+  })
+
+  # Observer for second plot gene links  
+  observe({
+    req(input$enable_comparison, input$color_second == "genes", input$genes_second)
+    
+    # Get first gene for links
+    first_gene <- input$genes_second[1] 
+    if (!is.null(first_gene) && nzchar(first_gene)) {
+      # Try to get gene ID
+      gene_data_obj <- tryCatch(gene_data()$genes, error = function(e) NULL)
+      if (!is.null(gene_data_obj)) {
+        gene_id <- tryCatch(get_gene_id(first_gene, gene_data_obj), error = function(e) first_gene)
+        if (!is.null(gene_id) && nzchar(gene_id)) {
+          gene_links(gene_id)
+        }
+      }
+    }
+  })
+
+  # Observer for single plot gene links (when comparison is disabled)
+  observe({
+    req(!isTRUE(input$enable_comparison), input$color == "genes", input$genes_n)
+    
+    # Get first gene for links
+    first_gene <- input$genes_n[1]
+    if (!is.null(first_gene) && nzchar(first_gene)) {
+      # Try to get gene ID
+      gene_data_obj <- tryCatch(gene_data()$genes, error = function(e) NULL)
+      if (!is.null(gene_data_obj)) {
+        gene_id <- tryCatch(get_gene_id(first_gene, gene_data_obj), error = function(e) first_gene)
+        if (!is.null(gene_id) && nzchar(gene_id)) {
+          gene_links(gene_id)
+        }
+      }
+    }
+  })
+
   # First plot output (uses main color control - same as single plot)
   output$first_plotly <- renderPlotly({
     # Only react to first plot's specific inputs

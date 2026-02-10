@@ -278,7 +278,13 @@ ui <- fluidPage(
             # Gene selection for second plot when genes is selected
             conditionalPanel(
               condition = "input.color_second == 'genes'",
-              selectizeInput("genes_second", "Gene(s) for Second Plot:", choices = ""),
+              selectizeInput("genes_second", "Gene(s) for Second Plot:", 
+                           choices = "", 
+                           multiple = TRUE,
+                           options = list(
+                             placeholder = "Select one or more genes",
+                             maxItems = 10
+                           )),
               checkboxInput("check_second", "Use Gene ID", value = FALSE)
             )
           )
@@ -305,7 +311,13 @@ ui <- fluidPage(
             id = "gene_snn_ui",
             column(
               width = 7,
-              selectizeInput("genes_n", "Gene", choices = "")
+              selectizeInput("genes_n", "Gene", 
+                           choices = "",
+                           multiple = TRUE,
+                           options = list(
+                             placeholder = "Select one or more genes",
+                             maxItems = 10
+                           ))
             ),
             column(
               id = "switch_id",
