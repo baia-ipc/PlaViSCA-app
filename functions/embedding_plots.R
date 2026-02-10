@@ -115,25 +115,26 @@ get_dim <- function(plot_type) {
 get_legend_layout <- function(legend_title, num_categories = NULL, is_dual_plot = FALSE) {
     # Determine layout based on number of categories
     if (!is.null(num_categories) && num_categories > 3) {
-        # Use vertical layout for many categories (closer to plot, on the right)
+        # Use vertical layout for many categories
         if (is_dual_plot) {
-            # For dual plots, position legend closer to avoid overlap
+            # For dual plots, position legend at top-left of plot area, overlaid
             list(
                 title = list(text = legend_title, font = list(size = 10, family = "Arial")),
                 orientation = "v",
-                x = 1.01,
+                x = 0.02,  # Far left of plot area
                 xanchor = "left",
-                y = 0.5,
-                yanchor = "middle",
+                y = 0.98,  # Top of plot area
+                yanchor = "top",
                 itemsizing = "constant",
                 font = list(size = 9, family = "Arial"),
                 bgcolor = "rgba(255,255,255,0.95)",
-                bordercolor = "rgba(0,0,0,0.4)",
+                bordercolor = "rgba(0,0,0,0.5)",
                 borderwidth = 1,
-                itemclick = "toggleothers",
-                itemdoubleclick = "toggle"
+                itemclick = "toggle",  # Toggle individual items on/off
+                itemdoubleclick = "toggleothers"  # Double-click to show only one
             )
         } else {
+            # Single plot - position on the right side
             list(
                 title = list(text = legend_title, font = list(size = 12, family = "Arial")),
                 orientation = "v",
@@ -146,38 +147,37 @@ get_legend_layout <- function(legend_title, num_categories = NULL, is_dual_plot 
                 bgcolor = "rgba(255,255,255,0.9)",
                 bordercolor = "rgba(0,0,0,0.3)",
                 borderwidth = 1,
-                itemclick = "toggleothers",
-                itemdoubleclick = "toggle"
+                itemclick = "toggle",  # Toggle individual items on/off
+                itemdoubleclick = "toggleothers"  # Double-click to show only one
             )
         }
     } else {
-        # Use horizontal layout for 3 or fewer categories (positioned above plot, centered)
+        # Use vertical layout for 3 or fewer categories as well (better for consistency)
         if (is_dual_plot) {
-            # For dual plots, position legend within the plot area at the top
+            # For dual plots, position legend at top-left of plot area, overlaid
             list(
                 title = list(text = legend_title, font = list(size = 10, family = "Arial")),
-                orientation = "h",
-                x = 0.5,
-                xanchor = "center", 
-                y = 0.98,  # Position at the very top of the plot area
+                orientation = "v",
+                x = 0.02,  # Far left of plot area
+                xanchor = "left",
+                y = 0.98,  # Top of plot area
                 yanchor = "top",
                 itemsizing = "constant",
-                itemwidth = 45,
-                tracegroupgap = 15,
                 font = list(size = 9, family = "Arial"),
                 bgcolor = "rgba(255,255,255,0.95)",
-                bordercolor = "rgba(0,0,0,0.4)",
+                bordercolor = "rgba(0,0,0,0.5)",
                 borderwidth = 1,
-                itemclick = "toggleothers",
-                itemdoubleclick = "toggle"
+                itemclick = "toggle",  # Toggle individual items on/off
+                itemdoubleclick = "toggleothers"  # Double-click to show only one
             )
         } else {
+            # Single plot - use horizontal layout above plot
             list(
                 title = list(text = legend_title, font = list(size = 12, family = "Arial")),
                 orientation = "h",
                 x = 0.5,
                 xanchor = "center", 
-                y = 1.02,  # Positioned closer to the plot
+                y = 1.02,  # Positioned above the plot
                 yanchor = "bottom",
                 itemsizing = "constant",
                 itemwidth = 60,  # Wider items for better spacing
@@ -186,8 +186,8 @@ get_legend_layout <- function(legend_title, num_categories = NULL, is_dual_plot 
                 bgcolor = "rgba(255,255,255,0.85)",
                 bordercolor = "rgba(0,0,0,0.2)",
                 borderwidth = 1,
-                itemclick = "toggleothers",
-                itemdoubleclick = "toggle"
+                itemclick = "toggle",  # Toggle individual items on/off
+                itemdoubleclick = "toggleothers"  # Double-click to show only one
             )
         }
     }
@@ -196,19 +196,21 @@ get_legend_layout <- function(legend_title, num_categories = NULL, is_dual_plot 
 # Get appropriate margins based on legend orientation
 get_plot_margins <- function(num_categories = NULL, is_dual_plot = FALSE) {
     if (!is.null(num_categories) && num_categories > 3) {
-        # Vertical legend - more right margin, standard top margin
+        # Vertical legend
         if (is_dual_plot) {
-            # For dual plots, reduce right margin since space is limited
-            list(l = 40, r = 100, t = 40, b = 40)
+            # For dual plots, legend is overlaid so no extra margin needed
+            list(l = 50, r = 50, t = 40, b = 40)
         } else {
+            # Single plot - more right margin for external legend
             list(l = 50, r = 140, t = 50, b = 50)
         }
     } else {
-        # Horizontal legend - standard right margin, more top margin
+        # Fewer categories
         if (is_dual_plot) {
-            # For dual plots, adjust margins for better fit
-            list(l = 40, r = 40, t = 50, b = 40)
+            # For dual plots, legend is overlaid so no extra margin needed
+            list(l = 50, r = 50, t = 40, b = 40)
         } else {
+            # Single plot - more top margin for horizontal legend above
             list(l = 50, r = 50, t = 60, b = 50)
         }
     }
