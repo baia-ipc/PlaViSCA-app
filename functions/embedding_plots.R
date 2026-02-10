@@ -112,22 +112,56 @@ get_dim <- function(plot_type) {
 }
 
 
-get_legend_layout <- function(legend_title) {
-    list(
-        title = list(text = legend_title),
-        orientation = "h",
-        x = 0.5,
-        xanchor = "center", 
-        y = 1.15,
-        yanchor = "bottom",
-        itemsizing = "constant",
-        itemwidth = 30,
-        tracegroupgap = 10,
-        font = list(size = 12),
-        bgcolor = "rgba(255,255,255,0.8)",
-        bordercolor = "rgba(0,0,0,0.2)",
-        borderwidth = 1
-    )
+get_legend_layout <- function(legend_title, num_categories = NULL) {
+    # Determine layout based on number of categories
+    if (!is.null(num_categories) && num_categories > 3) {
+        # Use vertical layout for many categories (closer to plot, on the right)
+        list(
+            title = list(text = legend_title, font = list(size = 12, family = "Arial")),
+            orientation = "v",
+            x = 1.02,
+            xanchor = "left",
+            y = 0.5,
+            yanchor = "middle",
+            itemsizing = "constant",
+            font = list(size = 11, family = "Arial"),
+            bgcolor = "rgba(255,255,255,0.9)",
+            bordercolor = "rgba(0,0,0,0.3)",
+            borderwidth = 1,
+            itemclick = "toggleothers",
+            itemdoubleclick = "toggle"
+        )
+    } else {
+        # Use horizontal layout for 3 or fewer categories (above plot)
+        list(
+            title = list(text = legend_title, font = list(size = 12, family = "Arial")),
+            orientation = "h",
+            x = 0.5,
+            xanchor = "center", 
+            y = 1.08,
+            yanchor = "bottom",
+            itemsizing = "constant",
+            itemwidth = 50,
+            tracegroupgap = 20,
+            font = list(size = 12, family = "Arial"),
+            bgcolor = "rgba(255,255,255,0.9)",
+            bordercolor = "rgba(0,0,0,0.3)",
+            borderwidth = 1,
+            itemclick = "toggleothers",
+            itemdoubleclick = "toggle"
+        )
+    }
+}
+
+# Get appropriate margins based on legend orientation
+get_plot_margins <- function(num_categories = NULL) {
+    if (!is.null(num_categories) && num_categories > 3) {
+        # Vertical legend - more right margin, standard top margin
+        list(l = 50, r = 140, t = 50, b = 50)
+    } else {
+        # Horizontal legend - standard right margin, more top margin
+        list(l = 50, r = 50, t = 70, b = 50)
+    }
 }
 
 
@@ -189,7 +223,15 @@ plot_2d <- function(
 
     hover_text <- build_hover_text(df, legend_title, display_color, x, y)
 
-    legend_layout <- get_legend_layout(legend_title)
+    # Calculate number of unique categories for categorical data
+    num_categories <- if (is_categorical) {
+        length(unique(df[[color]]))
+    } else {
+        NULL
+    }
+    
+    legend_layout <- get_legend_layout(legend_title, num_categories)
+    plot_margins <- get_plot_margins(num_categories)
     df$plotly_key <- seq_len(nrow(df))
 
     if (is_categorical) {
@@ -217,7 +259,7 @@ plot_2d <- function(
                 yaxis = list(title = paste("Y-", y)),
                 legend = legend_layout,
                 font = list(size = 14),
-                margin = list(l = 50, r = 50, t = 80, b = 50)
+                margin = plot_margins
             )
     } else {
         p <- plot_ly(
@@ -244,7 +286,7 @@ plot_2d <- function(
                 xaxis = list(title = paste("X-", x)),
                 yaxis = list(title = paste("Y-", y)),
                 font = list(size = 14),
-                margin = list(l = 50, r = 50, t = 80, b = 50)
+                margin = plot_margins
             )
     }
     return(p)
@@ -280,7 +322,15 @@ plot_3d <- function(
 
     hover_text <- build_hover_text(df, legend_title, display_color, x_vals, y_vals, z_vals)
 
-    legend_layout <- get_legend_layout(legend_title)
+    # Calculate number of unique categories for categorical data
+    num_categories <- if (is_categorical) {
+        length(unique(df[[color]]))
+    } else {
+        NULL
+    }
+
+    legend_layout <- get_legend_layout(legend_title, num_categories)
+    plot_margins <- get_plot_margins(num_categories)
 
     if (is_categorical) {
         p <- plot_ly(
@@ -307,7 +357,7 @@ plot_3d <- function(
                 ),
                 legend = legend_layout,
                 font = list(size = 14),
-                margin = list(l = 50, r = 50, t = 80, b = 50)
+                margin = plot_margins
             )
     } else {
         p <- plot_ly(
@@ -337,7 +387,7 @@ plot_3d <- function(
                     zaxis = list(title = paste("Z-", z_col))
                 ),
                 font = list(size = 14),
-                margin = list(l = 50, r = 50, t = 80, b = 50)
+                margin = plot_margins
             )
     }
     return(p)
