@@ -741,7 +741,7 @@ ui <- fluidPage(
                   div(
                     style = "text-align: center; margin-top: 5px; font-size: 12px; color: #666;",
                     HTML(
-                      "<em>Note: All life cycle stages are predicted, except for the sporozoite.</em>"
+                      "<em>Note: All parasite stages are predicted by SingleR, except sporozoites which are confirmed by sample type.</em>"
                     )
                   )
                 ),

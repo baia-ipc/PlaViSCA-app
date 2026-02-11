@@ -448,10 +448,6 @@ server <- function(input, output, session) {
       paste0("host_species__", unique(mr_data$host_species)),
       format_species_name(unique(mr_data$host_species))
     ),
-    life_cycle_stage = setNames(
-      paste0("life_cycle_stage__", unique(mr_data$life_cycle_stage)),
-      unique(mr_data$life_cycle_stage)
-    ),
     treatment = setNames(
       paste0("treatment__", unique(mr_data$treatment)),
       unique(mr_data$treatment)
@@ -826,13 +822,13 @@ server <- function(input, output, session) {
         )
       })
 
-      ## plot life_cycle vs count
+      ## plot parasite stage vs count
       output$life_cycle_plotly <- renderPlotly({
         meta_plotly(
           filt_data,
-          "life_cycle_stage",
+          "parasite_stage",
           "Count",
-          "Life cyle stage",
+          "Parasite stage",
           "bar"
         )
       })

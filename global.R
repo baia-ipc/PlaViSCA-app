@@ -74,7 +74,6 @@ group_choices <- c(
   "development_phase",
   "blood_stage",
   "parasite_stage",
-  "life_cycle_stage",
   "host_species",
   "treatment",
   "sample_type"
