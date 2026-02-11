@@ -159,42 +159,28 @@ get_plot_margins <- function(num_categories = NULL, is_dual_plot = FALSE) {
 }
 
 
-# Hover text for 2D and 3D plots
+# Hover text for 2D and 3D plots (optimized for performance)
 build_hover_text <- function(df, legend_title, display_color, x_vals = NULL, y_vals = NULL, z_vals = NULL) {
-    # Conditionally include Z label/value only when provided
-    z_label <- if (is.null(z_vals)) "" else "<br>Z:"
-    z_value <- if (is.null(z_vals)) "" else z_vals
-
-    return(~ paste(
-        "Cell_id:",
-        df$barcode,
-        "<br>Color by",
-        legend_title,
-        ":",
-        display_color,
-        "<br>Cluster:",
-        df$seurat_clusters,
-        "<br>Study:",
-        df$study_label,
-        "<br>Life cycle stage:",
-        df$life_cycle_stage,
-        "<br>Host species:",
-        format_species_name(df$host_species),
-        "<br>Sample type:",
-        df$sample_type,
-        "<br>Sequencer:",
-        df$sequencer,
-        "<br>Strain:",
-        df$strain,
-        "<br>n_Features_RNA:",
-        df$n_feature_rna,
-        "<br>X:",
-        x_vals,
-        "<br>Y:",
-        y_vals,
-        z_label,
-        z_value
-    ))
+    # Simplified hover text - only show most important info
+    # This reduces data sent to browser significantly
+    
+    # Build base text
+    base_text <- paste0(
+        "Cell: ", df$barcode,
+        "<br>", legend_title, ": ", display_color,
+        "<br>Study: ", df$study_label,
+        "<br>Stage: ", df$life_cycle_stage
+    )
+    
+    # Add coordinates
+    coords_text <- paste0("<br>X: ", round(x_vals, 2), "<br>Y: ", round(y_vals, 2))
+    
+    # Conditionally add Z if provided
+    if (!is.null(z_vals)) {
+        coords_text <- paste0(coords_text, "<br>Z: ", round(z_vals, 2))
+    }
+    
+    return(~ paste0(base_text, coords_text))
 }
 
 
@@ -234,12 +220,12 @@ plot_2d <- function(
             data = df,
             x = x,
             y = y,
-            type = "scatter",
+            type = "scattergl",  # Use WebGL for better performance with large datasets
             mode = "markers",
             color = ~ factor(df[[color]]),
             marker = list(
                 size = size,
-                line = list(width = 0.5, color = "rgba(0,0,0,0.3)")
+                line = list(width = 0, color = "rgba(0,0,0,0)")  # Disable borders for performance
             ),
             text = hover_text,
             hoverinfo = "text",
@@ -261,7 +247,7 @@ plot_2d <- function(
             data = df,
             x = x,
             y = y,
-            type = "scatter",
+            type = "scattergl",  # Use WebGL for better performance with large datasets
             mode = "markers",
             text = hover_text,
             hoverinfo = "text",
