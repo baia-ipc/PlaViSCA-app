@@ -256,9 +256,10 @@ create_meta_filter_row <- function(suffix = "") {
                     options = list(
                         placeholder = "Select options...",
                         onInitialize = I('function() { this.setValue(""); }')
+                    )
                 )
             )
-        )
+        ) # Close second fluidRow
         ) # Close filters-container div
     )
 }
