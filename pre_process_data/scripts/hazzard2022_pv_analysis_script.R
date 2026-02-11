@@ -204,7 +204,6 @@ sample_type <- c(
   "Mammalian host: blood",
   "Mammalian host: blood"
 )
-parasite_stage <- c("Sporozoites", "Sporozoites", "Blood stages", "Blood stages")
 strain <- c("Sal1/Chesson", "Sal1/Chesson", "Sal1", "Sal1")
 day_post_infection <- rep(NA, length(all_pv))
 treatment <- rep("No_Treatment", length(all_pv))
@@ -223,7 +222,6 @@ for (i in 1:length(all_pv)) {
   all_pv[[i]]$host_species <- paste0(host_species[[i]])
   all_pv[[i]]$host_id <- paste0(host_id[[i]])
   all_pv[[i]]$sample_type <- paste0(sample_type[[i]])
-  all_pv[[i]]$parasite_stage <- paste0(parasite_stage[[i]])
   all_pv[[i]]$strain <- paste0(strain[[i]])
   all_pv[[i]]$day_post_infection <- paste0(day_post_infection[[i]])
   all_pv[[i]]$treatment <- paste0(treatment[[i]])

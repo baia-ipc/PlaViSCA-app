@@ -219,13 +219,6 @@ sample_type <- list(
 ) %>%
     unlist()
 
-parasite_stage <- list(
-    "Sporozoites",
-    "Blood stages",
-    rep("Sporozoites", 5)
-) %>%
-    unlist()
-
 strain <- c(
     "Chesson",
     "Chesson&NIH1993",
@@ -253,7 +246,6 @@ for (i in 1:length(all_pv)) {
     all_pv[[i]]$host_species <- paste0(host_species[[i]])
     all_pv[[i]]$host_id <- paste0(host_id[[i]])
     all_pv[[i]]$sample_type <- paste0(sample_type[[i]])
-    all_pv[[i]]$parasite_stage <- paste0(parasite_stage[[i]])
     all_pv[[i]]$strain <- paste0(strain[[i]])
     all_pv[[i]]$day_post_infection <- paste0(day_post_infection[[i]])
     all_pv[[i]]$treatment <- paste0(treatment[[i]])

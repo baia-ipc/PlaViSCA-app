@@ -1,3 +1,36 @@
+# ============================================================================
+# ARCHIVE: TRANSFORMATION REFERENCE SCRIPT
+# ============================================================================
+# 
+# PURPOSE:
+# This script is kept as a REFERENCE for the transformation logic that was used
+# to create the 3-tier terminology system (development_phase, blood_stage, 
+# parasite_stage) from the legacy life_cycle_stage column.
+#
+# IMPORTANT: DO NOT RUN THIS SCRIPT!
+# This transformation logic has been integrated directly into the preprocessing
+# pipeline (pre_process_data/scripts/singleR.R). Future preprocessing runs will
+# automatically create the correct columns without needing this post-processing.
+#
+# HISTORY:
+# - Previously, individual study scripts created a "parasite_stage" column with
+#   values like "Blood stages", "Liver stages", "Sporozoites" (plural forms)
+# - This led to data inconsistency: 2,857 Hazzard2022 sporozoite cells had
+#   parasite_stage_old="Blood stage" but life_cycle_stage="Sporozoite"
+# - This script fixed the issue by using life_cycle_stage (from SingleR) as
+#   the authoritative source of truth instead of parasite_stage_old
+#
+# CURRENT STATE (as of Feb 2026):
+# - singleR.R now derives the 3 new columns directly from life_cycle_stage
+# - Individual study scripts NO LONGER create parasite_stage
+# - This script is archived for reference only
+#
+# SEE ALSO:
+# - pre_process_data/scripts/singleR.R (lines 414-471)
+# - AGENTS.md (preprocessing documentation)
+#
+# ============================================================================
+
 # CORRECTED transformation - use life_cycle_stage as source of truth
 # This fixes the issue where 2,857 Sporozoites were classified as "Blood stages"
 
