@@ -36,6 +36,13 @@ create_empty_plot <- function(title = "") {
 server <- function(input, output, session) {
   sessionData <- new.env(parent = emptyenv())
 
+  # Reactive values to preserve UI state across mode changes
+  ui_state <- reactiveValues(
+    stored_color = "study_label",
+    stored_genes = NULL,
+    stored_check = FALSE
+  )
+
   # Load publication data
   pub_data <- reactive({
     readr::read_csv("data/data_source.csv", show_col_types = FALSE)
@@ -1109,6 +1116,10 @@ server <- function(input, output, session) {
             "genes_exp_0",
             label = "Gene name",
             choices = initial_choices,
+            options = list(
+              placeholder = "Select one or more genes",
+              maxItems = 10
+            ),
             server = TRUE
           )
         },
@@ -1142,7 +1153,11 @@ server <- function(input, output, session) {
           session,
           "genes_exp_0",
           choices = choices,
-          selected = default_selection
+          selected = default_selection,
+          options = list(
+            placeholder = "Select one or more genes",
+            maxItems = 10
+          )
         )
       },
       error = function(e) {
@@ -1334,6 +1349,10 @@ server <- function(input, output, session) {
       "genes_exp_0",
       choices = choices,
       selected = default_selection,  # Add default selection
+      options = list(
+        placeholder = "Select one or more genes",
+        maxItems = 10
+      ),
       server = TRUE
     )
   })
@@ -1437,7 +1456,7 @@ server <- function(input, output, session) {
                 # User selected gene names - convert to IDs
                 for (gene_name in cur_genes) {
                   gene_id <- get_gene_id(gene_name, fg$genes)
-                  if (!is.na(gene_id)) {
+                   if (!is.na(gene_id)) {
                     gene_ids <- c(gene_ids, gene_id)
                   }
                 }
@@ -1684,61 +1703,14 @@ server <- function(input, output, session) {
 
       # Set loading state when showing gene UI
       genes_loading(TRUE)
-
-      # Use a safer approach to get gene choices
-      tryCatch(
-        {
-          gene_choices <- if (!is.null(gene_data()$genes)) {
-            get_gene_choices(gene_data()$genes, input$check)
-          } else {
-            ""
-          }
-
-          # Set default selection to first available choice
-          default_selection <- if (length(gene_choices) > 0) gene_choices[1] else NULL
-
-          updateSelectizeInput(
-            session,
-            "genes_n",
-            label = if (isTRUE(input$check)) "Gene ID" else "Gene name",
-            choices = gene_choices,
-            selected = default_selection,  # Add default selection
-            server = TRUE
-          )
-
-          # Reset loading state after update
-          later(
-            function() {
-              genes_loading(FALSE)
-            },
-            0.1
-          )
-        },
-        error = function(e) {
-          # Fallback to empty choices if there's an error
-          updateSelectizeInput(
-            session,
-            "genes_n",
-            label = if (isTRUE(input$check)) "Gene ID" else "Gene name",
-            choices = "",
-            server = TRUE
-          )
-          
+      
+      # Reset loading state after a short delay to allow other observers to complete
+      later(
+        function() {
           genes_loading(FALSE)
-        }
+        },
+        0.5
       )
-      # } else if (input$color == "RNA_snn") {
-      #   shinyjs::show("gene_snn_ui")
-      #   shinyjs::hide("gene_link_ui")
-      #   shinyjs::hide("data_type")
-      #   shinyjs::hide("switch_id")
-      #   updateSelectizeInput(
-      #     session,
-      #     "genes_n",
-      #     label = "Select Resolution",
-      #     choices = RNA_snn,
-      #     server = TRUE
-      #   )
     } else {
       shinyjs::hide("gene_snn_ui")
       shinyjs::hide("gene_link_ui")
@@ -1748,22 +1720,45 @@ server <- function(input, output, session) {
     }
   })
 
-  # Separate observer to update gene choices when data or toggle changes
-  observe({
-    req(gene_data()$genes, input$color == "genes")
+  # Separate observer to update gene choices when color changes to genes or toggle changes
+  observeEvent(list(input$color, input$check), {
+    if (!identical(input$color, "genes")) {
+      return()
+    }
+    
+    req(gene_data()$genes)
 
     # Set loading state to prevent plot updates
     genes_loading(TRUE)
 
     tryCatch(
       {
-        gene_choices <- get_gene_choices(gene_data()$genes, input$check)
+        genes_df <- gene_data()$genes
+        if (is.null(genes_df) || nrow(genes_df) == 0) {
+          genes_loading(FALSE)
+          return()
+        }
+        
+        gene_choices <- get_gene_choices(genes_df, input$check)
+        
+        if (is.null(gene_choices) || length(gene_choices) == 0) {
+          genes_loading(FALSE)
+          return()
+        }
+
+        # Store current selection before updating choices
+        current_selection <- input$genes_n
 
         updateSelectizeInput(
           session,
           "genes_n",
           label = if (isTRUE(input$check)) "Gene ID" else "Gene name",
           choices = gene_choices,
+          selected = current_selection,  # Preserve current selection
+          options = list(
+            placeholder = "Select one or more genes",
+            maxItems = 10
+          ),
           server = TRUE
         )
 
@@ -1776,10 +1771,11 @@ server <- function(input, output, session) {
         )
       },
       error = function(e) {
+        message("Error updating gene choices: ", e$message)
         genes_loading(FALSE)
       }
     )
-  })
+  }, ignoreInit = FALSE)
 
   ## hide switch for tsne
   observeEvent(input$embedding, {
@@ -1862,6 +1858,74 @@ server <- function(input, output, session) {
     ignoreInit = TRUE
   )
 
+  # Observer for updating second plot axis choices (for comparison mode)
+  observeEvent(
+    list(
+      input$embedding,
+      input$plot_second,
+      input$xaxis_second,
+      input$check_all,
+      input$enable_comparison
+    ),
+    {
+      req(input$enable_comparison)
+      
+      if (input$plot_second == "2d") {
+        x_choices <- switch(input$embedding,
+          "umap" = if (isTRUE(input$check_all)) umap_i else umap_u,
+          "pca" = if (isTRUE(input$check_all)) pca_i else pca_u,
+          "tsne" = tsne
+        )
+
+        updateSelectInput(
+          session,
+          "xaxis_second",
+          choices = x_choices,
+          selected = x_choices[1]
+        )
+
+        y_choices <- switch(input$embedding,
+          "umap" = y_col(
+            input$check_all,
+            input$xaxis_second,
+            umap_i,
+            umap_u
+          ),
+          "pca" = y_col(input$check_all, input$xaxis_second, pca_i, pca_u),
+          "tsne" = setdiff(tsne, input$xaxis_second)
+        )
+
+        updateSelectInput(
+          session,
+          "yaxis_second",
+          choices = y_choices,
+          selected = if (input$yaxis_second %in% y_choices) {
+            input$yaxis_second
+          } else {
+            y_choices[2]
+          }
+        )
+      }
+    }
+  )
+
+  # Observer for updating second plot size based on 2D/3D selection  
+  observeEvent(
+    input$plot_second,
+    {
+      req(input$enable_comparison)
+      
+      if (!is.null(input$plot_second)) {
+        if (input$plot_second == "2d") {
+          updateRadioButtons(session, "size_second", selected = 2)
+        } else if (input$plot_second == "3d") {
+          updateRadioButtons(session, "size_second", selected = 4)
+        }
+      }
+    },
+    ignoreInit = TRUE
+  )
+
   ## choose data based on input color
   data <- reactive({
     req(input$color)  # Ensure input$color is available
@@ -1872,11 +1936,57 @@ server <- function(input, output, session) {
     }
   })
 
+  # Separate data reactive for first plot (used in comparison mode)
+  first_plot_data <- reactive({
+    req(input$enable_comparison)
+    
+    # Cache the data and gene objects at evaluation time to avoid interference
+    tryCatch({
+      current_data <- filtered_gene_data()$data
+      current_genes <- gene_data()$genes
+      current_full_data <- gene_data()$data
+      current_data_type <- get_current_data_type()
+      
+      # Add cached objects as attributes to prevent cross-plot interference
+      attr(current_data, "cached_genes") <- current_genes
+      attr(current_data, "cached_full_data") <- current_full_data
+      attr(current_data, "cached_data_type") <- current_data_type
+      
+      current_data
+    }, error = function(e) {
+      # If data loading fails, return NULL gracefully
+      NULL
+    })
+  })
+
+  # Separate data reactive for second plot (used in comparison mode)
+  second_plot_data <- reactive({
+    req(input$enable_comparison)
+    
+    # Cache the data and gene objects at evaluation time to avoid interference  
+    tryCatch({
+      current_data <- filtered_gene_data()$data
+      current_genes <- gene_data()$genes
+      current_full_data <- gene_data()$data
+      current_data_type <- get_current_data_type()
+      
+      # Add cached objects as attributes to prevent cross-plot interference
+      attr(current_data, "cached_genes") <- current_genes
+      attr(current_data, "cached_full_data") <- current_full_data
+      attr(current_data, "cached_data_type") <- current_data_type
+      
+      current_data
+    }, error = function(e) {
+      # If data loading fails, return NULL gracefully
+      NULL
+    })
+  })
+
   # Add debouncing for plot updates
   plot_update_trigger <- reactiveVal(0)
-  plot_ready <- reactiveVal(FALSE)
+  plot_ready <- reactiveVal(TRUE)  # Initialize to TRUE so plots can render on startup
   genes_loading <- reactiveVal(FALSE)
-  autoUpdatePlot <- reactiveVal(FALSE)
+  autoUpdatePlot <- reactiveVal(TRUE)  # Initialize to TRUE so plots can render on startup
 
   # Simplified debounced observer for plot-related inputs
   observe({
@@ -1987,26 +2097,81 @@ server <- function(input, output, session) {
 
   
   # Helper function to generate embedding plots with different color options
-  generate_embedding_plot <- function(color_input, genes_input, check_input, is_dual_plot = FALSE) {
-    req(all_dependencies_ready(), embedding_ready())
+  generate_embedding_plot <- function(color_input, genes_input, check_input, xaxis_input, yaxis_input, size_input, plot_input, is_dual_plot = FALSE, data_source = NULL) {
+    # Debug logging for plot generation
+    if (is_dual_plot && color_input == "genes") {
+      cat("DEBUG GENERATE_EMBEDDING_PLOT:\n")
+      cat("  - color_input:", color_input, "\n")
+      cat("  - genes_input:", paste(genes_input, collapse=", "), "\n")
+      cat("  - check_input:", check_input, "\n")
+      cat("  - is_dual_plot:", is_dual_plot, "\n")
+      cat("  - data_source is null:", is.null(data_source), "\n")
+    }
     
-    # Triple-check data is still valid
-    if (is.null(data()) || nrow(data()) == 0) {
-      return(NULL)
+    # For dual plot mode, skip the global dependency checks and use simpler validation
+    if (is_dual_plot) {
+      # Basic data validation for comparison mode
+      plot_data <- if (!is.null(data_source)) data_source else data()
+      if (is.null(plot_data) || nrow(plot_data) == 0) {
+        return(NULL)
+      }
+      
+      # For gene coloring in dual plot mode, check the specific gene inputs
+      if (color_input == "genes") {
+        if (is.null(genes_input) || length(genes_input) == 0 || any(is.na(genes_input)) || any(genes_input == "")) {
+          return(NULL)
+        }
+      }
+    } else {
+      # Single plot mode - use the existing dependency system
+      req(all_dependencies_ready(), embedding_ready())
+    }
+     
+    # For single plot mode, get data after dependency checks
+    if (!is_dual_plot) {
+      plot_data <- if (!is.null(data_source)) data_source else data()
+      if (is.null(plot_data) || nrow(plot_data) == 0) {
+        return(NULL)
+      }
     }
     
     # Generate plot without progress bar
     isolate({
       # Work on a local copy so we can attach a temporary gene-expression column
-      df_local <- data()
+      df_local <- plot_data
       
       color_column <- NULL
       
       if (isTRUE(color_input == "genes")) {
         # Resolve gene input robustly: user may supply display names or gene ids (multiple selection supported)
         gene_inputs <- genes_input
-        gene_data_obj <- tryCatch(gene_data()$genes, error = function(e) NULL)
-        full_mat <- if (!is.null(cached_data[[get_current_data_type()]])) cached_data[[get_current_data_type()]] else gene_data()$data
+        
+        # Handle empty or invalid gene inputs by falling back to sample_type
+        if (is.null(gene_inputs) || length(gene_inputs) == 0 || 
+            (length(gene_inputs) == 1 && (is.na(gene_inputs) || gene_inputs == ""))) {
+          # If genes are requested but none provided, fall back to sample_type
+          color_column <- "sample_type"
+        } else {
+          # Process gene inputs normally
+          
+          # For dual plot mode, use cached data to prevent interference between plots
+          if (is_dual_plot && !is.null(data_source)) {
+            gene_data_obj <- attr(data_source, "cached_genes")
+            full_mat <- attr(data_source, "cached_full_data")
+            
+            # Fallback if cached data is missing
+            if (is.null(gene_data_obj)) {
+              gene_data_obj <- tryCatch(gene_data()$genes, error = function(e) NULL)
+            }
+            if (is.null(full_mat)) {
+              full_mat <- tryCatch(gene_data()$data, error = function(e) NULL)
+            }
+          } else {
+            # Single plot mode - use dynamic data
+            gene_data_obj <- tryCatch(gene_data()$genes, error = function(e) NULL)
+            full_mat <- if (!is.null(cached_data[[get_current_data_type()]])) cached_data[[get_current_data_type()]] else gene_data()$data
+          }
+        
         row_idx <- attr(df_local, "row_idx")
         
         resolved_gene_col <- NULL
@@ -2022,25 +2187,31 @@ server <- function(input, output, session) {
               
               # If the UI 'check' toggle indicates the user entered gene ids, try that first
               if (!is.null(gene_input) && nzchar(as.character(gene_input)) && isTRUE(check_input)) {
-                candidate <- as.character(gene_input)
-                if (!is.null(full_mat) && candidate %in% colnames(full_mat)) {
-                  current_resolved <- candidate
+                gene_id_from_input <- as.character(gene_input)
+                
+                # Directly check if this gene ID exists in our data matrix
+                if (gene_id_from_input %in% colnames(full_mat)) {
+                  current_resolved <- gene_id_from_input
                 }
               }
               
-              # If still not resolved, try mapping display name -> gene id using helper
-              if (is.null(current_resolved) && !is.null(gene_input) && nzchar(as.character(gene_input))) {
-                mapped <- tryCatch(get_gene_id(as.character(gene_input), gene_data_obj), error = function(e) NULL)
-                if (!is.null(mapped) && !is.na(mapped) && !is.null(full_mat) && mapped %in% colnames(full_mat)) {
-                  current_resolved <- as.character(mapped)
-                }
+              # If we didn't resolve by gene ID, try by gene name
+              if (is.null(current_resolved) && !is.null(gene_data_obj)) {
+                tryCatch({
+                  candidate_id <- get_gene_id(as.character(gene_input), gene_data_obj)
+                  if (!is.null(candidate_id) && !is.na(candidate_id) && candidate_id %in% colnames(full_mat)) {
+                    current_resolved <- candidate_id
+                  }
+                }, error = function(e) {
+                  # Silently continue if gene lookup fails
+                })
               }
               
-              # Final fallback: maybe the input text itself is the column name in the matrix
-              if (is.null(current_resolved) && !is.null(gene_input) && nzchar(as.character(gene_input))) {
-                candidate <- as.character(gene_input)
-                if (!is.null(full_mat) && candidate %in% colnames(full_mat)) {
-                  current_resolved <- candidate
+              # Final fallback: direct string match in column names
+              if (is.null(current_resolved)) {
+                gene_as_string <- as.character(gene_input)
+                if (gene_as_string %in% colnames(full_mat)) {
+                  current_resolved <- gene_as_string
                 }
               }
               
@@ -2059,72 +2230,117 @@ server <- function(input, output, session) {
                 resolved_gene_col <- "multi_gene_avg"
               }
             } else if (length(valid_gene_ids) == 1) {
-              resolved_gene_col <- valid_gene_ids[1]
+              # Single valid gene from multi-gene selection - attach expression values
+              gene_id <- valid_gene_ids[1]
+              if (!is.null(row_idx) && length(row_idx) > 0) {
+                df_local[[gene_id]] <- full_mat[row_idx, gene_id]
+              } else {
+                df_local[[gene_id]] <- full_mat[, gene_id]
+              }
+              resolved_gene_col <- gene_id
             }
           } else {
-            # Single gene selection - use existing logic
+            # Single gene selection
             gene_input <- gene_inputs[1]
             
-            # Try the same resolution logic for single gene
+            # If the UI 'check' toggle indicates the user entered a gene id, try that first
             if (!is.null(gene_input) && nzchar(as.character(gene_input)) && isTRUE(check_input)) {
-              candidate <- as.character(gene_input)
-              if (!is.null(full_mat) && candidate %in% colnames(full_mat)) {
-                resolved_gene_col <- candidate
+              gene_id_from_input <- as.character(gene_input)
+              
+              # Directly check if this gene ID exists in our data matrix
+              if (gene_id_from_input %in% colnames(full_mat)) {
+                resolved_gene_col <- gene_id_from_input
               }
             }
             
-            if (is.null(resolved_gene_col) && !is.null(gene_input) && nzchar(as.character(gene_input))) {
-              mapped <- tryCatch(get_gene_id(as.character(gene_input), gene_data_obj), error = function(e) NULL)
-              if (!is.null(mapped) && !is.na(mapped) && !is.null(full_mat) && mapped %in% colnames(full_mat)) {
-                resolved_gene_col <- as.character(mapped)
-              }
+            # If we didn't resolve by gene ID, try by gene name
+            if (is.null(resolved_gene_col) && !is.null(gene_data_obj)) {
+              tryCatch({
+                candidate_id <- get_gene_id(as.character(gene_input), gene_data_obj)
+                if (!is.null(candidate_id) && !is.na(candidate_id) && candidate_id %in% colnames(full_mat)) {
+                  resolved_gene_col <- candidate_id
+                }
+              }, error = function(e) {
+                # Silently continue if gene lookup fails
+              })
             }
             
-            if (is.null(resolved_gene_col) && !is.null(gene_input) && nzchar(as.character(gene_input))) {
-              candidate <- as.character(gene_input)
-              if (!is.null(full_mat) && candidate %in% colnames(full_mat)) {
-                resolved_gene_col <- candidate
+            # Final fallback: direct string match in column names
+            if (is.null(resolved_gene_col)) {
+              gene_as_string <- as.character(gene_input)
+              if (gene_as_string %in% colnames(full_mat)) {
+                resolved_gene_col <- gene_as_string
               }
             }
           }
         }
         
-        if (!is.null(resolved_gene_col) && resolved_gene_col %in% colnames(df_local)) {
-          color_column <- resolved_gene_col
+        if (!is.null(resolved_gene_col)) {
+          # For single gene selection, attach the gene expression values from full_mat to df_local
+          # (Multi-gene averaging already attached values earlier at line 2229)
+          if (resolved_gene_col != "multi_gene_avg" && resolved_gene_col %in% colnames(full_mat)) {
+            if (!is.null(row_idx) && length(row_idx) > 0) {
+              # Attach gene expression values for the filtered rows
+              df_local[[resolved_gene_col]] <- full_mat[row_idx, resolved_gene_col]
+            } else {
+              # If no row_idx, use all rows
+              df_local[[resolved_gene_col]] <- full_mat[, resolved_gene_col]
+            }
+          }
+          
+          # Now verify the gene column exists in df_local
+          if (resolved_gene_col %in% colnames(df_local)) {
+            color_column <- resolved_gene_col
+          } else {
+            # Gene was resolved but doesn't exist in current data - add debug and return NULL
+            cat("DEBUG PLOT ERROR: Gene resolved to '", resolved_gene_col, "' but not found in df_local columns\n")
+            cat("  - df_local columns (first 10):", paste(head(colnames(df_local), 10), collapse=", "), "\n")
+            cat("  - df_local total columns:", ncol(df_local), "\n")
+            cat("  - is_dual_plot:", is_dual_plot, "\n")
+            cat("  - genes_input:", paste(genes_input, collapse=", "), "\n")
+            return(NULL)
+          }
         } else {
-          color_column <- "sample_type"
+          cat("DEBUG PLOT ERROR: resolved_gene_col is NULL\n")
+          cat("  - genes_input:", paste(genes_input, collapse=", "), "\n")
+          cat("  - gene_data_obj is null:", is.null(gene_data_obj), "\n")
+          cat("  - full_mat is null:", is.null(full_mat), "\n")
+          if (!is.null(full_mat)) {
+            cat("  - full_mat columns (first 10):", paste(head(colnames(full_mat), 10), collapse=", "), "\n")
+          }
+          return(NULL)  # No valid gene found
         }
+        } # End of gene processing block
       } else {
+        # For non-gene colors, use the column directly
         color_column <- color_input
       }
       
-      # Final safety check: ensure the resolved color column exists in df_local
-      if (is.null(color_column) || is.na(color_column) || color_column == "" || !(color_column %in% colnames(df_local))) {
-        color_column <- "sample_type"
+      if (is.null(color_column)) {
+        return(NULL)
       }
       
-       p <- embedding_plot(
+      # Generate the actual plot
+      p <- embedding_plot(
         df_local,
-        input$xaxis,
-        input$yaxis,
+        xaxis_input,
+        yaxis_input,
         color_column,
         genes_input,
-        input$size,
+        size_input,
         plot_type = get_plot_type(),
-        plot_dim = input$plot,
+        plot_dim = plot_input,
         is_dual_plot = is_dual_plot
       )
-      
-       p <- p %>%
+      p <- p %>%
         event_register("plotly_click") %>%
         config(
           displaylogo = FALSE, 
           scrollZoom = TRUE,
           modeBarButtonsToRemove = c(),
-          displayModeBar = TRUE,
-          modeBarPosition = "left"
+          displayModeBar = TRUE
         )
-      
+
       return(p)
     })
   }
@@ -2132,6 +2348,93 @@ server <- function(input, output, session) {
   # Remove comparison button handler
   observeEvent(input$remove_comparison, {
     updateCheckboxInput(session, "enable_comparison", value = FALSE)
+  })
+  
+  # Preserve UI state when toggling comparison mode
+  observeEvent(input$enable_comparison, {
+    if (isTRUE(input$enable_comparison)) {
+      # Debug: Log what we're starting with
+      cat("DEBUG: Enabling comparison mode\n")
+      cat("  - input$color:", if(is.null(input$color)) "NULL" else input$color, "\n")
+      cat("  - input$genes_n:", if(is.null(input$genes_n)) "NULL" else paste(input$genes_n, collapse=", "), "\n")
+      cat("  - input$check:", if(is.null(input$check)) "NULL" else input$check, "\n")
+      
+      # Store current selections before enabling comparison
+      ui_state$stored_color <- input$color
+      ui_state$stored_genes <- input$genes_n  
+      ui_state$stored_check <- input$check
+      
+      # Update label for first plot
+      updateSelectInput(
+        session,
+        "color",
+        label = "First Plot Color"
+      )
+      
+      # Initialize second plot with same settings as first plot
+      cat("  - Setting color_second to:", input$color, "\n")
+      updateSelectInput(
+        session,
+        "color_second",
+        selected = input$color
+      )
+      
+      # If first plot is using genes, also copy gene selection to second plot
+      if (!is.null(input$color) && input$color == "genes" && !is.null(input$genes_n) && length(input$genes_n) > 0) {
+        # Capture the gene selection in the current reactive context
+        current_genes <- input$genes_n
+        cat("  - Copying genes to second plot:", paste(current_genes, collapse=", "), "\n")
+        
+        # Wait a moment for the UI to update, then copy gene selection
+        later(function() {
+          cat("  - Later callback: setting genes_second to:", paste(current_genes, collapse=", "), "\n")
+          updateSelectizeInput(
+            session,
+            "genes_second",
+            selected = current_genes  # Use captured value instead of input$genes_n
+          )
+        }, 0.1)
+      } else {
+        cat("  - Not copying genes (color is not 'genes' or genes are empty)\n")
+      }
+      
+      # Also copy check state
+      if (!is.null(input$check)) {
+        updateCheckboxInput(
+          session,
+          "check_second",
+          value = input$check
+        )
+      }
+    } else {
+      # When disabling comparison, restore previous selections
+      updateSelectInput(
+        session,
+        "color",
+        label = "Color",
+        selected = ui_state$stored_color
+      )
+      
+      # If the stored color was genes, also restore gene selection
+      if (!is.null(ui_state$stored_color) && ui_state$stored_color == "genes") {
+        if (!is.null(ui_state$stored_genes) && length(ui_state$stored_genes) > 0) {
+          updateSelectizeInput(
+            session,
+            "genes_n", 
+            selected = ui_state$stored_genes
+          )
+        }
+      }
+    }
+  }, ignoreInit = TRUE)
+  
+  # Continuously update stored state when user makes changes (only when comparison is disabled)
+  observe({
+    if (!isTRUE(input$enable_comparison)) {
+      ui_state$stored_color <- input$color
+      ui_state$stored_genes <- input$genes_n
+      ui_state$stored_check <- input$check
+    }
   })
   
   # Update UI labels when color selections change - separate observers for independence
@@ -2188,133 +2491,238 @@ server <- function(input, output, session) {
     }
   })
   
-  # Update gene choices for second plot
-  observe({
+  # Update gene choices for second plot when comparison mode and color_second changes
+  observeEvent(list(input$color_second, input$check_second), {
+    if (!isTRUE(input$enable_comparison) || !identical(input$color_second, "genes")) {
+      return()
+    }
+    
     req(gene_data()$genes)
     
-    gene_choices <- tryCatch({
-      get_gene_choices(gene_data()$genes, isTRUE(input$check_second))
-    }, error = function(e) "")
-    
-    updateSelectizeInput(
-      session,
-      "genes_second",
-      choices = gene_choices,
-      server = TRUE
-    )
-  })
+    tryCatch({
+      genes_df <- gene_data()$genes
+      if (is.null(genes_df) || nrow(genes_df) == 0) {
+        return()
+      }
+      
+      gene_choices <- get_gene_choices(genes_df, isTRUE(input$check_second))
+      
+      if (is.null(gene_choices) || length(gene_choices) == 0) {
+        return()
+      }
+      
+      # Store current selection before updating choices
+      current_selection_second <- input$genes_second
+      
+      updateSelectizeInput(
+        session,
+        "genes_second",
+        label = if (isTRUE(input$check_second)) "Gene ID" else "Gene name",
+        choices = gene_choices,
+        selected = current_selection_second,  # Preserve current selection
+        options = list(
+          placeholder = "Select one or more genes",
+          maxItems = 10
+        ),
+        server = TRUE
+      )
+    }, error = function(e) {
+      message("Error updating second plot gene choices: ", e$message)
+    })
+  }, ignoreInit = FALSE)
   
+  # Helper function to validate gene selection
+  validate_gene_selection <- function(genes_input, plot_name = "plot") {
+    if (is.null(genes_input)) {
+      return(FALSE)
+    }
+    
+    if (length(genes_input) == 0) {
+      return(FALSE)
+    }
+    
+    # Check if all gene inputs are non-empty strings
+    if (any(is.na(genes_input)) || any(genes_input == "")) {
+      return(FALSE)
+    }
+    
+    return(TRUE)
+  }
+
   # Create reactive expressions for each plot that only depend on their specific inputs
   first_plot_reactive <- reactive({
-    req(input$enable_comparison, input$color)
+    req(input$enable_comparison)
     
-    color_main <- input$color
-    genes_main <- if (is.null(input$genes_n)) "" else input$genes_n
-    check_main <- if (is.null(input$check)) FALSE else input$check
+    # Get current values with defaults
+    color_main <- if (!is.null(input$color)) input$color else "sample_type"
+    genes_main <- if (!is.null(input$genes_n)) input$genes_n else ""
+    check_main <- if (!is.null(input$check)) input$check else FALSE
     
+    # For gene coloring, only return NULL if genes are explicitly needed but completely missing
     if (color_main == "genes") {
-      req(genes_main)
+      # Allow the reactive to return values even if genes are empty - let the plot function handle it
+      if (is.null(genes_main) || (length(genes_main) == 1 && genes_main == "")) {
+        # Return a valid structure but with empty genes - don't block with NULL
+        genes_main <- ""
+      }
     }
     
     list(
       color = color_main,
       genes = genes_main,
       check = check_main,
-      timestamp = Sys.time()  # Add timestamp to track when this changes
+      xaxis = if (!is.null(input$xaxis)) input$xaxis else "pc_1",
+      yaxis = if (!is.null(input$yaxis)) input$yaxis else "pc_2", 
+      size = if (!is.null(input$size)) input$size else 4,
+      plot = if (!is.null(input$plot)) input$plot else "3d",
+      timestamp = Sys.time()
     )
   })
   
   second_plot_reactive <- reactive({
-    req(input$enable_comparison, input$color_second)
+    req(input$enable_comparison)
     
-    color_second <- input$color_second
-    genes_second <- if (is.null(input$genes_second)) "" else input$genes_second
-    check_second <- if (is.null(input$check_second)) FALSE else input$check_second
+    # Get current values with defaults
+    color_second <- if (!is.null(input$color_second)) input$color_second else "sample_type"
+    genes_second <- if (!is.null(input$genes_second)) input$genes_second else ""
+    check_second <- if (!is.null(input$check_second)) input$check_second else FALSE
+    xaxis_second <- if (!is.null(input$xaxis_second)) input$xaxis_second else "pc_1"
+    yaxis_second <- if (!is.null(input$yaxis_second)) input$yaxis_second else "pc_2"
+    size_second <- if (!is.null(input$size_second)) input$size_second else 4
+    plot_second <- if (!is.null(input$plot_second)) input$plot_second else "3d"
     
+    # For gene coloring, allow empty genes and let the plot function handle it
     if (color_second == "genes") {
-      req(genes_second)
+      if (is.null(genes_second) || (length(genes_second) == 1 && genes_second == "")) {
+        genes_second <- ""  # Set to empty but don't block
+      }
     }
     
     list(
       color = color_second,
       genes = genes_second,
       check = check_second,
+      xaxis = xaxis_second,
+      yaxis = yaxis_second,
+      size = size_second,
+      plot = plot_second,
       timestamp = Sys.time()  # Add timestamp to track when this changes
     )
   })
 
-  # Observer for first plot gene links
-  observe({
-    req(input$enable_comparison, input$color == "genes", input$genes_n)
-    
-    # Get first gene for links
-    first_gene <- input$genes_n[1]
-    if (!is.null(first_gene) && nzchar(first_gene)) {
-      # Try to get gene ID
-      gene_data_obj <- tryCatch(gene_data()$genes, error = function(e) NULL)
-      if (!is.null(gene_data_obj)) {
-        gene_id <- tryCatch(get_gene_id(first_gene, gene_data_obj), error = function(e) first_gene)
-        if (!is.null(gene_id) && nzchar(gene_id)) {
-          gene_links(gene_id)
-        }
-      }
-    }
-  })
+   # Observer for first plot gene links (during comparison)
+   observe({
+     req(input$enable_comparison, input$color == "genes", input$genes_n)
+     
+     # Get all selected genes for links
+     selected_genes <- input$genes_n
+     if (!is.null(selected_genes) && length(selected_genes) > 0) {
+       gene_data_obj <- tryCatch(gene_data()$genes, error = function(e) NULL)
+       if (!is.null(gene_data_obj)) {
+         # Get gene IDs for all selected genes
+         gene_ids <- sapply(selected_genes, function(gene) {
+           tryCatch(get_gene_id(gene, gene_data_obj), error = function(e) gene)
+         })
+         gene_ids <- gene_ids[!is.null(gene_ids) & nzchar(gene_ids)]
+         if (length(gene_ids) > 0) {
+           gene_links_multiple(gene_ids)
+         }
+       }
+     }
+   })
 
-  # Observer for second plot gene links  
-  observe({
-    req(input$enable_comparison, input$color_second == "genes", input$genes_second)
-    
-    # Get first gene for links
-    first_gene <- input$genes_second[1] 
-    if (!is.null(first_gene) && nzchar(first_gene)) {
-      # Try to get gene ID
-      gene_data_obj <- tryCatch(gene_data()$genes, error = function(e) NULL)
-      if (!is.null(gene_data_obj)) {
-        gene_id <- tryCatch(get_gene_id(first_gene, gene_data_obj), error = function(e) first_gene)
-        if (!is.null(gene_id) && nzchar(gene_id)) {
-          gene_links(gene_id)
-        }
-      }
-    }
-  })
+   # Observer for second plot gene links  
+   observe({
+     req(input$enable_comparison, input$color_second == "genes", input$genes_second)
+     
+     # Get all selected genes for links
+     selected_genes <- input$genes_second
+     if (!is.null(selected_genes) && length(selected_genes) > 0) {
+       gene_data_obj <- tryCatch(gene_data()$genes, error = function(e) NULL)
+       if (!is.null(gene_data_obj)) {
+         # Get gene IDs for all selected genes
+         gene_ids <- sapply(selected_genes, function(gene) {
+           tryCatch(get_gene_id(gene, gene_data_obj), error = function(e) gene)
+         })
+         gene_ids <- gene_ids[!is.null(gene_ids) & nzchar(gene_ids)]
+         if (length(gene_ids) > 0) {
+           gene_links_multiple(gene_ids)
+         }
+       }
+     }
+   })
 
-  # Observer for single plot gene links (when comparison is disabled)
-  observe({
-    req(!isTRUE(input$enable_comparison), input$color == "genes", input$genes_n)
-    
-    # Get first gene for links
-    first_gene <- input$genes_n[1]
-    if (!is.null(first_gene) && nzchar(first_gene)) {
-      # Try to get gene ID
-      gene_data_obj <- tryCatch(gene_data()$genes, error = function(e) NULL)
-      if (!is.null(gene_data_obj)) {
-        gene_id <- tryCatch(get_gene_id(first_gene, gene_data_obj), error = function(e) first_gene)
-        if (!is.null(gene_id) && nzchar(gene_id)) {
-          gene_links(gene_id)
-        }
+   # Observer for single plot gene links (when comparison is disabled)
+   observe({
+     req(!isTRUE(input$enable_comparison), input$color == "genes", input$genes_n)
+     
+     # Get all selected genes for links
+     selected_genes <- input$genes_n
+     if (!is.null(selected_genes) && length(selected_genes) > 0) {
+       gene_data_obj <- tryCatch(gene_data()$genes, error = function(e) NULL)
+       if (!is.null(gene_data_obj)) {
+         # Get gene IDs for all selected genes
+         gene_ids <- sapply(selected_genes, function(gene) {
+           tryCatch(get_gene_id(gene, gene_data_obj), error = function(e) gene)
+         })
+         gene_ids <- gene_ids[!is.null(gene_ids) & nzchar(gene_ids)]
+         if (length(gene_ids) > 0) {
+           gene_links_multiple(gene_ids)
+         }
+       }
       }
-    }
-  })
+   })
 
   # First plot output (uses main color control - same as single plot)
   output$first_plotly <- renderPlotly({
-    # Only react to first plot's specific inputs
+    # Get plot parameters
     plot_params <- first_plot_reactive()
     
-    generate_embedding_plot(plot_params$color, plot_params$genes, plot_params$check, is_dual_plot = TRUE)
+    # If plot_params is NULL (e.g., during initialization), return NULL to show spinner
+    if (is.null(plot_params)) {
+      return(NULL)
+    }
+    
+    generate_embedding_plot(
+      plot_params$color, 
+      plot_params$genes, 
+      plot_params$check,
+      plot_params$xaxis,
+      plot_params$yaxis,
+      plot_params$size,
+      plot_params$plot,
+      is_dual_plot = TRUE, 
+      data_source = first_plot_data()
+    )
   })
 
   # Second plot output (uses second color control)
   output$second_plotly <- renderPlotly({
-    # Only react to second plot's specific inputs
+    # Get plot parameters
     plot_params <- second_plot_reactive()
     
-    generate_embedding_plot(plot_params$color, plot_params$genes, plot_params$check, is_dual_plot = TRUE)
+    # If plot_params is NULL (e.g., during initialization), return NULL to show spinner
+    if (is.null(plot_params)) {
+      return(NULL)
+    }
+    
+    generate_embedding_plot(
+      plot_params$color, 
+      plot_params$genes, 
+      plot_params$check,
+      plot_params$xaxis,
+      plot_params$yaxis,
+      plot_params$size,
+      plot_params$plot,
+      is_dual_plot = TRUE, 
+      data_source = second_plot_data()
+    )
   })
   
   # Keep the original plot for backward compatibility
   output$all_plotly <- renderPlotly({
+    # Only render when comparison is NOT enabled
+    req(!isTRUE(input$enable_comparison))
     req(all_dependencies_ready(), embedding_ready())
 
     # Triple-check data is still valid
@@ -2455,8 +2863,7 @@ server <- function(input, output, session) {
           displaylogo = FALSE, 
           scrollZoom = TRUE,
           modeBarButtonsToRemove = c(),
-          displayModeBar = TRUE,
-          modeBarPosition = "left"  # Move toolbar to left
+          displayModeBar = TRUE
         )
 
       embplot(TRUE)
@@ -2956,4 +3363,57 @@ server <- function(input, output, session) {
       }
     )
   })
+  
+  # Debug outputs for comparison mode
+  output$debug_first_plot <- renderText({
+    if (!isTRUE(input$enable_comparison)) return("")
+    
+    paste(
+      "=== FIRST PLOT DEBUG ===",
+      paste("enable_comparison:", isTRUE(input$enable_comparison)),
+      paste("input$color:", if(is.null(input$color)) "NULL" else input$color),
+      paste("input$genes_n:", if(is.null(input$genes_n)) "NULL" else paste(input$genes_n, collapse=", ")),
+      paste("input$check:", if(is.null(input$check)) "NULL" else input$check),
+      "",
+      "first_plot_reactive():",
+      paste("- result:", if(is.null(try(first_plot_reactive(), silent=TRUE))) "NULL" else "OK"),
+      "",
+      "first_plot_data():",  
+      paste("- result:", if(is.null(try(first_plot_data(), silent=TRUE))) "NULL" else "OK"),
+      sep = "\n"
+    )
+  })
+  
+  output$debug_second_plot <- renderText({
+    if (!isTRUE(input$enable_comparison)) return("")
+    
+    paste(
+      "=== SECOND PLOT DEBUG ===", 
+      paste("input$color_second:", if(is.null(input$color_second)) "NULL" else input$color_second),
+      paste("input$genes_second:", if(is.null(input$genes_second)) "NULL" else paste(input$genes_second, collapse=", ")),
+      paste("input$check_second:", if(is.null(input$check_second)) "NULL" else input$check_second),
+      "",
+      "second_plot_reactive():",
+      paste("- result:", if(is.null(try(second_plot_reactive(), silent=TRUE))) "NULL" else "OK"),
+      "",
+      "second_plot_data():",
+      paste("- result:", if(is.null(try(second_plot_data(), silent=TRUE))) "NULL" else "OK"), 
+      sep = "\n"
+    )
+  })
+  
+  output$debug_general <- renderText({
+    if (!isTRUE(input$enable_comparison)) return("")
+    
+    paste(
+      "=== GENERAL DEBUG ===",
+      paste("Current time:", Sys.time()),
+      paste("App initialized:", app_initialized()),
+      paste("Data loading trigger:", data_loading_trigger()),
+      paste("Gene data available:", !is.null(try(gene_data(), silent=TRUE))),
+      paste("Filtered gene data available:", !is.null(try(filtered_gene_data(), silent=TRUE))),
+      sep = "\n"
+    )
+  })
+  
 }
