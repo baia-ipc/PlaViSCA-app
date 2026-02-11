@@ -1752,7 +1752,6 @@ server <- function(input, output, session) {
         updateSelectizeInput(
           session,
           "genes_n",
-          label = if (isTRUE(input$check)) "Gene ID" else "Gene name",
           choices = gene_choices,
           selected = current_selection,  # Preserve current selection
           options = list(
@@ -1761,6 +1760,10 @@ server <- function(input, output, session) {
           ),
           server = TRUE
         )
+        
+        # Update the label text based on toggle state
+        label_text <- if (isTRUE(input$check)) "Gene ID" else "Gene name"
+        runjs(sprintf('$("#gene_label").text("%s");', label_text))
 
         # Reset loading state after choices are updated
         later(
@@ -2485,7 +2488,6 @@ server <- function(input, output, session) {
       updateSelectizeInput(
         session,
         "genes_second",
-        label = if (isTRUE(input$check_second)) "Gene ID" else "Gene name",
         choices = gene_choices,
         selected = current_selection_second,  # Preserve current selection
         options = list(
@@ -2494,6 +2496,10 @@ server <- function(input, output, session) {
         ),
         server = TRUE
       )
+      
+      # Update the label text based on toggle state
+      label_text_second <- if (isTRUE(input$check_second)) "Gene ID" else "Gene name"
+      runjs(sprintf('$("#gene_label_second").text("%s");', label_text_second))
     }, error = function(e) {
       message("Error updating second plot gene choices: ", e$message)
     })

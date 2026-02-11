@@ -1612,9 +1612,30 @@ input:checked+.slider:before {
 .gene_link_ui_exp a {
   color: #0066cc;
   text-decoration: none;
-  font-size: 0.9em;
+  font-size: 0.8em;
+  padding: 2px 5px;
+  background-color: #f0f0f0;
+  border-radius: 3px;
+  border: 1px solid #ddd;
 }
 
 .gene_link_ui_exp a:hover {
   color: #d234e7;
+}
+
+/* Ensure all gene links have consistent styling */
+.gene-link {
+  color: #0066cc !important;
+  text-decoration: underline !important;
+  font-size: 0.85em !important;
+  padding: 0px !important;
+  background-color: transparent !important;
+  border: none !important;
+  transition: color 0.2s ease !important;
+}
+
+.gene-link:hover {
+  color: #d234e7 !important;
+  text-decoration: underline !important;
+  background-color: transparent !important;
 }

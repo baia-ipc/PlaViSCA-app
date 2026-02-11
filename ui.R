@@ -299,62 +299,63 @@ ui <- fluidPage(
           column(
             width = 12,
             class = "col-12",
-            # Gene selection dropdown with toggle
+            # Gene selection with toggle in label
             fluidRow(
               column(
-                width = 10,
-                selectizeInput("genes_n", "Gene", 
+                width = 12,
+                style = "margin-bottom: 5px;",
+                div(
+                  style = "display: flex; align-items: center; margin-bottom: 5px;",
+                  tags$label(
+                    style = "margin: 0; margin-right: 10px; font-weight: bold;",
+                    id = "gene_label",
+                    "Gene name"
+                  ),
+                  tags$label(
+                    class = "switch",
+                    style = "font-size: 0.8em; margin: 0;",
+                    "Gene ID",
+                    tags$input(
+                      id = "check",
+                      type = "checkbox",
+                      class = "toggle_exp"
+                    ),
+                    tags$span(class = "slider")
+                  )
+                ),
+                selectizeInput("genes_n", NULL, 
                              choices = "",
                              multiple = TRUE,
                              options = list(
                                placeholder = "Select one or more genes",
                                maxItems = 10
                              ))
-              ),
-              column(
-                width = 2,
-                br(),
-                div(
-                  style = "margin-top: 5px;",
-                  div(
-                    style = "margin-top: 5px;",
-                    tags$label(
-                      class = "switch",
-                      style = "font-size: 0.8em; margin-right: 8px;",
-                      "Gene ID",
-                      tags$input(
-                        id = "check",
-                        type = "checkbox",
-                        class = "toggle_exp"
-                      ),
-                      tags$span(class = "slider")
-                    )
-                  )
-                )
               )
             ),
-            # External links below gene selection
+            # External links inline with dropdown
             fluidRow(
               column(
                 width = 12,
                 tags$div(
                   id = "gene_link_ui_first",
                   class = "gene_link_ui_exp",
-                  style = "margin-top: -5px; text-align: left; padding-left: 10px;",
-                  tags$a(
-                    id = "plasmo_link",
-                    href = "#",
-                    target = "_blank",
-                    class = "gene-link",
-                    "🔬 PlasmoDB"
-                  ),
-                  tags$span(" | ", style = "margin: 0 5px; color: #999;"),
-                  tags$a(
-                    id = "ncbi_link", 
-                    href = "#",
-                    target = "_blank",
-                    class = "gene-link",
-                    "🧬 NCBI"
+                  style = "margin-top: -10px; margin-bottom: 10px; text-align: left; padding-left: 0px;",
+                  tags$small(
+                    tags$a(
+                      id = "plasmo_link",
+                      href = "#",
+                      target = "_blank",
+                      class = "gene-link",
+                      "🔬 PlasmoDB"
+                    ),
+                    tags$span(" | ", style = "margin: 0 5px; color: #999;"),
+                    tags$a(
+                      id = "ncbi_link", 
+                      href = "#",
+                      target = "_blank",
+                      class = "gene-link",
+                      "🧬 NCBI"
+                    )
                   )
                 )
               )
@@ -364,6 +365,7 @@ ui <- fluidPage(
         column(
           width = 12,
           class = "col-12",
+          style = "margin-top: 15px;",
           fluidRow(
             column(
               width = 12,
@@ -412,62 +414,63 @@ ui <- fluidPage(
              # Gene selection for second plot when genes is selected
              conditionalPanel(
                condition = "input.color_second == 'genes'",
-               # Gene selection dropdown with toggle
+               # Gene selection with toggle in label
                fluidRow(
                  column(
-                   width = 10,
-                   selectizeInput("genes_second", "Gene(s) for Second Plot:", 
+                   width = 12,
+                   style = "margin-bottom: 5px;",
+                   div(
+                     style = "display: flex; align-items: center; margin-bottom: 5px;",
+                     tags$label(
+                       style = "margin: 0; margin-right: 10px; font-weight: bold;",
+                       id = "gene_label_second",
+                       "Gene name"
+                     ),
+                     tags$label(
+                       class = "switch",
+                       style = "font-size: 0.8em; margin: 0;",
+                       "Gene ID",
+                       tags$input(
+                         id = "check_second",
+                         type = "checkbox",
+                         class = "toggle_exp"
+                       ),
+                       tags$span(class = "slider")
+                     )
+                   ),
+                   selectizeInput("genes_second", NULL, 
                                 choices = "", 
                                 multiple = TRUE,
                                 options = list(
                                   placeholder = "Select one or more genes",
                                   maxItems = 10
                                 ))
-                 ),
-                 column(
-                   width = 2,
-                   br(),
-                   div(
-                     style = "margin-top: 5px;",
-                    div(
-                      style = "margin-top: 5px;",
-                      tags$label(
-                        class = "switch",
-                        style = "font-size: 0.8em; margin-right: 8px;",
-                        "Gene ID",
-                        tags$input(
-                          id = "check_second",
-                          type = "checkbox",
-                          class = "toggle_exp"
-                        ),
-                        tags$span(class = "slider")
-                      )
-                    )
-                   )
                  )
                ),
-               # External links below gene selection for second plot
+               # External links inline with dropdown
                fluidRow(
                  column(
                    width = 12,
                   tags$div(
                     id = "gene_link_ui_second",
                     class = "gene_link_ui_exp",
-                    style = "margin-top: -5px; text-align: left; padding-left: 10px;",
-                    tags$a(
-                      id = "plasmo_link_second",
-                      href = "#",
-                      target = "_blank", 
-                      class = "gene-link",
-                      "🔬 PlasmoDB"
-                    ),
-                    tags$span(" | ", style = "margin: 0 5px; color: #999;"),
-                    tags$a(
-                      id = "ncbi_link_second",
-                      href = "#",
-                      target = "_blank",
-                      class = "gene-link",
-                      "🧬 NCBI"
+                    style = "margin-top: -10px; margin-bottom: 10px; text-align: left; padding-left: 0px;",
+                    tags$small(
+                      tags$a(
+                        id = "plasmo_link_second",
+                        href = "#",
+                        target = "_blank", 
+                        class = "gene-link",
+                        "🔬 PlasmoDB"
+                      ),
+                      tags$span(" | ", style = "margin: 0 5px; color: #999;"),
+                      tags$a(
+                        id = "ncbi_link_second",
+                        href = "#",
+                        target = "_blank",
+                        class = "gene-link",
+                        "🧬 NCBI"
+                      )
                     )
                   )
                  )
