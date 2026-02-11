@@ -37,14 +37,11 @@ keep_metadata_cols <- c(
   "sequencer", "hour_post_invasion", "day_post_infection",
   
   # QC metrics
-  "n_count_rna", "n_feature_rna",
+  "n_count_rna", "n_feature_rna"
   
-  # Embeddings (will be identified by pattern)
-  # pca_u_1, pca_u_2, pca_u_3, pca_i_1, pca_i_2, pca_i_3,
-  # umap_u_1, umap_u_2, umap_u_3, umap_i_1, umap_i_2, umap_i_3,
-  # t_sne_1, t_sne_2, t_sne_3
-  
-  # Gene expression columns (PVP01_*) will be identified by pattern
+  # NOTE: Embeddings and gene expression columns are identified by pattern below
+  # Embeddings: pca_u_*, pca_i_*, umap_u_*, umap_i_*, t_sne_*
+  # Genes: PVP01_*
 )
 
 # Columns to explicitly REMOVE
