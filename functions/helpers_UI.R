@@ -99,104 +99,114 @@ gene_links_multiple <- function(gene_ids) {
 # Function that builds the full Metadata tab
 create_meta_filter_row <- function(suffix = "") {
     tagList(
-        # First row (5 boxes)
-        fluidRow(
-            class = "meta-filter",
-            style = "display: flex; flex-wrap: wrap; justify-content: space-between;",
-            column(
-                width = 2,
-                selectizeInput(
-                    inputId = paste0("study_label", suffix),
-                    "Study label:",
-                    choices = c(""),
-                    multiple = TRUE,
-                    options = list(
-                        placeholder = "Select options...",
-                        onInitialize = I('function() { this.setValue(""); }')
-                    )
-                )
+        # Filters box container
+        div(
+            class = "filters-container",
+            style = "border: 1px solid #ddd; border-radius: 8px; padding: 20px; margin-bottom: 20px; background-color: #f9f9f9;",
+            # Filters header
+            h4(
+                style = "margin-top: 0; margin-bottom: 15px; color: #333; font-weight: 600; border-bottom: 2px solid #3498db; padding-bottom: 10px;",
+                icon("filter"),
+                " Filters"
             ),
-            column(
-                width = 2,
-                selectizeInput(
-                    inputId = paste0("sample_type", suffix),
-                    "Sample type:",
-                    choices = c(""),
-                    multiple = TRUE,
-                    options = list(
-                        placeholder = "Select options...",
-                        onInitialize = I('function() { this.setValue(""); }')
+            # First row (5 boxes)
+            fluidRow(
+                class = "meta-filter",
+                style = "display: flex; flex-wrap: wrap; justify-content: space-between;",
+                column(
+                    width = 2,
+                    selectizeInput(
+                        inputId = paste0("study_label", suffix),
+                        "Study label:",
+                        choices = c(""),
+                        multiple = TRUE,
+                        options = list(
+                            placeholder = "Select options...",
+                            onInitialize = I('function() { this.setValue(""); }')
+                        )
                     )
-                )
-            ),
-            column(
-                width = 2,
-                selectizeInput(
-                    inputId = paste0("host_species", suffix),
-                    "Host species:",
-                    choices = c(""),
-                    multiple = TRUE,
-                    options = list(
-                        placeholder = "Select options...",
-                        onInitialize = I('function() { this.setValue(""); }'),
-                        render = I(
-                            '{
-              option: function(item, escape) {
-                return "<div>" + item.label + "</div>";
-              },
-              item: function(item, escape) {
-                return "<div>" + item.label + "</div>";
-              }
-            }'
+                ),
+                column(
+                    width = 2,
+                    selectizeInput(
+                        inputId = paste0("sample_type", suffix),
+                        "Sample type:",
+                        choices = c(""),
+                        multiple = TRUE,
+                        options = list(
+                            placeholder = "Select options...",
+                            onInitialize = I('function() { this.setValue(""); }')
+                        )
+                    )
+                ),
+                column(
+                    width = 2,
+                    selectizeInput(
+                        inputId = paste0("host_species", suffix),
+                        "Host species:",
+                        choices = c(""),
+                        multiple = TRUE,
+                        options = list(
+                            placeholder = "Select options...",
+                            onInitialize = I('function() { this.setValue(""); }'),
+                            render = I(
+                                '{
+                  option: function(item, escape) {
+                    return "<div>" + item.label + "</div>";
+                  },
+                  item: function(item, escape) {
+                    return "<div>" + item.label + "</div>";
+                  }
+                }'
+                            )
+                        )
+                    )
+                ),
+                column(
+                    width = 2,
+                    selectizeInput(
+                        inputId = paste0("parasite_stage", suffix),
+                        "Parasite stage:",
+                        choices = c(""),
+                        multiple = TRUE,
+                        options = list(
+                            placeholder = "Select options...",
+                            onInitialize = I('function() { this.setValue(""); }')
+                        )
+                    )
+                ),
+                column(
+                    width = 2,
+                    selectizeInput(
+                        inputId = paste0("treatment", suffix),
+                        "Treatment:",
+                        choices = c(""),
+                        multiple = TRUE,
+                        options = list(
+                            placeholder = "Select options...",
+                            onInitialize = I('function() { this.setValue(""); }')
                         )
                     )
                 )
             ),
-            column(
-                width = 2,
-                selectizeInput(
-                    inputId = paste0("parasite_stage", suffix),
-                    "Parasite stage:",
-                    choices = c(""),
-                    multiple = TRUE,
-                    options = list(
-                        placeholder = "Select options...",
-                        onInitialize = I('function() { this.setValue(""); }')
-                    )
-                )
-            ),
-            column(
-                width = 2,
-                selectizeInput(
-                    inputId = paste0("treatment", suffix),
-                    "Treatment:",
-                    choices = c(""),
-                    multiple = TRUE,
-                    options = list(
-                        placeholder = "Select options...",
-                        onInitialize = I('function() { this.setValue(""); }')
-                    )
-                )
-            )
-        ),
 
-        # Second row (5 boxes)
-        fluidRow(
-            class = "meta-filter",
-            style = "display: flex; flex-wrap: wrap; justify-content: space-between;",
-            column(
-                width = 2,
-                selectizeInput(
-                    inputId = paste0("development_phase", suffix),
-                    "Development phase:",
-                    choices = c(""),
-                    multiple = TRUE,
-                    options = list(
-                        placeholder = "Select options...",
-                        onInitialize = I('function() { this.setValue(""); }')
+            # Second row (5 boxes)
+            fluidRow(
+                class = "meta-filter",
+                style = "display: flex; flex-wrap: wrap; justify-content: space-between;",
+                column(
+                    width = 2,
+                    selectizeInput(
+                        inputId = paste0("development_phase", suffix),
+                        "Development phase:",
+                        choices = c(""),
+                        multiple = TRUE,
+                        options = list(
+                            placeholder = "Select options...",
+                            onInitialize = I('function() { this.setValue(""); }')
+                        )
                     )
-                )
-            ),
+                ),
             column(
                 width = 2,
                 selectizeInput(
@@ -246,10 +256,10 @@ create_meta_filter_row <- function(suffix = "") {
                     options = list(
                         placeholder = "Select options...",
                         onInitialize = I('function() { this.setValue(""); }')
-                    )
                 )
             )
         )
+        ) # Close filters-container div
     )
 }
 

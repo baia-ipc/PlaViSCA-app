@@ -94,9 +94,9 @@ filtered_gene_exp_cache_key <- function(input) {
         "filtered_gene_exp",
         get_field("study_label_exp"),
         get_field("host_species_exp"),
-        get_field("life_cycle_stage_exp"),
-        get_field("treatment_exp"),
         get_field("parasite_stage_exp"),
+        get_field("treatment_exp"),
+        get_field("development_phase_exp"),
         get_field("sample_type_exp"),
         get_field("strain_exp"),
         get_field("hour_post_invasion_exp"),
@@ -193,10 +193,10 @@ analyze_data_diversity <- function(data, group_col) {
                             gsub("_", " ", group_col), ": '", value, "'")
             
             # Provide context-specific suggestions
-            if (group_col == "life_cycle_stage") {
-                suggestion <- "This is biologically correct - try grouping by host_species, sample_type, or study_label instead"
-            } else if (group_col == "parasite_stage") {
-                suggestion <- "This is expected when filtering by parasite stage - try life_cycle_stage or host_species grouping"
+            if (group_col == "parasite_stage") {
+                suggestion <- "This is biologically correct - try grouping by development_phase, host_species, or sample_type instead"
+            } else if (group_col == "development_phase") {
+                suggestion <- "This is expected when filtering by development phase - try parasite_stage or host_species grouping"
             } else if (group_col == "host_species") {
                 suggestion <- "This filtered dataset contains data from only one host species - try sample_type or study_label grouping"
             } else if (group_col == "sample_type") {
@@ -299,9 +299,10 @@ apply_secondary_filters <- function(data, inputs, keep_gene_matrix = TRUE, genes
     metadata_cols <- c(
         "study_label",
         "host_species",
-        "life_cycle_stage",
+        "development_phase",
         "treatment",
         "parasite_stage",
+        "blood_stage",
         "sample_type",
         "geographic_location",
         "sc_technology",
@@ -1060,7 +1061,6 @@ generate_data_summary <- function(data, filters_applied = NULL) {
     # Key metadata columns to summarize
     summary_cols <- c("study_label", "host_species", "sample_type", 
                      "development_phase", "blood_stage", "parasite_stage",
-                     "life_cycle_stage", 
                      "strain", "geographic_location", "treatment")
     
     available_cols <- intersect(summary_cols, colnames(data))

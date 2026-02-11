@@ -533,8 +533,8 @@ server <- function(input, output, session) {
       )
       updateSelectInput(
         session,
-        "life_cycle_stage",
-        choices = unique(filt_data$life_cycle_stage)
+        "parasite_stage",
+        choices = unique(filt_data$parasite_stage)
       )
       updateSelectInput(
         session,
@@ -543,8 +543,8 @@ server <- function(input, output, session) {
       )
       updateSelectInput(
         session,
-        "parasite_stage",
-        choices = unique(filt_data$parasite_stage)
+        "development_phase",
+        choices = unique(filt_data$development_phase)
       )
       updateSelectInput(
         session,
@@ -588,8 +588,8 @@ server <- function(input, output, session) {
       )
       updateSelectInput(
         session,
-        "life_cycle_stage_qc",
-        choices = unique(filt_data$life_cycle_stage)
+        "parasite_stage_qc",
+        choices = unique(filt_data$parasite_stage)
       )
       updateSelectInput(
         session,
@@ -598,8 +598,8 @@ server <- function(input, output, session) {
       )
       updateSelectInput(
         session,
-        "parasite_stage_qc",
-        choices = unique(filt_data$parasite_stage)
+        "development_phase_qc",
+        choices = unique(filt_data$development_phase)
       )
       updateSelectInput(
         session,
@@ -643,8 +643,8 @@ server <- function(input, output, session) {
       )
       updateSelectInput(
         session,
-        "life_cycle_stage_exp",
-        choices = unique(filt_data$life_cycle_stage)
+        "parasite_stage_exp",
+        choices = unique(filt_data$parasite_stage)
       )
       updateSelectInput(
         session,
@@ -653,8 +653,8 @@ server <- function(input, output, session) {
       )
       updateSelectInput(
         session,
-        "parasite_stage_exp",
-        choices = unique(filt_data$parasite_stage)
+        "development_phase_exp",
+        choices = unique(filt_data$development_phase)
       )
       updateSelectInput(
         session,
@@ -732,7 +732,8 @@ server <- function(input, output, session) {
                 refine_state,
                 pred_gametocyte,
                 seurat_clusters,
-                parasite_stage,
+                life_cycle_stage,  # Exclude old life_cycle_stage column
+                parasite_stage_old,  # Exclude old parasite_stage_old if present
                 geographic_location,
                 day_post_infection
               )
@@ -743,7 +744,9 @@ server <- function(input, output, session) {
                 "study_label",
                 "sample_type",
                 "host_species",
-                "life_cycle_stage",
+                "parasite_stage",
+                "development_phase",
+                "blood_stage",
                 "treatment",
                 "strain",
                 "hour_post_invasion",
@@ -763,7 +766,9 @@ server <- function(input, output, session) {
               Host_species,
               Strain,
               Treatment,
-              Life_cycle_stage,
+              Development_phase,
+              Parasite_stage,
+              Blood_stage,
               Hour_post_invasion,
               Sc_technology,
               Sequencer,
