@@ -416,13 +416,9 @@ server <- function(input, output, session) {
       paste0("development_phase__", unique(mr_data$development_phase)),
       unique(mr_data$development_phase)
     ),
-    blood_stage_form = setNames(
-      paste0("blood_stage_form__", unique(mr_data$blood_stage_form)),
-      unique(mr_data$blood_stage_form)
-    ),
-    parasite_stage_overall = setNames(
-      paste0("parasite_stage_overall__", unique(mr_data$parasite_stage_overall)),
-      unique(mr_data$parasite_stage_overall)
+    blood_stage = setNames(
+      paste0("blood_stage__", unique(mr_data$blood_stage)),
+      unique(mr_data$blood_stage)
     ),
     parasite_stage = setNames(
       paste0("parasite_stage__", unique(mr_data$parasite_stage)),

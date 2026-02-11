@@ -232,8 +232,8 @@ ui <- fluidPage(
             choices = list(
               "Study" = "study_label",
               "Development phase" = "development_phase",
-              "Blood stage" = "blood_stage_form",
-              "Parasite stage" = "parasite_stage_overall",
+              "Blood stage" = "blood_stage",
+              "Parasite stage" = "parasite_stage",
               "Strain" = "strain",
               "Treatment" = "treatment",
               "Sample type" = "sample_type",
@@ -349,8 +349,8 @@ ui <- fluidPage(
               choices = list(
                 "Study" = "study_label",
                 "Development phase" = "development_phase",
-                "Blood stage" = "blood_stage_form",
-                "Parasite stage" = "parasite_stage_overall",
+                "Blood stage" = "blood_stage",
+                "Parasite stage" = "parasite_stage",
                 "Strain" = "strain",
                 "Treatment" = "treatment",
                 "Sample type" = "sample_type",

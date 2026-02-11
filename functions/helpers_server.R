@@ -1059,8 +1059,8 @@ generate_data_summary <- function(data, filters_applied = NULL) {
     
     # Key metadata columns to summarize
     summary_cols <- c("study_label", "host_species", "sample_type", 
-                     "development_phase", "blood_stage_form", "parasite_stage_overall",
-                     "parasite_stage", "life_cycle_stage", 
+                     "development_phase", "blood_stage", "parasite_stage",
+                     "life_cycle_stage", 
                      "strain", "geographic_location", "treatment")
     
     available_cols <- intersect(summary_cols, colnames(data))
