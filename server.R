@@ -312,30 +312,113 @@ server <- function(input, output, session) {
         # Cache the current state (only data type, no filter)
         cached_data$current_type <- current_type
         sessionData$last_gene_data <- result
-        return(result)
-      })
+    return(result)
+  })
+
+  # Populate Embeddings tab filter dropdowns when data changes
+  observeEvent(gene_data(), {
+    req(gene_data()$data)
+    req(input$tabset == "Embeddings")
+    
+    filt_data <- gene_data()$data
+    
+    tryCatch({
+      updateSelectizeInput(
+        session,
+        "study_label",
+        choices = unique(filt_data$study_label),
+        server = TRUE
+      )
+      updateSelectizeInput(
+        session,
+        "sample_type",
+        choices = unique(filt_data$sample_type),
+        server = TRUE
+      )
+      updateSelectizeInput(
+        session,
+        "host_species",
+        choices = setNames(
+          unique(filt_data$host_species),
+          format_species_name(unique(filt_data$host_species))
+        ),
+        server = TRUE
+      )
+      updateSelectizeInput(
+        session,
+        "parasite_stage",
+        choices = unique(filt_data$parasite_stage),
+        server = TRUE
+      )
+      updateSelectizeInput(
+        session,
+        "treatment",
+        choices = unique(filt_data$treatment),
+        server = TRUE
+      )
+      updateSelectizeInput(
+        session,
+        "development_phase",
+        choices = unique(filt_data$development_phase),
+        server = TRUE
+      )
+      updateSelectizeInput(
+        session,
+        "strain",
+        choices = unique(filt_data$strain),
+        server = TRUE
+      )
+      updateSelectizeInput(
+        session,
+        "hour_post_invasion",
+        choices = unique(filt_data$hour_post_invasion),
+        server = TRUE
+      )
+      updateSelectizeInput(
+        session,
+        "sequencer",
+        choices = unique(filt_data$sequencer),
+        server = TRUE
+      )
+      updateSelectizeInput(
+        session,
+        "sc_technology",
+        choices = unique(filt_data$sc_technology),
+        server = TRUE
+      )
+    }, error = function(e) {
+      # Silent error handling
+    })
+  })
+
     },
     ignoreNULL = FALSE
   )
 
-  # Separate reactive for filtered gene data
+  # Separate reactive for filtered gene data (Embeddings tab)
   filtered_gene_data <- reactive({
     req(gene_data())
 
-    selections <- input$apply_filter
-
-    # If no selections made (empty or null), use default filter
-    if (is.null(selections) || length(selections) == 0) {
-      selections <- default_df_filter()
-    }
-
-    req(selections)
+    # Collect individual filter inputs (no suffix for Embeddings tab)
+    # Empty selections mean "no filter" - show all data
+    current_inputs <- list(
+      study_label = input$study_label,
+      host_species = input$host_species,
+      parasite_stage = input$parasite_stage,
+      treatment = input$treatment,
+      development_phase = input$development_phase,
+      sample_type = input$sample_type,
+      strain = input$strain,
+      hour_post_invasion = input$hour_post_invasion,
+      sequencer = input$sequencer,
+      sc_technology = input$sc_technology
+    )
 
     # Create cache key for filtered gene data
     cache_key <- make_cache_key(
       "filtered_gene_data",
       get_current_data_type(),
-      selections
+      current_inputs
     )
 
     # Check cache first to avoid reprocessing
@@ -343,27 +426,18 @@ server <- function(input, output, session) {
       return(sessionData[[cache_key]])
     }
 
-    # subset that contains all gene columns (which caused large copies).
-    parsed_inputs <- list()
-    if (!is.null(selections) && length(selections) > 0) {
-      parts <- strsplit(selections, "__", fixed = TRUE)
-      valid_parts <- Filter(function(x) length(x) == 2, parts)
-      if (length(valid_parts) > 0) {
-        filter_list <- lapply(
-          split(valid_parts, vapply(valid_parts, `[[`, character(1), 1)),
-          function(lst) vapply(lst, `[[`, character(1), 2)
-        )
-        parsed_inputs <- filter_list
-      }
-    }
-
     filtered_meta <- tryCatch(
       {
-        apply_secondary_filters(gene_data()$data, parsed_inputs, keep_gene_matrix = FALSE, genes = if (!is.null(gene_data()$genes)) gene_data()$genes$gene else NULL)
+        apply_secondary_filters(
+          gene_data()$data, 
+          current_inputs, 
+          keep_gene_matrix = FALSE, 
+          genes = if (!is.null(gene_data()$genes)) gene_data()$genes$gene else NULL
+        )
       },
       error = function(e) {
-        # Fallback to safe fun_filter_df behavior if something unexpected
-        fun_filter_df(gene_data()$data, selections)
+        # Return unfiltered data if filtering fails
+        gene_data()$data
       }
     )
 
@@ -381,7 +455,7 @@ server <- function(input, output, session) {
       data = filtered_meta,
       full = full_df,
       row_idx = row_idx,
-      genes = gene_data()$genes  # Use gene_data() instead of filtered_gene_data()
+      genes = gene_data()$genes
     )
 
     # Cache the result
@@ -454,26 +528,8 @@ server <- function(input, output, session) {
     )
   )
 
-  observe({
-    first_group <- names(grouped_choices)[1]
-    default_values <- grouped_choices[[first_group]]
-
-    if (is.null(default_df_filter())) {
-      default_df_filter(default_values)
-    }
-
-    updateSelectInput(
-      session,
-      "apply_filter",
-      choices = grouped_choices,
-      selected = character(0)
-    )
-  })
-
+  # Old apply_filter code removed - now using individual filter inputs
   user_interact <- reactiveVal(FALSE)
-  observeEvent(input$apply_filter, {
-    user_interact(TRUE)
-  })
 
   # Reactive filtered data
   filtered_data <- reactive({
@@ -1939,7 +1995,16 @@ server <- function(input, output, session) {
       input$data_type,
       input$check,
       input$check_all,
-      input$apply_filter
+      input$study_label,
+      input$host_species,
+      input$parasite_stage,
+      input$treatment,
+      input$development_phase,
+      input$sample_type,
+      input$strain,
+      input$hour_post_invasion,
+      input$sequencer,
+      input$sc_technology
     )
 
     # Set plot as not ready immediately when inputs change

@@ -193,39 +193,6 @@ ui <- fluidPage(
         column(
           width = 12,
           class = "col-12",
-          div(
-            class = "form-group shiny-input-container",
-            id = "apply_filter",
-            tags$label("Data filters:", `for` = "apply_filter"),
-            div(
-              id = "apply_filter_wrapper",
-              class = "dropdown-container",
-              selectizeInput(
-                "apply_filter",
-                label = NULL,
-                choices = NULL,
-                multiple = TRUE,
-                options = list(
-                  placeholder = "No filter applied",
-                  render = I(
-                    '{
-                      option: function(item, escape) {
-                        return "<div>" + item.label + "</div>";
-                      },
-                      item: function(item, escape) {
-                        return "<div>" + item.label + "</div>";
-                      }
-                    }'
-                  )
-                )
-              ),
-              tags$div(class = "dropdown-arrow", title = "Open dropdown", "▼")
-            )
-          )
-        ),
-        column(
-          width = 12,
-          class = "col-12",
           selectInput(
             "color",
             "Color",
@@ -490,6 +457,13 @@ ui <- fluidPage(
           # embedding section (moved to first position)
           tabPanel(
             "Embeddings",
+            # Add filter row at the top
+            fluidRow(
+              column(
+                width = 12,
+                create_meta_filter_row("")
+              )
+            ),
             fluidRow(
               column(
                 id = "tab_switch",
