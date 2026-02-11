@@ -995,8 +995,17 @@ input:checked+.slider:before {
 }
 
 #plasmo_link,
-#ncbi_link {
-  display: block;
+#ncbi_link,
+#plasmo_link_exp,
+#ncbi_link_exp,
+#plasmo_link_second,
+#ncbi_link_second {
+  display: inline-block;
+  background: none !important;
+  background-color: transparent !important;
+  padding: 0 !important;
+  border: none !important;
+  box-shadow: none !important;
 }
 
 /* Axis Container */
@@ -1607,20 +1616,27 @@ input:checked+.slider:before {
 /* Style the gene link section */
 .gene_link_ui_exp {
   padding-top: 25px;
+  background: transparent !important;
 }
 
 .gene_link_ui_exp a {
-  color: #0066cc;
-  text-decoration: none;
-  font-size: 0.8em;
-  padding: 2px 5px;
-  background-color: #f0f0f0;
-  border-radius: 3px;
-  border: 1px solid #ddd;
+  color: #0066cc !important;
+  text-decoration: underline !important;
+  font-size: 1em !important;
+  padding: 0px !important;
+  background: none !important;
+  background-color: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  transition: color 0.2s ease !important;
 }
 
 .gene_link_ui_exp a:hover {
-  color: #d234e7;
+  color: #d234e7 !important;
+  text-decoration: underline !important;
+  background: none !important;
+  background-color: transparent !important;
 }
 
 /* Ensure all gene links have consistent styling */

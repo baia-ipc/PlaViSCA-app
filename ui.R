@@ -637,13 +637,15 @@ ui <- fluidPage(
                             id = "plasmo_link_exp",
                             href = "#",
                             target = "_blank",
+                            class = "gene-link",
                             "🔬 PlasmoDB"
                           ),
-                          span("|"),
+                          tags$span(" | ", style = "margin: 0 8px; color: #999; font-size: 1em;"),
                           tags$a(
                             id = "ncbi_link_exp",
                             href = "#",
                             target = "_blank",
+                            class = "gene-link",
                             "🧬 NCBI"
                           )
                         )
