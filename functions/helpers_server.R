@@ -310,7 +310,6 @@ apply_secondary_filters <- function(data, inputs, keep_gene_matrix = TRUE, genes
         "strain",
         "day_post_infection",
         "hour_post_invasion",
-        "biological_replicate",
         "n_count_rna",
         "n_feature_rna"
     )

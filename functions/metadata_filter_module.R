@@ -171,23 +171,11 @@ render_metadata_outputs <- function(output, filt_data) {
         processed_data <- filt_data %>%
             select(
                 -c(
-                    biological_replicate,
-                    liver_form,
-                    starts_with("rna_snn_res_"),
                     starts_with("umap_"),
                     starts_with("pca_"),
                     starts_with("t_sne_"),
                     barcode,
-                    study_pmid,
-                    run_id,
-                    num_srr,
-                    pub_year,
-                    host_id,
-                    goegraphic_location,
-                    sequncer,
-                    refine_state,
-                    pred_gametocyte,
-                    seurat_clusters,
+                    life_cycle_stage,  # Hidden from UI
                     parasite_stage,
                     geographic_location,
                     day_post_infection

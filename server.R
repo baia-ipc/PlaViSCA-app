@@ -711,25 +711,11 @@ server <- function(input, output, session) {
           processed_data <- filt_data %>%
             select(
               -c(
-                biological_replicate,
-                liver_form,
-                starts_with("rna_snn_res_"),
                 starts_with("umap_"),
                 starts_with("pca_"),
                 starts_with("t_sne_"),
                 barcode,
-                study_pmid,
-                run_id,
-                num_srr,
-                pub_year,
-                host_id,
-                goegraphic_location,
-                sequncer,
-                refine_state,
-                pred_gametocyte,
-                seurat_clusters,
-                life_cycle_stage,  # Exclude old life_cycle_stage column
-                parasite_stage_old,  # Exclude old parasite_stage_old if present
+                life_cycle_stage,  # Exclude old life_cycle_stage column (hidden from UI)
                 geographic_location,
                 day_post_infection
               )

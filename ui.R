@@ -110,8 +110,8 @@ ui <- fluidPage(
           actionLink(
             "analysis_link",
             tagList(
-              img(src = "umap.png", alt = "Analysis"),
-              span("Analysis")
+              img(src = "umap.png", alt = "Embedding"),
+              span("Embedding")
             )
           ),
           actionLink(
