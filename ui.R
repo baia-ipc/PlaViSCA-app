@@ -592,8 +592,7 @@ ui <- fluidPage(
                   width = 6,
                   tags$div(
                     style = "text-align: center; margin-bottom: 10px;",
-                    tags$h5("First Plot", style = "color: #007bff; margin: 0; font-weight: bold;"),
-                    tags$small("Uses First Plot Color control", style = "color: #666;")
+                    tags$h5("First Plot", style = "color: #007bff; margin: 0; font-weight: bold;")
                   ),
                   withSpinner(
                     type = 6,
@@ -606,8 +605,7 @@ ui <- fluidPage(
                   width = 6,
                   tags$div(
                     style = "text-align: center; margin-bottom: 10px;",
-                    tags$h5("Second Plot", style = "color: #28a745; margin: 0; font-weight: bold;"),
-                    tags$small("Uses Second Plot Color control", style = "color: #666;")
+                    tags$h5("Second Plot", style = "color: #28a745; margin: 0; font-weight: bold;")
                   ),
                   withSpinner(
                     type = 6,

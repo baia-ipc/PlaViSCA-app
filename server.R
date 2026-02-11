@@ -2320,7 +2320,8 @@ server <- function(input, output, session) {
           displaylogo = FALSE, 
           scrollZoom = TRUE,
           modeBarButtonsToRemove = c(),
-          displayModeBar = TRUE
+          displayModeBar = TRUE,
+          modeBarPosition = "left"
         )
 
       return(p)
@@ -2837,7 +2838,8 @@ server <- function(input, output, session) {
           displaylogo = FALSE, 
           scrollZoom = TRUE,
           modeBarButtonsToRemove = c(),
-          displayModeBar = TRUE
+          displayModeBar = TRUE,
+          modeBarPosition = "left"
         )
 
       embplot(TRUE)
