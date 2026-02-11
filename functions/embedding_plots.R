@@ -112,108 +112,50 @@ get_dim <- function(plot_type) {
 }
 
 
-get_legend_layout <- function(legend_title, num_categories = NULL, is_dual_plot = FALSE) {
-    # Determine layout based on number of categories
-    if (!is.null(num_categories) && num_categories > 3) {
-        # Use vertical layout for many categories
-        if (is_dual_plot) {
-            # For dual plots, position legend at top-left of plot area, overlaid
-            list(
-                title = list(text = legend_title, font = list(size = 11, family = "Arial")),
-                orientation = "v",
-                x = 0.02,  # Far left of plot area
-                xanchor = "left",
-                y = 0.98,  # Top of plot area
-                yanchor = "top",
-                itemsizing = "constant",
-                font = list(size = 10, family = "Arial"),  # Increased from 9 to 10
-                bgcolor = "rgba(255,255,255,0.95)",
-                bordercolor = "rgba(0,0,0,0.5)",
-                borderwidth = 1,
-                itemclick = "toggle",  # Toggle individual items on/off
-                itemdoubleclick = "toggleothers"  # Double-click to show only one
-            )
-        } else {
-            # Single plot - position on the right side
-            list(
-                title = list(text = legend_title, font = list(size = 12, family = "Arial")),
-                orientation = "v",
-                x = 1.02,
-                xanchor = "left",
-                y = 0.5,
-                yanchor = "middle",
-                itemsizing = "constant",
-                font = list(size = 11, family = "Arial"),
-                bgcolor = "rgba(255,255,255,0.9)",
-                bordercolor = "rgba(0,0,0,0.3)",
-                borderwidth = 1,
-                itemclick = "toggle",  # Toggle individual items on/off
-                itemdoubleclick = "toggleothers"  # Double-click to show only one
-            )
-        }
+get_legend_layout <- function(legend_title, num_categories = NULL, is_dual_plot = FALSE, is_gene_plot = FALSE) {
+    # Check if this is a gene plot (continuous color scale)
+    if (is_gene_plot) {
+        # For gene plots, use a smaller, borderless legend
+        list(
+            title = list(text = legend_title, font = list(size = 9, family = "Arial")),
+            orientation = "v",
+            x = 0.02,  # Far left of plot area
+            xanchor = "left", 
+            y = 0.98,  # Top of plot area
+            yanchor = "top",
+            itemsizing = "constant",
+            font = list(size = 8, family = "Arial"),
+            bgcolor = "rgba(255,255,255,0.8)",
+            borderwidth = 0,  # Remove border
+            len = 0.5,  # Make legend half the height
+            thickness = 15,  # Make legend thinner
+            itemclick = "toggle",
+            itemdoubleclick = "toggleothers"
+        )
     } else {
-        # Use vertical layout for 3 or fewer categories as well (better for consistency)
-        if (is_dual_plot) {
-            # For dual plots, position legend at top-left of plot area, overlaid
-            list(
-                title = list(text = legend_title, font = list(size = 11, family = "Arial")),
-                orientation = "v",
-                x = 0.02,  # Far left of plot area
-                xanchor = "left",
-                y = 0.98,  # Top of plot area
-                yanchor = "top",
-                itemsizing = "constant",
-                font = list(size = 10, family = "Arial"),  # Increased from 9 to 10
-                bgcolor = "rgba(255,255,255,0.95)",
-                bordercolor = "rgba(0,0,0,0.5)",
-                borderwidth = 1,
-                itemclick = "toggle",  # Toggle individual items on/off
-                itemdoubleclick = "toggleothers"  # Double-click to show only one
-            )
-        } else {
-            # Single plot - use horizontal layout above plot
-            list(
-                title = list(text = legend_title, font = list(size = 12, family = "Arial")),
-                orientation = "h",
-                x = 0.5,
-                xanchor = "center", 
-                y = 1.02,  # Positioned above the plot
-                yanchor = "bottom",
-                itemsizing = "constant",
-                itemwidth = 60,  # Wider items for better spacing
-                tracegroupgap = 25,  # More space between items
-                font = list(size = 11, family = "Arial"),
-                bgcolor = "rgba(255,255,255,0.85)",
-                bordercolor = "rgba(0,0,0,0.2)",
-                borderwidth = 1,
-                itemclick = "toggle",  # Toggle individual items on/off
-                itemdoubleclick = "toggleothers"  # Double-click to show only one
-            )
-        }
+        # Always position legend at top-left of plot area, overlaid for consistency
+        list(
+            title = list(text = legend_title, font = list(size = 11, family = "Arial")),
+            orientation = "v",
+            x = 0.02,  # Far left of plot area
+            xanchor = "left",
+            y = 0.98,  # Top of plot area
+            yanchor = "top",
+            itemsizing = "constant",
+            font = list(size = 10, family = "Arial"),
+            bgcolor = "rgba(255,255,255,0.95)",
+            bordercolor = "rgba(0,0,0,0.5)",
+            borderwidth = 1,
+            itemclick = "toggle",  # Toggle individual items on/off
+            itemdoubleclick = "toggleothers"  # Double-click to show only one
+        )
     }
 }
 
 # Get appropriate margins based on legend orientation
 get_plot_margins <- function(num_categories = NULL, is_dual_plot = FALSE) {
-    if (!is.null(num_categories) && num_categories > 3) {
-        # Vertical legend
-        if (is_dual_plot) {
-            # For dual plots, legend is overlaid so no extra margin needed
-            list(l = 50, r = 50, t = 40, b = 40)
-        } else {
-            # Single plot - more right margin for external legend
-            list(l = 50, r = 140, t = 50, b = 50)
-        }
-    } else {
-        # Fewer categories
-        if (is_dual_plot) {
-            # For dual plots, legend is overlaid so no extra margin needed
-            list(l = 50, r = 50, t = 40, b = 40)
-        } else {
-            # Single plot - more top margin for horizontal legend above
-            list(l = 50, r = 50, t = 60, b = 50)
-        }
-    }
+    # Since legend is always overlaid at top-left, use consistent margins for all plots
+    list(l = 50, r = 50, t = 40, b = 40)
 }
 
 
@@ -281,10 +223,10 @@ plot_2d <- function(
         length(unique(df[[color]]))
     } else {
         NULL
-    }
-    
-    legend_layout <- get_legend_layout(legend_title, num_categories, is_dual_plot)
-    plot_margins <- get_plot_margins(num_categories, is_dual_plot)
+     }
+     
+     legend_layout <- get_legend_layout(legend_title, num_categories, is_dual_plot, !is_categorical)
+     plot_margins <- get_plot_margins(num_categories, is_dual_plot)
     df$plotly_key <- seq_len(nrow(df))
 
     if (is_categorical) {
@@ -381,10 +323,10 @@ plot_3d <- function(
         length(unique(df[[color]]))
     } else {
         NULL
-    }
+     }
 
-    legend_layout <- get_legend_layout(legend_title, num_categories, is_dual_plot)
-    plot_margins <- get_plot_margins(num_categories, is_dual_plot)
+     legend_layout <- get_legend_layout(legend_title, num_categories, is_dual_plot, !is_categorical)
+     plot_margins <- get_plot_margins(num_categories, is_dual_plot)
 
     if (is_categorical) {
         p <- plot_ly(

@@ -42,6 +42,60 @@ gene_links <- function(gene_id) {
     ))
 }
 
+# Generate links for multiple genes and open multiple tabs
+gene_links_multiple <- function(gene_ids) {
+    if (length(gene_ids) == 0) return()
+    
+    if (length(gene_ids) == 1) {
+        # Single gene - use the regular function
+        gene_links(gene_ids[1])
+    } else {
+        # Multiple genes - create JavaScript to open multiple tabs
+        plasmo_urls <- paste0("https://plasmodb.org/plasmo/app/record/gene/", gene_ids)
+        ncbi_urls <- paste0("https://www.ncbi.nlm.nih.gov/protein/", gene_ids)
+        
+        # Update the first gene's links in the UI
+        gene_links(gene_ids[1])
+        
+        # Create JSON arrays manually for JavaScript
+        plasmo_json <- paste0('["', paste(plasmo_urls, collapse = '","'), '"]')
+        ncbi_json <- paste0('["', paste(ncbi_urls, collapse = '","'), '"]')
+        
+        # Add click handlers for multiple tab opening
+        shinyjs::runjs(sprintf(
+            "
+        document.querySelectorAll('[id^=plasmo_link]').forEach(function(el) {
+            el.onclick = function(e) {
+                e.preventDefault();
+                var urls = %s;
+                urls.forEach(function(url) {
+                    window.open(url, '_blank');
+                });
+                return false;
+            };
+        });
+        ",
+            plasmo_json
+        ))
+        
+        shinyjs::runjs(sprintf(
+            "
+        document.querySelectorAll('[id^=ncbi_link]').forEach(function(el) {
+            el.onclick = function(e) {
+                e.preventDefault();
+                var urls = %s;
+                urls.forEach(function(url) {
+                    window.open(url, '_blank');
+                });
+                return false;
+            };
+        });
+        ",
+            ncbi_json
+        ))
+    }
+}
+
 # Function that builds the full Metadata tab
 create_meta_filter_row <- function(suffix = "") {
     tagList(
