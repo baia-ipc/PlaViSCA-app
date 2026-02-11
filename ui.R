@@ -311,22 +311,15 @@ ui <- fluidPage(
                     id = "gene_label",
                     "Gene name"
                   ),
-                  div(
-                    style = "display: flex; align-items: center; gap: 8px;",
-                    tags$span(
-                      style = "font-size: 0.85em; margin: 0;",
-                      "Gene ID"
+                  tags$label(
+                    class = "switch",
+                    style = "margin: 0;",
+                    tags$input(
+                      id = "check",
+                      type = "checkbox",
+                      class = "toggle_exp"
                     ),
-                    tags$label(
-                      class = "switch",
-                      style = "margin: 0;",
-                      tags$input(
-                        id = "check",
-                        type = "checkbox",
-                        class = "toggle_exp"
-                      ),
-                      tags$span(class = "slider")
-                    )
+                    tags$span(class = "slider")
                   )
                 ),
                 selectizeInput("genes_n", NULL, 
@@ -345,7 +338,7 @@ ui <- fluidPage(
                 tags$div(
                   id = "gene_link_ui_first",
                   class = "gene_link_ui_exp",
-                  style = "margin-top: -10px; margin-bottom: 10px; text-align: left; padding-left: 0px; display: flex; align-items: center;",
+                  style = "margin-top: -5px; margin-bottom: 10px; text-align: left; padding-left: 0px; display: flex; align-items: center;",
                   tags$a(
                     id = "plasmo_link",
                     href = "#",
@@ -430,22 +423,15 @@ ui <- fluidPage(
                        id = "gene_label_second",
                        "Gene name"
                      ),
-                     div(
-                       style = "display: flex; align-items: center; gap: 8px;",
-                       tags$span(
-                         style = "font-size: 0.85em; margin: 0;",
-                         "Gene ID"
+                     tags$label(
+                       class = "switch",
+                       style = "margin: 0;",
+                       tags$input(
+                         id = "check_second",
+                         type = "checkbox",
+                         class = "toggle_exp"
                        ),
-                       tags$label(
-                         class = "switch",
-                         style = "margin: 0;",
-                         tags$input(
-                           id = "check_second",
-                           type = "checkbox",
-                           class = "toggle_exp"
-                         ),
-                         tags$span(class = "slider")
-                       )
+                       tags$span(class = "slider")
                      )
                    ),
                    selectizeInput("genes_second", NULL, 
@@ -464,7 +450,7 @@ ui <- fluidPage(
                   tags$div(
                     id = "gene_link_ui_second",
                     class = "gene_link_ui_exp",
-                    style = "margin-top: -10px; margin-bottom: 10px; text-align: left; padding-left: 0px; display: flex; align-items: center;",
+                    style = "margin-top: -5px; margin-bottom: 10px; text-align: left; padding-left: 0px; display: flex; align-items: center;",
                     tags$a(
                       id = "plasmo_link_second",
                       href = "#",
