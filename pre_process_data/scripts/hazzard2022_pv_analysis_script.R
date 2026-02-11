@@ -204,7 +204,7 @@ sample_type <- c(
   "Mammalian host: blood",
   "Mammalian host: blood"
 )
-parasite_stage <- c("Sporozoite stage", "Sporozoite stage", "Blood stage", "Blood stage")
+parasite_stage <- c("Sporozoites", "Sporozoites", "Blood stages", "Blood stages")
 strain <- c("Sal1/Chesson", "Sal1/Chesson", "Sal1", "Sal1")
 day_post_infection <- rep(NA, length(all_pv))
 treatment <- rep("No_Treatment", length(all_pv))

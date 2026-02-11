@@ -197,7 +197,7 @@ host_id <- c(
 )
 
 sample_type <- rep("Mammalian host: blood", length(all_pv))
-parasite_stage <- rep("Blood stage", length(all_pv))
+parasite_stage <- rep("Blood stages", length(all_pv))
 strain <- rep("NIH1993-F3&Chesson", length(all_pv))
 
 day_post_infection <- c(16, 14)

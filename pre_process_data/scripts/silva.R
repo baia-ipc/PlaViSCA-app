@@ -36,7 +36,7 @@ silva$sequncer <- c(
 silva$host_species <- "Homo sapiens"
 silva$host_id <- NA
 silva$sample_type <- "Mammalian host: hepatocyte"
-silva$parasite_stage <- "Liver stage"
+silva$parasite_stage <- "Liver stages"
 silva$strain <- "Patient isolate"
 
 silva$day_post_infection <- c(

@@ -220,9 +220,9 @@ sample_type <- list(
     unlist()
 
 parasite_stage <- list(
-    "Sporozoite stage",
-    "Blood stage",
-    rep("Sporozoite stage", 5)
+    "Sporozoites",
+    "Blood stages",
+    rep("Sporozoites", 5)
 ) %>%
     unlist()
 
