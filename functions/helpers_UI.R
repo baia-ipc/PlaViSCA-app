@@ -156,7 +156,7 @@ create_meta_filter_row <- function(suffix = "") {
                 width = 2,
                 selectizeInput(
                     inputId = paste0("life_cycle_stage", suffix),
-                    "Life cycle stage (legacy):",
+                    "Life cycle stage:",
                     choices = c(""),
                     multiple = TRUE,
                     options = list(
@@ -188,7 +188,7 @@ create_meta_filter_row <- function(suffix = "") {
                 width = 2,
                 selectizeInput(
                     inputId = paste0("parasite_stage", suffix),
-                    "Parasite stage (legacy):",
+                    "Parasite stage:",
                     choices = c(""),
                     multiple = TRUE,
                     options = list(
