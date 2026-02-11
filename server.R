@@ -1862,55 +1862,8 @@ server <- function(input, output, session) {
   )
 
   # Observer for updating second plot axis choices (for comparison mode)
-  observeEvent(
-    list(
-      input$embedding,
-      input$plot,
-      input$xaxis_second,
-      input$check_all,
-      input$enable_comparison
-    ),
-    {
-      req(input$enable_comparison)
-      
-      if (input$plot == "2d") {
-        x_choices <- switch(input$embedding,
-          "umap" = if (isTRUE(input$check_all)) umap_i else umap_u,
-          "pca" = if (isTRUE(input$check_all)) pca_i else pca_u,
-          "tsne" = tsne
-        )
-
-        updateSelectInput(
-          session,
-          "xaxis_second",
-          choices = x_choices,
-          selected = x_choices[1]
-        )
-
-        y_choices <- switch(input$embedding,
-          "umap" = y_col(
-            input$check_all,
-            input$xaxis_second,
-            umap_i,
-            umap_u
-          ),
-          "pca" = y_col(input$check_all, input$xaxis_second, pca_i, pca_u),
-          "tsne" = setdiff(tsne, input$xaxis_second)
-        )
-
-        updateSelectInput(
-          session,
-          "yaxis_second",
-          choices = y_choices,
-          selected = if (input$yaxis_second %in% y_choices) {
-            input$yaxis_second
-          } else {
-            y_choices[2]
-          }
-        )
-      }
-    }
-  )
+  # Removed: observeEvent for updating second plot axis choices
+  # Both plots now use the same axes from main controls
 
   # Observer for updating second plot size based on 2D/3D selection  
   # Removed: observeEvent for plot_second to update size_second
@@ -2547,9 +2500,9 @@ server <- function(input, output, session) {
     color_second <- if (!is.null(input$color_second)) input$color_second else "sample_type"
     genes_second <- if (!is.null(input$genes_second)) input$genes_second else ""
     check_second <- if (!is.null(input$check_second)) input$check_second else FALSE
-    xaxis_second <- if (!is.null(input$xaxis_second)) input$xaxis_second else "pc_1"
-    yaxis_second <- if (!is.null(input$yaxis_second)) input$yaxis_second else "pc_2"
-    # Use main plot size and dimension for second plot
+    # Use main plot axes, size and dimension for second plot
+    xaxis_val <- if (!is.null(input$xaxis)) input$xaxis else "pc_1"
+    yaxis_val <- if (!is.null(input$yaxis)) input$yaxis else "pc_2"
     size_val <- if (!is.null(input$size)) input$size else 4
     plot_val <- if (!is.null(input$plot)) input$plot else "3d"
     
@@ -2564,8 +2517,8 @@ server <- function(input, output, session) {
       color = color_second,
       genes = genes_second,
       check = check_second,
-      xaxis = xaxis_second,
-      yaxis = yaxis_second,
+      xaxis = xaxis_val,
+      yaxis = yaxis_val,
       size = size_val,
       plot = plot_val,
       timestamp = Sys.time()  # Add timestamp to track when this changes

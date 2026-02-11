@@ -423,29 +423,6 @@ ui <- fluidPage(
                  )
                 )
               )
-           ),
-           
-           # Second plot axis settings
-           h5("Second Plot Axes", style = "margin-top: 15px; color: #666;"),
-           fluidRow(
-             column(
-               width = 6,
-               selectInput(
-                 "xaxis_second",
-                 "X-axis",
-                 choices = c("pc_1"),
-                 selected = "pc_1"
-               )
-             ),
-             column(
-               width = 6,
-               selectInput(
-                 "yaxis_second",
-                 "Y-axis",
-                 choices = c("pc_2"),
-                 selected = "pc_2"
-               )
-             )
            )
          ),
          column(
