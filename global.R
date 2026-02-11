@@ -5,10 +5,18 @@ suppressPackageStartupMessages(library(conflicted))
 # Resolve namespace conflicts BEFORE sourcing function files
 suppressMessages(conflict_prefer("layout", "plotly"))
 
-# sourcer function
+# Source helper functions
 source("functions/helpers_server.R")
 source("functions/helpers_UI.R")
 source("functions/embedding_plots.R")
+
+# Source modular server functions
+source("functions/navigation_module.R")
+source("functions/data_loading_module.R")
+source("functions/metadata_filter_module.R")
+source("functions/quality_control_module.R")
+source("functions/gene_expression_module.R")
+source("functions/embedding_visualization_module.R")
 
 # Define a function for memoized data loading.
 load_data <- memoise(function(file_path) {
