@@ -52,13 +52,21 @@ is_categorical_data <- function(x) {
 # Colors for categorical data
 prepare_categorical_colors <- function(df, color) {
     df[[color]] <- as.character(df[[color]])
-    df[[color]][is.na(df[[color]])] <- "NA (missing)"
+    
+    # Create context-aware NA label
+    na_label <- if (color == "blood_stage") {
+        "NA (not in blood stage)"
+    } else {
+        "NA (missing)"
+    }
+    
+    df[[color]][is.na(df[[color]])] <- na_label
 
     unique_values <- unique(df[[color]])
 
-    has_na <- "NA (missing)" %in% unique_values
+    has_na <- na_label %in% unique_values
     if (has_na) {
-        actual_values <- unique_values[unique_values != "NA (missing)"]
+        actual_values <- unique_values[unique_values != na_label]
     } else {
         actual_values <- unique_values
     }
@@ -76,7 +84,7 @@ prepare_categorical_colors <- function(df, color) {
     }
 
     final_levels <- if (has_na) {
-        c("NA (missing)", sorted_values)
+        c(na_label, sorted_values)
     } else {
         sorted_values
     }
@@ -117,14 +125,14 @@ get_legend_layout <- function(legend_title, num_categories = NULL, is_dual_plot 
     if (is_gene_plot) {
         # For gene plots, use a smaller, borderless legend
         list(
-            title = list(text = legend_title, font = list(size = 9, family = "Arial")),
+            title = list(text = legend_title, font = list(size = 12, family = "Arial")),
             orientation = "v",
             x = 0.02,  # Far left of plot area
             xanchor = "left", 
             y = 0.98,  # Top of plot area
             yanchor = "top",
             itemsizing = "constant",
-            font = list(size = 8, family = "Arial"),
+            font = list(size = 11, family = "Arial"),
             bgcolor = "rgba(255,255,255,0.8)",
             borderwidth = 0,  # Remove border
             len = 0.5,  # Make legend half the height
@@ -135,14 +143,14 @@ get_legend_layout <- function(legend_title, num_categories = NULL, is_dual_plot 
     } else {
         # Always position legend at top-left of plot area, overlaid for consistency
         list(
-            title = list(text = legend_title, font = list(size = 11, family = "Arial")),
+            title = list(text = legend_title, font = list(size = 14, family = "Arial")),
             orientation = "v",
             x = 0.02,  # Far left of plot area
             xanchor = "left",
             y = 0.98,  # Top of plot area
             yanchor = "top",
             itemsizing = "constant",
-            font = list(size = 10, family = "Arial"),
+            font = list(size = 12, family = "Arial"),
             bgcolor = "rgba(255,255,255,0.95)",
             bordercolor = "rgba(0,0,0,0.5)",
             borderwidth = 1,
