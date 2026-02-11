@@ -173,10 +173,45 @@ ui <- fluidPage(
               img(src = "about.png", alt = "About"),
               span("About")
             )
-          )
-        )
-      )
-    ),
+                )
+              ),
+              
+              # Second plot settings (size, dimension, axes)
+              h5("Second Plot Settings", style = "margin-top: 15px; color: #666;"),
+              radioButtons(
+                "size_second",
+                "Size (Second Plot)",
+                choices = list("S" = 2, "M" = 4, "L" = 6),
+                selected = 4
+              ),
+              radioButtons(
+                "plot_second",
+                "Plot Dimension (Second Plot)",
+                choices = list("2D" = "2d", "3D" = "3d"),
+                selected = "3d"
+              ),
+              fluidRow(
+                column(
+                  width = 6,
+                  selectInput(
+                    "xaxis_second",
+                    "X-axis (Second Plot)",
+                    choices = c("pc_1"),
+                    selected = "pc_1"
+                  )
+                ),
+                column(
+                  width = 6,
+                  selectInput(
+                    "yaxis_second",
+                    "Y-axis (Second Plot)",
+                    choices = c("pc_2"),
+                    selected = "pc_2"
+                  )
+                )
+              )
+           )
+         ),
     fluidRow(id = "particles-js-home", class = "particles-js"),
     fluidRow(p(class = "copyright", "© 2025 BAIA Team. All rights reserved."))
   ),
