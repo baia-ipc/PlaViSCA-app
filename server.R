@@ -412,6 +412,18 @@ server <- function(input, output, session) {
   # Metadata filter
   # choose columns for filter data
   grouped_choices <- list(
+    development_phase = setNames(
+      paste0("development_phase__", unique(mr_data$development_phase)),
+      unique(mr_data$development_phase)
+    ),
+    blood_stage_form = setNames(
+      paste0("blood_stage_form__", unique(mr_data$blood_stage_form)),
+      unique(mr_data$blood_stage_form)
+    ),
+    parasite_stage_overall = setNames(
+      paste0("parasite_stage_overall__", unique(mr_data$parasite_stage_overall)),
+      unique(mr_data$parasite_stage_overall)
+    ),
     parasite_stage = setNames(
       paste0("parasite_stage__", unique(mr_data$parasite_stage)),
       unique(mr_data$parasite_stage)
@@ -2357,8 +2369,11 @@ server <- function(input, output, session) {
       # Map color values to display names
       color_names <- c(
         "study_label" = "Study",
-        "life_cycle_stage" = "Life cycle",
-        "parasite_stage" = "Parasite stage", 
+        "development_phase" = "Development phase",
+        "blood_stage_form" = "Blood-stage form",
+        "parasite_stage_overall" = "Parasite stage",
+        "life_cycle_stage" = "Life cycle (legacy)",
+        "parasite_stage" = "Parasite stage (legacy)", 
         "strain" = "Strain",
         "treatment" = "Treatment",
         "sample_type" = "Sample type",
@@ -2384,8 +2399,11 @@ server <- function(input, output, session) {
       # Map color values to display names
       color_names <- c(
         "study_label" = "Study",
-        "life_cycle_stage" = "Life cycle",
-        "parasite_stage" = "Parasite stage", 
+        "development_phase" = "Development phase",
+        "blood_stage_form" = "Blood-stage form",
+        "parasite_stage_overall" = "Parasite stage",
+        "life_cycle_stage" = "Life cycle (legacy)",
+        "parasite_stage" = "Parasite stage (legacy)", 
         "strain" = "Strain",
         "treatment" = "Treatment",
         "sample_type" = "Sample type",

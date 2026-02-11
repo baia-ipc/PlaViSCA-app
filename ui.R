@@ -231,8 +231,9 @@ ui <- fluidPage(
             "Color",
             choices = list(
               "Study" = "study_label",
-              "Life cycle" = "life_cycle_stage",
-              "Parasite stage" = "parasite_stage",
+              "Development phase" = "development_phase",
+              "Blood-stage form" = "blood_stage_form",
+              "Parasite stage" = "parasite_stage_overall",
               "Strain" = "strain",
               "Treatment" = "treatment",
               "Sample type" = "sample_type",
@@ -347,8 +348,9 @@ ui <- fluidPage(
               "Second Plot Color",
               choices = list(
                 "Study" = "study_label",
-                "Life cycle" = "life_cycle_stage",
-                "Parasite stage" = "parasite_stage",
+                "Development phase" = "development_phase",
+                "Blood-stage form" = "blood_stage_form",
+                "Parasite stage" = "parasite_stage_overall",
                 "Strain" = "strain",
                 "Treatment" = "treatment",
                 "Sample type" = "sample_type",
@@ -657,7 +659,7 @@ ui <- fluidPage(
                         "group_exp",
                         "Group by",
                         choices = group_choices,
-                        selected = "life_cycle_stage"
+                        selected = "development_phase"
                       )
                     )
                   ),
