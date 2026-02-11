@@ -338,7 +338,7 @@ ui <- fluidPage(
                 tags$div(
                   id = "gene_link_ui_first",
                   class = "gene_link_ui_exp",
-                  style = "margin-top: -5px; margin-bottom: 10px; text-align: left; padding-left: 0px; display: flex; align-items: center;",
+                  style = "margin-top: -15px; margin-bottom: 10px; text-align: left; padding-left: 0px; display: flex; align-items: center;",
                   tags$a(
                     id = "plasmo_link",
                     href = "#",
@@ -450,7 +450,7 @@ ui <- fluidPage(
                   tags$div(
                     id = "gene_link_ui_second",
                     class = "gene_link_ui_exp",
-                    style = "margin-top: -5px; margin-bottom: 10px; text-align: left; padding-left: 0px; display: flex; align-items: center;",
+                    style = "margin-top: -15px; margin-bottom: 10px; text-align: left; padding-left: 0px; display: flex; align-items: center;",
                     tags$a(
                       id = "plasmo_link_second",
                       href = "#",
