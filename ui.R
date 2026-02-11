@@ -425,49 +425,25 @@ ui <- fluidPage(
               )
            ),
            
-           # Second plot settings (size, dimension, axes)
-           h5("Second Plot Settings", style = "margin-top: 15px; color: #666;"),
-           column(
-             width = 12,
-             class = "col-12",
-             radioButtons(
-               "size_second",
-               "Size (Second Plot)",
-               choices = list("S" = 2, "M" = 4, "L" = 6),
-               selected = 4
-             )
-           ),
-           column(
-             width = 12,
-             class = "col-12",
-             radioButtons(
-               "plot_second",
-               "Plot Dimension (Second Plot)",
-               choices = list("2D" = "2d", "3D" = "3d"),
-               selected = "3d"
-             )
-           ),
-           column(
-             width = 12,
-             class = "col-12",
-             fluidRow(
-               column(
-                 width = 6,
-                 selectInput(
-                   "xaxis_second",
-                   "X-axis (Second Plot)",
-                   choices = c("pc_1"),
-                   selected = "pc_1"
-                 )
-               ),
-               column(
-                 width = 6,
-                 selectInput(
-                   "yaxis_second",
-                   "Y-axis (Second Plot)",
-                   choices = c("pc_2"),
-                   selected = "pc_2"
-                 )
+           # Second plot axis settings
+           h5("Second Plot Axes", style = "margin-top: 15px; color: #666;"),
+           fluidRow(
+             column(
+               width = 6,
+               selectInput(
+                 "xaxis_second",
+                 "X-axis",
+                 choices = c("pc_1"),
+                 selected = "pc_1"
+               )
+             ),
+             column(
+               width = 6,
+               selectInput(
+                 "yaxis_second",
+                 "Y-axis",
+                 choices = c("pc_2"),
+                 selected = "pc_2"
                )
              )
            )

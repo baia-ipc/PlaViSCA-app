@@ -1865,7 +1865,7 @@ server <- function(input, output, session) {
   observeEvent(
     list(
       input$embedding,
-      input$plot_second,
+      input$plot,
       input$xaxis_second,
       input$check_all,
       input$enable_comparison
@@ -1873,7 +1873,7 @@ server <- function(input, output, session) {
     {
       req(input$enable_comparison)
       
-      if (input$plot_second == "2d") {
+      if (input$plot == "2d") {
         x_choices <- switch(input$embedding,
           "umap" = if (isTRUE(input$check_all)) umap_i else umap_u,
           "pca" = if (isTRUE(input$check_all)) pca_i else pca_u,
@@ -1913,21 +1913,8 @@ server <- function(input, output, session) {
   )
 
   # Observer for updating second plot size based on 2D/3D selection  
-  observeEvent(
-    input$plot_second,
-    {
-      req(input$enable_comparison)
-      
-      if (!is.null(input$plot_second)) {
-        if (input$plot_second == "2d") {
-          updateRadioButtons(session, "size_second", selected = 2)
-        } else if (input$plot_second == "3d") {
-          updateRadioButtons(session, "size_second", selected = 4)
-        }
-      }
-    },
-    ignoreInit = TRUE
-  )
+  # Removed: observeEvent for plot_second to update size_second
+  # Size and plot dimension now inherited from main controls
 
   ## choose data based on input color
   data <- reactive({
@@ -2562,8 +2549,9 @@ server <- function(input, output, session) {
     check_second <- if (!is.null(input$check_second)) input$check_second else FALSE
     xaxis_second <- if (!is.null(input$xaxis_second)) input$xaxis_second else "pc_1"
     yaxis_second <- if (!is.null(input$yaxis_second)) input$yaxis_second else "pc_2"
-    size_second <- if (!is.null(input$size_second)) input$size_second else 4
-    plot_second <- if (!is.null(input$plot_second)) input$plot_second else "3d"
+    # Use main plot size and dimension for second plot
+    size_val <- if (!is.null(input$size)) input$size else 4
+    plot_val <- if (!is.null(input$plot)) input$plot else "3d"
     
     # For gene coloring, allow empty genes and let the plot function handle it
     if (color_second == "genes") {
@@ -2578,8 +2566,8 @@ server <- function(input, output, session) {
       check = check_second,
       xaxis = xaxis_second,
       yaxis = yaxis_second,
-      size = size_second,
-      plot = plot_second,
+      size = size_val,
+      plot = plot_val,
       timestamp = Sys.time()  # Add timestamp to track when this changes
     )
   })
