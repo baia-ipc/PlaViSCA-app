@@ -1627,7 +1627,7 @@ input:checked+.slider:before {
 .gene-link {
   color: #0066cc !important;
   text-decoration: underline !important;
-  font-size: 0.85em !important;
+  font-size: 1em !important;
   padding: 0px !important;
   background-color: transparent !important;
   border: none !important;

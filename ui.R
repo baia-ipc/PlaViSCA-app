@@ -311,16 +311,22 @@ ui <- fluidPage(
                     id = "gene_label",
                     "Gene name"
                   ),
-                  tags$label(
-                    class = "switch",
-                    style = "font-size: 0.8em; margin: 0;",
-                    "Gene ID",
-                    tags$input(
-                      id = "check",
-                      type = "checkbox",
-                      class = "toggle_exp"
+                  div(
+                    style = "display: flex; align-items: center; gap: 8px;",
+                    tags$span(
+                      style = "font-size: 0.85em; margin: 0;",
+                      "Gene ID"
                     ),
-                    tags$span(class = "slider")
+                    tags$label(
+                      class = "switch",
+                      style = "margin: 0;",
+                      tags$input(
+                        id = "check",
+                        type = "checkbox",
+                        class = "toggle_exp"
+                      ),
+                      tags$span(class = "slider")
+                    )
                   )
                 ),
                 selectizeInput("genes_n", NULL, 
@@ -339,23 +345,21 @@ ui <- fluidPage(
                 tags$div(
                   id = "gene_link_ui_first",
                   class = "gene_link_ui_exp",
-                  style = "margin-top: -10px; margin-bottom: 10px; text-align: left; padding-left: 0px;",
-                  tags$small(
-                    tags$a(
-                      id = "plasmo_link",
-                      href = "#",
-                      target = "_blank",
-                      class = "gene-link",
-                      "🔬 PlasmoDB"
-                    ),
-                    tags$span(" | ", style = "margin: 0 5px; color: #999;"),
-                    tags$a(
-                      id = "ncbi_link", 
-                      href = "#",
-                      target = "_blank",
-                      class = "gene-link",
-                      "🧬 NCBI"
-                    )
+                  style = "margin-top: -10px; margin-bottom: 10px; text-align: left; padding-left: 0px; display: flex; align-items: center;",
+                  tags$a(
+                    id = "plasmo_link",
+                    href = "#",
+                    target = "_blank",
+                    class = "gene-link",
+                    "🔬 PlasmoDB"
+                  ),
+                  tags$span(" | ", style = "margin: 0 8px; color: #999; font-size: 1em;"),
+                  tags$a(
+                    id = "ncbi_link", 
+                    href = "#",
+                    target = "_blank",
+                    class = "gene-link",
+                    "🧬 NCBI"
                   )
                 )
               )
@@ -426,16 +430,22 @@ ui <- fluidPage(
                        id = "gene_label_second",
                        "Gene name"
                      ),
-                     tags$label(
-                       class = "switch",
-                       style = "font-size: 0.8em; margin: 0;",
-                       "Gene ID",
-                       tags$input(
-                         id = "check_second",
-                         type = "checkbox",
-                         class = "toggle_exp"
+                     div(
+                       style = "display: flex; align-items: center; gap: 8px;",
+                       tags$span(
+                         style = "font-size: 0.85em; margin: 0;",
+                         "Gene ID"
                        ),
-                       tags$span(class = "slider")
+                       tags$label(
+                         class = "switch",
+                         style = "margin: 0;",
+                         tags$input(
+                           id = "check_second",
+                           type = "checkbox",
+                           class = "toggle_exp"
+                         ),
+                         tags$span(class = "slider")
+                       )
                      )
                    ),
                    selectizeInput("genes_second", NULL, 
@@ -454,23 +464,21 @@ ui <- fluidPage(
                   tags$div(
                     id = "gene_link_ui_second",
                     class = "gene_link_ui_exp",
-                    style = "margin-top: -10px; margin-bottom: 10px; text-align: left; padding-left: 0px;",
-                    tags$small(
-                      tags$a(
-                        id = "plasmo_link_second",
-                        href = "#",
-                        target = "_blank", 
-                        class = "gene-link",
-                        "🔬 PlasmoDB"
-                      ),
-                      tags$span(" | ", style = "margin: 0 5px; color: #999;"),
-                      tags$a(
-                        id = "ncbi_link_second",
-                        href = "#",
-                        target = "_blank",
-                        class = "gene-link",
-                        "🧬 NCBI"
-                      )
+                    style = "margin-top: -10px; margin-bottom: 10px; text-align: left; padding-left: 0px; display: flex; align-items: center;",
+                    tags$a(
+                      id = "plasmo_link_second",
+                      href = "#",
+                      target = "_blank", 
+                      class = "gene-link",
+                      "🔬 PlasmoDB"
+                    ),
+                    tags$span(" | ", style = "margin: 0 8px; color: #999; font-size: 1em;"),
+                    tags$a(
+                      id = "ncbi_link_second",
+                      href = "#",
+                      target = "_blank",
+                      class = "gene-link",
+                      "🧬 NCBI"
                     )
                   )
                  )
