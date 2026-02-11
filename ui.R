@@ -173,10 +173,57 @@ ui <- fluidPage(
               img(src = "about.png", alt = "About"),
               span("About")
             )
-          )
-        )
-      )
-    ),
+                )
+              )
+           ),
+           
+           # Separate controls for second plot  
+           h5("Second Plot Settings", style = "margin-top: 15px; color: #666;"),
+           column(
+             width = 12,
+             class = "col-12",
+             radioButtons(
+               "size_second",
+               "Size (Second Plot)",
+               choices = list("S" = 2, "M" = 4, "L" = 6),
+               selected = 4
+             )
+           ),
+           column(
+             width = 12,
+             class = "col-12",
+             radioButtons(
+               "plot_second",
+               "Plot Dimension (Second Plot)",
+               choices = list("2D" = "2d", "3D" = "3d"),
+               selected = "3d"
+             )
+           ),
+           column(
+             width = 12,
+             class = "col-12",
+             fluidRow(
+               column(
+                 width = 6,
+                 selectInput(
+                   "xaxis_second",
+                   "X-axis (Second Plot)",
+                   choices = c("pc_1"),
+                   selected = "pc_1"
+                 )
+               ),
+               column(
+                 width = 6,
+                 selectInput(
+                   "yaxis_second",
+                   "Y-axis (Second Plot)",
+                   choices = c("pc_2"),
+                   selected = "pc_2"
+                 )
+               )
+             )
+           )
+         ),
     fluidRow(id = "particles-js-home", class = "particles-js"),
     fluidRow(p(class = "copyright", "© 2025 BAIA Team. All rights reserved."))
   ),
@@ -228,7 +275,7 @@ ui <- fluidPage(
           class = "col-12",
           selectInput(
             "color",
-            "First Plot Color",
+            "Color",
             choices = list(
               "Study" = "study_label",
               "Life cycle" = "life_cycle_stage",
@@ -243,9 +290,96 @@ ui <- fluidPage(
               "HPI" = "hour_post_invasion",
               "Genes" = "genes"
             ),
-            selected = "study_label"
+             selected = "study_label"
           )
         ),
+        # Gene selection for first plot when genes is selected
+        conditionalPanel(
+          condition = "input.color == 'genes'",
+          column(
+            width = 12,
+            class = "col-12",
+            # Gene selection dropdown with toggle
+            fluidRow(
+              column(
+                width = 10,
+                selectizeInput("genes_n", "Gene", 
+                             choices = "",
+                             multiple = TRUE,
+                             options = list(
+                               placeholder = "Select one or more genes",
+                               maxItems = 10
+                             ))
+              ),
+              column(
+                width = 2,
+                br(),
+                div(
+                  style = "margin-top: 5px;",
+                  div(
+                    style = "margin-top: 5px;",
+                    tags$label(
+                      class = "switch",
+                      style = "font-size: 0.8em; margin-right: 8px;",
+                      "Gene ID",
+                      tags$input(
+                        id = "check",
+                        type = "checkbox",
+                        class = "toggle_exp"
+                      ),
+                      tags$span(class = "slider")
+                    )
+                  )
+                )
+              )
+            ),
+            # External links below gene selection
+            fluidRow(
+              column(
+                width = 12,
+                tags$div(
+                  id = "gene_link_ui_first",
+                  class = "gene_link_ui_exp",
+                  style = "margin-top: -5px; text-align: left; padding-left: 10px;",
+                  tags$a(
+                    id = "plasmo_link",
+                    href = "#",
+                    target = "_blank",
+                    class = "gene-link",
+                    "🔬 PlasmoDB"
+                  ),
+                  tags$span(" | ", style = "margin: 0 5px; color: #999;"),
+                  tags$a(
+                    id = "ncbi_link", 
+                    href = "#",
+                    target = "_blank",
+                    class = "gene-link",
+                    "🧬 NCBI"
+                  )
+                )
+              )
+            )
+          )
+        ),
+        column(
+          width = 12,
+          class = "col-12",
+          fluidRow(
+            column(
+              width = 12,
+              radioButtons(
+                "data_type",
+                "Data type",
+                choices = list(
+                  "Raw" = "raw",
+                  "Normalized" = "normalize"
+                  # "Scaled" = "scale"
+                ),
+                selected = "normalize"
+               )
+             )
+           )
+         ),
         column(
           width = 12,
           class = "col-12",
@@ -275,78 +409,70 @@ ui <- fluidPage(
               ),
               selected = "sample_type"
             ),
-            # Gene selection for second plot when genes is selected
-            conditionalPanel(
-              condition = "input.color_second == 'genes'",
-              selectizeInput("genes_second", "Gene(s) for Second Plot:", 
-                           choices = "", 
-                           multiple = TRUE,
-                           options = list(
-                             placeholder = "Select one or more genes",
-                             maxItems = 10
-                           )),
-              checkboxInput("check_second", "Use Gene ID", value = FALSE)
-            )
-          )
-        ),
-        column(
-          width = 12,
-          class = "col-12",
-          fluidRow(
-            column(
-              width = 12,
-              radioButtons(
-                "data_type",
-                "Data type",
-                choices = list(
-                  "Raw" = "raw",
-                  "Normalized" = "normalize"
-                  # "Scaled" = "scale"
-                ),
-                selected = "normalize"
-              )
-            )
-          ),
-          fluidRow(
-            id = "gene_snn_ui",
-            column(
-              width = 7,
-              selectizeInput("genes_n", "Gene", 
-                           choices = "",
-                           multiple = TRUE,
-                           options = list(
-                             placeholder = "Select one or more genes",
-                             maxItems = 10
-                           ))
-            ),
-            column(
-              id = "switch_id",
-              width = 2,
-              tags$label(
-                class = "switch",
-                tags$input(id = "check", type = "checkbox"),
-                tags$span(class = "slider")
-              )
-            ),
-            column(
-              width = 5,
-              tags$div(
-                id = "gene_link_ui",
-                class = "col-12",
-                tags$a(
-                  id = "plasmo_link",
-                  href = "#",
-                  target = "_blank",
-                  "🔬 PlasmoDB"
-                ),
-                tags$a(
-                  id = "ncbi_link",
-                  href = "#",
-                  target = "_blank",
-                  "🧬 NCBI"
-                )
-              )
-            )
+             # Gene selection for second plot when genes is selected
+             conditionalPanel(
+               condition = "input.color_second == 'genes'",
+               # Gene selection dropdown with toggle
+               fluidRow(
+                 column(
+                   width = 10,
+                   selectizeInput("genes_second", "Gene(s) for Second Plot:", 
+                                choices = "", 
+                                multiple = TRUE,
+                                options = list(
+                                  placeholder = "Select one or more genes",
+                                  maxItems = 10
+                                ))
+                 ),
+                 column(
+                   width = 2,
+                   br(),
+                   div(
+                     style = "margin-top: 5px;",
+                    div(
+                      style = "margin-top: 5px;",
+                      tags$label(
+                        class = "switch",
+                        style = "font-size: 0.8em; margin-right: 8px;",
+                        "Gene ID",
+                        tags$input(
+                          id = "check_second",
+                          type = "checkbox",
+                          class = "toggle_exp"
+                        ),
+                        tags$span(class = "slider")
+                      )
+                    )
+                   )
+                 )
+               ),
+               # External links below gene selection for second plot
+               fluidRow(
+                 column(
+                   width = 12,
+                  tags$div(
+                    id = "gene_link_ui_second",
+                    class = "gene_link_ui_exp",
+                    style = "margin-top: -5px; text-align: left; padding-left: 10px;",
+                    tags$a(
+                      id = "plasmo_link_second",
+                      href = "#",
+                      target = "_blank", 
+                      class = "gene-link",
+                      "🔬 PlasmoDB"
+                    ),
+                    tags$span(" | ", style = "margin: 0 5px; color: #999;"),
+                    tags$a(
+                      id = "ncbi_link_second",
+                      href = "#",
+                      target = "_blank",
+                      class = "gene-link",
+                      "🧬 NCBI"
+                    )
+                  )
+                 )
+               )
+             )
           )
         ),
         column(
@@ -463,6 +589,7 @@ ui <- fluidPage(
                 style = "text-align: center; margin: 20px 0; font-weight: bold; color: #2c3e50;",
                 "Comparison"
               ),
+              
               fluidRow(
                 column(
                   width = 6,
@@ -531,7 +658,13 @@ ui <- fluidPage(
                   fluidRow(
                     column(
                       width = 6,
-                      selectizeInput("genes_exp_0", "Gene", choices = NULL),
+                      selectizeInput("genes_exp_0", "Gene", 
+                                   choices = NULL, 
+                                   multiple = TRUE,
+                                   options = list(
+                                     placeholder = "Select one or more genes",
+                                     maxItems = 10
+                                   )),
                       column(
                         width = 2,
                         class = "switch_exp",

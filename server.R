@@ -2098,16 +2098,6 @@ server <- function(input, output, session) {
   
   # Helper function to generate embedding plots with different color options
   generate_embedding_plot <- function(color_input, genes_input, check_input, xaxis_input, yaxis_input, size_input, plot_input, is_dual_plot = FALSE, data_source = NULL) {
-    # Debug logging for plot generation
-    if (is_dual_plot && color_input == "genes") {
-      cat("DEBUG GENERATE_EMBEDDING_PLOT:\n")
-      cat("  - color_input:", color_input, "\n")
-      cat("  - genes_input:", paste(genes_input, collapse=", "), "\n")
-      cat("  - check_input:", check_input, "\n")
-      cat("  - is_dual_plot:", is_dual_plot, "\n")
-      cat("  - data_source is null:", is.null(data_source), "\n")
-    }
-    
     # For dual plot mode, skip the global dependency checks and use simpler validation
     if (is_dual_plot) {
       # Basic data validation for comparison mode
@@ -2292,23 +2282,12 @@ server <- function(input, output, session) {
           if (resolved_gene_col %in% colnames(df_local)) {
             color_column <- resolved_gene_col
           } else {
-            # Gene was resolved but doesn't exist in current data - add debug and return NULL
-            cat("DEBUG PLOT ERROR: Gene resolved to '", resolved_gene_col, "' but not found in df_local columns\n")
-            cat("  - df_local columns (first 10):", paste(head(colnames(df_local), 10), collapse=", "), "\n")
-            cat("  - df_local total columns:", ncol(df_local), "\n")
-            cat("  - is_dual_plot:", is_dual_plot, "\n")
-            cat("  - genes_input:", paste(genes_input, collapse=", "), "\n")
+            # Gene was resolved but doesn't exist in current data
             return(NULL)
           }
         } else {
-          cat("DEBUG PLOT ERROR: resolved_gene_col is NULL\n")
-          cat("  - genes_input:", paste(genes_input, collapse=", "), "\n")
-          cat("  - gene_data_obj is null:", is.null(gene_data_obj), "\n")
-          cat("  - full_mat is null:", is.null(full_mat), "\n")
-          if (!is.null(full_mat)) {
-            cat("  - full_mat columns (first 10):", paste(head(colnames(full_mat), 10), collapse=", "), "\n")
-          }
-          return(NULL)  # No valid gene found
+          # No valid gene found
+          return(NULL)
         }
         } # End of gene processing block
       } else {
@@ -2353,12 +2332,6 @@ server <- function(input, output, session) {
   # Preserve UI state when toggling comparison mode
   observeEvent(input$enable_comparison, {
     if (isTRUE(input$enable_comparison)) {
-      # Debug: Log what we're starting with
-      cat("DEBUG: Enabling comparison mode\n")
-      cat("  - input$color:", if(is.null(input$color)) "NULL" else input$color, "\n")
-      cat("  - input$genes_n:", if(is.null(input$genes_n)) "NULL" else paste(input$genes_n, collapse=", "), "\n")
-      cat("  - input$check:", if(is.null(input$check)) "NULL" else input$check, "\n")
-      
       # Store current selections before enabling comparison
       ui_state$stored_color <- input$color
       ui_state$stored_genes <- input$genes_n  
@@ -2372,7 +2345,6 @@ server <- function(input, output, session) {
       )
       
       # Initialize second plot with same settings as first plot
-      cat("  - Setting color_second to:", input$color, "\n")
       updateSelectInput(
         session,
         "color_second",
@@ -2383,19 +2355,15 @@ server <- function(input, output, session) {
       if (!is.null(input$color) && input$color == "genes" && !is.null(input$genes_n) && length(input$genes_n) > 0) {
         # Capture the gene selection in the current reactive context
         current_genes <- input$genes_n
-        cat("  - Copying genes to second plot:", paste(current_genes, collapse=", "), "\n")
         
         # Wait a moment for the UI to update, then copy gene selection
         later(function() {
-          cat("  - Later callback: setting genes_second to:", paste(current_genes, collapse=", "), "\n")
           updateSelectizeInput(
             session,
             "genes_second",
             selected = current_genes  # Use captured value instead of input$genes_n
           )
         }, 0.1)
-      } else {
-        cat("  - Not copying genes (color is not 'genes' or genes are empty)\n")
       }
       
       # Also copy check state
@@ -3361,58 +3329,6 @@ server <- function(input, output, session) {
       },
       error = function(e) {
       }
-    )
-  })
-  
-  # Debug outputs for comparison mode
-  output$debug_first_plot <- renderText({
-    if (!isTRUE(input$enable_comparison)) return("")
-    
-    paste(
-      "=== FIRST PLOT DEBUG ===",
-      paste("enable_comparison:", isTRUE(input$enable_comparison)),
-      paste("input$color:", if(is.null(input$color)) "NULL" else input$color),
-      paste("input$genes_n:", if(is.null(input$genes_n)) "NULL" else paste(input$genes_n, collapse=", ")),
-      paste("input$check:", if(is.null(input$check)) "NULL" else input$check),
-      "",
-      "first_plot_reactive():",
-      paste("- result:", if(is.null(try(first_plot_reactive(), silent=TRUE))) "NULL" else "OK"),
-      "",
-      "first_plot_data():",  
-      paste("- result:", if(is.null(try(first_plot_data(), silent=TRUE))) "NULL" else "OK"),
-      sep = "\n"
-    )
-  })
-  
-  output$debug_second_plot <- renderText({
-    if (!isTRUE(input$enable_comparison)) return("")
-    
-    paste(
-      "=== SECOND PLOT DEBUG ===", 
-      paste("input$color_second:", if(is.null(input$color_second)) "NULL" else input$color_second),
-      paste("input$genes_second:", if(is.null(input$genes_second)) "NULL" else paste(input$genes_second, collapse=", ")),
-      paste("input$check_second:", if(is.null(input$check_second)) "NULL" else input$check_second),
-      "",
-      "second_plot_reactive():",
-      paste("- result:", if(is.null(try(second_plot_reactive(), silent=TRUE))) "NULL" else "OK"),
-      "",
-      "second_plot_data():",
-      paste("- result:", if(is.null(try(second_plot_data(), silent=TRUE))) "NULL" else "OK"), 
-      sep = "\n"
-    )
-  })
-  
-  output$debug_general <- renderText({
-    if (!isTRUE(input$enable_comparison)) return("")
-    
-    paste(
-      "=== GENERAL DEBUG ===",
-      paste("Current time:", Sys.time()),
-      paste("App initialized:", app_initialized()),
-      paste("Data loading trigger:", data_loading_trigger()),
-      paste("Gene data available:", !is.null(try(gene_data(), silent=TRUE))),
-      paste("Filtered gene data available:", !is.null(try(filtered_gene_data(), silent=TRUE))),
-      sep = "\n"
     )
   })
   
