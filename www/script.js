@@ -114,6 +114,38 @@ function setupFilterSync() {
     'sequencer', 'sc_technology'
   ];
   
+  // Function to copy options from first filter to all others
+  function syncFilterOptions(inputId) {
+    // Get the first (Embeddings tab) selectize instance
+    const firstSelect = $('#filter-row-embeddings select[id="' + inputId + '"]')[0];
+    if (!firstSelect || !firstSelect.selectize) return;
+    
+    const firstSelectize = firstSelect.selectize;
+    const options = firstSelectize.options;
+    const value = firstSelectize.getValue();
+    
+    // Update all other filter rows with the same options and value
+    $('.filter-row:not(#filter-row-embeddings) select[id="' + inputId + '"]').each(function() {
+      if (this.selectize) {
+        const selectize = this.selectize;
+        
+        // Clear existing options
+        selectize.clearOptions();
+        
+        // Add all options from the first selectize
+        Object.keys(options).forEach(function(key) {
+          selectize.addOption(options[key]);
+        });
+        
+        // Set the same value
+        selectize.setValue(value, true);
+        
+        // Refresh the selectize
+        selectize.refreshOptions(false);
+      }
+    });
+  }
+  
   // Function to sync a specific filter value across all filter rows
   function syncFilterValue(inputId, value) {
     // Update all selectize inputs with this ID across all filter rows
@@ -134,13 +166,60 @@ function setupFilterSync() {
     });
   });
   
-  // Also sync when Shiny updates the inputs (after data loads)
+  // Watch for when Shiny updates the filter options (after data loads)
+  // We need to copy those options to all other filter instances
+  const observer = new MutationObserver(function(mutations) {
+    mutations.forEach(function(mutation) {
+      if (mutation.type === 'childList' || mutation.type === 'attributes') {
+        const target = $(mutation.target);
+        
+        // Check if this is a selectize dropdown that was updated
+        if (target.closest('#filter-row-embeddings').length > 0) {
+          const select = target.closest('.selectize-control').prev('select');
+          if (select.length > 0) {
+            const inputId = select.attr('id');
+            if (filterIds.includes(inputId)) {
+              // Wait a bit for selectize to finish updating
+              setTimeout(function() {
+                syncFilterOptions(inputId);
+              }, 100);
+            }
+          }
+        }
+      }
+    });
+  });
+  
+  // Observe the embeddings filter row for changes
+  const embeddingsRow = document.getElementById('filter-row-embeddings');
+  if (embeddingsRow) {
+    observer.observe(embeddingsRow, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['class']
+    });
+  }
+  
+  // Also sync when Shiny explicitly triggers inputchanged
   $(document).on('shiny:inputchanged', function(event) {
     if (filterIds.includes(event.name)) {
       syncFilterValue(event.name, event.value);
+      // Also try to sync options in case they changed
+      setTimeout(function() {
+        syncFilterOptions(event.name);
+      }, 100);
     }
   });
+  
+  // Initial sync of options after page load
+  setTimeout(function() {
+    filterIds.forEach(function(filterId) {
+      syncFilterOptions(filterId);
+    });
+  }, 2000);
 }
+
 
 
 
