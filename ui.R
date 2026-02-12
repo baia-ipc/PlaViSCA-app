@@ -556,8 +556,7 @@ ui <- fluidPage(
             # Shared filter row at top of tab content
             fluidRow(
               id = "filter-row-gene-expression",
-              class = "filter-row filter-row-hidden",
-              style = "display: none;",
+              class = "filter-row",
               column(
                 width = 12,
                 create_meta_filter_row("")
@@ -675,8 +674,7 @@ ui <- fluidPage(
             # Shared filter row at top of tab content
             fluidRow(
               id = "filter-row-quality-control",
-              class = "filter-row filter-row-hidden",
-              style = "display: none;",
+              class = "filter-row",
               column(
                 width = 12,
                 create_meta_filter_row("")
@@ -718,8 +716,7 @@ ui <- fluidPage(
             # Shared filter row at top of tab content
             fluidRow(
               id = "filter-row-metadata",
-              class = "filter-row filter-row-hidden",
-              style = "display: none;",
+              class = "filter-row",
               column(
                 width = 12,
                 create_meta_filter_row("")

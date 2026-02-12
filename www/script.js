@@ -107,77 +107,41 @@ $(document).ready(function () {
 
 // Synchronize filters across tabs
 function setupFilterSync() {
-  // Map tab names to filter row IDs
-  const tabFilterMap = {
-    'Embeddings': 'filter-row-embeddings',
-    'Gene expression': 'filter-row-gene-expression',
-    'Quality control': 'filter-row-quality-control',
-    'Metadata': 'filter-row-metadata'
-  };
+  // List of all filter input IDs
+  const filterIds = [
+    'study_label', 'sample_type', 'host_species', 'parasite_stage',
+    'treatment', 'development_phase', 'strain', 'hour_post_invasion',
+    'sequencer', 'sc_technology'
+  ];
   
-  // Function to sync values from visible filters to hidden ones
-  function syncFilterValues() {
-    // Get values from the visible (Embeddings) filter
-    const visibleFilters = $('#filter-row-embeddings');
-    
-    // For each selectize input in the visible filter
-    visibleFilters.find('select').each(function() {
-      const inputId = $(this).attr('id');
-      const value = $(this).val();
-      
-      // Update the same input in all hidden filter rows
-      $('.filter-row-hidden select[id="' + inputId + '"]').each(function() {
-        const selectize = this.selectize;
-        if (selectize) {
-          selectize.setValue(value, true);
-        }
-      });
+  // Function to sync a specific filter value across all filter rows
+  function syncFilterValue(inputId, value) {
+    // Update all selectize inputs with this ID across all filter rows
+    $('.filter-row select[id="' + inputId + '"]').each(function() {
+      const selectize = this.selectize;
+      if (selectize) {
+        // Use silent mode to avoid triggering change events recursively
+        selectize.setValue(value, true);
+      }
     });
   }
   
-  // Function to show/hide appropriate filter row
-  function toggleFilterRows(activeTab) {
-    const activeFilterId = tabFilterMap[activeTab];
-    
-    if (activeFilterId) {
-      // Hide all filter rows first
-      $('.filter-row').hide();
-      
-      // Show the active tab's filter row
-      $('#' + activeFilterId).show();
-      
-      // Sync values before showing
-      syncFilterValues();
-    }
-  }
-  
-  // Show correct filters on initial load
-  setTimeout(function() {
-    const activeTab = $('#tabset li.active a').text().trim();
-    toggleFilterRows(activeTab);
-  }, 100);
-  
-  // Listen for tab changes
-  $('a[data-toggle="tab"]').on('shown.bs.tab', function(e) {
-    const activeTab = $(e.target).text().trim();
-    toggleFilterRows(activeTab);
+  // Listen for changes on any filter input
+  filterIds.forEach(function(filterId) {
+    $(document).on('change', '#' + filterId, function() {
+      const value = $(this).val();
+      syncFilterValue(filterId, value);
+    });
   });
   
-  // Also listen to Shiny's tabset change event
+  // Also sync when Shiny updates the inputs (after data loads)
   $(document).on('shiny:inputchanged', function(event) {
-    if (event.name === 'tabset') {
-      setTimeout(function() {
-        const activeTab = $('#tabset li.active a').text().trim();
-        toggleFilterRows(activeTab);
-      }, 50);
+    if (filterIds.includes(event.name)) {
+      syncFilterValue(event.name, event.value);
     }
-  });
-  
-  // Sync values when any filter changes in the visible row
-  $(document).on('change', '.filter-row:visible select', function() {
-    syncFilterValues();
   });
 }
+
 
 
 
