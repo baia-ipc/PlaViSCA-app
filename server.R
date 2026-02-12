@@ -324,83 +324,123 @@ server <- function(input, output, session) {
     
     filt_data <- gene_data()$data
     
+    # List of filter suffixes for all tabs
+    filter_suffixes <- c("", "_gex", "_qc", "_meta")
+    
     # Use isolate to prevent reactive loop
     tryCatch({
-      updateSelectizeInput(
-        session,
-        "study_label",
-        choices = unique(filt_data$study_label),
-        selected = isolate(input$study_label),
-        server = TRUE
-      )
-      updateSelectizeInput(
-        session,
-        "sample_type",
-        choices = unique(filt_data$sample_type),
-        selected = isolate(input$sample_type),
-        server = TRUE
-      )
-      updateSelectizeInput(
-        session,
-        "host_species",
-        choices = setNames(
-          unique(filt_data$host_species),
-          format_species_name(unique(filt_data$host_species))
-        ),
-        selected = isolate(input$host_species),
-        server = TRUE
-      )
-      updateSelectizeInput(
-        session,
-        "parasite_stage",
-        choices = unique(filt_data$parasite_stage),
-        selected = isolate(input$parasite_stage),
-        server = TRUE
-      )
-      updateSelectizeInput(
-        session,
-        "treatment",
-        choices = unique(filt_data$treatment),
-        selected = isolate(input$treatment),
-        server = TRUE
-      )
-      updateSelectizeInput(
-        session,
-        "development_phase",
-        choices = unique(filt_data$development_phase),
-        selected = isolate(input$development_phase),
-        server = TRUE
-      )
-      updateSelectizeInput(
-        session,
-        "strain",
-        choices = unique(filt_data$strain),
-        selected = isolate(input$strain),
-        server = TRUE
-      )
-      updateSelectizeInput(
-        session,
-        "hour_post_invasion",
-        choices = unique(filt_data$hour_post_invasion),
-        selected = isolate(input$hour_post_invasion),
-        server = TRUE
-      )
-      updateSelectizeInput(
-        session,
-        "sequencer",
-        choices = unique(filt_data$sequencer),
-        selected = isolate(input$sequencer),
-        server = TRUE
-      )
-      updateSelectizeInput(
-        session,
-        "sc_technology",
-        choices = unique(filt_data$sc_technology),
-        selected = isolate(input$sc_technology),
-        server = TRUE
-      )
+      # Populate all filter instances (one for each tab)
+      for (suffix in filter_suffixes) {
+        updateSelectizeInput(
+          session,
+          paste0("study_label", suffix),
+          choices = unique(filt_data$study_label),
+          selected = isolate(input[[paste0("study_label", suffix)]]),
+          server = TRUE
+        )
+        updateSelectizeInput(
+          session,
+          paste0("sample_type", suffix),
+          choices = unique(filt_data$sample_type),
+          selected = isolate(input[[paste0("sample_type", suffix)]]),
+          server = TRUE
+        )
+        updateSelectizeInput(
+          session,
+          paste0("host_species", suffix),
+          choices = setNames(
+            unique(filt_data$host_species),
+            format_species_name(unique(filt_data$host_species))
+          ),
+          selected = isolate(input[[paste0("host_species", suffix)]]),
+          server = TRUE
+        )
+        updateSelectizeInput(
+          session,
+          paste0("parasite_stage", suffix),
+          choices = unique(filt_data$parasite_stage),
+          selected = isolate(input[[paste0("parasite_stage", suffix)]]),
+          server = TRUE
+        )
+        updateSelectizeInput(
+          session,
+          paste0("treatment", suffix),
+          choices = unique(filt_data$treatment),
+          selected = isolate(input[[paste0("treatment", suffix)]]),
+          server = TRUE
+        )
+        updateSelectizeInput(
+          session,
+          paste0("development_phase", suffix),
+          choices = unique(filt_data$development_phase),
+          selected = isolate(input[[paste0("development_phase", suffix)]]),
+          server = TRUE
+        )
+        updateSelectizeInput(
+          session,
+          paste0("strain", suffix),
+          choices = unique(filt_data$strain),
+          selected = isolate(input[[paste0("strain", suffix)]]),
+          server = TRUE
+        )
+        updateSelectizeInput(
+          session,
+          paste0("hour_post_invasion", suffix),
+          choices = unique(filt_data$hour_post_invasion),
+          selected = isolate(input[[paste0("hour_post_invasion", suffix)]]),
+          server = TRUE
+        )
+        updateSelectizeInput(
+          session,
+          paste0("sequencer", suffix),
+          choices = unique(filt_data$sequencer),
+          selected = isolate(input[[paste0("sequencer", suffix)]]),
+          server = TRUE
+        )
+        updateSelectizeInput(
+          session,
+          paste0("sc_technology", suffix),
+          choices = unique(filt_data$sc_technology),
+          selected = isolate(input[[paste0("sc_technology", suffix)]]),
+          server = TRUE
+        )
+      }
     }, error = function(e) {
       # Silent error handling
+    })
+  })
+  
+  # Sync filter values across all tabs
+  # When a filter changes in any tab, update all other tabs to match
+  filter_names <- c("study_label", "sample_type", "host_species", "parasite_stage",
+                    "treatment", "development_phase", "strain", "hour_post_invasion",
+                    "sequencer", "sc_technology")
+  filter_suffixes <- c("", "_gex", "_qc", "_meta")
+  
+  # Create observers for each filter to sync across tabs
+  lapply(filter_names, function(filter_name) {
+    lapply(filter_suffixes, function(source_suffix) {
+      input_id <- paste0(filter_name, source_suffix)
+      
+      observeEvent(input[[input_id]], {
+        new_value <- input[[input_id]]
+        
+        # Update all other instances of this filter
+        for (target_suffix in filter_suffixes) {
+          if (target_suffix != source_suffix) {
+            target_id <- paste0(filter_name, target_suffix)
+            
+            # Only update if value is different to avoid loops
+            if (!identical(input[[target_id]], new_value)) {
+              updateSelectizeInput(
+                session,
+                target_id,
+                selected = new_value
+              )
+            }
+          }
+        }
+      }, ignoreNULL = FALSE, ignoreInit = TRUE)
     })
   })
 
@@ -551,29 +591,29 @@ server <- function(input, output, session) {
   observeEvent(
     list(
       input$data_opt,
-      input$study_label,
-      input$host_species,
-      input$parasite_stage,
-      input$treatment,
-      input$development_phase,
-      input$sample_type,
-      input$strain,
-      input$hour_post_invasion,
-      input$sequencer,
-      input$sc_technology
+      input$study_label_meta,
+      input$host_species_meta,
+      input$parasite_stage_meta,
+      input$treatment_meta,
+      input$development_phase_meta,
+      input$sample_type_meta,
+      input$strain_meta,
+      input$hour_post_invasion_meta,
+      input$sequencer_meta,
+      input$sc_technology_meta
     ),
     {
       current_inputs <- list(
-        study_label = input$study_label,
-        sample_type = input$sample_type,
-        host_species = input$host_species,
-        parasite_stage = input$parasite_stage,
-        treatment = input$treatment,
-        development_phase = input$development_phase,
-        strain = input$strain,
-        hour_post_invasion = input$hour_post_invasion,
-        sequencer = input$sequencer,
-        sc_technology = input$sc_technology
+        study_label = input$study_label_meta,
+        sample_type = input$sample_type_meta,
+        host_species = input$host_species_meta,
+        parasite_stage = input$parasite_stage_meta,
+        treatment = input$treatment_meta,
+        development_phase = input$development_phase_meta,
+        strain = input$strain_meta,
+        hour_post_invasion = input$hour_post_invasion_meta,
+        sequencer = input$sequencer_meta,
+        sc_technology = input$sc_technology_meta
       )
 
       filt_data <- apply_secondary_filters(filtered_data(), current_inputs)
@@ -709,29 +749,29 @@ server <- function(input, output, session) {
   observeEvent(
     list(
       input$data_opt,
-      input$study_label,
-      input$host_species,
-      input$parasite_stage,
-      input$treatment,
-      input$development_phase,
-      input$sample_type,
-      input$strain,
-      input$hour_post_invasion,
-      input$sequencer,
-      input$sc_technology
+      input$study_label_qc,
+      input$host_species_qc,
+      input$parasite_stage_qc,
+      input$treatment_qc,
+      input$development_phase_qc,
+      input$sample_type_qc,
+      input$strain_qc,
+      input$hour_post_invasion_qc,
+      input$sequencer_qc,
+      input$sc_technology_qc
     ),
     {
       current_inputs <- list(
-        study_label = input$study_label,
-        host_species = input$host_species,
-        parasite_stage = input$parasite_stage,
-        treatment = input$treatment,
-        development_phase = input$development_phase,
-        sample_type = input$sample_type,
-        strain = input$strain,
-        hour_post_invasion = input$hour_post_invasion,
-        sequencer = input$sequencer,
-        sc_technology = input$sc_technology
+        study_label = input$study_label_qc,
+        host_species = input$host_species_qc,
+        parasite_stage = input$parasite_stage_qc,
+        treatment = input$treatment_qc,
+        development_phase = input$development_phase_qc,
+        sample_type = input$sample_type_qc,
+        strain = input$strain_qc,
+        hour_post_invasion = input$hour_post_invasion_qc,
+        sequencer = input$sequencer_qc,
+        sc_technology = input$sc_technology_qc
       )
 
       filt_data <- apply_secondary_filters(filtered_data(), current_inputs)
@@ -873,29 +913,29 @@ server <- function(input, output, session) {
   observeEvent(
     list(
       input$data_opt,
-      input$study_label,
-      input$host_species,
-      input$parasite_stage,
-      input$treatment,
-      input$development_phase,
-      input$sample_type,
-      input$strain,
-      input$hour_post_invasion,
-      input$sequencer,
-      input$sc_technology
+      input$study_label_gex,
+      input$host_species_gex,
+      input$parasite_stage_gex,
+      input$treatment_gex,
+      input$development_phase_gex,
+      input$sample_type_gex,
+      input$strain_gex,
+      input$hour_post_invasion_gex,
+      input$sequencer_gex,
+      input$sc_technology_gex
     ),
     {
       current_inputs <- list(
-        study_label = input$study_label,
-        host_species = input$host_species,
-        parasite_stage = input$parasite_stage,
-        treatment = input$treatment,
-        development_phase = input$development_phase,
-        sample_type = input$sample_type,
-        strain = input$strain,
-        hour_post_invasion = input$hour_post_invasion,
-        sequencer = input$sequencer,
-        sc_technology = input$sc_technology
+        study_label = input$study_label_gex,
+        host_species = input$host_species_gex,
+        parasite_stage = input$parasite_stage_gex,
+        treatment = input$treatment_gex,
+        development_phase = input$development_phase_gex,
+        sample_type = input$sample_type_gex,
+        strain = input$strain_gex,
+        hour_post_invasion = input$hour_post_invasion_gex,
+        sequencer = input$sequencer_gex,
+        sc_technology = input$sc_technology_gex
       )
 
       filt_data <- apply_secondary_filters(filtered_data(), current_inputs)

@@ -559,7 +559,7 @@ ui <- fluidPage(
               class = "filter-row",
               column(
                 width = 12,
-                create_meta_filter_row("")
+                create_meta_filter_row("_gex")
               )
             ),
             fluidRow(
@@ -677,7 +677,7 @@ ui <- fluidPage(
               class = "filter-row",
               column(
                 width = 12,
-                create_meta_filter_row("")
+                create_meta_filter_row("_qc")
               )
             ),
             div(
@@ -719,7 +719,7 @@ ui <- fluidPage(
               class = "filter-row",
               column(
                 width = 12,
-                create_meta_filter_row("")
+                create_meta_filter_row("_meta")
               )
             ),
             div(
