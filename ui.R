@@ -733,16 +733,6 @@ ui <- fluidPage(
               )
             )
           )
-        ),
-        
-        # Shared filter row for all tabs (positioned via CSS to appear inside tab content)
-        fluidRow(
-          id = "shared-filters",
-          class = "sticky-filters",
-          column(
-            width = 12,
-            create_meta_filter_row("")
-          )
         )
       )
     )
