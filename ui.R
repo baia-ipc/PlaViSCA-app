@@ -452,6 +452,14 @@ ui <- fluidPage(
         id = "main",
         class = "main",
         
+        # Shared filter row for all tabs (sticky filters) - placed before tab content
+        fluidRow(
+          column(
+            width = 12,
+            create_meta_filter_row("")
+          )
+        ),
+        
         tabsetPanel(
           id = "tabset",
 
@@ -725,14 +733,6 @@ ui <- fluidPage(
                 DT::DTOutput("data_source")
               )
             )
-          )
-        ),
-        
-        # Shared filter row for all tabs (sticky filters) - placed after tabs
-        fluidRow(
-          column(
-            width = 12,
-            create_meta_filter_row("")
           )
         )
       )
