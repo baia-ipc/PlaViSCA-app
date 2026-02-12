@@ -531,204 +531,82 @@ server <- function(input, output, session) {
   # Old apply_filter code removed - now using individual filter inputs
   user_interact <- reactiveVal(FALSE)
 
-  # Reactive filtered data
+  # Reactive for base metadata (no filtering - just returns mr_data)
+  # Filtering is now done at the individual tab level using shared filter inputs
   filtered_data <- reactive({
-    selections <- input$apply_filter
-
-    # If no selections made (empty or null), use default filter
-    if (is.null(selections) || length(selections) == 0) {
-      selections <- default_df_filter()
-    }
-
-    req(selections)
-
-    # Create cache key for filtered data
-    cache_key <- make_cache_key("filtered_metadata", selections)
-
-    # Check cache first to avoid reprocessing
-    if (exists(cache_key, envir = sessionData, inherits = FALSE)) {
-      return(sessionData[[cache_key]])
-    }
-
-    result <- fun_filter_df(mr_data, selections)
-
-    # Cache the result
-    sessionData[[cache_key]] <- result
-
-    return(result)
+    mr_data
   })
 
-  # Manipulation tabset
+  # Populate filter dropdowns for all tabs (shared inputs across tabs)
   observe({
     filt_data <- filtered_data()
     req(nrow(filt_data) > 0)
 
-    if (input$tabset == "Metadata") {
-      updateSelectInput(
-        session,
-        "study_label",
-        choices = unique(filt_data$study_label)
-      )
-      updateSelectInput(
-        session,
-        "sample_type",
-        choices = unique(filt_data$sample_type)
-      )
-      updateSelectizeInput(
-        session,
-        "host_species",
-        choices = setNames(
-          unique(filt_data$host_species),
-          format_species_name(unique(filt_data$host_species))
-        ),
-        server = TRUE
-      )
-      updateSelectInput(
-        session,
-        "parasite_stage",
-        choices = unique(filt_data$parasite_stage)
-      )
-      updateSelectInput(
-        session,
-        "treatment",
-        choices = unique(filt_data$treatment)
-      )
-      updateSelectInput(
-        session,
-        "development_phase",
-        choices = unique(filt_data$development_phase)
-      )
-      updateSelectInput(
-        session,
-        "strain",
-        choices = unique(filt_data$strain)
-      )
-      updateSelectInput(
-        session,
-        "hour_post_invasion",
-        choices = unique(filt_data$hour_post_invasion)
-      )
-      updateSelectInput(
-        session,
-        "sequencer",
-        choices = unique(filt_data$sequencer)
-      )
-      updateSelectInput(
-        session,
-        "sc_technology",
-        choices = unique(filt_data$sc_technology)
-      )
-    } else if (input$tabset == "Quality control") {
-      updateSelectInput(
-        session,
-        "study_label_qc",
-        choices = unique(filt_data$study_label)
-      )
-      updateSelectInput(
-        session,
-        "sample_type_qc",
-        choices = unique(filt_data$sample_type)
-      )
-      updateSelectizeInput(
-        session,
-        "host_species_qc",
-        choices = setNames(
-          unique(filt_data$host_species),
-          format_species_name(unique(filt_data$host_species))
-        ),
-        server = TRUE
-      )
-      updateSelectInput(
-        session,
-        "parasite_stage_qc",
-        choices = unique(filt_data$parasite_stage)
-      )
-      updateSelectInput(
-        session,
-        "treatment_qc",
-        choices = unique(filt_data$treatment)
-      )
-      updateSelectInput(
-        session,
-        "development_phase_qc",
-        choices = unique(filt_data$development_phase)
-      )
-      updateSelectInput(
-        session,
-        "strain_qc",
-        choices = unique(filt_data$strain)
-      )
-      updateSelectInput(
-        session,
-        "hour_post_invasion_qc",
-        choices = unique(filt_data$hour_post_invasion)
-      )
-      updateSelectInput(
-        session,
-        "sequencer_qc",
-        choices = unique(filt_data$sequencer)
-      )
-      updateSelectInput(
-        session,
-        "sc_technology_qc",
-        choices = unique(filt_data$sc_technology)
-      )
-    } else if (input$tabset == "Gene expression") {
-      updateSelectInput(
-        session,
-        "study_label_exp",
-        choices = unique(filt_data$study_label)
-      )
-      updateSelectInput(
-        session,
-        "sample_type_exp",
-        choices = unique(filt_data$sample_type)
-      )
-      updateSelectizeInput(
-        session,
-        "host_species_exp",
-        choices = setNames(
-          unique(filt_data$host_species),
-          format_species_name(unique(filt_data$host_species))
-        ),
-        server = TRUE
-      )
-      updateSelectInput(
-        session,
-        "parasite_stage_exp",
-        choices = unique(filt_data$parasite_stage)
-      )
-      updateSelectInput(
-        session,
-        "treatment_exp",
-        choices = unique(filt_data$treatment)
-      )
-      updateSelectInput(
-        session,
-        "development_phase_exp",
-        choices = unique(filt_data$development_phase)
-      )
-      updateSelectInput(
-        session,
-        "strain_exp",
-        choices = unique(filt_data$strain)
-      )
-      updateSelectInput(
-        session,
-        "hour_post_invasion_exp",
-        choices = unique(filt_data$hour_post_invasion)
-      )
-      updateSelectInput(
-        session,
-        "sequencer_exp",
-        choices = unique(filt_data$sequencer)
-      )
-      updateSelectInput(
-        session,
-        "sc_technology_exp",
-        choices = unique(filt_data$sc_technology)
-      )
-    }
+    # All tabs now use the same filter input IDs (no suffixes)
+    # So we only need to update once, and it applies to all tabs
+    updateSelectizeInput(
+      session,
+      "study_label",
+      choices = unique(filt_data$study_label),
+      server = TRUE
+    )
+    updateSelectizeInput(
+      session,
+      "sample_type",
+      choices = unique(filt_data$sample_type),
+      server = TRUE
+    )
+    updateSelectizeInput(
+      session,
+      "host_species",
+      choices = setNames(
+        unique(filt_data$host_species),
+        format_species_name(unique(filt_data$host_species))
+      ),
+      server = TRUE
+    )
+    updateSelectizeInput(
+      session,
+      "parasite_stage",
+      choices = unique(filt_data$parasite_stage),
+      server = TRUE
+    )
+    updateSelectizeInput(
+      session,
+      "treatment",
+      choices = unique(filt_data$treatment),
+      server = TRUE
+    )
+    updateSelectizeInput(
+      session,
+      "development_phase",
+      choices = unique(filt_data$development_phase),
+      server = TRUE
+    )
+    updateSelectizeInput(
+      session,
+      "strain",
+      choices = unique(filt_data$strain),
+      server = TRUE
+    )
+    updateSelectizeInput(
+      session,
+      "hour_post_invasion",
+      choices = unique(filt_data$hour_post_invasion),
+      server = TRUE
+    )
+    updateSelectizeInput(
+      session,
+      "sequencer",
+      choices = unique(filt_data$sequencer),
+      server = TRUE
+    )
+    updateSelectizeInput(
+      session,
+      "sc_technology",
+      choices = unique(filt_data$sc_technology),
+      server = TRUE
+    )
   })
 
   observeEvent(
@@ -892,29 +770,29 @@ server <- function(input, output, session) {
   observeEvent(
     list(
       input$data_opt,
-      input$study_label_qc,
-      input$host_species_qc,
-      input$parasite_stage_qc,
-      input$treatment_qc,
-      input$development_phase_qc,
-      input$sample_type_qc,
-      input$strain_qc,
-      input$hour_post_invasion_qc,
-      input$sequencer_qc,
-      input$sc_technology_qc
+      input$study_label,
+      input$host_species,
+      input$parasite_stage,
+      input$treatment,
+      input$development_phase,
+      input$sample_type,
+      input$strain,
+      input$hour_post_invasion,
+      input$sequencer,
+      input$sc_technology
     ),
     {
       current_inputs <- list(
-        study_label = input$study_label_qc,
-        host_species = input$host_species_qc,
-        parasite_stage = input$parasite_stage_qc,
-        treatment = input$treatment_qc,
-        development_phase = input$development_phase_qc,
-        sample_type = input$sample_type_qc,
-        strain = input$strain_qc,
-        hour_post_invasion = input$hour_post_invasion_qc,
-        sequencer = input$sequencer_qc,
-        sc_technology = input$sc_technology_qc
+        study_label = input$study_label,
+        host_species = input$host_species,
+        parasite_stage = input$parasite_stage,
+        treatment = input$treatment,
+        development_phase = input$development_phase,
+        sample_type = input$sample_type,
+        strain = input$strain,
+        hour_post_invasion = input$hour_post_invasion,
+        sequencer = input$sequencer,
+        sc_technology = input$sc_technology
       )
 
       filt_data <- apply_secondary_filters(filtered_data(), current_inputs)
@@ -946,9 +824,9 @@ server <- function(input, output, session) {
       ## plot elbow
       output$data_pca_stdv_plotly <- renderPlotly({
         selected_study <- if (
-          !is.null(input$study_label_qc) && length(input$study_label_qc) > 0
+          !is.null(input$study_label) && length(input$study_label) > 0
         ) {
-          input$study_label_qc[1]
+          input$study_label[1]
         } else {
           unique(mr_data$study_label)[1]
         }
@@ -963,9 +841,9 @@ server <- function(input, output, session) {
       ## plot variable genes
       output$variable_genes_plotly <- renderPlotly({
         selected_study <- if (
-          !is.null(input$study_label_qc) && length(input$study_label_qc) > 0
+          !is.null(input$study_label) && length(input$study_label) > 0
         ) {
-          input$study_label_qc[1]
+          input$study_label[1]
         } else {
           unique(mr_data$study_label)[1]
         }
@@ -1003,16 +881,16 @@ server <- function(input, output, session) {
     req(gene_data())  # Use raw gene_data() instead of filtered_gene_data()
 
     current_inputs <- list(
-      study_label = input$study_label_exp,
-      host_species = input$host_species_exp,
-      parasite_stage = input$parasite_stage_exp,
-      treatment = input$treatment_exp,
-      development_phase = input$development_phase_exp,
-      sample_type = input$sample_type_exp,
-      strain = input$strain_exp,
-      hour_post_invasion = input$hour_post_invasion_exp,
-      sequencer = input$sequencer_exp,
-      sc_technology = input$sc_technology_exp
+      study_label = input$study_label,
+      host_species = input$host_species,
+      parasite_stage = input$parasite_stage,
+      treatment = input$treatment,
+      development_phase = input$development_phase,
+      sample_type = input$sample_type,
+      strain = input$strain,
+      hour_post_invasion = input$hour_post_invasion,
+      sequencer = input$sequencer,
+      sc_technology = input$sc_technology
     )
 
     # Create cache key as a single string for filtered gene expression data
@@ -1056,29 +934,29 @@ server <- function(input, output, session) {
   observeEvent(
     list(
       input$data_opt,
-      input$study_label_exp,
-      input$host_species_exp,
-      input$parasite_stage_exp,
-      input$treatment_exp,
-      input$development_phase_exp,
-      input$sample_type_exp,
-      input$strain_exp,
-      input$hour_post_invasion_exp,
-      input$sequencer_exp,
-      input$sc_technology_exp
+      input$study_label,
+      input$host_species,
+      input$parasite_stage,
+      input$treatment,
+      input$development_phase,
+      input$sample_type,
+      input$strain,
+      input$hour_post_invasion,
+      input$sequencer,
+      input$sc_technology
     ),
     {
       current_inputs <- list(
-        study_label = input$study_label_exp,
-        host_species = input$host_species_exp,
-        parasite_stage = input$parasite_stage_exp,
-        treatment = input$treatment_exp,
-        development_phase = input$development_phase_exp,
-        sample_type = input$sample_type_exp,
-        strain = input$strain_exp,
-        hour_post_invasion = input$hour_post_invasion_exp,
-        sequencer = input$sequencer_exp,
-        sc_technology = input$sc_technology_exp
+        study_label = input$study_label,
+        host_species = input$host_species,
+        parasite_stage = input$parasite_stage,
+        treatment = input$treatment,
+        development_phase = input$development_phase,
+        sample_type = input$sample_type,
+        strain = input$strain,
+        hour_post_invasion = input$hour_post_invasion,
+        sequencer = input$sequencer,
+        sc_technology = input$sc_technology
       )
 
       filt_data <- apply_secondary_filters(filtered_data(), current_inputs)
@@ -1110,16 +988,16 @@ server <- function(input, output, session) {
       input$group_exp,
       input$check_exp_0,
       get_current_data_type(),
-      input$study_label_exp,
-      input$host_species_exp,
-      input$parasite_stage_exp,
-      input$treatment_exp,
-      input$development_phase_exp,
-      input$sample_type_exp,
-      input$strain_exp,
-      input$hour_post_invasion_exp,
-      input$sequencer_exp,
-      input$sc_technology_exp
+      input$study_label,
+      input$host_species,
+      input$parasite_stage,
+      input$treatment,
+      input$development_phase,
+      input$sample_type,
+      input$strain,
+      input$hour_post_invasion,
+      input$sequencer,
+      input$sc_technology
     )
 
     # Check cache first for instant gene switching
@@ -3134,16 +3012,16 @@ server <- function(input, output, session) {
                   gene_info$gene_id,
                   gene_info$gene_name,
                   as.character(cur_group),
-                  paste(isolate(input$study_label_exp), collapse = ", "),
-                  paste(isolate(input$host_species_exp), collapse = ", "),
-                  paste(isolate(input$parasite_stage_exp), collapse = ", "),
-                  paste(isolate(input$treatment_exp), collapse = ", "),
-                  paste(isolate(input$development_phase_exp), collapse = ", "),
-                  paste(isolate(input$sample_type_exp), collapse = ", "),
-                  paste(isolate(input$strain_exp), collapse = ", "),
-                  paste(isolate(input$hour_post_invasion_exp), collapse = ", "),
-                  paste(isolate(input$sequencer_exp), collapse = ", "),
-                  paste(isolate(input$sc_technology_exp), collapse = ", "),
+                  paste(isolate(input$study_label), collapse = ", "),
+                  paste(isolate(input$host_species), collapse = ", "),
+                  paste(isolate(input$parasite_stage), collapse = ", "),
+                  paste(isolate(input$treatment), collapse = ", "),
+                  paste(isolate(input$development_phase), collapse = ", "),
+                  paste(isolate(input$sample_type), collapse = ", "),
+                  paste(isolate(input$strain), collapse = ", "),
+                  paste(isolate(input$hour_post_invasion), collapse = ", "),
+                  paste(isolate(input$sequencer), collapse = ", "),
+                  paste(isolate(input$sc_technology), collapse = ", "),
                   as.character(Sys.time())
                 ),
                 stringsAsFactors = FALSE
@@ -3284,16 +3162,16 @@ server <- function(input, output, session) {
                       gene_info$gene_id,
                       gene_info$gene_name,
                       as.character(cur_group),
-                      paste(isolate(input$study_label_exp), collapse = ", "),
-                      paste(isolate(input$host_species_exp), collapse = ", "),
-                      paste(isolate(input$parasite_stage_exp), collapse = ", "),
-                      paste(isolate(input$treatment_exp), collapse = ", "),
-                      paste(isolate(input$development_phase_exp), collapse = ", "),
-                      paste(isolate(input$sample_type_exp), collapse = ", "),
-                      paste(isolate(input$strain_exp), collapse = ", "),
-                      paste(isolate(input$hour_post_invasion_exp), collapse = ", "),
-                      paste(isolate(input$sequencer_exp), collapse = ", "),
-                      paste(isolate(input$sc_technology_exp), collapse = ", "),
+                      paste(isolate(input$study_label), collapse = ", "),
+                      paste(isolate(input$host_species), collapse = ", "),
+                      paste(isolate(input$parasite_stage), collapse = ", "),
+                      paste(isolate(input$treatment), collapse = ", "),
+                      paste(isolate(input$development_phase), collapse = ", "),
+                      paste(isolate(input$sample_type), collapse = ", "),
+                      paste(isolate(input$strain), collapse = ", "),
+                      paste(isolate(input$hour_post_invasion), collapse = ", "),
+                      paste(isolate(input$sequencer), collapse = ", "),
+                      paste(isolate(input$sc_technology), collapse = ", "),
                       as.character(Sys.time())
                     ),
                     stringsAsFactors = FALSE

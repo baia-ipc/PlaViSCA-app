@@ -553,7 +553,7 @@ ui <- fluidPage(
             fluidRow(
               column(
                 width = 12,
-                create_meta_filter_row("_exp")
+                create_meta_filter_row("")
               )
             ),
             fluidRow(
@@ -667,7 +667,7 @@ ui <- fluidPage(
             "Quality control",
             div(
               id = "qual_section",
-              create_meta_filter_row("_qc"),
+              create_meta_filter_row(""),
               fluidRow(
                 column(
                   width = 6,

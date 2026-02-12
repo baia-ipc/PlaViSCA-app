@@ -14,16 +14,16 @@ create_filtered_gene_exp_reactive <- function(gene_data, input, sessionData,
         req(gene_data())
 
         current_inputs <- list(
-            study_label = input$study_label_exp,
-            host_species = input$host_species_exp,
-            parasite_stage = input$parasite_stage_exp,
-            treatment = input$treatment_exp,
-            development_phase = input$development_phase_exp,
-            sample_type = input$sample_type_exp,
-            strain = input$strain_exp,
-            hour_post_invasion = input$hour_post_invasion_exp,
-            sequencer = input$sequencer_exp,
-            sc_technology = input$sc_technology_exp
+            study_label = input$study_label,
+            host_species = input$host_species,
+            parasite_stage = input$parasite_stage,
+            treatment = input$treatment,
+            development_phase = input$development_phase,
+            sample_type = input$sample_type,
+            strain = input$strain,
+            hour_post_invasion = input$hour_post_invasion,
+            sequencer = input$sequencer,
+            sc_technology = input$sc_technology
         )
 
         # Create cache key for filtered gene expression data
