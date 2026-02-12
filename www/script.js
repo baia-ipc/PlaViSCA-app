@@ -102,49 +102,7 @@ function setupImmediateSidebarControl() {
 $(document).ready(function () {
   setupImmediateSidebarControl();
   optimizeSidebarTransition();
-  setupDynamicFilters();
 });
-
-// Dynamic filter positioning - moves filters to active tab
-function setupDynamicFilters() {
-  const filterRow = $('#shared-filters');
-  
-  // Map tab names to their placeholder IDs
-  const tabPlaceholders = {
-    'Embeddings': '#filter-placeholder-embeddings',
-    'Gene expression': '#filter-placeholder-gene-expression',
-    'Quality control': '#filter-placeholder-quality-control',
-    'Metadata': '#filter-placeholder-metadata',
-    'Data sources': '#filter-placeholder-data-sources'
-  };
-  
-  // Function to move filters to the active tab
-  function moveFiltersToActiveTab() {
-    const activeTab = $('#tabset li.active a').text().trim();
-    const targetPlaceholder = tabPlaceholders[activeTab];
-    
-    if (targetPlaceholder && $(targetPlaceholder).length) {
-      // Move the filter row to the active tab's placeholder
-      filterRow.appendTo(targetPlaceholder);
-      filterRow.show();
-    }
-  }
-  
-  // Move filters on initial load
-  setTimeout(moveFiltersToActiveTab, 100);
-  
-  // Move filters when tab changes
-  $('a[data-toggle="tab"]').on('shown.bs.tab', function(e) {
-    moveFiltersToActiveTab();
-  });
-  
-  // Also listen to Shiny's tabset change event
-  $(document).on('shiny:inputchanged', function(event) {
-    if (event.name === 'tabset') {
-      setTimeout(moveFiltersToActiveTab, 50);
-    }
-  });
-}
 
 
 // Optimized tooltip management with caching and throttling

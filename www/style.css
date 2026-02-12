@@ -1664,18 +1664,26 @@ input:checked+.slider:before {
   top: 0 !important;
 }
 
-/* Filter placeholder and dynamic filters */
-.filter-placeholder {
+/* Sticky filters positioned inside tab content */
+#shared-filters.sticky-filters {
+  position: absolute;
+  top: 50px; /* Below the tab navigation bar */
+  left: 0;
+  right: 0;
   width: 100%;
-  min-height: 0;
+  background: white;
+  z-index: 100;
+  padding: 15px 15px 10px 15px;
+  border-bottom: 1px solid #ddd;
+  margin: 0;
 }
 
-#shared-filters {
-  width: 100%;
-  margin-bottom: 20px;
-  margin-top: 10px;
+/* Add padding to tab content to account for fixed filter row */
+.tab-content {
+  padding-top: 120px !important; /* Space for filters */
 }
 
 #shared-filters .form-group {
-  margin-bottom: 15px;
+  margin-bottom: 10px;
 }
+
