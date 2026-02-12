@@ -1663,3 +1663,19 @@ input:checked+.slider:before {
   right: auto !important;
   top: 0 !important;
 }
+
+/* Filter placeholder and dynamic filters */
+.filter-placeholder {
+  width: 100%;
+  min-height: 0;
+}
+
+#shared-filters {
+  width: 100%;
+  margin-bottom: 20px;
+  margin-top: 10px;
+}
+
+#shared-filters .form-group {
+  margin-bottom: 15px;
+}

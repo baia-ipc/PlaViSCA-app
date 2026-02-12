@@ -452,8 +452,9 @@ ui <- fluidPage(
         id = "main",
         class = "main",
         
-        # Shared filter row for all tabs (sticky filters) - placed before tab content
+        # Shared filter row for all tabs (sticky filters) - will be moved by JS
         fluidRow(
+          id = "shared-filters",
           column(
             width = 12,
             create_meta_filter_row("")
@@ -466,6 +467,8 @@ ui <- fluidPage(
           # embedding section (moved to first position)
           tabPanel(
             "Embeddings",
+            # Placeholder for filters (JS will insert here)
+            div(id = "filter-placeholder-embeddings", class = "filter-placeholder"),
             fluidRow(
               column(
                 id = "tab_switch",
@@ -552,6 +555,8 @@ ui <- fluidPage(
           # gene expression section (moved to second position)
           tabPanel(
             "Gene expression",
+            # Placeholder for filters (JS will insert here)
+            div(id = "filter-placeholder-gene-expression", class = "filter-placeholder"),
             fluidRow(
               column(
                 width = 12,
@@ -661,6 +666,8 @@ ui <- fluidPage(
           ),
           tabPanel(
             "Quality control",
+            # Placeholder for filters (JS will insert here)
+            div(id = "filter-placeholder-quality-control", class = "filter-placeholder"),
             div(
               id = "qual_section",
               fluidRow(
@@ -694,6 +701,8 @@ ui <- fluidPage(
           # Metadata tab (moved to fourth position)
           tabPanel(
             "Metadata",
+            # Placeholder for filters (JS will insert here)
+            div(id = "filter-placeholder-metadata", class = "filter-placeholder"),
             div(
               id = "meta_section",
               fluidRow(
@@ -726,6 +735,8 @@ ui <- fluidPage(
           ),
           tabPanel(
             "Data sources",
+            # Placeholder for filters (JS will insert here)
+            div(id = "filter-placeholder-data-sources", class = "filter-placeholder"),
             div(
               id = "source_section",
               column(
