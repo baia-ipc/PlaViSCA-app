@@ -551,6 +551,13 @@ ui <- fluidPage(
           # gene expression section (moved to second position)
           tabPanel(
             "Gene expression",
+            # Shared filter row at top of tab content
+            fluidRow(
+              column(
+                width = 12,
+                create_meta_filter_row("")
+              )
+            ),
             fluidRow(
               column(
                 width = 12,
@@ -660,6 +667,13 @@ ui <- fluidPage(
           ),
           tabPanel(
             "Quality control",
+            # Shared filter row at top of tab content
+            fluidRow(
+              column(
+                width = 12,
+                create_meta_filter_row("")
+              )
+            ),
             div(
               id = "qual_section",
               fluidRow(
@@ -693,6 +707,13 @@ ui <- fluidPage(
           # Metadata tab (moved to fourth position)
           tabPanel(
             "Metadata",
+            # Shared filter row at top of tab content
+            fluidRow(
+              column(
+                width = 12,
+                create_meta_filter_row("")
+              )
+            ),
             div(
               id = "meta_section",
               fluidRow(
@@ -725,6 +746,13 @@ ui <- fluidPage(
           ),
           tabPanel(
             "Data sources",
+            # Shared filter row at top of tab content
+            fluidRow(
+              column(
+                width = 12,
+                create_meta_filter_row("")
+              )
+            ),
             div(
               id = "source_section",
               column(
