@@ -312,13 +312,15 @@ server <- function(input, output, session) {
         # Cache the current state (only data type, no filter)
         cached_data$current_type <- current_type
         sessionData$last_gene_data <- result
-    return(result)
-  })
+        return(result)
+      })
+    },
+    ignoreNULL = FALSE
+  )
 
   # Populate Embeddings tab filter dropdowns when data changes
   observeEvent(gene_data(), {
     req(gene_data()$data)
-    req(input$tabset == "Embeddings")
     
     filt_data <- gene_data()$data
     
@@ -391,9 +393,6 @@ server <- function(input, output, session) {
     })
   })
 
-    },
-    ignoreNULL = FALSE
-  )
 
   # Separate reactive for filtered gene data (Embeddings tab)
   filtered_gene_data <- reactive({
@@ -1800,12 +1799,9 @@ server <- function(input, output, session) {
 
   ## choose data based on input color
   data <- reactive({
-    req(input$color)  # Ensure input$color is available
-    if (input$color == "genes") {
-      filtered_gene_data()$data
-    } else {
-      filtered_data()
-    }
+    # For embedding plots, we always need filtered_gene_data which contains coordinates
+    # The distinction is only about whether we're coloring by genes or metadata
+    filtered_gene_data()$data
   })
 
   # Separate data reactive for first plot (used in comparison mode)
