@@ -329,12 +329,14 @@ server <- function(input, output, session) {
         session,
         "study_label",
         choices = unique(filt_data$study_label),
+        selected = input$study_label,
         server = TRUE
       )
       updateSelectizeInput(
         session,
         "sample_type",
         choices = unique(filt_data$sample_type),
+        selected = input$sample_type,
         server = TRUE
       )
       updateSelectizeInput(
@@ -344,48 +346,56 @@ server <- function(input, output, session) {
           unique(filt_data$host_species),
           format_species_name(unique(filt_data$host_species))
         ),
+        selected = input$host_species,
         server = TRUE
       )
       updateSelectizeInput(
         session,
         "parasite_stage",
         choices = unique(filt_data$parasite_stage),
+        selected = input$parasite_stage,
         server = TRUE
       )
       updateSelectizeInput(
         session,
         "treatment",
         choices = unique(filt_data$treatment),
+        selected = input$treatment,
         server = TRUE
       )
       updateSelectizeInput(
         session,
         "development_phase",
         choices = unique(filt_data$development_phase),
+        selected = input$development_phase,
         server = TRUE
       )
       updateSelectizeInput(
         session,
         "strain",
         choices = unique(filt_data$strain),
+        selected = input$strain,
         server = TRUE
       )
       updateSelectizeInput(
         session,
         "hour_post_invasion",
         choices = unique(filt_data$hour_post_invasion),
+        selected = input$hour_post_invasion,
         server = TRUE
       )
       updateSelectizeInput(
         session,
         "sequencer",
         choices = unique(filt_data$sequencer),
+        selected = input$sequencer,
         server = TRUE
       )
       updateSelectizeInput(
         session,
         "sc_technology",
         choices = unique(filt_data$sc_technology),
+        selected = input$sc_technology,
         server = TRUE
       )
     }, error = function(e) {
@@ -543,16 +553,19 @@ server <- function(input, output, session) {
 
     # All tabs now use the same filter input IDs (no suffixes)
     # So we only need to update once, and it applies to all tabs
+    # IMPORTANT: Preserve current selections when updating choices
     updateSelectizeInput(
       session,
       "study_label",
       choices = unique(filt_data$study_label),
+      selected = input$study_label,
       server = TRUE
     )
     updateSelectizeInput(
       session,
       "sample_type",
       choices = unique(filt_data$sample_type),
+      selected = input$sample_type,
       server = TRUE
     )
     updateSelectizeInput(
@@ -562,48 +575,56 @@ server <- function(input, output, session) {
         unique(filt_data$host_species),
         format_species_name(unique(filt_data$host_species))
       ),
+      selected = input$host_species,
       server = TRUE
     )
     updateSelectizeInput(
       session,
       "parasite_stage",
       choices = unique(filt_data$parasite_stage),
+      selected = input$parasite_stage,
       server = TRUE
     )
     updateSelectizeInput(
       session,
       "treatment",
       choices = unique(filt_data$treatment),
+      selected = input$treatment,
       server = TRUE
     )
     updateSelectizeInput(
       session,
       "development_phase",
       choices = unique(filt_data$development_phase),
+      selected = input$development_phase,
       server = TRUE
     )
     updateSelectizeInput(
       session,
       "strain",
       choices = unique(filt_data$strain),
+      selected = input$strain,
       server = TRUE
     )
     updateSelectizeInput(
       session,
       "hour_post_invasion",
       choices = unique(filt_data$hour_post_invasion),
+      selected = input$hour_post_invasion,
       server = TRUE
     )
     updateSelectizeInput(
       session,
       "sequencer",
       choices = unique(filt_data$sequencer),
+      selected = input$sequencer,
       server = TRUE
     )
     updateSelectizeInput(
       session,
       "sc_technology",
       choices = unique(filt_data$sc_technology),
+      selected = input$sc_technology,
       server = TRUE
     )
   })

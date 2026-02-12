@@ -451,19 +451,21 @@ ui <- fluidPage(
         width = 12,
         id = "main",
         class = "main",
+        
+        # Shared filter row for all tabs (sticky filters)
+        fluidRow(
+          column(
+            width = 12,
+            create_meta_filter_row("")
+          )
+        ),
+        
         tabsetPanel(
           id = "tabset",
 
           # embedding section (moved to first position)
           tabPanel(
             "Embeddings",
-            # Add filter row at the top
-            fluidRow(
-              column(
-                width = 12,
-                create_meta_filter_row("")
-              )
-            ),
             fluidRow(
               column(
                 id = "tab_switch",
@@ -550,12 +552,6 @@ ui <- fluidPage(
           # gene expression section (moved to second position)
           tabPanel(
             "Gene expression",
-            fluidRow(
-              column(
-                width = 12,
-                create_meta_filter_row("")
-              )
-            ),
             fluidRow(
               column(
                 width = 12,
@@ -667,7 +663,6 @@ ui <- fluidPage(
             "Quality control",
             div(
               id = "qual_section",
-              create_meta_filter_row(""),
               fluidRow(
                 column(
                   width = 6,
@@ -701,7 +696,6 @@ ui <- fluidPage(
             "Metadata",
             div(
               id = "meta_section",
-              create_meta_filter_row(),
               fluidRow(
                 column(width = 4, plotlyOutput("sample_plotly")),
                 column(width = 4, plotlyOutput("species_plotly")),
