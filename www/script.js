@@ -116,43 +116,59 @@ function setupFilterSync() {
   
   // Function to copy options from first filter to all others
   function syncFilterOptions(inputId) {
-    // Get the first (Embeddings tab) selectize instance
-    const firstSelect = $('#filter-row-embeddings select[id="' + inputId + '"]')[0];
-    if (!firstSelect || !firstSelect.selectize) return;
+    // Get all select elements with this ID
+    const allSelects = $('select[id="' + inputId + '"]');
+    if (allSelects.length === 0) return;
     
-    const firstSelectize = firstSelect.selectize;
-    const options = firstSelectize.options;
-    const value = firstSelectize.getValue();
+    // Find the first one that has options (usually from Embeddings tab)
+    let sourceSelectize = null;
+    allSelects.each(function() {
+      if (this.selectize && Object.keys(this.selectize.options).length > 0) {
+        sourceSelectize = this.selectize;
+        return false; // break
+      }
+    });
     
-    // Update all other filter rows with the same options and value
-    $('.filter-row:not(#filter-row-embeddings) select[id="' + inputId + '"]').each(function() {
-      if (this.selectize) {
+    if (!sourceSelectize) return;
+    
+    const options = sourceSelectize.options;
+    const value = sourceSelectize.getValue();
+    
+    console.log('Syncing options for', inputId, 'from source with', Object.keys(options).length, 'options');
+    
+    // Update all other selectize instances
+    allSelects.each(function() {
+      if (this.selectize && this.selectize !== sourceSelectize) {
         const selectize = this.selectize;
         
-        // Clear existing options
+        // Clear and add options
         selectize.clearOptions();
-        
-        // Add all options from the first selectize
         Object.keys(options).forEach(function(key) {
           selectize.addOption(options[key]);
         });
         
         // Set the same value
         selectize.setValue(value, true);
-        
-        // Refresh the selectize
         selectize.refreshOptions(false);
+        
+        console.log('Synced', inputId, 'to another instance');
       }
+    });
+  }
+  
+  // Function to sync all filters
+  function syncAllFilters() {
+    console.log('Syncing all filters...');
+    filterIds.forEach(function(filterId) {
+      syncFilterOptions(filterId);
     });
   }
   
   // Function to sync a specific filter value across all filter rows
   function syncFilterValue(inputId, value) {
-    // Update all selectize inputs with this ID across all filter rows
-    $('.filter-row select[id="' + inputId + '"]').each(function() {
+    $('select[id="' + inputId + '"]').each(function() {
       const selectize = this.selectize;
-      if (selectize) {
-        // Use silent mode to avoid triggering change events recursively
+      if (selectize && selectize.getValue() !== value) {
         selectize.setValue(value, true);
       }
     });
@@ -160,65 +176,67 @@ function setupFilterSync() {
   
   // Listen for changes on any filter input
   filterIds.forEach(function(filterId) {
-    $(document).on('change', '#' + filterId, function() {
+    $(document).on('change', 'select[id="' + filterId + '"]', function() {
       const value = $(this).val();
       syncFilterValue(filterId, value);
     });
   });
   
-  // Watch for when Shiny updates the filter options (after data loads)
-  // We need to copy those options to all other filter instances
-  const observer = new MutationObserver(function(mutations) {
-    mutations.forEach(function(mutation) {
-      if (mutation.type === 'childList' || mutation.type === 'attributes') {
-        const target = $(mutation.target);
-        
-        // Check if this is a selectize dropdown that was updated
-        if (target.closest('#filter-row-embeddings').length > 0) {
-          const select = target.closest('.selectize-control').prev('select');
-          if (select.length > 0) {
-            const inputId = select.attr('id');
-            if (filterIds.includes(inputId)) {
-              // Wait a bit for selectize to finish updating
-              setTimeout(function() {
-                syncFilterOptions(inputId);
-              }, 100);
-            }
-          }
-        }
-      }
-    });
-  });
-  
-  // Observe the embeddings filter row for changes
-  const embeddingsRow = document.getElementById('filter-row-embeddings');
-  if (embeddingsRow) {
-    observer.observe(embeddingsRow, {
-      childList: true,
-      subtree: true,
-      attributes: true,
-      attributeFilter: ['class']
-    });
-  }
-  
-  // Also sync when Shiny explicitly triggers inputchanged
-  $(document).on('shiny:inputchanged', function(event) {
+  // Listen for when Shiny finishes updating inputs
+  let syncTimer = null;
+  $(document).on('shiny:value', function(event) {
+    // Check if this is one of our filter inputs
     if (filterIds.includes(event.name)) {
-      syncFilterValue(event.name, event.value);
-      // Also try to sync options in case they changed
-      setTimeout(function() {
-        syncFilterOptions(event.name);
-      }, 100);
+      console.log('Shiny updated', event.name);
+      // Debounce: wait for all updates to finish
+      clearTimeout(syncTimer);
+      syncTimer = setTimeout(function() {
+        syncAllFilters();
+      }, 500);
     }
   });
   
-  // Initial sync of options after page load
-  setTimeout(function() {
-    filterIds.forEach(function(filterId) {
-      syncFilterOptions(filterId);
-    });
-  }, 2000);
+  // Poll for selectize initialization and sync periodically
+  let pollCount = 0;
+  const maxPolls = 20; // Poll for up to 10 seconds
+  
+  function pollAndSync() {
+    pollCount++;
+    
+    // Check if embeddings filter has been populated
+    const embeddingsFilter = $('#filter-row-embeddings select[id="study_label"]')[0];
+    if (embeddingsFilter && embeddingsFilter.selectize) {
+      const optionCount = Object.keys(embeddingsFilter.selectize.options).length;
+      console.log('Poll', pollCount, '- study_label has', optionCount, 'options');
+      
+      if (optionCount > 0) {
+        console.log('Filters populated! Syncing all...');
+        syncAllFilters();
+        // Continue polling a few more times to ensure everything syncs
+        if (pollCount < 10) {
+          setTimeout(pollAndSync, 1000);
+        }
+        return;
+      }
+    }
+    
+    // Continue polling if not done yet
+    if (pollCount < maxPolls) {
+      setTimeout(pollAndSync, 500);
+    } else {
+      console.log('Stopped polling after', pollCount, 'attempts');
+    }
+  }
+  
+  // Start polling after a short delay
+  setTimeout(pollAndSync, 1000);
+  
+  // Also try syncing when user switches tabs
+  $(document).on('shown.bs.tab', 'a[data-toggle="tab"]', function(e) {
+    setTimeout(syncAllFilters, 200);
+  });
 }
+
 
 
 
