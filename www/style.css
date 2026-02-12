@@ -1664,26 +1664,4 @@ input:checked+.slider:before {
   top: 0 !important;
 }
 
-/* Sticky filters positioned inside tab content */
-#shared-filters.sticky-filters {
-  position: absolute;
-  top: 50px; /* Below the tab navigation bar */
-  left: 0;
-  right: 0;
-  width: 100%;
-  background: white;
-  z-index: 100;
-  padding: 15px 15px 10px 15px;
-  border-bottom: 1px solid #ddd;
-  margin: 0;
-}
-
-/* Add padding to tab content to account for fixed filter row */
-.tab-content {
-  padding-top: 120px !important; /* Space for filters */
-}
-
-#shared-filters .form-group {
-  margin-bottom: 10px;
-}
 

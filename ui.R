@@ -458,6 +458,13 @@ ui <- fluidPage(
           # embedding section (moved to first position)
           tabPanel(
             "Embeddings",
+            # Shared filter row at top of tab content
+            fluidRow(
+              column(
+                width = 12,
+                create_meta_filter_row("")
+              )
+            ),
             fluidRow(
               column(
                 id = "tab_switch",
