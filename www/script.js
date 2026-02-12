@@ -102,7 +102,83 @@ function setupImmediateSidebarControl() {
 $(document).ready(function () {
   setupImmediateSidebarControl();
   optimizeSidebarTransition();
+  setupFilterSync();
 });
+
+// Synchronize filters across tabs
+function setupFilterSync() {
+  // Map tab names to filter row IDs
+  const tabFilterMap = {
+    'Embeddings': 'filter-row-embeddings',
+    'Gene expression': 'filter-row-gene-expression',
+    'Quality control': 'filter-row-quality-control',
+    'Metadata': 'filter-row-metadata'
+  };
+  
+  // Function to sync values from visible filters to hidden ones
+  function syncFilterValues() {
+    // Get values from the visible (Embeddings) filter
+    const visibleFilters = $('#filter-row-embeddings');
+    
+    // For each selectize input in the visible filter
+    visibleFilters.find('select').each(function() {
+      const inputId = $(this).attr('id');
+      const value = $(this).val();
+      
+      // Update the same input in all hidden filter rows
+      $('.filter-row-hidden select[id="' + inputId + '"]').each(function() {
+        const selectize = this.selectize;
+        if (selectize) {
+          selectize.setValue(value, true);
+        }
+      });
+    });
+  }
+  
+  // Function to show/hide appropriate filter row
+  function toggleFilterRows(activeTab) {
+    const activeFilterId = tabFilterMap[activeTab];
+    
+    if (activeFilterId) {
+      // Hide all filter rows first
+      $('.filter-row').hide();
+      
+      // Show the active tab's filter row
+      $('#' + activeFilterId).show();
+      
+      // Sync values before showing
+      syncFilterValues();
+    }
+  }
+  
+  // Show correct filters on initial load
+  setTimeout(function() {
+    const activeTab = $('#tabset li.active a').text().trim();
+    toggleFilterRows(activeTab);
+  }, 100);
+  
+  // Listen for tab changes
+  $('a[data-toggle="tab"]').on('shown.bs.tab', function(e) {
+    const activeTab = $(e.target).text().trim();
+    toggleFilterRows(activeTab);
+  });
+  
+  // Also listen to Shiny's tabset change event
+  $(document).on('shiny:inputchanged', function(event) {
+    if (event.name === 'tabset') {
+      setTimeout(function() {
+        const activeTab = $('#tabset li.active a').text().trim();
+        toggleFilterRows(activeTab);
+      }, 50);
+    }
+  });
+  
+  // Sync values when any filter changes in the visible row
+  $(document).on('change', '.filter-row:visible select', function() {
+    syncFilterValues();
+  });
+}
+
 
 
 // Optimized tooltip management with caching and throttling

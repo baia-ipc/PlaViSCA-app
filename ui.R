@@ -460,6 +460,8 @@ ui <- fluidPage(
             "Embeddings",
             # Shared filter row at top of tab content
             fluidRow(
+              id = "filter-row-embeddings",
+              class = "filter-row",
               column(
                 width = 12,
                 create_meta_filter_row("")
@@ -553,6 +555,9 @@ ui <- fluidPage(
             "Gene expression",
             # Shared filter row at top of tab content
             fluidRow(
+              id = "filter-row-gene-expression",
+              class = "filter-row filter-row-hidden",
+              style = "display: none;",
               column(
                 width = 12,
                 create_meta_filter_row("")
@@ -669,6 +674,9 @@ ui <- fluidPage(
             "Quality control",
             # Shared filter row at top of tab content
             fluidRow(
+              id = "filter-row-quality-control",
+              class = "filter-row filter-row-hidden",
+              style = "display: none;",
               column(
                 width = 12,
                 create_meta_filter_row("")
@@ -709,6 +717,9 @@ ui <- fluidPage(
             "Metadata",
             # Shared filter row at top of tab content
             fluidRow(
+              id = "filter-row-metadata",
+              class = "filter-row filter-row-hidden",
+              style = "display: none;",
               column(
                 width = 12,
                 create_meta_filter_row("")
@@ -746,13 +757,6 @@ ui <- fluidPage(
           ),
           tabPanel(
             "Data sources",
-            # Shared filter row at top of tab content
-            fluidRow(
-              column(
-                width = 12,
-                create_meta_filter_row("")
-              )
-            ),
             div(
               id = "source_section",
               column(
