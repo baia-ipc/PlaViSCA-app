@@ -138,48 +138,54 @@ server <- function(input, output, session) {
     runjs("window.open('manual/index.html', '_blank')")
   })
 
-  # Synchronize data type selection across tabs
+  # Synchronize plot controls (data type, size, dimension) across tabs
   observeEvent(input$tabset, {
     syncing_tabs(TRUE)
-
-    if (input$tabset == "Gene expression") {
-      # Sync with embeddings data type if available, otherwise default to normalize
-      current_selection <- if (!is.null(input$data_type)) {
-        input$data_type
-      } else {
-        "normalize"
-      }
-
-      # Only update if the selection is different to avoid unnecessary triggers
-      if (is.null(input$data_type_exp) || input$data_type_exp != current_selection) {
-        updateRadioButtons(
-          session,
-          "data_type_exp",
-          choices = list(
-            "Raw" = "raw",
-            "Normalized" = "normalize"
-          ),
-          selected = current_selection
-        )
-      }
-      current_selection <- if (!is.null(input$data_type_exp)) {
-        input$data_type_exp
-      } else {
-        "normalize"
-      }
-
-      # Only update if the selection is different to avoid unnecessary triggers
-      if (is.null(input$data_type) || input$data_type != current_selection) {
-        updateRadioButtons(
-          session,
-          "data_type",
-          choices = list(
-            "Raw" = "raw",
-            "Normalized" = "normalize"
-            # "Scaled" = "scale"
-          ),
-          selected = current_selection
-        )
+    
+    # Define mapping between tab names and their input suffixes
+    tab_suffixes <- list(
+      "Embeddings" = "",
+      "Gene expression" = "_exp",
+      "Quality control" = "_qc",
+      "Metadata" = "_meta"
+    )
+    
+    current_tab <- input$tabset
+    if (current_tab %in% names(tab_suffixes)) {
+      source_suffix <- tab_suffixes[[current_tab]]
+      
+      # Determine current global values from the active tab's inputs
+      # If they are NULL (e.g., initial load), use defaults
+      current_data_type <- if (!is.null(input[[paste0("data_type", source_suffix)]])) 
+                            input[[paste0("data_type", source_suffix)]] else "normalize"
+      current_size <- if (!is.null(input[[paste0("size", source_suffix)]])) 
+                            input[[paste0("size", source_suffix)]] else 4
+      current_plot <- if (!is.null(input[[paste0("plot", source_suffix)]])) 
+                            input[[paste0("plot", source_suffix)]] else "3d"
+      
+      # Update all other tabs
+      for (tab in names(tab_suffixes)) {
+        if (tab != current_tab) {
+          target_suffix <- tab_suffixes[[tab]]
+          
+          # Sync data type
+          if (is.null(input[[paste0("data_type", target_suffix)]]) || 
+              input[[paste0("data_type", target_suffix)]] != current_data_type) {
+            updateRadioButtons(session, paste0("data_type", target_suffix), selected = current_data_type)
+          }
+          
+          # Sync size
+          if (is.null(input[[paste0("size", target_suffix)]]) || 
+              input[[paste0("size", target_suffix)]] != current_size) {
+            updateRadioButtons(session, paste0("size", target_suffix), selected = current_size)
+          }
+          
+          # Sync plot dimension
+          if (is.null(input[[paste0("plot", target_suffix)]]) || 
+              input[[paste0("plot", target_suffix)]] != current_plot) {
+            updateRadioButtons(session, paste0("plot", target_suffix), selected = current_plot)
+          }
+        }
       }
     }
 
@@ -514,15 +520,52 @@ server <- function(input, output, session) {
     return(result)
   })
 
-  # Synchronize data type selections between tabs using helper functions
-  create_data_type_sync_observer(
-    input = input,
-    session = session,
-    input_name = "data_type", # embeddings tabset
-    target_input = "data_type_exp",
-    expected_tabset = "Embeddings",
-    global_loading = global_loading
-  )
+  # Synchronize plot controls between tabs on change
+  lapply(c("Embeddings", "Gene expression", "Quality control", "Metadata"), function(tab) {
+    suffix_map <- list(
+      "Embeddings" = "",
+      "Gene expression" = "_exp",
+      "Quality control" = "_qc",
+      "Metadata" = "_meta"
+    )
+    suffix <- suffix_map[[tab]]
+    
+    # Sync data type
+    observeEvent(input[[paste0("data_type", suffix)]], {
+      if (!is.null(input$tabset) && input$tabset == tab && !syncing_tabs()) {
+        val <- input[[paste0("data_type", suffix)]]
+        for (other_tab in names(suffix_map)) {
+          if (other_tab != tab) {
+            updateRadioButtons(session, paste0("data_type", suffix_map[[other_tab]]), selected = val)
+          }
+        }
+      }
+    }, ignoreInit = TRUE)
+    
+    # Sync size
+    observeEvent(input[[paste0("size", suffix)]], {
+      if (!is.null(input$tabset) && input$tabset == tab && !syncing_tabs()) {
+        val <- input[[paste0("size", suffix)]]
+        for (other_tab in names(suffix_map)) {
+          if (other_tab != tab) {
+            updateRadioButtons(session, paste0("size", suffix_map[[other_tab]]), selected = val)
+          }
+        }
+      }
+    }, ignoreInit = TRUE)
+    
+    # Sync plot dimension
+    observeEvent(input[[paste0("plot", suffix)]], {
+      if (!is.null(input$tabset) && input$tabset == tab && !syncing_tabs()) {
+        val <- input[[paste0("plot", suffix)]]
+        for (other_tab in names(suffix_map)) {
+          if (other_tab != tab) {
+            updateRadioButtons(session, paste0("plot", suffix_map[[other_tab]]), selected = val)
+          }
+        }
+      }
+    }, ignoreInit = TRUE)
+  })
 
   create_data_type_sync_observer(
     input = input,

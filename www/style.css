@@ -1665,3 +1665,20 @@ input:checked+.slider:before {
 }
 
 
+
+/* Make filters-container boxes full width like in Gene Expression */
+.filters-container {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+/* Ensure consistent spacing for all filter rows and control boxes */
+.main .row {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.main .row > [class*='col-'] {
+  padding-left: 15px;
+  padding-right: 15px;
+}

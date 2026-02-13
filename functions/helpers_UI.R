@@ -264,6 +264,58 @@ create_meta_filter_row <- function(suffix = "") {
     )
 }
 
+# Create a box for plot controls (data type, point size, dimension)
+create_plot_controls <- function(data_type_id = "data_type", include_size_dim = TRUE, suffix = "") {
+    size_id <- paste0("size", suffix)
+    plot_id <- paste0("plot", suffix)
+    
+    fluidRow(
+        style = "margin-top: 20px; margin-bottom: 20px;",
+        column(
+            width = 12,
+            div(
+                class = "filters-container",
+                style = "border: 1px solid #ddd; border-radius: 8px; padding: 20px; background-color: #f9f9f9;",
+                fluidRow(
+                    column(
+                        width = if(include_size_dim) 4 else 12,
+                        radioButtons(
+                            data_type_id,
+                            "Data type",
+                            choices = list("Raw" = "raw", "Normalized" = "normalize"),
+                            selected = "normalize",
+                            inline = TRUE
+                        )
+                    ),
+                    if(include_size_dim) {
+                        tagList(
+                            column(
+                                width = 4,
+                                radioButtons(
+                                    size_id,
+                                    "Point size",
+                                    choices = list("Small" = 2, "Medium" = 4, "Large" = 6),
+                                    selected = 4,
+                                    inline = TRUE
+                                )
+                            ),
+                            column(
+                                width = 4,
+                                radioButtons(
+                                    plot_id,
+                                    "Dimension",
+                                    choices = list("2D" = "2d", "3D" = "3d"),
+                                    selected = "3d",
+                                    inline = TRUE
+                                )
+                            )
+                        )
+                    }
+                )
+            )
+        )
+    )
+}
 
 # Generate UI subBlock in gene expression
 subBlock <- function(i) {

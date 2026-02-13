@@ -180,11 +180,17 @@ build_hover_text <- function(df, legend_title, display_color, x_vals = NULL, y_v
         "<br>Stage: ", df$parasite_stage
     )
     
-    # Add coordinates
-    coords_text <- paste0("<br>X: ", round(x_vals, 2), "<br>Y: ", round(y_vals, 2))
+    # Add coordinates only if they are numeric
+    coords_text <- ""
+    if (!is.null(x_vals) && is.numeric(x_vals)) {
+        coords_text <- paste0("<br>X: ", round(x_vals, 2))
+    }
+    if (!is.null(y_vals) && is.numeric(y_vals)) {
+        coords_text <- paste0(coords_text, "<br>Y: ", round(y_vals, 2))
+    }
     
-    # Conditionally add Z if provided
-    if (!is.null(z_vals)) {
+    # Conditionally add Z if provided and numeric
+    if (!is.null(z_vals) && is.numeric(z_vals)) {
         coords_text <- paste0(coords_text, "<br>Z: ", round(z_vals, 2))
     }
     
