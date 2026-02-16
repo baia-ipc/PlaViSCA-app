@@ -982,36 +982,196 @@ ul li:not(:last-child) {
   font-weight: 600 !important;
 }
 
-/* Force horizontal layout for options and ensure visibility */
-.shiny-options-group {
-  display: flex !important;
-  flex-direction: row !important;
-  flex-wrap: nowrap !important;
+/* --- Unified Control Button Styles --- */
+/* Button-style radios for Embedding, Point Size, Dimension */
+#embedding .radio-inline,
+#size .radio-inline,
+#plot .radio-inline {
+  display: inline-flex !important;
   align-items: center !important;
-  justify-content: flex-start !important;
+  justify-content: center !important;
+  width: auto !important;
+  min-width: 65px !important;
+  height: 34px !important;
+  padding: 0 10px !important;
+  font-size: 12px !important;
+  border: 1px solid #ccc !important;
+  border-radius: 6px !important;
+  cursor: pointer !important;
+  margin: 0 4px 4px 0 !important;
+  background-color: #fff !important;
+  color: #333 !important;
+  transition: all 0.2s ease;
+}
+
+/* Selected state for button-style radios */
+#embedding .radio-inline.checked-label,
+#size .radio-inline.checked-label,
+#plot .radio-inline.checked-label {
+  background-color: #d6eaf8 !important;
+  border-color: #3498db !important;
+  color: #2c3e50 !important;
+  font-weight: 600 !important;
+}
+
+/* Hide the actual radio circle for button-styled controls */
+#embedding .radio-inline input,
+#size .radio-inline input,
+#plot .radio-inline input {
+  display: none !important;
+}
+
+/* Standard radio button styling for Data Type (circle + label side-by-side) */
+#data_type .radio-inline,
+#data_type_exp .radio-inline {
+  display: inline-flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 8px !important;
+  font-size: 13px !important;
+  margin-right: 20px !important;
+  cursor: pointer;
+  background: none !important;
+  border: none !important;
+  padding: 0 !important;
+  width: auto !important;
+  height: auto !important;
+}
+
+#data_type .radio-inline input,
+#data_type_exp .radio-inline input {
+  display: inline-block !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  width: 16px !important;
+  height: 16px !important;
+  position: static !important;
+  opacity: 1 !important;
+  cursor: pointer !important;
+}
+
+#data_type .radio-inline span,
+#data_type_exp .radio-inline span {
+  display: inline-block !important;
+  margin: 0 !important;
+  line-height: 1 !important;
+}
+
+/* Ensure no background/border for Data Type selection */
+#data_type .radio-inline.checked-label,
+#data_type_exp .radio-inline.checked-label {
+  background-color: transparent !important;
+  border: none !important;
+  color: inherit !important;
+  font-weight: 600 !important;
+  box-shadow: none !important;
 }
 
 /* Grid Alignment and Label consistency */
-.filters-container label {
+.filters-container label,
+#embedding > label,
+#size > label,
+#plot > label {
   display: block !important;
   font-weight: 600 !important;
-  margin-bottom: 10px !important;
+  margin-bottom: 8px !important;
   color: #333 !important;
-  font-size: 15px !important;
+  font-size: 14px !important;
 }
 
-.filters-container .row > div[class*='col-'] {
-  padding-left: 15px !important;
-  padding-right: 15px !important;
-  margin-bottom: 0 !important;
+/* Specific Dimension block alignment fix */
+.dimension-axes-container {
+  display: flex !important;
+  align-items: center !important;
+  margin-top: 0 !important;
+  height: 34px;
+}
+
+#xaxis-container,
+#yaxis-container,
+.dimension-axes-container .shiny-input-container {
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.dimension-axes-container select {
+  height: 30px !important;
+  font-size: 12px !important;
+  padding: 4px 8px !important;
+  border-radius: 4px !important;
+}
+
+
+/* Grid Alignment and Label consistency */
+.filters-container label,
+#embedding > label,
+#size > label,
+#plot > label {
+  display: block !important;
+  font-weight: 600 !important;
+  margin-bottom: 8px !important;
+  color: #333 !important;
+  font-size: 14px !important;
 }
 
 /* Dimension block horizontal alignment and sizing */
 .dimension-axes-container {
   display: flex !important;
   align-items: center !important;
-  height: 40px;
+  margin-top: 0 !important;
+  height: 34px;
 }
+
+#xaxis-container,
+#yaxis-container,
+.dimension-axes-container .shiny-input-container {
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.dimension-axes-container select {
+  height: 30px !important;
+  font-size: 12px !important;
+  padding: 4px 8px !important;
+  border-radius: 4px !important;
+}
+
+/* Specific button styles for control radios */
+#embedding .radio-inline,
+#size .radio-inline,
+#plot .radio-inline {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: auto !important;
+  min-width: 65px !important;
+  height: 34px !important;
+  padding: 0 10px !important;
+  font-size: 12px !important;
+  border: 1px solid #ccc !important;
+  border-radius: 6px !important;
+  cursor: pointer !important;
+  margin: 0 4px 4px 0 !important;
+  background-color: #fff !important;
+  color: #333 !important;
+  transition: all 0.2s ease;
+}
+
+#embedding .radio-inline.checked-label,
+#size .radio-inline.checked-label,
+#plot .radio-inline.checked-label {
+  background-color: #d6eaf8 !important;
+  border-color: #3498db !important;
+  color: #2c3e50 !important;
+  font-weight: 600 !important;
+}
+
+#embedding .radio-inline input,
+#size .radio-inline input,
+#plot .radio-inline input {
+  display: none !important;
+}
+
 
 .dimension-axes-container .shiny-input-container {
   margin: 0 !important;
@@ -1071,7 +1231,20 @@ ul li:not(:last-child) {
   display: flex !important;
   align-items: center !important;
   margin-top: 0 !important;
-  height: 38px;
+  height: 34px;
+}
+
+#xaxis-container, #yaxis-container,
+.dimension-axes-container .shiny-input-container {
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.dimension-axes-container select {
+  height: 30px !important;
+  font-size: 12px !important;
+  padding: 4px 8px !important;
+  border-radius: 4px !important;
 }
 
 .dimension-axes-container .shiny-options-group {
