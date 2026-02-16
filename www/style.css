@@ -857,6 +857,69 @@ ul li:not(:last-child) {
   font-weight: 600 !important;
 }
 
+/* Standard radio button styling for Data Type (circle + label side-by-side) */
+#data_type .radio-inline,
+#data_type_exp .radio-inline {
+  display: inline-flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 8px !important;
+  font-size: 13px !important;
+  margin-right: 15px !important;
+  cursor: pointer;
+  background: none !important;
+  border: none !important;
+  padding: 0 !important;
+  width: auto !important;
+  height: auto !important;
+}
+
+#data_type .radio-inline input,
+#data_type_exp .radio-inline input {
+  display: inline-block !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  width: 16px !important;
+  height: 16px !important;
+  position: static !important;
+  opacity: 1 !important;
+  cursor: pointer !important;
+}
+
+#data_type .radio-inline span,
+#data_type_exp .radio-inline span {
+  display: inline-block !important;
+  margin: 0 !important;
+  line-height: 1 !important;
+}
+
+/* Ensure no background/border for Data Type selection */
+#data_type .radio-inline.checked-label,
+#data_type_exp .radio-inline.checked-label {
+  background-color: transparent !important;
+  border: none !important;
+  color: inherit !important;
+  font-weight: 600 !important;
+  box-shadow: none !important;
+}
+
+/* Hide the actual radio circle for button-styled controls */
+#embedding .radio-inline input,
+#size .radio-inline input,
+#plot .radio-inline input {
+  display: none !important;
+}
+
+
+#embedding .radio-inline.checked-label,
+#size .radio-inline.checked-label,
+#plot .radio-inline.checked-label {
+  background-color: #d6eaf8 !important;
+  border-color: #3498db !important;
+  color: #2c3e50 !important;
+  font-weight: 600 !important;
+}
+
 /* Hide the actual radio circle for button-styled controls */
 #embedding .radio-inline input,
 #size .radio-inline input,
@@ -868,30 +931,51 @@ ul li:not(:last-child) {
 #data_type .radio-inline,
 #data_type_exp .radio-inline {
   display: inline-flex !important;
+  flex-direction: row !important;
   align-items: center !important;
-  gap: 5px;
+  gap: 8px !important;
   font-size: 13px !important;
   margin-right: 15px !important;
   cursor: pointer;
   background: none !important;
   border: none !important;
   padding: 0 !important;
+  width: auto !important;
+  height: auto !important;
 }
 
 #data_type .radio-inline input,
 #data_type_exp .radio-inline input {
   display: inline-block !important;
   margin: 0 !important;
-  width: 14px;
-  height: 14px;
+  padding: 0 !important;
+  width: 16px !important;
+  height: 16px !important;
+  position: static !important;
+  opacity: 1 !important;
+  cursor: pointer !important;
 }
 
+#data_type .radio-inline span,
+#data_type_exp .radio-inline span {
+  display: inline-block !important;
+  margin: 0 !important;
+  line-height: 1 !important;
+}
+
+/* Ensure no background/border for Data Type selection */
+#data_type .radio-inline.checked-label,
+#data_type_exp .radio-inline.checked-label {
+  background-color: transparent !important;
+  border: none !important;
+  color: inherit !important;
+  font-weight: 600 !important;
+  box-shadow: none !important;
+}
 
 #embedding .radio-inline.checked-label,
 #size .radio-inline.checked-label,
-#plot .radio-inline.checked-label,
-#data_type .radio-inline.checked-label,
-#data_type_exp .radio-inline.checked-label {
+#plot .radio-inline.checked-label {
   background-color: #d6eaf8 !important;
   border-color: #3498db !important;
   color: #2c3e50 !important;
@@ -1247,9 +1331,7 @@ ul li:not(:last-child) {
 /* Selected state styling */
 #embedding .radio-inline.checked-label,
 #size .radio-inline.checked-label,
-#plot .radio-inline.checked-label,
-#data_type .radio-inline.checked-label,
-#data_type_exp .radio-inline.checked-label {
+#plot .radio-inline.checked-label {
   background-color: #d6eaf8 !important;
   border-color: #3498db !important;
   color: #2c3e50 !important;
