@@ -1759,13 +1759,9 @@ server <- function(input, output, session) {
   )
 
   ## hide switch for tsne
-  observeEvent(input$embedding, {
-    if (input$embedding == "tsne") {
-      runjs('$("#tab_switch").css("visibility", "hidden");')
-    } else {
-      runjs('$("#tab_switch").css("visibility", "visible");')
-    }
-  })
+  # Removed: observeEvent for hiding tab_switch via JS
+  # Integration toggle now handled via conditionalPanel in ui.R
+
 
   ## get x- and y- axis selections for 2D plots
   observeEvent(
@@ -1919,6 +1915,8 @@ server <- function(input, output, session) {
   # Create reactive expressions for each plot that only depend on their specific inputs
   first_plot_reactive <- reactive({
     req(input$enable_comparison)
+    # Ensure axes match the current embedding to avoid transition errors
+    req(input$xaxis, input$yaxis)
 
     # Determine which inputs to use based on comparison mode
     color_val <- if (!is.null(input$color_first_comp)) input$color_first_comp else "sample_type"
@@ -1929,10 +1927,35 @@ server <- function(input, output, session) {
       color = color_val,
       genes = genes_val,
       check = check_val,
-      xaxis = if (!is.null(input$xaxis)) input$xaxis else "pc_1",
-      yaxis = if (!is.null(input$yaxis)) input$yaxis else "pc_2",
+      xaxis = input$xaxis,
+      yaxis = input$yaxis,
       size = if (!is.null(input$size)) input$size else 4,
       plot = if (!is.null(input$plot)) input$plot else "3d",
+      embedding = input$embedding, # Explicitly include to trigger on change
+      integration = input$check_all,
+      timestamp = Sys.time()
+    )
+  })
+
+  # Reactive expression for second plot parameters
+  second_plot_reactive <- reactive({
+    req(input$enable_comparison)
+    req(input$xaxis, input$yaxis)
+
+    color_val <- if (!is.null(input$color_second)) input$color_second else "sample_type"
+    genes_val <- if (!is.null(input$genes_second)) input$genes_second else ""
+    check_val <- if (!is.null(input$check_second)) input$check_second else FALSE
+
+    list(
+      color = color_val,
+      genes = genes_val,
+      check = check_val,
+      xaxis = input$xaxis,
+      yaxis = input$yaxis,
+      size = if (!is.null(input$size)) input$size else 4,
+      plot = if (!is.null(input$plot)) input$plot else "3d",
+      embedding = input$embedding,
+      integration = input$check_all,
       timestamp = Sys.time()
     )
   })
@@ -2000,10 +2023,12 @@ server <- function(input, output, session) {
 
   ## determine plot type
   get_plot_type <- reactive({
-    switch(input$embedding,
+    emb <- if (!is.null(input$embedding)) input$embedding else "umap"
+    switch(emb,
       "pca" = if (isTRUE(input$check_all)) "pca_i" else "pca_u",
       "umap" = if (isTRUE(input$check_all)) "umap_i" else "umap_u",
-      "tsne" = "tSNE"
+      "tsne" = "tSNE",
+      "umap_i" # default
     )
   })
 
@@ -2268,13 +2293,24 @@ server <- function(input, output, session) {
         return(NULL)
       }
 
+      # Determine proper legend title for gene expression
+      effective_legend_title <- if (isTRUE(color_input == "genes")) {
+        if (!is.null(genes_input) && length(genes_input) > 0) {
+          if (length(genes_input) == 1) genes_input[1] else paste0("Avg of ", length(genes_input), " genes")
+        } else {
+          "Gene expression"
+        }
+      } else {
+        color_input
+      }
+
       # Generate the actual plot
       p <- embedding_plot(
         df_local,
         xaxis_input,
         yaxis_input,
         color_column,
-        genes_input,
+        effective_legend_title,
         size_input,
         plot_type = get_plot_type(),
         plot_dim = plot_input,
