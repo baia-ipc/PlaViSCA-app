@@ -388,7 +388,7 @@ ui <- fluidPage(
                               style = "background-color: white; padding: 10px; border-radius: 8px; border: 1px solid #bbdefb; margin-top: 5px;",
                               div(
                                 style = "display: flex; align-items: center; margin-bottom: 5px;",
-                                tags$label(style = "margin: 0; margin-right: 10px; font-weight: 600; font-size: 0.9em;", "Gene identifier"),
+                                tags$label(style = "margin: 0; margin-right: 10px; font-weight: 600; font-size: 0.9em;", "Gene name"),
                                 tags$label(
                                   class = "switch",
                                   style = "transform: scale(0.8);",
@@ -396,7 +396,25 @@ ui <- fluidPage(
                                   tags$span(class = "slider")
                                 )
                               ),
-                              selectizeInput("genes_n_first_comp", NULL, choices = "", multiple = TRUE, options = list(placeholder = "Select genes", maxItems = 10))
+                              selectizeInput("genes_n_first_comp", NULL, choices = "", multiple = TRUE, options = list(placeholder = "Select genes", maxItems = 10)),
+                              tags$div(
+                                style = "margin-top: 5px; font-size: 0.85em;",
+                                tags$a(
+                                  id = "plasmo_link_first",
+                                  href = "#",
+                                  target = "_blank",
+                                  class = "gene-link",
+                                  "🔬 PlasmoDB"
+                                ),
+                                tags$span(" | ", style = "margin: 0 5px; color: #999;"),
+                                tags$a(
+                                  id = "ncbi_link_first",
+                                  href = "#",
+                                  target = "_blank",
+                                  class = "gene-link",
+                                  "🧬 NCBI"
+                                )
+                              )
                             )
                           )
                         )
@@ -433,7 +451,7 @@ ui <- fluidPage(
                               style = "background-color: white; padding: 10px; border-radius: 8px; border: 1px solid #dcedc8; margin-top: 5px;",
                               div(
                                 style = "display: flex; align-items: center; margin-bottom: 5px;",
-                                tags$label(style = "margin: 0; margin-right: 10px; font-weight: 600; font-size: 0.9em;", "Gene identifier"),
+                                tags$label(style = "margin: 0; margin-right: 10px; font-weight: 600; font-size: 0.9em;", "Gene name"),
                                 tags$label(
                                   class = "switch",
                                   style = "transform: scale(0.8);",
@@ -441,7 +459,25 @@ ui <- fluidPage(
                                   tags$span(class = "slider")
                                 )
                               ),
-                              selectizeInput("genes_second", NULL, choices = "", multiple = TRUE, options = list(placeholder = "Select genes", maxItems = 10))
+                              selectizeInput("genes_second", NULL, choices = "", multiple = TRUE, options = list(placeholder = "Select genes", maxItems = 10)),
+                              tags$div(
+                                style = "margin-top: 5px; font-size: 0.85em;",
+                                tags$a(
+                                  id = "plasmo_link_second",
+                                  href = "#",
+                                  target = "_blank",
+                                  class = "gene-link",
+                                  "🔬 PlasmoDB"
+                                ),
+                                tags$span(" | ", style = "margin: 0 5px; color: #999;"),
+                                tags$a(
+                                  id = "ncbi_link_second",
+                                  href = "#",
+                                  target = "_blank",
+                                  class = "gene-link",
+                                  "🧬 NCBI"
+                                )
+                              )
                             )
                           )
                         )
@@ -454,7 +490,7 @@ ui <- fluidPage(
 
             # Gene selection
             conditionalPanel(
-              condition = "input.color == 'genes'",
+              condition = "input.color == 'genes' && !input.enable_comparison",
               fluidRow(
                 column(
                   width = 12,

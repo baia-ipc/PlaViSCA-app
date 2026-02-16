@@ -2488,7 +2488,7 @@ server <- function(input, output, session) {
         })
         gene_ids <- gene_ids[!is.null(gene_ids) & nzchar(gene_ids)]
         if (length(gene_ids) > 0) {
-          gene_links_multiple(gene_ids)
+          gene_links_multiple(gene_ids, target = "plasmo_link_first")
         }
       }
     }
@@ -2509,7 +2509,7 @@ server <- function(input, output, session) {
         })
         gene_ids <- gene_ids[!is.null(gene_ids) & nzchar(gene_ids)]
         if (length(gene_ids) > 0) {
-          gene_links_multiple(gene_ids)
+          gene_links_multiple(gene_ids, target = "plasmo_link_second")
         }
       }
     }
