@@ -235,15 +235,15 @@ ui <- fluidPage(
 
                     # Integration toggle
                     column(
-                      width = 2,
+                      width = 3,
                       tags$label("Integration", class = "control-label", style = "margin-bottom: 5px; display: block;"),
                       div(
                         id = "tab_switch",
-                        style = "text-align: center; margin-top: 15px; display: flex; align-items: center; gap: 15px;",
-                        tags$span(class = "left-label", "Un", style = "font-size: 13px;"),
+                        style = "text-align: center; margin-top: 15px; display: flex; align-items: center; gap: 10px;",
+                        tags$span(class = "left-label", "Unintegrated", style = "font-size: 12px;"),
                         tags$label(
                           class = "switch",
-                          style = "transform: scale(0.95); margin-bottom: 0;",
+                          style = "transform: scale(0.8); margin-bottom: 0;",
                           tags$input(
                             id = "check_all",
                             type = "checkbox",
@@ -251,7 +251,7 @@ ui <- fluidPage(
                           ),
                           tags$span(class = "slider")
                         ),
-                        tags$span(class = "right-label", "Int", style = "font-size: 13px;")
+                        tags$span(class = "right-label", "Integrated", style = "font-size: 12px;")
                       )
                     ),
 
@@ -281,10 +281,10 @@ ui <- fluidPage(
 
                     # Dimension & Axes
                     column(
-                      width = 4,
+                      width = 3,
                       tags$label("Dimension", class = "control-label", style = "margin-bottom: 5px; display: block;"),
                       div(
-                        style = "display: flex; align-items: center; gap: 15px; height: 34px;",
+                        style = "display: flex; align-items: center; gap: 10px; height: 34px;",
                         radioButtons(
                           "plot",
                           NULL,
@@ -295,9 +295,17 @@ ui <- fluidPage(
                         conditionalPanel(
                           condition = "input.plot == '2d'",
                           div(
-                            style = "display: inline-flex; gap: 12px; align-items: center;",
-                            selectInput("xaxis", NULL, choices = c("pc_1" = "pc_1"), selected = "pc_1", width = "105px"),
-                            selectInput("yaxis", NULL, choices = c("pc_2" = "pc_2"), selected = "pc_2", width = "105px")
+                            style = "display: inline-flex; gap: 8px; align-items: center;",
+                            div(
+                              style = "display: flex; flex-direction: column;",
+                              tags$label("X", style = "margin-bottom: 0px; font-size: 10px; text-align: center;"),
+                              selectInput("xaxis", NULL, choices = c("pc_1" = "pc_1"), selected = "pc_1", width = "90px")
+                            ),
+                            div(
+                              style = "display: flex; flex-direction: column;",
+                              tags$label("Y", style = "margin-bottom: 0px; font-size: 10px; text-align: center;"),
+                              selectInput("yaxis", NULL, choices = c("pc_2" = "pc_2"), selected = "pc_2", width = "90px")
+                            )
                           )
                         )
                       )

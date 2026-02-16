@@ -827,12 +827,10 @@ ul li:not(:last-child) {
   width: 100%;
 }
 
-/* Consolidate radio button styles to prevent overlap and save space */
+/* Consolidate radio button styles for specific controls to save space */
 #embedding .radio-inline,
 #size .radio-inline,
-#plot .radio-inline,
-#data_type .radio-inline,
-#data_type_exp .radio-inline {
+#plot .radio-inline {
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
@@ -852,62 +850,40 @@ ul li:not(:last-child) {
 
 #embedding .radio-inline.checked-label,
 #size .radio-inline.checked-label,
-#plot .radio-inline.checked-label,
-#data_type .radio-inline.checked-label,
-#data_type_exp .radio-inline.checked-label {
+#plot .radio-inline.checked-label {
   background-color: #d6eaf8 !important;
   border-color: #3498db !important;
   color: #2c3e50 !important;
   font-weight: 600 !important;
 }
 
-/* Force horizontal layout for options */
-.shiny-options-group {
-  display: flex !important;
-  flex-direction: row !important;
-  flex-wrap: nowrap !important;
+/* Hide the actual radio circle for button-styled controls */
+#embedding .radio-inline input,
+#size .radio-inline input,
+#plot .radio-inline input {
+  display: none !important;
+}
+
+/* Standard radio button styling for Data Type */
+#data_type .radio-inline,
+#data_type_exp .radio-inline {
+  display: inline-flex !important;
   align-items: center !important;
-  justify-content: flex-start !important;
-}
-
-/* Grid Alignment and Label consistency */
-.filters-container label {
-  display: block !important;
-  font-weight: 600 !important;
-  margin-bottom: 8px !important;
-  color: #333 !important;
-  font-size: 14px !important;
-}
-
-#embedding > label,
-#size > label,
-#plot > label {
-  display: block !important;
-  font-weight: 600 !important;
-  margin-bottom: 8px !important;
-  color: #333 !important;
-  font-size: 14px !important;
-}
-
-/* Specific Dimension block alignment fix */
-.dimension-axes-container {
-  display: flex !important;
-  align-items: center !important;
-  margin-top: 0 !important;
-  height: 34px;
-}
-
-#xaxis-container, #yaxis-container {
+  gap: 5px;
+  font-size: 13px !important;
+  margin-right: 15px !important;
+  cursor: pointer;
+  background: none !important;
+  border: none !important;
   padding: 0 !important;
 }
 
-/* Hide the actual radio circle */
-#embedding .radio-inline input,
-#size .radio-inline input,
-#plot .radio-inline input,
 #data_type .radio-inline input,
 #data_type_exp .radio-inline input {
-  display: none !important;
+  display: inline-block !important;
+  margin: 0 !important;
+  width: 14px;
+  height: 14px;
 }
 
 
