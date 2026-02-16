@@ -102,7 +102,7 @@ create_meta_filter_row <- function(suffix = "") {
         # Filters box container
         div(
             class = "filters-container",
-            style = "border: 1px solid #ddd; border-radius: 8px; padding: 20px; margin-bottom: 20px; background-color: #f9f9f9;",
+            style = "border: 1px solid #ddd; border-radius: 8px; padding: 20px 20px 10px 20px; margin-bottom: 0; background-color: #f9f9f9;",
             # Filters header
             h4(
                 style = "margin-top: 0; margin-bottom: 15px; color: #333; font-weight: 600; border-bottom: 2px solid #3498db; padding-bottom: 10px;",
@@ -112,9 +112,8 @@ create_meta_filter_row <- function(suffix = "") {
             # First row (5 boxes)
             fluidRow(
                 class = "meta-filter",
-                style = "display: flex; flex-wrap: wrap; justify-content: space-between;",
-                column(
-                    width = 2,
+                div(
+                    class = "col-5-custom",
                     selectizeInput(
                         inputId = paste0("study_label", suffix),
                         "Study label:",
@@ -126,8 +125,8 @@ create_meta_filter_row <- function(suffix = "") {
                         )
                     )
                 ),
-                column(
-                    width = 2,
+                div(
+                    class = "col-5-custom",
                     selectizeInput(
                         inputId = paste0("sample_type", suffix),
                         "Sample type:",
@@ -139,8 +138,8 @@ create_meta_filter_row <- function(suffix = "") {
                         )
                     )
                 ),
-                column(
-                    width = 2,
+                div(
+                    class = "col-5-custom",
                     selectizeInput(
                         inputId = paste0("host_species", suffix),
                         "Host species:",
@@ -162,8 +161,8 @@ create_meta_filter_row <- function(suffix = "") {
                         )
                     )
                 ),
-                column(
-                    width = 2,
+                div(
+                    class = "col-5-custom",
                     selectizeInput(
                         inputId = paste0("parasite_stage", suffix),
                         "Parasite stage:",
@@ -175,8 +174,8 @@ create_meta_filter_row <- function(suffix = "") {
                         )
                     )
                 ),
-                column(
-                    width = 2,
+                div(
+                    class = "col-5-custom",
                     selectizeInput(
                         inputId = paste0("treatment", suffix),
                         "Treatment:",
@@ -193,9 +192,8 @@ create_meta_filter_row <- function(suffix = "") {
             # Second row (5 boxes)
             fluidRow(
                 class = "meta-filter",
-                style = "display: flex; flex-wrap: wrap; justify-content: space-between;",
-                column(
-                    width = 2,
+                div(
+                    class = "col-5-custom",
                     selectizeInput(
                         inputId = paste0("development_phase", suffix),
                         "Development phase:",
@@ -207,8 +205,8 @@ create_meta_filter_row <- function(suffix = "") {
                         )
                     )
                 ),
-            column(
-                width = 2,
+            div(
+                class = "col-5-custom",
                 selectizeInput(
                     inputId = paste0("strain", suffix),
                     "Strain:",
@@ -220,8 +218,8 @@ create_meta_filter_row <- function(suffix = "") {
                     )
                 )
             ),
-            column(
-                width = 2,
+            div(
+                class = "col-5-custom",
                 selectizeInput(
                     inputId = paste0("hour_post_invasion", suffix),
                     "Hour post invasion:",
@@ -233,8 +231,8 @@ create_meta_filter_row <- function(suffix = "") {
                     )
                 )
             ),
-            column(
-                width = 2,
+            div(
+                class = "col-5-custom",
                 selectizeInput(
                     inputId = paste0("sequencer", suffix),
                     "Sequencer:",
@@ -246,8 +244,8 @@ create_meta_filter_row <- function(suffix = "") {
                     )
                 )
             ),
-            column(
-                width = 2,
+            div(
+                class = "col-5-custom",
                 selectizeInput(
                     inputId = paste0("sc_technology", suffix),
                     "Single-cell technology:",
@@ -275,7 +273,7 @@ create_plot_controls <- function(data_type_id = "data_type", include_size_dim = 
             width = 12,
             div(
                 class = "filters-container",
-                style = "border: 1px solid #ddd; border-radius: 8px; padding: 20px; background-color: #f9f9f9;",
+                style = "border: 1px solid #ddd; border-radius: 8px; padding: 20px 20px 10px 20px; background-color: #f9f9f9; margin-bottom: 0;",
                 fluidRow(
                     column(
                         width = if(include_size_dim) 4 else 12,

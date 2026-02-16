@@ -4,8 +4,9 @@ function updateLabelStyles($input) {
   const name = $input.attr('name');
   const id = $input.attr('id');
 
-  const skipNames = ['stagelr', 'data_type', 'data_type_exp'];
-  const skipIds = ['check', 'check_exp', 'embedding'];
+  // Do not skip styling for the main control buttons
+  const skipNames = ['stagelr'];
+  const skipIds = ['check', 'check_exp'];
 
   if ($input.is(':checked') && !skipNames.includes(name) && !skipIds.includes(id)) {
     $label.addClass('checked-label');
@@ -44,14 +45,14 @@ function setupImmediateSidebarControl() {
     if (!sidebar || !main) return;
 
     // Tabs that should hide the sidebar
-    const hideSidebarTabs = ['Metadata', 'Quality control', 'Data sources', 'Gene expression'];
+    const hideSidebarTabs = ['Metadata', 'Quality control', 'Data sources', 'Gene expression', 'Embeddings'];
 
     if (hideSidebarTabs.includes(tabName)) {
       // Hide sidebar immediately
       sidebar.classList.remove('visible');
       main.classList.add('col-sm-12');
     } else {
-      // Show sidebar immediately (for Embeddings)
+      // Show sidebar (if any other tab exists)
       sidebar.classList.add('visible');
       main.classList.remove('col-sm-12');
     }
@@ -83,13 +84,13 @@ function setupImmediateSidebarControl() {
 
   // Set initial state
   function setInitialSidebarState() {
-    // Default to Embeddings tab (first tab) - show sidebar
+    // Default to hide sidebar for full screen experience
     const sidebar = document.getElementById('sidebar');
     const main = document.getElementById('main');
 
     if (sidebar && main) {
-      sidebar.classList.add('visible');
-      main.classList.remove('col-sm-12');
+      sidebar.classList.remove('visible');
+      main.classList.add('col-sm-12');
     }
   }
 
@@ -491,7 +492,7 @@ $(document).ready(function () {
     const $i = $(this);
     if ($i.attr('type') === 'radio') {
       $('input[name="' + $i.attr('name') + '"]')
-        .not('[name="stagelr"], [name="data_type"]')
+        .not('[name="stagelr"]')
         .closest('label')
         .removeClass('checked-label');
     }

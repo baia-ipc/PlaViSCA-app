@@ -92,16 +92,16 @@ filtered_gene_exp_cache_key <- function(input) {
 
     make_cache_key(
         "filtered_gene_exp",
-        get_field("study_label_exp"),
-        get_field("host_species_exp"),
-        get_field("parasite_stage_exp"),
-        get_field("treatment_exp"),
-        get_field("development_phase_exp"),
-        get_field("sample_type_exp"),
-        get_field("strain_exp"),
-        get_field("hour_post_invasion_exp"),
-        get_field("sequencer_exp"),
-        get_field("sc_technology_exp")
+        get_field("study_label_gex"),
+        get_field("host_species_gex"),
+        get_field("parasite_stage_gex"),
+        get_field("treatment_gex"),
+        get_field("development_phase_gex"),
+        get_field("sample_type_gex"),
+        get_field("strain_gex"),
+        get_field("hour_post_invasion_gex"),
+        get_field("sequencer_gex"),
+        get_field("sc_technology_gex")
     )
 }
 

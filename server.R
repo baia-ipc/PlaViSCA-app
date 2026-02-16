@@ -20,10 +20,10 @@ suppressMessages({
 create_empty_plot <- function(title = "") {
   plotly::plot_ly() %>%
     plotly::add_trace(
-      x = c(), 
-      y = c(), 
-      type = 'scatter', 
-      mode = 'markers'
+      x = c(),
+      y = c(),
+      type = "scatter",
+      mode = "markers"
     ) %>%
     plotly::layout(
       title = title,
@@ -141,7 +141,7 @@ server <- function(input, output, session) {
   # Synchronize plot controls (data type, size, dimension) across tabs
   observeEvent(input$tabset, {
     syncing_tabs(TRUE)
-    
+
     # Define mapping between tab names and their input suffixes
     tab_suffixes <- list(
       "Embeddings" = "",
@@ -149,40 +149,61 @@ server <- function(input, output, session) {
       "Quality control" = "_qc",
       "Metadata" = "_meta"
     )
-    
+
     current_tab <- input$tabset
+
+    # Ensure gene is selected when navigating to Gene expression tab
+    if (current_tab == "Gene expression") {
+      if (is.null(input$genes_exp_0) || length(input$genes_exp_0) == 0) {
+        req(gene_data()$genes)
+        choices <- get_gene_choices(gene_data()$genes, input$check_exp_0)
+        if (length(choices) > 0) {
+          updateSelectizeInput(session, "genes_exp_0", selected = choices[1])
+        }
+      }
+    }
+
     if (current_tab %in% names(tab_suffixes)) {
       source_suffix <- tab_suffixes[[current_tab]]
-      
+
       # Determine current global values from the active tab's inputs
       # If they are NULL (e.g., initial load), use defaults
-      current_data_type <- if (!is.null(input[[paste0("data_type", source_suffix)]])) 
-                            input[[paste0("data_type", source_suffix)]] else "normalize"
-      current_size <- if (!is.null(input[[paste0("size", source_suffix)]])) 
-                            input[[paste0("size", source_suffix)]] else 4
-      current_plot <- if (!is.null(input[[paste0("plot", source_suffix)]])) 
-                            input[[paste0("plot", source_suffix)]] else "3d"
-      
+      current_data_type <- if (!is.null(input[[paste0("data_type", source_suffix)]])) {
+        input[[paste0("data_type", source_suffix)]]
+      } else {
+        "normalize"
+      }
+      current_size <- if (!is.null(input[[paste0("size", source_suffix)]])) {
+        input[[paste0("size", source_suffix)]]
+      } else {
+        4
+      }
+      current_plot <- if (!is.null(input[[paste0("plot", source_suffix)]])) {
+        input[[paste0("plot", source_suffix)]]
+      } else {
+        "3d"
+      }
+
       # Update all other tabs
       for (tab in names(tab_suffixes)) {
         if (tab != current_tab) {
           target_suffix <- tab_suffixes[[tab]]
-          
+
           # Sync data type
-          if (is.null(input[[paste0("data_type", target_suffix)]]) || 
-              input[[paste0("data_type", target_suffix)]] != current_data_type) {
+          if (is.null(input[[paste0("data_type", target_suffix)]]) ||
+            input[[paste0("data_type", target_suffix)]] != current_data_type) {
             updateRadioButtons(session, paste0("data_type", target_suffix), selected = current_data_type)
           }
-          
+
           # Sync size
-          if (is.null(input[[paste0("size", target_suffix)]]) || 
-              input[[paste0("size", target_suffix)]] != current_size) {
+          if (is.null(input[[paste0("size", target_suffix)]]) ||
+            input[[paste0("size", target_suffix)]] != current_size) {
             updateRadioButtons(session, paste0("size", target_suffix), selected = current_size)
           }
-          
+
           # Sync plot dimension
-          if (is.null(input[[paste0("plot", target_suffix)]]) || 
-              input[[paste0("plot", target_suffix)]] != current_plot) {
+          if (is.null(input[[paste0("plot", target_suffix)]]) ||
+            input[[paste0("plot", target_suffix)]] != current_plot) {
             updateRadioButtons(session, paste0("plot", target_suffix), selected = current_plot)
           }
         }
@@ -327,126 +348,135 @@ server <- function(input, output, session) {
   # Populate filter dropdowns when gene_data changes (once on load)
   observeEvent(gene_data(), {
     req(gene_data()$data)
-    
+
     filt_data <- gene_data()$data
-    
+
     # List of filter suffixes for all tabs
     filter_suffixes <- c("", "_gex", "_qc", "_meta")
-    
+
     # Use isolate to prevent reactive loop
-    tryCatch({
-      # Populate all filter instances (one for each tab)
-      for (suffix in filter_suffixes) {
-        updateSelectizeInput(
-          session,
-          paste0("study_label", suffix),
-          choices = unique(filt_data$study_label),
-          selected = isolate(input[[paste0("study_label", suffix)]]),
-          server = TRUE
-        )
-        updateSelectizeInput(
-          session,
-          paste0("sample_type", suffix),
-          choices = unique(filt_data$sample_type),
-          selected = isolate(input[[paste0("sample_type", suffix)]]),
-          server = TRUE
-        )
-        updateSelectizeInput(
-          session,
-          paste0("host_species", suffix),
-          choices = setNames(
-            unique(filt_data$host_species),
-            format_species_name(unique(filt_data$host_species))
-          ),
-          selected = isolate(input[[paste0("host_species", suffix)]]),
-          server = TRUE
-        )
-        updateSelectizeInput(
-          session,
-          paste0("parasite_stage", suffix),
-          choices = unique(filt_data$parasite_stage),
-          selected = isolate(input[[paste0("parasite_stage", suffix)]]),
-          server = TRUE
-        )
-        updateSelectizeInput(
-          session,
-          paste0("treatment", suffix),
-          choices = unique(filt_data$treatment),
-          selected = isolate(input[[paste0("treatment", suffix)]]),
-          server = TRUE
-        )
-        updateSelectizeInput(
-          session,
-          paste0("development_phase", suffix),
-          choices = unique(filt_data$development_phase),
-          selected = isolate(input[[paste0("development_phase", suffix)]]),
-          server = TRUE
-        )
-        updateSelectizeInput(
-          session,
-          paste0("strain", suffix),
-          choices = unique(filt_data$strain),
-          selected = isolate(input[[paste0("strain", suffix)]]),
-          server = TRUE
-        )
-        updateSelectizeInput(
-          session,
-          paste0("hour_post_invasion", suffix),
-          choices = unique(filt_data$hour_post_invasion),
-          selected = isolate(input[[paste0("hour_post_invasion", suffix)]]),
-          server = TRUE
-        )
-        updateSelectizeInput(
-          session,
-          paste0("sequencer", suffix),
-          choices = unique(filt_data$sequencer),
-          selected = isolate(input[[paste0("sequencer", suffix)]]),
-          server = TRUE
-        )
-        updateSelectizeInput(
-          session,
-          paste0("sc_technology", suffix),
-          choices = unique(filt_data$sc_technology),
-          selected = isolate(input[[paste0("sc_technology", suffix)]]),
-          server = TRUE
-        )
+    tryCatch(
+      {
+        # Populate all filter instances (one for each tab)
+        for (suffix in filter_suffixes) {
+          updateSelectizeInput(
+            session,
+            paste0("study_label", suffix),
+            choices = unique(filt_data$study_label),
+            selected = isolate(input[[paste0("study_label", suffix)]]),
+            server = TRUE
+          )
+          updateSelectizeInput(
+            session,
+            paste0("sample_type", suffix),
+            choices = unique(filt_data$sample_type),
+            selected = isolate(input[[paste0("sample_type", suffix)]]),
+            server = TRUE
+          )
+          updateSelectizeInput(
+            session,
+            paste0("host_species", suffix),
+            choices = setNames(
+              unique(filt_data$host_species),
+              format_species_name(unique(filt_data$host_species))
+            ),
+            selected = isolate(input[[paste0("host_species", suffix)]]),
+            server = TRUE
+          )
+          updateSelectizeInput(
+            session,
+            paste0("parasite_stage", suffix),
+            choices = unique(filt_data$parasite_stage),
+            selected = isolate(input[[paste0("parasite_stage", suffix)]]),
+            server = TRUE
+          )
+          updateSelectizeInput(
+            session,
+            paste0("treatment", suffix),
+            choices = unique(filt_data$treatment),
+            selected = isolate(input[[paste0("treatment", suffix)]]),
+            server = TRUE
+          )
+          updateSelectizeInput(
+            session,
+            paste0("development_phase", suffix),
+            choices = unique(filt_data$development_phase),
+            selected = isolate(input[[paste0("development_phase", suffix)]]),
+            server = TRUE
+          )
+          updateSelectizeInput(
+            session,
+            paste0("strain", suffix),
+            choices = unique(filt_data$strain),
+            selected = isolate(input[[paste0("strain", suffix)]]),
+            server = TRUE
+          )
+          updateSelectizeInput(
+            session,
+            paste0("hour_post_invasion", suffix),
+            choices = unique(filt_data$hour_post_invasion),
+            selected = isolate(input[[paste0("hour_post_invasion", suffix)]]),
+            server = TRUE
+          )
+          updateSelectizeInput(
+            session,
+            paste0("sequencer", suffix),
+            choices = unique(filt_data$sequencer),
+            selected = isolate(input[[paste0("sequencer", suffix)]]),
+            server = TRUE
+          )
+          updateSelectizeInput(
+            session,
+            paste0("sc_technology", suffix),
+            choices = unique(filt_data$sc_technology),
+            selected = isolate(input[[paste0("sc_technology", suffix)]]),
+            server = TRUE
+          )
+        }
+      },
+      error = function(e) {
+        # Silent error handling
       }
-    }, error = function(e) {
-      # Silent error handling
-    })
+    )
   })
-  
+
   # Sync filter values across all tabs
   # When a filter changes in any tab, update all other tabs to match
-  filter_names <- c("study_label", "sample_type", "host_species", "parasite_stage",
-                    "treatment", "development_phase", "strain", "hour_post_invasion",
-                    "sequencer", "sc_technology")
+  filter_names <- c(
+    "study_label", "sample_type", "host_species", "parasite_stage",
+    "treatment", "development_phase", "strain", "hour_post_invasion",
+    "sequencer", "sc_technology"
+  )
   filter_suffixes <- c("", "_gex", "_qc", "_meta")
-  
+
   # Create observers for each filter to sync across tabs
   lapply(filter_names, function(filter_name) {
     lapply(filter_suffixes, function(source_suffix) {
       input_id <- paste0(filter_name, source_suffix)
-      
-      observeEvent(input[[input_id]], {
-        new_value <- input[[input_id]]
-        
-        # Update all other instances of this filter
-        for (target_suffix in filter_suffixes) {
-          if (target_suffix != source_suffix) {
-            target_id <- paste0(filter_name, target_suffix)
-            
-            # Only update if value is different to avoid loops
-            if (!identical(input[[target_id]], new_value)) {
-              updateSelectizeInput(
-                session,
-                target_id,
-                selected = new_value
-              )
+
+      observeEvent(input[[input_id]],
+        {
+          new_value <- input[[input_id]]
+
+          # Update all other instances of this filter
+          for (target_suffix in filter_suffixes) {
+            if (target_suffix != source_suffix) {
+              target_id <- paste0(filter_name, target_suffix)
+
+              # Only update if value is different to avoid loops
+              if (!identical(input[[target_id]], new_value)) {
+                updateSelectizeInput(
+                  session,
+                  target_id,
+                  selected = new_value
+                )
+              }
             }
           }
-        }
-      }, ignoreNULL = FALSE, ignoreInit = TRUE)
+        },
+        ignoreNULL = FALSE,
+        ignoreInit = TRUE
+      )
     })
   })
 
@@ -485,9 +515,9 @@ server <- function(input, output, session) {
     filtered_meta <- tryCatch(
       {
         apply_secondary_filters(
-          gene_data()$data, 
-          current_inputs, 
-          keep_gene_matrix = FALSE, 
+          gene_data()$data,
+          current_inputs,
+          keep_gene_matrix = FALSE,
           genes = if (!is.null(gene_data()$genes)) gene_data()$genes$gene else NULL
         )
       },
@@ -499,14 +529,14 @@ server <- function(input, output, session) {
 
     # Get row indices if available from the filtered metadata
     row_idx <- attr(filtered_meta, "row_idx")
-    
+
     # Get the full dataset (with gene expression matrix)
     full_df <- if (!is.null(cached_data[[get_current_data_type()]])) {
       cached_data[[get_current_data_type()]]
     } else {
       gene_data()$data
     }
-    
+
     result <- list(
       data = filtered_meta,
       full = full_df,
@@ -529,42 +559,51 @@ server <- function(input, output, session) {
       "Metadata" = "_meta"
     )
     suffix <- suffix_map[[tab]]
-    
+
     # Sync data type
-    observeEvent(input[[paste0("data_type", suffix)]], {
-      if (!is.null(input$tabset) && input$tabset == tab && !syncing_tabs()) {
-        val <- input[[paste0("data_type", suffix)]]
-        for (other_tab in names(suffix_map)) {
-          if (other_tab != tab) {
-            updateRadioButtons(session, paste0("data_type", suffix_map[[other_tab]]), selected = val)
+    observeEvent(input[[paste0("data_type", suffix)]],
+      {
+        if (!is.null(input$tabset) && input$tabset == tab && !syncing_tabs()) {
+          val <- input[[paste0("data_type", suffix)]]
+          for (other_tab in names(suffix_map)) {
+            if (other_tab != tab) {
+              updateRadioButtons(session, paste0("data_type", suffix_map[[other_tab]]), selected = val)
+            }
           }
         }
-      }
-    }, ignoreInit = TRUE)
-    
+      },
+      ignoreInit = TRUE
+    )
+
     # Sync size
-    observeEvent(input[[paste0("size", suffix)]], {
-      if (!is.null(input$tabset) && input$tabset == tab && !syncing_tabs()) {
-        val <- input[[paste0("size", suffix)]]
-        for (other_tab in names(suffix_map)) {
-          if (other_tab != tab) {
-            updateRadioButtons(session, paste0("size", suffix_map[[other_tab]]), selected = val)
+    observeEvent(input[[paste0("size", suffix)]],
+      {
+        if (!is.null(input$tabset) && input$tabset == tab && !syncing_tabs()) {
+          val <- input[[paste0("size", suffix)]]
+          for (other_tab in names(suffix_map)) {
+            if (other_tab != tab) {
+              updateRadioButtons(session, paste0("size", suffix_map[[other_tab]]), selected = val)
+            }
           }
         }
-      }
-    }, ignoreInit = TRUE)
-    
+      },
+      ignoreInit = TRUE
+    )
+
     # Sync plot dimension
-    observeEvent(input[[paste0("plot", suffix)]], {
-      if (!is.null(input$tabset) && input$tabset == tab && !syncing_tabs()) {
-        val <- input[[paste0("plot", suffix)]]
-        for (other_tab in names(suffix_map)) {
-          if (other_tab != tab) {
-            updateRadioButtons(session, paste0("plot", suffix_map[[other_tab]]), selected = val)
+    observeEvent(input[[paste0("plot", suffix)]],
+      {
+        if (!is.null(input$tabset) && input$tabset == tab && !syncing_tabs()) {
+          val <- input[[paste0("plot", suffix)]]
+          for (other_tab in names(suffix_map)) {
+            if (other_tab != tab) {
+              updateRadioButtons(session, paste0("plot", suffix_map[[other_tab]]), selected = val)
+            }
           }
         }
-      }
-    }, ignoreInit = TRUE)
+      },
+      ignoreInit = TRUE
+    )
   })
 
   create_data_type_sync_observer(
@@ -671,7 +710,7 @@ server <- function(input, output, session) {
                 starts_with("pca_"),
                 starts_with("t_sne_"),
                 barcode,
-                life_cycle_stage,  # Exclude old life_cycle_stage column (hidden from UI)
+                life_cycle_stage, # Exclude old life_cycle_stage column (hidden from UI)
                 geographic_location,
                 day_post_infection
               )
@@ -900,19 +939,19 @@ server <- function(input, output, session) {
 
   # Gene Expression tabset - with optimized caching and debouncing
   filtered_gene_exp_data <- reactive({
-    req(gene_data())  # Use raw gene_data() instead of filtered_gene_data()
+    req(gene_data()) # Use raw gene_data() instead of filtered_gene_data()
 
     current_inputs <- list(
-      study_label = input$study_label,
-      host_species = input$host_species,
-      parasite_stage = input$parasite_stage,
-      treatment = input$treatment,
-      development_phase = input$development_phase,
-      sample_type = input$sample_type,
-      strain = input$strain,
-      hour_post_invasion = input$hour_post_invasion,
-      sequencer = input$sequencer,
-      sc_technology = input$sc_technology
+      study_label = input$study_label_gex,
+      host_species = input$host_species_gex,
+      parasite_stage = input$parasite_stage_gex,
+      treatment = input$treatment_gex,
+      development_phase = input$development_phase_gex,
+      sample_type = input$sample_type_gex,
+      strain = input$strain_gex,
+      hour_post_invasion = input$hour_post_invasion_gex,
+      sequencer = input$sequencer_gex,
+      sc_technology = input$sc_technology_gex
     )
 
     # Create cache key as a single string for filtered gene expression data
@@ -927,7 +966,7 @@ server <- function(input, output, session) {
         full_df <- if (!is.null(cached_data[[get_current_data_type()]])) cached_data[[get_current_data_type()]] else gene_data()$data
 
         filt_meta <- apply_secondary_filters(
-          gene_data()$data,  # Use raw gene_data() instead of filtered_gene_data()
+          gene_data()$data, # Use raw gene_data() instead of filtered_gene_data()
           current_inputs,
           keep_gene_matrix = FALSE,
           genes = if (!is.null(gene_data()$genes)) gene_data()$genes$gene else NULL
@@ -938,7 +977,7 @@ server <- function(input, output, session) {
 
         result <- list(
           data = filt_meta,
-          genes = gene_data()$genes,  # FIXED: Use gene_data() instead of filtered_gene_data()
+          genes = gene_data()$genes, # FIXED: Use gene_data() instead of filtered_gene_data()
           full = full_df,
           row_idx = row_idx
         )
@@ -951,7 +990,7 @@ server <- function(input, output, session) {
         return(NULL)
       }
     )
-  }) %>% debounce(500)  # Add 500ms debounce to batch filter changes
+  }) %>% debounce(500) # Add 500ms debounce to batch filter changes
 
   observeEvent(
     list(
@@ -986,7 +1025,6 @@ server <- function(input, output, session) {
   )
 
 
-
   # Manipulation tabset "Gene Exp"
   ## gene_exp_0 block with minimal caching for speed
   choice_exp_0 <- reactive({
@@ -996,7 +1034,7 @@ server <- function(input, output, session) {
 
   # df_exp data for genes_exp_0 with simplified reactive approach and debouncing
   df_exp_0 <- reactive({
-    req(filtered_gene_exp_data(), input$genes_exp_0, input$group_exp)
+    req(filtered_gene_exp_data(), input$genes_exp_0, input$group_exp_0)
 
     # Skip processing during loading states
     if (global_loading()) {
@@ -1007,19 +1045,19 @@ server <- function(input, output, session) {
     cache_key <- make_cache_key(
       "df_exp",
       input$genes_exp_0,
-      input$group_exp,
+      input$group_exp_0,
       input$check_exp_0,
       get_current_data_type(),
-      input$study_label,
-      input$host_species,
-      input$parasite_stage,
-      input$treatment,
-      input$development_phase,
-      input$sample_type,
-      input$strain,
-      input$hour_post_invasion,
-      input$sequencer,
-      input$sc_technology
+      input$study_label_gex,
+      input$host_species_gex,
+      input$parasite_stage_gex,
+      input$treatment_gex,
+      input$development_phase_gex,
+      input$sample_type_gex,
+      input$strain_gex,
+      input$hour_post_invasion_gex,
+      input$sequencer_gex,
+      input$sc_technology_gex
     )
 
     # Check cache first for instant gene switching
@@ -1036,7 +1074,7 @@ server <- function(input, output, session) {
         df_exp0(
           filtered_gene_exp_data(),
           input$genes_exp_0,
-          input$group_exp,
+          input$group_exp_0,
           check_exp = input$check_exp_0,
           full_data = filtered_gene_exp_data()$full
         )
@@ -1045,9 +1083,9 @@ server <- function(input, output, session) {
         return(NULL)
       }
     )
-    
+
     return(result)
-  }) %>% debounce(300)  # Add 300ms debounce to reduce unnecessary re-renders
+  }) %>% debounce(300) # Add 300ms debounce to reduce unnecessary re-renders
 
   df_gene0 <- reactiveVal(NULL)
 
@@ -1067,6 +1105,7 @@ server <- function(input, output, session) {
             "genes_exp_0",
             label = "Gene name",
             choices = initial_choices,
+            selected = initial_choices[1],
             options = list(
               placeholder = "Select one or more genes",
               maxItems = 10
@@ -1088,7 +1127,7 @@ server <- function(input, output, session) {
 
     # Get choices based on checkbox state
     choices <- get_gene_choices(gene_data()$genes, input$check_exp_0)
-    
+
     # Try to preserve current selection if it's still valid in new choices
     current_selection <- input$genes_exp_0
     if (!is.null(current_selection) && all(current_selection %in% choices)) {
@@ -1126,18 +1165,18 @@ server <- function(input, output, session) {
   # Debounced gene selection to prevent flickering
   genes_exp_0_debounced <- reactive({
     input$genes_exp_0
-  }) %>% debounce(800)  # Wait 800ms after user stops typing/selecting
-  
+  }) %>% debounce(800) # Wait 800ms after user stops typing/selecting
+
   group_exp_debounced <- reactive({
-    input$group_exp
+    input$group_exp_0
   }) %>% debounce(500)
 
   # df_exp_0 when the user selects a gene/group - IMPROVED VERSION
-  output$gene_exp_plotly <- renderPlotly({
+  output$gene_exp_plotly_0 <- renderPlotly({
     # Use debounced inputs to prevent flickering
     selected_genes <- genes_exp_0_debounced()
     selected_group <- group_exp_debounced()
-    
+
     # Validate inputs
     if (is.null(selected_genes) || length(selected_genes) == 0 || is.null(selected_group)) {
       return(create_empty_plot("Please select at least one gene and a grouping option"))
@@ -1148,130 +1187,134 @@ server <- function(input, output, session) {
     }
 
     # FIXED: Use filtered_gene_exp_data() which includes ALL filters, not just parasite_stage
-    tryCatch({
-      # 1. Get the filtered data with ALL filters applied
-      filtered_gene_exp <- filtered_gene_exp_data()
-      if (is.null(filtered_gene_exp) || is.null(filtered_gene_exp$data)) {
-        return(create_empty_plot("Data not loaded"))
-      }
-      
-      # 2. Use the already filtered data instead of applying only parasite_stage filter
-      filtered_data <- filtered_gene_exp$data
-      raw_data <- list(
-        data = filtered_gene_exp$full,  # Full expression matrix
-        genes = filtered_gene_exp$genes
-      )
-      
-      # 3. Get full expression matrix from the filtered data object
-      full_matrix <- filtered_gene_exp$full
-      
-      # 4. Use row indices from the filtered metadata if available
-      row_idx <- attr(filtered_data, "row_idx")
-      
-      # 5. Process each selected gene and collect expression values
-      gene_expression_matrix <- list()
-      valid_gene_names <- c()
-      
-      for (gene_name in selected_genes) {
-        gene_id <- NULL
-        if (!is.null(raw_data$genes)) {
-          gene_match <- raw_data$genes[raw_data$genes$name == gene_name, ]
-          if (nrow(gene_match) > 0) {
-            gene_id <- gene_match$gene[1]
+    tryCatch(
+      {
+        # 1. Get the filtered data with ALL filters applied
+        filtered_gene_exp <- filtered_gene_exp_data()
+        if (is.null(filtered_gene_exp) || is.null(filtered_gene_exp$data)) {
+          return(create_empty_plot("Data not loaded"))
+        }
+
+        # 2. Use the already filtered data instead of applying only parasite_stage filter
+        filtered_data <- filtered_gene_exp$data
+        raw_data <- list(
+          data = filtered_gene_exp$full, # Full expression matrix
+          genes = filtered_gene_exp$genes
+        )
+
+        # 3. Get full expression matrix from the filtered data object
+        full_matrix <- filtered_gene_exp$full
+
+        # 4. Use row indices from the filtered metadata if available
+        row_idx <- attr(filtered_data, "row_idx")
+
+        # 5. Process each selected gene and collect expression values
+        gene_expression_matrix <- list()
+        valid_gene_names <- c()
+
+        for (gene_name in selected_genes) {
+          gene_id <- NULL
+          if (!is.null(raw_data$genes)) {
+            gene_match <- raw_data$genes[raw_data$genes$name == gene_name, ]
+            if (nrow(gene_match) > 0) {
+              gene_id <- gene_match$gene[1]
+            }
           }
+
+          if (is.null(gene_id)) {
+            next # Skip this gene if not found
+          }
+
+          if (!(gene_id %in% colnames(full_matrix))) {
+            next # Skip if gene expression not found
+          }
+
+          # Get row indices for filtered data
+          if (!is.null(row_idx) && length(row_idx) > 0) {
+            # Use row indices from filtered metadata (this is the correct approach)
+            gene_expression <- full_matrix[[gene_id]][row_idx]
+          } else {
+            # Fallback: match by rownames (less efficient but safer)
+            row_indices <- match(rownames(filtered_data), rownames(full_matrix))
+            valid_indices <- !is.na(row_indices)
+
+            if (sum(valid_indices) == 0) {
+              next # Skip if no matching data
+            }
+
+            # Extract expression values for filtered cells
+            gene_expression <- full_matrix[[gene_id]][row_indices[valid_indices]]
+          }
+
+          gene_expression_matrix[[gene_name]] <- gene_expression
+          valid_gene_names <- c(valid_gene_names, gene_name)
         }
-        
-        if (is.null(gene_id)) {
-          next  # Skip this gene if not found
+
+        # Check if we have any valid data
+        if (length(gene_expression_matrix) == 0) {
+          return(create_empty_plot("No data available for selected genes"))
         }
-        
-        if (!(gene_id %in% colnames(full_matrix))) {
-          next  # Skip if gene expression not found
-        }
-        
-        # Get row indices for filtered data
-        if (!is.null(row_idx) && length(row_idx) > 0) {
-          # Use row indices from filtered metadata (this is the correct approach)
-          gene_expression <- full_matrix[[gene_id]][row_idx]
+
+        # 5. Calculate average expression across all selected genes
+        if (length(valid_gene_names) == 1) {
+          # Single gene - use expression directly as vector
+          avg_expression <- gene_expression_matrix[[1]]
+          plot_title <- valid_gene_names[1]
         } else {
-          # Fallback: match by rownames (less efficient but safer)
+          # Multiple genes - calculate mean across genes for each cell
+          # Convert to matrix and calculate row means
+          expr_matrix <- do.call(cbind, gene_expression_matrix)
+          avg_expression <- rowMeans(expr_matrix, na.rm = TRUE)
+          plot_title <- paste(
+            "Average of", length(valid_gene_names), "genes:",
+            paste(valid_gene_names, collapse = ", ")
+          )
+        }
+
+        # 6. Get group values (make sure they match the expression data length)
+        if (!is.null(row_idx) && length(row_idx) > 0) {
+          # Use the same row indices for group values to ensure consistency
+          group_values <- filtered_data[[selected_group]]
+        } else {
+          # Fallback: match by rownames
           row_indices <- match(rownames(filtered_data), rownames(full_matrix))
           valid_indices <- !is.na(row_indices)
-          
-          if (sum(valid_indices) == 0) {
-            next  # Skip if no matching data
-          }
-          
-          # Extract expression values for filtered cells
-          gene_expression <- full_matrix[[gene_id]][row_indices[valid_indices]]
+          group_values <- filtered_data[[selected_group]][valid_indices]
         }
-        
-        gene_expression_matrix[[gene_name]] <- gene_expression
-        valid_gene_names <- c(valid_gene_names, gene_name)
+
+        # Ensure lengths match
+        if (length(avg_expression) != length(group_values)) {
+          # This should not happen, but handle it gracefully
+          min_len <- min(length(avg_expression), length(group_values))
+          avg_expression <- avg_expression[1:min_len]
+          group_values <- group_values[1:min_len]
+        }
+
+        # 7. Create final plot data
+        plot_data <- data.frame(
+          gene_expr = avg_expression,
+          group = group_values,
+          stringsAsFactors = FALSE
+        )
+        names(plot_data)[2] <- selected_group # Set correct column name for grouping
+
+        # Remove NA values
+        plot_data <- plot_data[!is.na(plot_data$gene_expr) & !is.na(plot_data[[selected_group]]), ]
+
+        if (nrow(plot_data) == 0) {
+          return(create_empty_plot("No data available for selected filters"))
+        }
+
+        # 8. Create the plot with title showing which genes were averaged
+        group_col <- tolower(selected_group)
+        result <- gene_exp_plot(plot_data, group_col, add_title = plot_title)
+
+        return(result)
+      },
+      error = function(e) {
+        return(create_empty_plot(paste("Error:", e$message)))
       }
-      
-      # Check if we have any valid data
-      if (length(gene_expression_matrix) == 0) {
-        return(create_empty_plot("No data available for selected genes"))
-      }
-      
-      # 5. Calculate average expression across all selected genes
-      if (length(valid_gene_names) == 1) {
-        # Single gene - use expression directly as vector
-        avg_expression <- gene_expression_matrix[[1]]
-        plot_title <- valid_gene_names[1]
-      } else {
-        # Multiple genes - calculate mean across genes for each cell
-        # Convert to matrix and calculate row means
-        expr_matrix <- do.call(cbind, gene_expression_matrix)
-        avg_expression <- rowMeans(expr_matrix, na.rm = TRUE)
-        plot_title <- paste("Average of", length(valid_gene_names), "genes:", 
-                           paste(valid_gene_names, collapse = ", "))
-      }
-      
-      # 6. Get group values (make sure they match the expression data length)
-      if (!is.null(row_idx) && length(row_idx) > 0) {
-        # Use the same row indices for group values to ensure consistency
-        group_values <- filtered_data[[selected_group]]
-      } else {
-        # Fallback: match by rownames
-        row_indices <- match(rownames(filtered_data), rownames(full_matrix))
-        valid_indices <- !is.na(row_indices)
-        group_values <- filtered_data[[selected_group]][valid_indices]
-      }
-      
-      # Ensure lengths match
-      if (length(avg_expression) != length(group_values)) {
-        # This should not happen, but handle it gracefully
-        min_len <- min(length(avg_expression), length(group_values))
-        avg_expression <- avg_expression[1:min_len]
-        group_values <- group_values[1:min_len]
-      }
-      
-      # 7. Create final plot data
-      plot_data <- data.frame(
-        gene_expr = avg_expression,
-        group = group_values,
-        stringsAsFactors = FALSE
-      )
-      names(plot_data)[2] <- selected_group  # Set correct column name for grouping
-      
-      # Remove NA values
-      plot_data <- plot_data[!is.na(plot_data$gene_expr) & !is.na(plot_data[[selected_group]]), ]
-      
-      if (nrow(plot_data) == 0) {
-        return(create_empty_plot("No data available for selected filters"))
-      }
-      
-      # 8. Create the plot with title showing which genes were averaged
-      group_col <- tolower(selected_group)
-      result <- gene_exp_plot(plot_data, group_col, add_title = plot_title)
-      
-      return(result)
-      
-    }, error = function(e) {
-      return(create_empty_plot(paste("Error:", e$message)))
-    })
+    )
   })
 
   ## gene expression link - updated for multiple genes
@@ -1287,26 +1330,7 @@ server <- function(input, output, session) {
     gene_links(gene_id)
   })
 
-  # Initialize gene choices for the first plot
-  observe({
-    req(gene_data())  # Use unfiltered gene_data() instead of filtered_gene_exp_data()
-    choices <- get_gene_choices(gene_data()$genes, FALSE)
-    
-    # Ensure we always have a valid selection
-    default_selection <- if (length(choices) > 0) choices[1] else NULL
-    
-    updateSelectizeInput(
-      session,
-      "genes_exp_0",
-      choices = choices,
-      selected = default_selection,  # Add default selection
-      options = list(
-        placeholder = "Select one or more genes",
-        maxItems = 10
-      ),
-      server = TRUE
-    )
-  })
+  # Redundant observer removed to prevent gene selection resets
 
   # gene_exp_i block
   # observe add button click from js
@@ -1315,14 +1339,14 @@ server <- function(input, output, session) {
   observeEvent(input$click_add_btn, {
     btn_id <- input$click_add_btn
     req(btn_id)
-    
+
     id <- as.numeric(gsub("add_btn_?", "", btn_id))
-    
+
     # Validate that id is a valid number
     if (is.na(id)) {
       return(NULL)
     }
-    
+
     shinyjs::hide(paste0("add_btn_", id))
 
     # Use the filtered gene-expression data for choices so selection respects metadata filters
@@ -1355,18 +1379,17 @@ server <- function(input, output, session) {
             if (!is.null(selectize_choices)) {
               # Set default selection to first available choice
               default_selection <- if (length(selectize_choices) > 0) selectize_choices[1] else NULL
-              
+
               updateSelectizeInput(
                 session,
                 inputId = paste0("genes_exp_", id),
                 choices = selectize_choices,
-                selected = default_selection,  # Add default selection
+                selected = default_selection, # Add default selection
                 server = TRUE
               )
             }
           },
-          error = function(e) {
-          }
+          error = function(e) {}
         )
       }, 0.25)
 
@@ -1397,7 +1420,7 @@ server <- function(input, output, session) {
               if (is.null(cur_genes) || length(cur_genes) == 0) {
                 return(create_empty_plot("No genes selected"))
               }
-              
+
               # Convert gene names to IDs
               gene_ids <- c()
               if (isTRUE(cur_check)) {
@@ -1407,12 +1430,12 @@ server <- function(input, output, session) {
                 # User selected gene names - convert to IDs
                 for (gene_name in cur_genes) {
                   gene_id <- get_gene_id(gene_name, fg$genes)
-                   if (!is.na(gene_id)) {
+                  if (!is.na(gene_id)) {
                     gene_ids <- c(gene_ids, gene_id)
                   }
                 }
               }
-              
+
               if (length(gene_ids) == 0) {
                 return(create_empty_plot("No valid genes found"))
               }
@@ -1430,7 +1453,7 @@ server <- function(input, output, session) {
               if (is.null(static_df) || nrow(static_df) == 0) {
                 return(create_empty_plot("No data"))
               }
-              
+
               # Create title showing gene info
               plot_title <- if (length(gene_ids) == 1) {
                 cur_genes[1]
@@ -1463,18 +1486,17 @@ server <- function(input, output, session) {
             if (!is.null(selectize_choices)) {
               # Set default selection to first available choice
               default_selection <- if (length(selectize_choices) > 0) selectize_choices[1] else NULL
-              
+
               updateSelectizeInput(
                 session,
                 inputId = paste0("genes_exp_", id),
                 choices = selectize_choices,
-                selected = default_selection,  # Add default selection
+                selected = default_selection, # Add default selection
                 server = TRUE
               )
             }
           },
-          error = function(e) {
-          }
+          error = function(e) {}
         )
       }, 0.25)
 
@@ -1515,7 +1537,7 @@ server <- function(input, output, session) {
               # Remove any invalid gene IDs
               valid_genes <- cur_genes[!is.na(gene_ids) & gene_ids != ""]
               valid_gene_ids <- gene_ids[!is.na(gene_ids) & gene_ids != ""]
-              
+
               if (length(valid_gene_ids) == 0) {
                 return(create_empty_plot("No valid genes found"))
               }
@@ -1532,7 +1554,7 @@ server <- function(input, output, session) {
               if (is.null(static_df) || nrow(static_df) == 0) {
                 return(create_empty_plot("No data"))
               }
-              
+
               # Create title showing gene info
               plot_title <- if (length(valid_gene_ids) == 1) {
                 valid_genes[1]
@@ -1619,14 +1641,14 @@ server <- function(input, output, session) {
     id <- input$change_gene_exp
     id <- as.numeric(gsub("genes_exp_", "", id))
     current_genes <- input[[paste0("genes_exp_", id)]]
-    
+
     # For multiple genes, use the first one for the link
     first_gene <- if (is.character(current_genes) && length(current_genes) > 0) {
       current_genes[1]
     } else {
       current_genes
     }
-    
+
     if (!is.null(first_gene) && first_gene != "") {
       gene_id <- get_gene_id(first_gene, gene_data()$genes)
       gene_links(gene_id)
@@ -1643,18 +1665,16 @@ server <- function(input, output, session) {
 
   ## dynamic UI for gene selection (RNA_snn commented out)
   shinyjs::hide("gene_snn_ui")
-  shinyjs::hide("data_type")
   observe({
-    req(input$color)  # Ensure input$color is available
+    req(input$color) # Ensure input$color is available
     if (input$color == "genes") {
-      shinyjs::show("data_type")
       shinyjs::show("gene_snn_ui")
       shinyjs::show("gene_link_ui")
       shinyjs::show("switch_id")
 
       # Set loading state when showing gene UI
       genes_loading(TRUE)
-      
+
       # Reset loading state after a short delay to allow other observers to complete
       later(
         function() {
@@ -1665,71 +1685,73 @@ server <- function(input, output, session) {
     } else {
       shinyjs::hide("gene_snn_ui")
       shinyjs::hide("gene_link_ui")
-      shinyjs::hide("data_type")
       shinyjs::hide("switch_id")
       genes_loading(FALSE)
     }
   })
 
   # Separate observer to update gene choices when color changes to genes or toggle changes
-  observeEvent(list(input$color, input$check), {
-    if (!identical(input$color, "genes")) {
-      return()
-    }
-    
-    req(gene_data()$genes)
-
-    # Set loading state to prevent plot updates
-    genes_loading(TRUE)
-
-    tryCatch(
-      {
-        genes_df <- gene_data()$genes
-        if (is.null(genes_df) || nrow(genes_df) == 0) {
-          genes_loading(FALSE)
-          return()
-        }
-        
-        gene_choices <- get_gene_choices(genes_df, input$check)
-        
-        if (is.null(gene_choices) || length(gene_choices) == 0) {
-          genes_loading(FALSE)
-          return()
-        }
-
-        # Store current selection before updating choices
-        current_selection <- input$genes_n
-
-        updateSelectizeInput(
-          session,
-          "genes_n",
-          choices = gene_choices,
-          selected = current_selection,  # Preserve current selection
-          options = list(
-            placeholder = "Select one or more genes",
-            maxItems = 10
-          ),
-          server = TRUE
-        )
-        
-        # Update the label text based on toggle state
-        label_text <- if (isTRUE(input$check)) "Gene ID" else "Gene name"
-        runjs(sprintf('$("#gene_label").text("%s");', label_text))
-
-        # Reset loading state after choices are updated
-        later(
-          function() {
-            genes_loading(FALSE)
-          },
-          0.1
-        )
-      },
-      error = function(e) {
-        message("Error updating gene choices: ", e$message)
-        genes_loading(FALSE)
+  observeEvent(list(input$color, input$check),
+    {
+      if (!identical(input$color, "genes")) {
+        return()
       }
-    )
-  }, ignoreInit = FALSE)
+
+      req(gene_data()$genes)
+
+      # Set loading state to prevent plot updates
+      genes_loading(TRUE)
+
+      tryCatch(
+        {
+          genes_df <- gene_data()$genes
+          if (is.null(genes_df) || nrow(genes_df) == 0) {
+            genes_loading(FALSE)
+            return()
+          }
+
+          gene_choices <- get_gene_choices(genes_df, input$check)
+
+          if (is.null(gene_choices) || length(gene_choices) == 0) {
+            genes_loading(FALSE)
+            return()
+          }
+
+          # Store current selection before updating choices
+          current_selection <- input$genes_n
+
+          updateSelectizeInput(
+            session,
+            "genes_n",
+            choices = gene_choices,
+            selected = current_selection, # Preserve current selection
+            options = list(
+              placeholder = "Select one or more genes",
+              maxItems = 10
+            ),
+            server = TRUE
+          )
+
+          # Update the label text based on toggle state
+          label_text <- if (isTRUE(input$check)) "Gene ID" else "Gene name"
+          runjs(sprintf('$("#gene_label").text("%s");', label_text))
+
+          # Reset loading state after choices are updated
+          later(
+            function() {
+              genes_loading(FALSE)
+            },
+            0.1
+          )
+        },
+        error = function(e) {
+          message("Error updating gene choices: ", e$message)
+          genes_loading(FALSE)
+        }
+      )
+    },
+    ignoreInit = FALSE
+  )
 
   ## hide switch for tsne
   observeEvent(input$embedding, {
@@ -1816,7 +1838,7 @@ server <- function(input, output, session) {
   # Removed: observeEvent for updating second plot axis choices
   # Both plots now use the same axes from main controls
 
-  # Observer for updating second plot size based on 2D/3D selection  
+  # Observer for updating second plot size based on 2D/3D selection
   # Removed: observeEvent for plot_second to update size_second
   # Size and plot dimension now inherited from main controls
 
@@ -1830,54 +1852,91 @@ server <- function(input, output, session) {
   # Separate data reactive for first plot (used in comparison mode)
   first_plot_data <- reactive({
     req(input$enable_comparison)
-    
+
     # Cache the data and gene objects at evaluation time to avoid interference
-    tryCatch({
-      current_data <- filtered_gene_data()$data
-      current_genes <- gene_data()$genes
-      current_full_data <- gene_data()$data
-      current_data_type <- get_current_data_type()
-      
-      # Add cached objects as attributes to prevent cross-plot interference
-      attr(current_data, "cached_genes") <- current_genes
-      attr(current_data, "cached_full_data") <- current_full_data
-      attr(current_data, "cached_data_type") <- current_data_type
-      
-      current_data
-    }, error = function(e) {
-      # If data loading fails, return NULL gracefully
-      NULL
-    })
+    tryCatch(
+      {
+        current_data <- filtered_gene_data()$data
+        current_genes <- gene_data()$genes
+        current_full_data <- gene_data()$data
+        current_data_type <- get_current_data_type()
+
+        # Add cached objects as attributes to prevent cross-plot interference
+        attr(current_data, "cached_genes") <- current_genes
+        attr(current_data, "cached_full_data") <- current_full_data
+        attr(current_data, "cached_data_type") <- current_data_type
+
+        current_data
+      },
+      error = function(e) {
+        NULL
+      }
+    )
   })
 
   # Separate data reactive for second plot (used in comparison mode)
   second_plot_data <- reactive({
     req(input$enable_comparison)
-    
-    # Cache the data and gene objects at evaluation time to avoid interference  
-    tryCatch({
-      current_data <- filtered_gene_data()$data
-      current_genes <- gene_data()$genes
-      current_full_data <- gene_data()$data
-      current_data_type <- get_current_data_type()
-      
-      # Add cached objects as attributes to prevent cross-plot interference
-      attr(current_data, "cached_genes") <- current_genes
-      attr(current_data, "cached_full_data") <- current_full_data
-      attr(current_data, "cached_data_type") <- current_data_type
-      
-      current_data
-    }, error = function(e) {
-      # If data loading fails, return NULL gracefully
-      NULL
-    })
+
+    # Cache the data and gene objects at evaluation time to avoid interference
+    tryCatch(
+      {
+        current_data <- filtered_gene_data()$data
+        current_genes <- gene_data()$genes
+        current_full_data <- gene_data()$data
+        current_data_type <- get_current_data_type()
+
+        # Add cached objects as attributes to prevent cross-plot interference
+        attr(current_data, "cached_genes") <- current_genes
+        attr(current_data, "cached_full_data") <- current_full_data
+        attr(current_data, "cached_data_type") <- current_data_type
+
+        current_data
+      },
+      error = function(e) {
+        NULL
+      }
+    )
+  })
+
+  # Observer to update gene choices for first plot in comparison mode
+  observeEvent(list(input$color_first_comp, input$check_first_comp), {
+    req(isTRUE(input$enable_comparison), identical(input$color_first_comp, "genes"), gene_data()$genes)
+    tryCatch(
+      {
+        choices <- get_gene_choices(gene_data()$genes, isTRUE(input$check_first_comp))
+        updateSelectizeInput(session, "genes_n_first_comp", choices = choices, selected = input$genes_n_first_comp, server = TRUE)
+      },
+      error = function(e) {}
+    )
+  })
+
+  # Create reactive expressions for each plot that only depend on their specific inputs
+  first_plot_reactive <- reactive({
+    req(input$enable_comparison)
+
+    # Determine which inputs to use based on comparison mode
+    color_val <- if (!is.null(input$color_first_comp)) input$color_first_comp else "sample_type"
+    genes_val <- if (!is.null(input$genes_n_first_comp)) input$genes_n_first_comp else ""
+    check_val <- if (!is.null(input$check_first_comp)) input$check_first_comp else FALSE
+
+    list(
+      color = color_val,
+      genes = genes_val,
+      check = check_val,
+      xaxis = if (!is.null(input$xaxis)) input$xaxis else "pc_1",
+      yaxis = if (!is.null(input$yaxis)) input$yaxis else "pc_2",
+      size = if (!is.null(input$size)) input$size else 4,
+      plot = if (!is.null(input$plot)) input$plot else "3d",
+      timestamp = Sys.time()
+    )
   })
 
   # Add debouncing for plot updates
   plot_update_trigger <- reactiveVal(0)
-  plot_ready <- reactiveVal(TRUE)  # Initialize to TRUE so plots can render on startup
+  plot_ready <- reactiveVal(TRUE) # Initialize to TRUE so plots can render on startup
   genes_loading <- reactiveVal(FALSE)
-  autoUpdatePlot <- reactiveVal(TRUE)  # Initialize to TRUE so plots can render on startup
+  autoUpdatePlot <- reactiveVal(TRUE) # Initialize to TRUE so plots can render on startup
 
   # Simplified debounced observer for plot-related inputs
   observe({
@@ -1910,8 +1969,7 @@ server <- function(input, output, session) {
         plot_ready(FALSE)
         autoUpdatePlot(FALSE)
       },
-      error = function(e) {
-      }
+      error = function(e) {}
     )
 
     # Simple debounce - wait for inputs to stabilize
@@ -1995,7 +2053,7 @@ server <- function(input, output, session) {
     }
   })
 
-  
+
   # Helper function to generate embedding plots with different color options
   generate_embedding_plot <- function(color_input, genes_input, check_input, xaxis_input, yaxis_input, size_input, plot_input, is_dual_plot = FALSE, data_source = NULL) {
     # For dual plot mode, skip the global dependency checks and use simpler validation
@@ -2005,7 +2063,7 @@ server <- function(input, output, session) {
       if (is.null(plot_data) || nrow(plot_data) == 0) {
         return(NULL)
       }
-      
+
       # For gene coloring in dual plot mode, check the specific gene inputs
       if (color_input == "genes") {
         if (is.null(genes_input) || length(genes_input) == 0 || any(is.na(genes_input)) || any(genes_input == "")) {
@@ -2016,7 +2074,7 @@ server <- function(input, output, session) {
       # Single plot mode - use the existing dependency system
       req(all_dependencies_ready(), embedding_ready())
     }
-     
+
     # For single plot mode, get data after dependency checks
     if (!is_dual_plot) {
       plot_data <- if (!is.null(data_source)) data_source else data()
@@ -2024,31 +2082,31 @@ server <- function(input, output, session) {
         return(NULL)
       }
     }
-    
+
     # Generate plot without progress bar
     isolate({
       # Work on a local copy so we can attach a temporary gene-expression column
       df_local <- plot_data
-      
+
       color_column <- NULL
-      
+
       if (isTRUE(color_input == "genes")) {
         # Resolve gene input robustly: user may supply display names or gene ids (multiple selection supported)
         gene_inputs <- genes_input
-        
+
         # Handle empty or invalid gene inputs by falling back to sample_type
-        if (is.null(gene_inputs) || length(gene_inputs) == 0 || 
-            (length(gene_inputs) == 1 && (is.na(gene_inputs) || gene_inputs == ""))) {
+        if (is.null(gene_inputs) || length(gene_inputs) == 0 ||
+          (length(gene_inputs) == 1 && (is.na(gene_inputs) || gene_inputs == ""))) {
           # If genes are requested but none provided, fall back to sample_type
           color_column <- "sample_type"
         } else {
           # Process gene inputs normally
-          
+
           # For dual plot mode, use cached data to prevent interference between plots
           if (is_dual_plot && !is.null(data_source)) {
             gene_data_obj <- attr(data_source, "cached_genes")
             full_mat <- attr(data_source, "cached_full_data")
-            
+
             # Fallback if cached data is missing
             if (is.null(gene_data_obj)) {
               gene_data_obj <- tryCatch(gene_data()$genes, error = function(e) NULL)
@@ -2061,144 +2119,150 @@ server <- function(input, output, session) {
             gene_data_obj <- tryCatch(gene_data()$genes, error = function(e) NULL)
             full_mat <- if (!is.null(cached_data[[get_current_data_type()]])) cached_data[[get_current_data_type()]] else gene_data()$data
           }
-        
-        row_idx <- attr(df_local, "row_idx")
-        
-        resolved_gene_col <- NULL
-        
-        # Handle multiple gene selection
-        if (!is.null(gene_inputs) && length(gene_inputs) > 0) {
-          if (length(gene_inputs) > 1) {
-            # For multiple genes, calculate average expression
-            valid_gene_ids <- c()
-            
-            for (gene_input in gene_inputs) {
-              current_resolved <- NULL
-              
-              # If the UI 'check' toggle indicates the user entered gene ids, try that first
+
+          row_idx <- attr(df_local, "row_idx")
+
+          resolved_gene_col <- NULL
+
+          # Handle multiple gene selection
+          if (!is.null(gene_inputs) && length(gene_inputs) > 0) {
+            if (length(gene_inputs) > 1) {
+              # For multiple genes, calculate average expression
+              valid_gene_ids <- c()
+
+              for (gene_input in gene_inputs) {
+                current_resolved <- NULL
+
+                # If the UI 'check' toggle indicates the user entered gene ids, try that first
+                if (!is.null(gene_input) && nzchar(as.character(gene_input)) && isTRUE(check_input)) {
+                  gene_id_from_input <- as.character(gene_input)
+
+                  # Directly check if this gene ID exists in our data matrix
+                  if (gene_id_from_input %in% colnames(full_mat)) {
+                    current_resolved <- gene_id_from_input
+                  }
+                }
+
+                # If we didn't resolve by gene ID, try by gene name
+                if (is.null(current_resolved) && !is.null(gene_data_obj)) {
+                  tryCatch(
+                    {
+                      candidate_id <- get_gene_id(as.character(gene_input), gene_data_obj)
+                      if (!is.null(candidate_id) && !is.na(candidate_id) && candidate_id %in% colnames(full_mat)) {
+                        current_resolved <- candidate_id
+                      }
+                    },
+                    error = function(e) {
+                      # Silently continue if gene lookup fails
+                    }
+                  )
+                }
+
+                # Final fallback: direct string match in column names
+                if (is.null(current_resolved)) {
+                  gene_as_string <- as.character(gene_input)
+                  if (gene_as_string %in% colnames(full_mat)) {
+                    current_resolved <- gene_as_string
+                  }
+                }
+
+                if (!is.null(current_resolved)) {
+                  valid_gene_ids <- c(valid_gene_ids, current_resolved)
+                }
+              }
+
+              # Calculate average if we have multiple valid genes
+              if (length(valid_gene_ids) > 1) {
+                if (!is.null(row_idx) && length(row_idx) > 0) {
+                  # Average the selected genes for the filtered rows
+                  gene_matrix <- full_mat[row_idx, valid_gene_ids, drop = FALSE]
+                  avg_expression <- rowMeans(gene_matrix, na.rm = TRUE)
+                  df_local$multi_gene_avg <- avg_expression
+                  resolved_gene_col <- "multi_gene_avg"
+                }
+              } else if (length(valid_gene_ids) == 1) {
+                # Single valid gene from multi-gene selection - attach expression values
+                gene_id <- valid_gene_ids[1]
+                if (!is.null(row_idx) && length(row_idx) > 0) {
+                  df_local[[gene_id]] <- full_mat[row_idx, gene_id]
+                } else {
+                  df_local[[gene_id]] <- full_mat[, gene_id]
+                }
+                resolved_gene_col <- gene_id
+              }
+            } else {
+              # Single gene selection
+              gene_input <- gene_inputs[1]
+
+              # If the UI 'check' toggle indicates the user entered a gene id, try that first
               if (!is.null(gene_input) && nzchar(as.character(gene_input)) && isTRUE(check_input)) {
                 gene_id_from_input <- as.character(gene_input)
-                
+
                 # Directly check if this gene ID exists in our data matrix
                 if (gene_id_from_input %in% colnames(full_mat)) {
-                  current_resolved <- gene_id_from_input
+                  resolved_gene_col <- gene_id_from_input
                 }
               }
-              
+
               # If we didn't resolve by gene ID, try by gene name
-              if (is.null(current_resolved) && !is.null(gene_data_obj)) {
-                tryCatch({
-                  candidate_id <- get_gene_id(as.character(gene_input), gene_data_obj)
-                  if (!is.null(candidate_id) && !is.na(candidate_id) && candidate_id %in% colnames(full_mat)) {
-                    current_resolved <- candidate_id
+              if (is.null(resolved_gene_col) && !is.null(gene_data_obj)) {
+                tryCatch(
+                  {
+                    candidate_id <- get_gene_id(as.character(gene_input), gene_data_obj)
+                    if (!is.null(candidate_id) && !is.na(candidate_id) && candidate_id %in% colnames(full_mat)) {
+                      resolved_gene_col <- candidate_id
+                    }
+                  },
+                  error = function(e) {
+                    # Silently continue if gene lookup fails
                   }
-                }, error = function(e) {
-                  # Silently continue if gene lookup fails
-                })
+                )
               }
-              
+
               # Final fallback: direct string match in column names
-              if (is.null(current_resolved)) {
+              if (is.null(resolved_gene_col)) {
                 gene_as_string <- as.character(gene_input)
                 if (gene_as_string %in% colnames(full_mat)) {
-                  current_resolved <- gene_as_string
+                  resolved_gene_col <- gene_as_string
                 }
               }
-              
-              if (!is.null(current_resolved)) {
-                valid_gene_ids <- c(valid_gene_ids, current_resolved)
-              }
             }
-            
-            # Calculate average if we have multiple valid genes
-            if (length(valid_gene_ids) > 1) {
+          }
+
+          if (!is.null(resolved_gene_col)) {
+            # For single gene selection, attach the gene expression values from full_mat to df_local
+            # (Multi-gene averaging already attached values earlier)
+            if (resolved_gene_col != "multi_gene_avg" && resolved_gene_col %in% colnames(full_mat)) {
               if (!is.null(row_idx) && length(row_idx) > 0) {
-                # Average the selected genes for the filtered rows
-                gene_matrix <- full_mat[row_idx, valid_gene_ids, drop = FALSE]
-                avg_expression <- rowMeans(gene_matrix, na.rm = TRUE)
-                df_local$multi_gene_avg <- avg_expression
-                resolved_gene_col <- "multi_gene_avg"
-              }
-            } else if (length(valid_gene_ids) == 1) {
-              # Single valid gene from multi-gene selection - attach expression values
-              gene_id <- valid_gene_ids[1]
-              if (!is.null(row_idx) && length(row_idx) > 0) {
-                df_local[[gene_id]] <- full_mat[row_idx, gene_id]
+                # Attach gene expression values for the filtered rows
+                df_local[[resolved_gene_col]] <- full_mat[row_idx, resolved_gene_col]
               } else {
-                df_local[[gene_id]] <- full_mat[, gene_id]
-              }
-              resolved_gene_col <- gene_id
-            }
-          } else {
-            # Single gene selection
-            gene_input <- gene_inputs[1]
-            
-            # If the UI 'check' toggle indicates the user entered a gene id, try that first
-            if (!is.null(gene_input) && nzchar(as.character(gene_input)) && isTRUE(check_input)) {
-              gene_id_from_input <- as.character(gene_input)
-              
-              # Directly check if this gene ID exists in our data matrix
-              if (gene_id_from_input %in% colnames(full_mat)) {
-                resolved_gene_col <- gene_id_from_input
+                # If no row_idx, use all rows
+                df_local[[resolved_gene_col]] <- full_mat[, resolved_gene_col]
               }
             }
-            
-            # If we didn't resolve by gene ID, try by gene name
-            if (is.null(resolved_gene_col) && !is.null(gene_data_obj)) {
-              tryCatch({
-                candidate_id <- get_gene_id(as.character(gene_input), gene_data_obj)
-                if (!is.null(candidate_id) && !is.na(candidate_id) && candidate_id %in% colnames(full_mat)) {
-                  resolved_gene_col <- candidate_id
-                }
-              }, error = function(e) {
-                # Silently continue if gene lookup fails
-              })
-            }
-            
-            # Final fallback: direct string match in column names
-            if (is.null(resolved_gene_col)) {
-              gene_as_string <- as.character(gene_input)
-              if (gene_as_string %in% colnames(full_mat)) {
-                resolved_gene_col <- gene_as_string
-              }
-            }
-          }
-        }
-        
-        if (!is.null(resolved_gene_col)) {
-          # For single gene selection, attach the gene expression values from full_mat to df_local
-          # (Multi-gene averaging already attached values earlier at line 2229)
-          if (resolved_gene_col != "multi_gene_avg" && resolved_gene_col %in% colnames(full_mat)) {
-            if (!is.null(row_idx) && length(row_idx) > 0) {
-              # Attach gene expression values for the filtered rows
-              df_local[[resolved_gene_col]] <- full_mat[row_idx, resolved_gene_col]
+
+            # Now verify the gene column exists in df_local
+            if (resolved_gene_col %in% colnames(df_local)) {
+              color_column <- resolved_gene_col
             } else {
-              # If no row_idx, use all rows
-              df_local[[resolved_gene_col]] <- full_mat[, resolved_gene_col]
+              # Gene was resolved but doesn't exist in current data
+              return(NULL)
             }
-          }
-          
-          # Now verify the gene column exists in df_local
-          if (resolved_gene_col %in% colnames(df_local)) {
-            color_column <- resolved_gene_col
           } else {
-            # Gene was resolved but doesn't exist in current data
+            # No valid gene found
             return(NULL)
           }
-        } else {
-          # No valid gene found
-          return(NULL)
-        }
         } # End of gene processing block
       } else {
         # For non-gene colors, use the column directly
         color_column <- color_input
       }
-      
+
       if (is.null(color_column)) {
         return(NULL)
       }
-      
+
       # Generate the actual plot
       p <- embedding_plot(
         df_local,
@@ -2214,7 +2278,7 @@ server <- function(input, output, session) {
       p <- p %>%
         event_register("plotly_click") %>%
         config(
-          displaylogo = FALSE, 
+          displaylogo = FALSE,
           scrollZoom = TRUE,
           modeBarButtonsToRemove = c(),
           displayModeBar = TRUE
@@ -2223,79 +2287,51 @@ server <- function(input, output, session) {
       return(p)
     })
   }
-  
+
   # Remove comparison button handler
   observeEvent(input$remove_comparison, {
     updateCheckboxInput(session, "enable_comparison", value = FALSE)
   })
-  
+
   # Preserve UI state when toggling comparison mode
-  observeEvent(input$enable_comparison, {
-    if (isTRUE(input$enable_comparison)) {
-      # Store current selections before enabling comparison
-      ui_state$stored_color <- input$color
-      ui_state$stored_genes <- input$genes_n  
-      ui_state$stored_check <- input$check
-      
-      # Update label for first plot
-      updateSelectInput(
-        session,
-        "color",
-        label = "First Plot Color"
-      )
-      
-      # Initialize second plot with same settings as first plot
-      updateSelectInput(
-        session,
-        "color_second",
-        selected = input$color
-      )
-      
-      # If first plot is using genes, also copy gene selection to second plot
-      if (!is.null(input$color) && input$color == "genes" && !is.null(input$genes_n) && length(input$genes_n) > 0) {
-        # Capture the gene selection in the current reactive context
-        current_genes <- input$genes_n
-        
-        # Wait a moment for the UI to update, then copy gene selection
-        later(function() {
-          updateSelectizeInput(
-            session,
-            "genes_second",
-            selected = current_genes  # Use captured value instead of input$genes_n
-          )
-        }, 0.1)
-      }
-      
-      # Also copy check state
-      if (!is.null(input$check)) {
-        updateCheckboxInput(
-          session,
-          "check_second",
-          value = input$check
-        )
-      }
-    } else {
-      # When disabling comparison, restore previous selections
-      updateSelectInput(
-        session,
-        "color",
-        label = "Color",
-        selected = ui_state$stored_color
-      )
-      
-      # If the stored color was genes, also restore gene selection
-      if (!is.null(ui_state$stored_color) && ui_state$stored_color == "genes") {
-        if (!is.null(ui_state$stored_genes) && length(ui_state$stored_genes) > 0) {
-          updateSelectizeInput(
-            session,
-            "genes_n", 
-            selected = ui_state$stored_genes
-          )
+  observeEvent(input$enable_comparison,
+    {
+      # Toggle active class for the comparison box UI
+      if (isTRUE(input$enable_comparison)) {
+        runjs("$('#compare_box').addClass('active');")
+        # Store current selections before enabling comparison
+        ui_state$stored_color <- input$color
+        ui_state$stored_genes <- input$genes_n
+        ui_state$stored_check <- input$check
+
+        # Update label for first plot (no longer needed as we use color_first_comp)
+
+        # Initialize comparison plots with same settings as main plot
+        updateSelectInput(session, "color_first_comp", selected = input$color)
+        updateSelectInput(session, "color_second", selected = input$color)
+
+        # If first plot is using genes, also copy gene selection
+        if (!is.null(input$color) && input$color == "genes" && !is.null(input$genes_n) && length(input$genes_n) > 0) {
+          current_genes <- input$genes_n
+          current_check <- input$check
+          later(function() {
+            updateCheckboxInput(session, "check_first_comp", value = current_check)
+            updateCheckboxInput(session, "check_second", value = current_check)
+            updateSelectizeInput(session, "genes_n_first_comp", selected = current_genes)
+            updateSelectizeInput(session, "genes_second", selected = current_genes)
+          }, 0.2)
+        }
+      } else {
+        runjs("$('#compare_box').removeClass('active');")
+        # When disabling comparison, restore previous selections (optional, but keep for consistency)
+        if (!is.null(ui_state$stored_color)) {
+          updateSelectInput(session, "color", selected = ui_state$stored_color)
         }
       }
-    }
-  }, ignoreInit = TRUE)
-  
+    },
+    ignoreInit = TRUE
+  )
+
   # Continuously update stored state when user makes changes (only when comparison is disabled)
   observe({
     if (!isTRUE(input$enable_comparison)) {
@@ -2304,47 +2340,19 @@ server <- function(input, output, session) {
       ui_state$stored_check <- input$check
     }
   })
-  
-  # Update UI labels when color selections change - separate observers for independence
-  observe({
-    # Only update first plot label if comparison is enabled
-    if (isTRUE(input$enable_comparison)) {
-      req(input$color)
-      
-      # Map color values to display names
-      color_names <- c(
-        "study_label" = "Study",
-        "development_phase" = "Development phase",
-        "blood_stage_form" = "Blood stage",
-        "parasite_stage_overall" = "Parasite stage",
-        "strain" = "Strain",
-        "treatment" = "Treatment",
-        "sample_type" = "Sample type",
-        "host_species" = "Host species",
-        "sequencer" = "Sequencer",
-        "sc_technology" = "SC technology",
-        "day_post_infection" = "DPI",
-        "hour_post_invasion" = "HPI",
-        "genes" = "Genes"
-      )
-      
-      first_label <- if (!is.null(color_names[input$color])) color_names[input$color] else "Unknown"
-      runjs(paste0("$('#first_plot_label').text('First Color: ", first_label, "');"))
-    }
-  })
-  
+
   # Separate observer for second plot color
   observe({
     # Only update second plot label if comparison is enabled
     if (isTRUE(input$enable_comparison)) {
       req(input$color_second)
-      
+
       # Map color values to display names
       color_names <- c(
         "study_label" = "Study",
         "development_phase" = "Development phase",
-        "blood_stage_form" = "Blood stage",
-        "parasite_stage_overall" = "Parasite stage",
+        "blood_stage" = "Blood stage",
+        "parasite_stage" = "Parasite stage",
         "strain" = "Strain",
         "treatment" = "Treatment",
         "sample_type" = "Sample type",
@@ -2355,106 +2363,82 @@ server <- function(input, output, session) {
         "hour_post_invasion" = "HPI",
         "genes" = "Genes"
       )
-      
+
       second_label <- if (!is.null(color_names[input$color_second])) color_names[input$color_second] else "Unknown"
       runjs(paste0("$('#second_plot_label').text('Second Color: ", second_label, "');"))
     }
   })
-  
+
   # Update gene choices for second plot when comparison mode and color_second changes
-  observeEvent(list(input$color_second, input$check_second), {
-    if (!isTRUE(input$enable_comparison) || !identical(input$color_second, "genes")) {
-      return()
-    }
-    
-    req(gene_data()$genes)
-    
-    tryCatch({
-      genes_df <- gene_data()$genes
-      if (is.null(genes_df) || nrow(genes_df) == 0) {
+  observeEvent(list(input$color_second, input$check_second),
+    {
+      if (!isTRUE(input$enable_comparison) || !identical(input$color_second, "genes")) {
         return()
       }
-      
-      gene_choices <- get_gene_choices(genes_df, isTRUE(input$check_second))
-      
-      if (is.null(gene_choices) || length(gene_choices) == 0) {
-        return()
-      }
-      
-      # Store current selection before updating choices
-      current_selection_second <- input$genes_second
-      
-      updateSelectizeInput(
-        session,
-        "genes_second",
-        choices = gene_choices,
-        selected = current_selection_second,  # Preserve current selection
-        options = list(
-          placeholder = "Select one or more genes",
-          maxItems = 10
-        ),
-        server = TRUE
+
+      req(gene_data()$genes)
+
+      tryCatch(
+        {
+          genes_df <- gene_data()$genes
+          if (is.null(genes_df) || nrow(genes_df) == 0) {
+            return()
+          }
+
+          gene_choices <- get_gene_choices(genes_df, isTRUE(input$check_second))
+
+          if (is.null(gene_choices) || length(gene_choices) == 0) {
+            return()
+          }
+
+          # Store current selection before updating choices
+          current_selection_second <- input$genes_second
+
+          updateSelectizeInput(
+            session,
+            "genes_second",
+            choices = gene_choices,
+            selected = current_selection_second, # Preserve current selection
+            options = list(
+              placeholder = "Select one or more genes",
+              maxItems = 10
+            ),
+            server = TRUE
+          )
+
+          # Update the label text based on toggle state
+          label_text_second <- if (isTRUE(input$check_second)) "Gene ID" else "Gene name"
+          runjs(sprintf('$("#gene_label_second").text("%s");', label_text_second))
+        },
+        error = function(e) {
+          message("Error updating second plot gene choices: ", e$message)
+        }
       )
-      
-      # Update the label text based on toggle state
-      label_text_second <- if (isTRUE(input$check_second)) "Gene ID" else "Gene name"
-      runjs(sprintf('$("#gene_label_second").text("%s");', label_text_second))
-    }, error = function(e) {
-      message("Error updating second plot gene choices: ", e$message)
-    })
-  }, ignoreInit = FALSE)
-  
+    },
+    ignoreInit = FALSE
+  )
+
   # Helper function to validate gene selection
   validate_gene_selection <- function(genes_input, plot_name = "plot") {
     if (is.null(genes_input)) {
       return(FALSE)
     }
-    
+
     if (length(genes_input) == 0) {
       return(FALSE)
     }
-    
+
     # Check if all gene inputs are non-empty strings
     if (any(is.na(genes_input)) || any(genes_input == "")) {
       return(FALSE)
     }
-    
+
     return(TRUE)
   }
 
-  # Create reactive expressions for each plot that only depend on their specific inputs
-  first_plot_reactive <- reactive({
-    req(input$enable_comparison)
-    
-    # Get current values with defaults
-    color_main <- if (!is.null(input$color)) input$color else "sample_type"
-    genes_main <- if (!is.null(input$genes_n)) input$genes_n else ""
-    check_main <- if (!is.null(input$check)) input$check else FALSE
-    
-    # For gene coloring, only return NULL if genes are explicitly needed but completely missing
-    if (color_main == "genes") {
-      # Allow the reactive to return values even if genes are empty - let the plot function handle it
-      if (is.null(genes_main) || (length(genes_main) == 1 && genes_main == "")) {
-        # Return a valid structure but with empty genes - don't block with NULL
-        genes_main <- ""
-      }
-    }
-    
-    list(
-      color = color_main,
-      genes = genes_main,
-      check = check_main,
-      xaxis = if (!is.null(input$xaxis)) input$xaxis else "pc_1",
-      yaxis = if (!is.null(input$yaxis)) input$yaxis else "pc_2", 
-      size = if (!is.null(input$size)) input$size else 4,
-      plot = if (!is.null(input$plot)) input$plot else "3d",
-      timestamp = Sys.time()
-    )
-  })
-  
   second_plot_reactive <- reactive({
     req(input$enable_comparison)
-    
+
     # Get current values with defaults
     color_second <- if (!is.null(input$color_second)) input$color_second else "sample_type"
     genes_second <- if (!is.null(input$genes_second)) input$genes_second else ""
@@ -2464,14 +2448,14 @@ server <- function(input, output, session) {
     yaxis_val <- if (!is.null(input$yaxis)) input$yaxis else "pc_2"
     size_val <- if (!is.null(input$size)) input$size else 4
     plot_val <- if (!is.null(input$plot)) input$plot else "3d"
-    
+
     # For gene coloring, allow empty genes and let the plot function handle it
     if (color_second == "genes") {
       if (is.null(genes_second) || (length(genes_second) == 1 && genes_second == "")) {
-        genes_second <- ""  # Set to empty but don't block
+        genes_second <- "" # Set to empty but don't block
       }
     }
-    
+
     list(
       color = color_second,
       genes = genes_second,
@@ -2480,92 +2464,92 @@ server <- function(input, output, session) {
       yaxis = yaxis_val,
       size = size_val,
       plot = plot_val,
-      timestamp = Sys.time()  # Add timestamp to track when this changes
+      timestamp = Sys.time() # Add timestamp to track when this changes
     )
   })
 
-   # Observer for first plot gene links (during comparison)
-   observe({
-     req(input$enable_comparison, input$color == "genes", input$genes_n)
-     
-     # Get all selected genes for links
-     selected_genes <- input$genes_n
-     if (!is.null(selected_genes) && length(selected_genes) > 0) {
-       gene_data_obj <- tryCatch(gene_data()$genes, error = function(e) NULL)
-       if (!is.null(gene_data_obj)) {
-         # Get gene IDs for all selected genes
-         gene_ids <- sapply(selected_genes, function(gene) {
-           tryCatch(get_gene_id(gene, gene_data_obj), error = function(e) gene)
-         })
-         gene_ids <- gene_ids[!is.null(gene_ids) & nzchar(gene_ids)]
-         if (length(gene_ids) > 0) {
-           gene_links_multiple(gene_ids)
-         }
-       }
-     }
-   })
+  # Observer for first plot gene links (during comparison)
+  observe({
+    req(input$enable_comparison, input$color_first_comp == "genes", input$genes_n_first_comp)
 
-   # Observer for second plot gene links  
-   observe({
-     req(input$enable_comparison, input$color_second == "genes", input$genes_second)
-     
-     # Get all selected genes for links
-     selected_genes <- input$genes_second
-     if (!is.null(selected_genes) && length(selected_genes) > 0) {
-       gene_data_obj <- tryCatch(gene_data()$genes, error = function(e) NULL)
-       if (!is.null(gene_data_obj)) {
-         # Get gene IDs for all selected genes
-         gene_ids <- sapply(selected_genes, function(gene) {
-           tryCatch(get_gene_id(gene, gene_data_obj), error = function(e) gene)
-         })
-         gene_ids <- gene_ids[!is.null(gene_ids) & nzchar(gene_ids)]
-         if (length(gene_ids) > 0) {
-           gene_links_multiple(gene_ids)
-         }
-       }
-     }
-   })
-
-   # Observer for single plot gene links (when comparison is disabled)
-   observe({
-     req(!isTRUE(input$enable_comparison), input$color == "genes", input$genes_n)
-     
-     # Get all selected genes for links
-     selected_genes <- input$genes_n
-     if (!is.null(selected_genes) && length(selected_genes) > 0) {
-       gene_data_obj <- tryCatch(gene_data()$genes, error = function(e) NULL)
-       if (!is.null(gene_data_obj)) {
-         # Get gene IDs for all selected genes
-         gene_ids <- sapply(selected_genes, function(gene) {
-           tryCatch(get_gene_id(gene, gene_data_obj), error = function(e) gene)
-         })
-         gene_ids <- gene_ids[!is.null(gene_ids) & nzchar(gene_ids)]
-         if (length(gene_ids) > 0) {
-           gene_links_multiple(gene_ids)
-         }
-       }
+    # Get all selected genes for links
+    selected_genes <- input$genes_n_first_comp
+    if (!is.null(selected_genes) && length(selected_genes) > 0) {
+      gene_data_obj <- tryCatch(gene_data()$genes, error = function(e) NULL)
+      if (!is.null(gene_data_obj)) {
+        # Get gene IDs for all selected genes
+        gene_ids <- sapply(selected_genes, function(gene) {
+          tryCatch(get_gene_id(gene, gene_data_obj), error = function(e) gene)
+        })
+        gene_ids <- gene_ids[!is.null(gene_ids) & nzchar(gene_ids)]
+        if (length(gene_ids) > 0) {
+          gene_links_multiple(gene_ids)
+        }
       }
-   })
+    }
+  })
+
+  # Observer for second plot gene links
+  observe({
+    req(input$enable_comparison, input$color_second == "genes", input$genes_second)
+
+    # Get all selected genes for links
+    selected_genes <- input$genes_second
+    if (!is.null(selected_genes) && length(selected_genes) > 0) {
+      gene_data_obj <- tryCatch(gene_data()$genes, error = function(e) NULL)
+      if (!is.null(gene_data_obj)) {
+        # Get gene IDs for all selected genes
+        gene_ids <- sapply(selected_genes, function(gene) {
+          tryCatch(get_gene_id(gene, gene_data_obj), error = function(e) gene)
+        })
+        gene_ids <- gene_ids[!is.null(gene_ids) & nzchar(gene_ids)]
+        if (length(gene_ids) > 0) {
+          gene_links_multiple(gene_ids)
+        }
+      }
+    }
+  })
+
+  # Observer for single plot gene links (when comparison is disabled)
+  observe({
+    req(!isTRUE(input$enable_comparison), input$color == "genes", input$genes_n)
+
+    # Get all selected genes for links
+    selected_genes <- input$genes_n
+    if (!is.null(selected_genes) && length(selected_genes) > 0) {
+      gene_data_obj <- tryCatch(gene_data()$genes, error = function(e) NULL)
+      if (!is.null(gene_data_obj)) {
+        # Get gene IDs for all selected genes
+        gene_ids <- sapply(selected_genes, function(gene) {
+          tryCatch(get_gene_id(gene, gene_data_obj), error = function(e) gene)
+        })
+        gene_ids <- gene_ids[!is.null(gene_ids) & nzchar(gene_ids)]
+        if (length(gene_ids) > 0) {
+          gene_links_multiple(gene_ids)
+        }
+      }
+    }
+  })
 
   # First plot output (uses main color control - same as single plot)
   output$first_plotly <- renderPlotly({
     # Get plot parameters
     plot_params <- first_plot_reactive()
-    
+
     # If plot_params is NULL (e.g., during initialization), return NULL to show spinner
     if (is.null(plot_params)) {
       return(NULL)
     }
-    
+
     generate_embedding_plot(
-      plot_params$color, 
-      plot_params$genes, 
+      plot_params$color,
+      plot_params$genes,
       plot_params$check,
       plot_params$xaxis,
       plot_params$yaxis,
       plot_params$size,
       plot_params$plot,
-      is_dual_plot = TRUE, 
+      is_dual_plot = TRUE,
       data_source = first_plot_data()
     )
   })
@@ -2574,25 +2558,25 @@ server <- function(input, output, session) {
   output$second_plotly <- renderPlotly({
     # Get plot parameters
     plot_params <- second_plot_reactive()
-    
+
     # If plot_params is NULL (e.g., during initialization), return NULL to show spinner
     if (is.null(plot_params)) {
       return(NULL)
     }
-    
+
     generate_embedding_plot(
-      plot_params$color, 
-      plot_params$genes, 
+      plot_params$color,
+      plot_params$genes,
       plot_params$check,
       plot_params$xaxis,
       plot_params$yaxis,
       plot_params$size,
       plot_params$plot,
-      is_dual_plot = TRUE, 
+      is_dual_plot = TRUE,
       data_source = second_plot_data()
     )
   })
-  
+
   # Keep the original plot for backward compatibility
   output$all_plotly <- renderPlotly({
     # Only render when comparison is NOT enabled
@@ -2619,16 +2603,16 @@ server <- function(input, output, session) {
         row_idx <- attr(df_local, "row_idx")
 
         resolved_gene_col <- NULL
-        
+
         # Handle multiple gene selection
         if (!is.null(gene_inputs) && length(gene_inputs) > 0) {
           if (length(gene_inputs) > 1) {
             # For multiple genes, calculate average expression
             valid_gene_ids <- c()
-            
+
             for (gene_input in gene_inputs) {
               current_resolved <- NULL
-              
+
               # If the UI 'check' toggle indicates the user entered gene ids, try that first
               if (!is.null(gene_input) && nzchar(as.character(gene_input)) && isTRUE(input$check)) {
                 candidate <- as.character(gene_input)
@@ -2636,7 +2620,7 @@ server <- function(input, output, session) {
                   current_resolved <- candidate
                 }
               }
-              
+
               # If still not resolved, try mapping display name -> gene id using helper
               if (is.null(current_resolved) && !is.null(gene_input) && nzchar(as.character(gene_input))) {
                 mapped <- tryCatch(get_gene_id(as.character(gene_input), gene_data_obj), error = function(e) NULL)
@@ -2644,24 +2628,24 @@ server <- function(input, output, session) {
                   current_resolved <- as.character(mapped)
                 }
               }
-              
+
               # Final fallback: maybe the input text itself is the column name in the matrix
               if (is.null(current_resolved) && !is.null(gene_input) && !is.null(full_mat) && as.character(gene_input) %in% colnames(full_mat)) {
                 current_resolved <- as.character(gene_input)
               }
-              
+
               if (!is.null(current_resolved)) {
                 valid_gene_ids <- c(valid_gene_ids, current_resolved)
               }
             }
-            
+
             # Calculate average expression if we have valid genes
             if (length(valid_gene_ids) > 0 && !is.null(row_idx) && length(row_idx) > 0) {
               gene_matrices <- list()
               for (gene_id in valid_gene_ids) {
                 gene_matrices[[gene_id]] <- full_mat[[gene_id]][row_idx]
               }
-              
+
               if (length(gene_matrices) > 0) {
                 gene_matrix <- do.call(cbind, gene_matrices)
                 avg_expression <- rowMeans(gene_matrix, na.rm = TRUE)
@@ -2670,11 +2654,10 @@ server <- function(input, output, session) {
                 resolved_gene_col <- gene_color_col
               }
             }
-            
           } else {
             # Single gene - use existing logic
             gene_input <- gene_inputs[1]
-            
+
             # If the UI 'check' toggle indicates the user entered a gene id, try that first
             if (!is.null(gene_input) && nzchar(as.character(gene_input)) && isTRUE(input$check)) {
               candidate <- as.character(gene_input)
@@ -2695,7 +2678,7 @@ server <- function(input, output, session) {
             if (is.null(resolved_gene_col) && !is.null(gene_input) && !is.null(full_mat) && as.character(gene_input) %in% colnames(full_mat)) {
               resolved_gene_col <- as.character(gene_input)
             }
-            
+
             # Attach single gene expression column
             if (!is.null(resolved_gene_col) && !is.na(resolved_gene_col) && !is.null(full_mat) && resolved_gene_col %in% colnames(full_mat) && !is.null(row_idx) && length(row_idx) > 0) {
               gene_color_col <- paste0(".gene_color_", gsub("[^A-Za-z0-9]", "_", resolved_gene_col))
@@ -2734,7 +2717,7 @@ server <- function(input, output, session) {
       p <- p %>%
         event_register("plotly_click") %>%
         config(
-          displaylogo = FALSE, 
+          displaylogo = FALSE,
           scrollZoom = TRUE,
           modeBarButtonsToRemove = c(),
           displayModeBar = TRUE
@@ -2929,7 +2912,7 @@ server <- function(input, output, session) {
   output$download_data <- downloadHandler(
     filename = function() {
       base_name <- "Plasmodium_vivax_embedding_data"
-      
+
       # Add gene information to filename if coloring by genes
       if (!is.null(input$color) && input$color == "genes" && !is.null(input$genes_n) && length(input$genes_n) > 0) {
         if (length(input$genes_n) == 1) {
@@ -2938,7 +2921,7 @@ server <- function(input, output, session) {
           base_name <- paste0(base_name, "_", length(input$genes_n), "_genes")
         }
       }
-      
+
       paste0(base_name, "_", Sys.Date(), ".csv")
     },
     content = function(file) {
@@ -2963,117 +2946,120 @@ server <- function(input, output, session) {
     content = function(file) {
       withProgress(message = "Processing Data", value = 0, {
         incProgress(0.3, detail = "Preparing data...")
-        
-        tryCatch({
-          fg <- filtered_gene_exp_data()
-          cur_genes <- isolate(input$genes_exp_0)
-          cur_group <- isolate(input$group_exp)
-          cur_check <- isolate(input$check_exp_0)
-          
-          if (!is.null(cur_genes) && !is.null(cur_group) && length(cur_genes) > 0) {
-            # Handle multiple gene selection
-            if (isTRUE(cur_check)) {
-              gene_exp_val <- cur_genes
-            } else {
-              gene_exp_val <- sapply(cur_genes, function(gene) get_gene_id(gene, fg$genes), USE.NAMES = FALSE)
-            }
-            
-            # Remove any invalid gene IDs
-            valid_genes <- cur_genes[!is.na(gene_exp_val) & gene_exp_val != ""]
-            valid_gene_ids <- gene_exp_val[!is.na(gene_exp_val) & gene_exp_val != ""]
-            
-            if (length(valid_gene_ids) == 0) {
-              stop("No valid genes found for the current selection")
-            }
-            
-            plot_data <- build_plot_slim(fg$data, fg$full, valid_gene_ids, cur_group)
-            
-            if (!is.null(plot_data) && nrow(plot_data) > 0) {
-              incProgress(0.5, detail = "Creating metadata...")
-              
-              # Create metadata sheet with analysis parameters
-              gene_info <- if (length(valid_gene_ids) == 1) {
-                list(
-                  gene_id = as.character(valid_gene_ids[1]),
-                  gene_name = as.character(valid_genes[1]),
-                  analysis_type = "Single Gene"
-                )
+
+        tryCatch(
+          {
+            fg <- filtered_gene_exp_data()
+            cur_genes <- isolate(input$genes_exp_0)
+            cur_group <- isolate(input$group_exp_0)
+            cur_check <- isolate(input$check_exp_0)
+
+            if (!is.null(cur_genes) && !is.null(cur_group) && length(cur_genes) > 0) {
+              # Handle multiple gene selection
+              if (isTRUE(cur_check)) {
+                gene_exp_val <- cur_genes
               } else {
-                list(
-                  gene_id = paste(valid_gene_ids, collapse = ", "),
-                  gene_name = paste(valid_genes, collapse = ", "),
-                  analysis_type = paste("Average of", length(valid_gene_ids), "genes")
-                )
+                gene_exp_val <- sapply(cur_genes, function(gene) get_gene_id(gene, fg$genes), USE.NAMES = FALSE)
               }
-              
-              metadata <- data.frame(
-                Parameter = c(
-                  "Analysis Type",
-                  "Data Type",
-                  "Gene ID(s)", 
-                  "Gene Name(s)",
-                  "Group By",
-                  "Study Label",
-                  "Host Species",
-                  "Life Cycle Stage",
-                  "Treatment",
-                  "Parasite Stage",
-                  "Sample Type",
-                  "Strain",
-                  "Hour Post Invasion",
-                  "Sequencer",
-                  "SC Technology",
-                  "Download Date"
-                ),
-                Value = c(
-                  gene_info$analysis_type,
-                  isolate(input$data_type_exp),
-                  gene_info$gene_id,
-                  gene_info$gene_name,
-                  as.character(cur_group),
-                  paste(isolate(input$study_label), collapse = ", "),
-                  paste(isolate(input$host_species), collapse = ", "),
-                  paste(isolate(input$parasite_stage), collapse = ", "),
-                  paste(isolate(input$treatment), collapse = ", "),
-                  paste(isolate(input$development_phase), collapse = ", "),
-                  paste(isolate(input$sample_type), collapse = ", "),
-                  paste(isolate(input$strain), collapse = ", "),
-                  paste(isolate(input$hour_post_invasion), collapse = ", "),
-                  paste(isolate(input$sequencer), collapse = ", "),
-                  paste(isolate(input$sc_technology), collapse = ", "),
-                  as.character(Sys.time())
-                ),
-                stringsAsFactors = FALSE
-              )
-              
-              incProgress(0.7, detail = "Saving file...")
-              
-              # Create Excel file with two sheets
-              writexl::write_xlsx(
-                list(
-                  "Expression Data" = plot_data,
-                  "Metadata" = metadata
-                ),
-                path = file
-              )
-              
-              incProgress(1, detail = "Download complete")
+
+              # Remove any invalid gene IDs
+              valid_genes <- cur_genes[!is.na(gene_exp_val) & gene_exp_val != ""]
+              valid_gene_ids <- gene_exp_val[!is.na(gene_exp_val) & gene_exp_val != ""]
+
+              if (length(valid_gene_ids) == 0) {
+                stop("No valid genes found for the current selection")
+              }
+
+              plot_data <- build_plot_slim(fg$data, fg$full, valid_gene_ids, cur_group)
+
+              if (!is.null(plot_data) && nrow(plot_data) > 0) {
+                incProgress(0.5, detail = "Creating metadata...")
+
+                # Create metadata sheet with analysis parameters
+                gene_info <- if (length(valid_gene_ids) == 1) {
+                  list(
+                    gene_id = as.character(valid_gene_ids[1]),
+                    gene_name = as.character(valid_genes[1]),
+                    analysis_type = "Single Gene"
+                  )
+                } else {
+                  list(
+                    gene_id = paste(valid_gene_ids, collapse = ", "),
+                    gene_name = paste(valid_genes, collapse = ", "),
+                    analysis_type = paste("Average of", length(valid_gene_ids), "genes")
+                  )
+                }
+
+                metadata <- data.frame(
+                  Parameter = c(
+                    "Analysis Type",
+                    "Data Type",
+                    "Gene ID(s)",
+                    "Gene Name(s)",
+                    "Group By",
+                    "Study Label",
+                    "Host Species",
+                    "Life Cycle Stage",
+                    "Treatment",
+                    "Parasite Stage",
+                    "Sample Type",
+                    "Strain",
+                    "Hour Post Invasion",
+                    "Sequencer",
+                    "SC Technology",
+                    "Download Date"
+                  ),
+                  Value = c(
+                    gene_info$analysis_type,
+                    isolate(input$data_type_exp),
+                    gene_info$gene_id,
+                    gene_info$gene_name,
+                    as.character(cur_group),
+                    paste(isolate(input$study_label), collapse = ", "),
+                    paste(isolate(input$host_species), collapse = ", "),
+                    paste(isolate(input$parasite_stage), collapse = ", "),
+                    paste(isolate(input$treatment), collapse = ", "),
+                    paste(isolate(input$development_phase), collapse = ", "),
+                    paste(isolate(input$sample_type), collapse = ", "),
+                    paste(isolate(input$strain), collapse = ", "),
+                    paste(isolate(input$hour_post_invasion), collapse = ", "),
+                    paste(isolate(input$sequencer), collapse = ", "),
+                    paste(isolate(input$sc_technology), collapse = ", "),
+                    as.character(Sys.time())
+                  ),
+                  stringsAsFactors = FALSE
+                )
+
+                incProgress(0.7, detail = "Saving file...")
+
+                # Create Excel file with two sheets
+                writexl::write_xlsx(
+                  list(
+                    "Expression Data" = plot_data,
+                    "Metadata" = metadata
+                  ),
+                  path = file
+                )
+
+                incProgress(1, detail = "Download complete")
+              } else {
+                stop("No data available for the selected gene and filters")
+              }
             } else {
-              stop("No data available for the selected gene and filters")
+              stop("Please select a gene and grouping option")
             }
-          } else {
-            stop("Please select a gene and grouping option")
+          },
+          error = function(e) {
+            # Create a simple error Excel file instead of failing completely
+            error_data <- data.frame(
+              Error = "Download failed",
+              Message = e$message,
+              Suggestion = "Please try again or contact support",
+              stringsAsFactors = FALSE
+            )
+            writexl::write_xlsx(list("Error" = error_data), path = file)
           }
-        }, error = function(e) {
-          # Create a simple error Excel file instead of failing completely
-          error_data <- data.frame(
-            Error = "Download failed",
-            Message = e$message,
-            Suggestion = "Please try again or contact support",
-            stringsAsFactors = FALSE
-          )
-          writexl::write_xlsx(list("Error" = error_data), path = file)
-        })
+        )
       })
     }
   )
@@ -3084,14 +3070,17 @@ server <- function(input, output, session) {
       local({
         plot_id <- i
         output_name <- paste0("download_gene_exp_", plot_id)
-        
+
         output[[output_name]] <- downloadHandler(
           filename = function() {
-            gene_names <- tryCatch({
-              gn <- input[[paste0("genes_exp_", plot_id)]]
-              if (is.null(gn) || length(gn) == 0) "gene" else gn
-            }, error = function(e) "gene")
-            
+            gene_names <- tryCatch(
+              {
+                gn <- input[[paste0("genes_exp_", plot_id)]]
+                if (is.null(gn) || length(gn) == 0) "gene" else gn
+              },
+              error = function(e) "gene"
+            )
+
             if (length(gene_names) > 1) {
               paste0("gene_expression_", length(gene_names), "_genes_", Sys.Date(), ".xlsx")
             } else {
@@ -3101,119 +3090,122 @@ server <- function(input, output, session) {
           content = function(file) {
             withProgress(message = "Processing Data", value = 0, {
               incProgress(0.3, detail = "Preparing data...")
-              
-              tryCatch({
-                # Validate all required inputs exist
-                cur_genes <- input[[paste0("genes_exp_", plot_id)]]
-                cur_group <- input[[paste0("group_exp_", plot_id)]]
-                cur_check <- input[[paste0("check_exp_", plot_id)]]
-                
-                if (is.null(cur_genes) || is.null(cur_group) || length(cur_genes) == 0) {
-                  showNotification("Please select a gene and grouping option first", type = "error")
-                  return(NULL)
-                }
-                
-                fg <- filtered_gene_exp_data()
-                if (is.null(fg) || is.null(fg$genes)) {
-                  showNotification("No data available for download", type = "error")
-                  return(NULL)
-                }
-                
-                # Handle multiple gene selection
-                if (isTRUE(cur_check)) {
-                  gene_exp_val <- cur_genes
-                } else {
-                  gene_exp_val <- sapply(cur_genes, function(gene) get_gene_id(gene, fg$genes), USE.NAMES = FALSE)
-                }
-                
-                # Remove any invalid gene IDs
-                valid_genes <- cur_genes[!is.na(gene_exp_val) & gene_exp_val != ""]
-                valid_gene_ids <- gene_exp_val[!is.na(gene_exp_val) & gene_exp_val != ""]
-                
-                if (length(valid_gene_ids) == 0) {
-                  showNotification("No valid genes found for the current selection", type = "error")
-                  return(NULL)
-                }
-                
-                plot_data <- build_plot_slim(fg$data, fg$full, valid_gene_ids, cur_group)
-                
-                if (!is.null(plot_data) && nrow(plot_data) > 0) {
-                  incProgress(0.5, detail = "Creating metadata...")
-                  
-                  # Create gene info for metadata
-                  gene_info <- if (length(valid_gene_ids) == 1) {
-                    list(
-                      gene_id = as.character(valid_gene_ids[1]),
-                      gene_name = as.character(valid_genes[1]),
-                      analysis_type = "Single Gene"
-                    )
-                  } else {
-                    list(
-                      gene_id = paste(valid_gene_ids, collapse = ", "),
-                      gene_name = paste(valid_genes, collapse = ", "),
-                      analysis_type = paste("Average of", length(valid_gene_ids), "genes")
-                    )
+
+              tryCatch(
+                {
+                  # Validate all required inputs exist
+                  cur_genes <- input[[paste0("genes_exp_", plot_id)]]
+                  cur_group <- input[[paste0("group_exp_", plot_id)]]
+                  cur_check <- input[[paste0("check_exp_", plot_id)]]
+
+                  if (is.null(cur_genes) || is.null(cur_group) || length(cur_genes) == 0) {
+                    showNotification("Please select a gene and grouping option first", type = "error")
+                    return(NULL)
                   }
-                  
-                  # Create metadata sheet with analysis parameters
-                  metadata <- data.frame(
-                    Parameter = c(
-                      "Analysis Type",
-                      "Data Type",
-                      "Gene ID(s)", 
-                      "Gene Name(s)",
-                      "Group By",
-                      "Study Label",
-                      "Host Species",
-                      "Life Cycle Stage",
-                      "Treatment",
-                      "Parasite Stage",
-                      "Sample Type",
-                      "Strain",
-                      "Hour Post Invasion",
-                      "Sequencer",
-                      "SC Technology",
-                      "Download Date"
-                    ),
-                    Value = c(
-                      gene_info$analysis_type,
-                      isolate(input$data_type_exp),
-                      gene_info$gene_id,
-                      gene_info$gene_name,
-                      as.character(cur_group),
-                      paste(isolate(input$study_label), collapse = ", "),
-                      paste(isolate(input$host_species), collapse = ", "),
-                      paste(isolate(input$parasite_stage), collapse = ", "),
-                      paste(isolate(input$treatment), collapse = ", "),
-                      paste(isolate(input$development_phase), collapse = ", "),
-                      paste(isolate(input$sample_type), collapse = ", "),
-                      paste(isolate(input$strain), collapse = ", "),
-                      paste(isolate(input$hour_post_invasion), collapse = ", "),
-                      paste(isolate(input$sequencer), collapse = ", "),
-                      paste(isolate(input$sc_technology), collapse = ", "),
-                      as.character(Sys.time())
-                    ),
-                    stringsAsFactors = FALSE
-                  )
-                  
-                  incProgress(0.7, detail = "Saving file...")
-                  
-                  # Create Excel file with two sheets
-                  writexl::write_xlsx(
-                    list(
-                      "Expression Data" = plot_data,
-                      "Metadata" = metadata
-                    ),
-                    path = file
-                  )
-                  
-                  incProgress(1, detail = "Download complete")
-                } else {
-                  showNotification("No data to download", type = "warning")
+
+                  fg <- filtered_gene_exp_data()
+                  if (is.null(fg) || is.null(fg$genes)) {
+                    showNotification("No data available for download", type = "error")
+                    return(NULL)
+                  }
+
+                  # Handle multiple gene selection
+                  if (isTRUE(cur_check)) {
+                    gene_exp_val <- cur_genes
+                  } else {
+                    gene_exp_val <- sapply(cur_genes, function(gene) get_gene_id(gene, fg$genes), USE.NAMES = FALSE)
+                  }
+
+                  # Remove any invalid gene IDs
+                  valid_genes <- cur_genes[!is.na(gene_exp_val) & gene_exp_val != ""]
+                  valid_gene_ids <- gene_exp_val[!is.na(gene_exp_val) & gene_exp_val != ""]
+
+                  if (length(valid_gene_ids) == 0) {
+                    showNotification("No valid genes found for the current selection", type = "error")
+                    return(NULL)
+                  }
+
+                  plot_data <- build_plot_slim(fg$data, fg$full, valid_gene_ids, cur_group)
+
+                  if (!is.null(plot_data) && nrow(plot_data) > 0) {
+                    incProgress(0.5, detail = "Creating metadata...")
+
+                    # Create gene info for metadata
+                    gene_info <- if (length(valid_gene_ids) == 1) {
+                      list(
+                        gene_id = as.character(valid_gene_ids[1]),
+                        gene_name = as.character(valid_genes[1]),
+                        analysis_type = "Single Gene"
+                      )
+                    } else {
+                      list(
+                        gene_id = paste(valid_gene_ids, collapse = ", "),
+                        gene_name = paste(valid_genes, collapse = ", "),
+                        analysis_type = paste("Average of", length(valid_gene_ids), "genes")
+                      )
+                    }
+
+                    # Create metadata sheet with analysis parameters
+                    metadata <- data.frame(
+                      Parameter = c(
+                        "Analysis Type",
+                        "Data Type",
+                        "Gene ID(s)",
+                        "Gene Name(s)",
+                        "Group By",
+                        "Study Label",
+                        "Host Species",
+                        "Life Cycle Stage",
+                        "Treatment",
+                        "Parasite Stage",
+                        "Sample Type",
+                        "Strain",
+                        "Hour Post Invasion",
+                        "Sequencer",
+                        "SC Technology",
+                        "Download Date"
+                      ),
+                      Value = c(
+                        gene_info$analysis_type,
+                        isolate(input$data_type_exp),
+                        gene_info$gene_id,
+                        gene_info$gene_name,
+                        as.character(cur_group),
+                        paste(isolate(input$study_label), collapse = ", "),
+                        paste(isolate(input$host_species), collapse = ", "),
+                        paste(isolate(input$parasite_stage), collapse = ", "),
+                        paste(isolate(input$treatment), collapse = ", "),
+                        paste(isolate(input$development_phase), collapse = ", "),
+                        paste(isolate(input$sample_type), collapse = ", "),
+                        paste(isolate(input$strain), collapse = ", "),
+                        paste(isolate(input$hour_post_invasion), collapse = ", "),
+                        paste(isolate(input$sequencer), collapse = ", "),
+                        paste(isolate(input$sc_technology), collapse = ", "),
+                        as.character(Sys.time())
+                      ),
+                      stringsAsFactors = FALSE
+                    )
+
+                    incProgress(0.7, detail = "Saving file...")
+
+                    # Create Excel file with two sheets
+                    writexl::write_xlsx(
+                      list(
+                        "Expression Data" = plot_data,
+                        "Metadata" = metadata
+                      ),
+                      path = file
+                    )
+
+                    incProgress(1, detail = "Download complete")
+                  } else {
+                    showNotification("No data to download", type = "warning")
+                  }
+                },
+                error = function(e) {
+                  showNotification(paste("Error downloading:", e$message), type = "error")
                 }
-              }, error = function(e) {
-                showNotification(paste("Error downloading:", e$message), type = "error")
-              })
+              )
             })
           }
         )
@@ -3233,9 +3225,7 @@ server <- function(input, output, session) {
         # Run garbage collection
         gc()
       },
-      error = function(e) {
-      }
+      error = function(e) {}
     )
   })
-  
 }

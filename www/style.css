@@ -610,8 +610,82 @@ ul li:not(:last-child) {
 }
 
 .main {
-  padding: 5px 10px 5px 25px;
+  margin-left: 15px;
+  margin-right: 15px;
+  padding: 5px 15px 5px 25px;
   height: 100%;
+}
+
+.form-group {
+  margin-bottom: 0 !important;
+}
+
+#meta_section {
+  margin-right: 15px;
+}
+
+.form-group {
+  margin-bottom: 0 !important;
+}
+
+.col-5-custom {
+  width: 20%;
+  float: left;
+  padding-left: 15px;
+  padding-right: 15px;
+}
+
+@media (max-width: 992px) {
+  .col-5-custom {
+    width: 50%;
+  }
+}
+
+@media (max-width: 768px) {
+  .col-5-custom {
+    width: 100%;
+  }
+}
+
+.main .row {
+  margin-left: -15px;
+  margin-right: -15px;
+}
+
+.main [class*='col-'] {
+  padding-left: 15px;
+  padding-right: 15px;
+}
+
+/* remove padding left and right for col-sm-12 to allow boxes to reach row edges */
+.col-sm-12,
+.col-12 {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+/* but restore padding for inner columns so content isn't flush */
+.meta-filter [class*='col-'],
+.filters-container [class*='col-'] {
+  padding-left: 15px;
+  padding-right: 15px;
+}
+
+.main .row {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.main [class*='col-'] {
+  padding-left: 15px;
+  padding-right: 15px;
+}
+
+/* remove padding left and right for col-sm-12 to make it widely full screen */
+.col-sm-12,
+.col-12 {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
 }
 
 .meta-filter {
@@ -633,7 +707,6 @@ ul li:not(:last-child) {
 }
 
 .analysis-container .col-sm-4 {
-  padding: 10px 0 15px 0;
   display: flex;
   flex-direction: column;
 }
@@ -741,10 +814,8 @@ ul li:not(:last-child) {
 }
 
 
-#size label,
 #color label,
-#color_second label,
-#plot label {
+#color_second label {
   display: flex;
   flex: 1;
   align-items: center;
@@ -754,6 +825,260 @@ ul li:not(:last-child) {
   border-radius: 4px;
   text-align: center;
   width: 100%;
+}
+
+/* --- Unified Control Button Styles --- */
+#embedding .radio-inline,
+#size .radio-inline,
+#plot .radio-inline {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-width: 85px !important;
+  width: auto !important;
+  height: 40px !important;
+  padding: 0 12px !important;
+  font-size: 15px !important;
+  border: 1px solid #ccc !important;
+  border-radius: 6px !important;
+  cursor: pointer !important;
+  margin: 0 8px 8px 0 !important;
+  background-color: #fff !important;
+  color: #333 !important;
+  transition: all 0.2s ease;
+  position: relative !important;
+  z-index: 5 !important;
+}
+
+#embedding .radio-inline {
+  min-width: 95px !important;
+}
+
+/* Hide actual radio circle inside labels */
+#embedding .radio-inline input[type="radio"],
+#size .radio-inline input[type="radio"],
+#plot .radio-inline input[type="radio"] {
+  position: absolute !important;
+  opacity: 0 !important;
+  width: 1px !important;
+  height: 1px !important;
+  pointer-events: none !important;
+}
+
+/* Selected state styling */
+#embedding .radio-inline.checked-label,
+#size .radio-inline.checked-label,
+#plot .radio-inline.checked-label {
+  background-color: #007bff !important;
+  border-color: #0056b3 !important;
+  color: #fff !important;
+  font-weight: 600 !important;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+}
+
+/* Force horizontal layout for options and ensure visibility */
+.shiny-options-group {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+}
+
+/* Grid Alignment and Label consistency */
+.filters-container label {
+  display: block !important;
+  font-weight: 600 !important;
+  margin-bottom: 10px !important;
+  color: #333 !important;
+  font-size: 15px !important;
+}
+
+.filters-container .row > div[class*='col-'] {
+  padding-left: 15px !important;
+  padding-right: 15px !important;
+  margin-bottom: 0 !important;
+}
+
+/* Dimension block horizontal alignment and sizing */
+.dimension-axes-container {
+  display: flex !important;
+  align-items: center !important;
+  height: 40px;
+}
+
+.dimension-axes-container .shiny-input-container {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.dimension-axes-container select {
+  height: 38px !important;
+  font-size: 14px !important;
+  border-radius: 6px !important;
+  border: 1px solid #ccc !important;
+}
+
+#embedding .radio-inline {
+  width: 95px !important;
+}
+
+/* Hide the actual radio circle */
+#embedding .radio-inline input[type="radio"],
+#size .radio-inline input[type="radio"],
+#plot .radio-inline input[type="radio"] {
+  display: none !important;
+}
+
+/* Selected state */
+#embedding .radio-inline.checked-label,
+#size .radio-inline.checked-label,
+#plot .radio-inline.checked-label {
+  background-color: #007bff !important;
+  border-color: #0056b3 !important;
+  color: #fff !important;
+  font-weight: 600 !important;
+}
+
+/* Force horizontal layout for options */
+.shiny-options-group {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  align-items: center !important;
+  margin-top: 0 !important;
+}
+
+/* Align labels consistently */
+#embedding > label,
+#size > label,
+#plot > label {
+  display: block !important;
+  font-weight: 600 !important;
+  margin-bottom: 8px !important;
+  color: #333 !important;
+  font-size: 14px !important;
+}
+
+/* Specific Dimension block alignment fix */
+.dimension-axes-container {
+  display: flex !important;
+  align-items: center !important;
+  margin-top: 0 !important;
+  height: 38px;
+}
+
+.dimension-axes-container .shiny-options-group {
+  margin-bottom: 0 !important;
+}
+
+.dimension-axes-container .shiny-input-container {
+  margin-bottom: 0 !important;
+  padding-top: 0 !important;
+  vertical-align: middle;
+}
+
+#xaxis-container, #yaxis-container {
+  padding: 0 !important;
+}
+
+/* Ensure the select inputs for axes look good */
+.dimension-axes-container .selectize-control {
+  margin-bottom: 0 !important;
+}
+
+/* Specific wider buttons for embedding types if needed */
+#embedding .radio-inline {
+  width: 85px !important;
+}
+
+/* Hide the actual radio circle */
+#embedding .radio-inline input,
+#size .radio-inline input,
+#plot .radio-inline input {
+  display: none !important;
+}
+
+/* Selected state */
+#embedding .radio-inline.checked-label,
+#size .radio-inline.checked-label,
+#plot .radio-inline.checked-label {
+  background-color: #d6eaf8 !important;
+  border-color: #3498db !important;
+  font-weight: bold !important;
+  color: #2c3e50 !important;
+}
+
+/* Force horizontal layout for options */
+.shiny-options-group {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  align-items: center !important;
+}
+
+/* Align labels consistently */
+#embedding > label,
+#size > label,
+#plot > label,
+.filters-container label {
+  display: block !important;
+  font-weight: 600 !important;
+  margin-bottom: 8px !important;
+  color: #333 !important;
+}
+
+/* Clean up internal paddings */
+.dimension-axes-container {
+  display: flex !important;
+  align-items: center !important;
+  height: 35px;
+}
+
+.dimension-axes-container .shiny-input-container {
+  margin-bottom: 0 !important;
+  padding: 0 !important;
+}
+
+#embedding .radio-inline {
+  width: 90px;
+}
+
+#embedding .radio-inline input[type="radio"],
+#size .radio-inline input[type="radio"],
+#plot .radio-inline input[type="radio"] {
+  display: none;
+}
+
+#embedding .radio-inline.checked-label,
+#size .radio-inline.checked-label,
+#plot .radio-inline.checked-label {
+  background-color: #d6eaf8;
+  border-color: #3498db;
+  font-weight: bold;
+}
+
+/* Ensure outer labels don't get flexed */
+#size > label,
+#plot > label {
+  display: block !important;
+  font-weight: 600;
+  margin-bottom: 5px;
+}
+
+#size label,
+#plot label {
+  all: unset;
+}
+
+#size .radio-inline,
+#plot .radio-inline {
+  display: inline-flex;
+  width: 80px;
+  padding: 8px 5px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  text-align: center;
 }
 
 
@@ -773,13 +1098,13 @@ ul li:not(:last-child) {
 /* Option Groups */
 .shiny-options-group {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap !important;
   gap: 5px;
+  align-items: center;
 }
 
 #color .shiny-options-group,
 #embedding .shiny-options-group,
-#data_type .shiny-options-group,
 #data_type_exp .shiny-options-group {
   align-items: flex-end;
 }
@@ -875,7 +1200,9 @@ ul li:not(:last-child) {
   align-items: center;
 }
 
-#embedding .radio-inline {
+#embedding .radio-inline,
+#size .radio-inline,
+#plot .radio-inline {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -887,19 +1214,23 @@ ul li:not(:last-child) {
   transition: background-color 0.3s, border-color 0.3s;
 }
 
-#embedding .radio-inline input[type="radio"] {
+#embedding .radio-inline input[type="radio"],
+#size .radio-inline input[type="radio"],
+#plot .radio-inline input[type="radio"] {
   display: none;
 }
 
-#embedding .radio-inline.checked-label {
+#embedding .radio-inline.checked-label,
+#size .radio-inline.checked-label,
+#plot .radio-inline.checked-label {
   background-color: #d6eaf8;
   border-color: #3498db;
   font-weight: bold;
 }
 
 /* Data type option */
-#data_type .shiny-options-group,
-#data_type_exp .shiny-options-group {
+#data_type_exp .shiny-options-group,
+#data_type .shiny-options-group {
   margin: 0;
   justify-content: flex-start;
   gap: 20px;
@@ -920,8 +1251,8 @@ ul li:not(:last-child) {
 }
 
 .switch_exp {
-  top: -70px;
-  left: 85px;
+  top: -60px;
+  left: 70px;
   padding: 0;
 }
 
@@ -1123,8 +1454,9 @@ input:checked+.slider:before {
   transition: background-color 0.3s, border-color 0.3s;
 }
 
-/* remove padding left and right for col-sm-6 */
-.col-sm-6 {
+/* remove padding left and right for col-sm-12 */
+.col-sm-12,
+.col-12 {
   padding-left: 0 !important;
   padding-right: 0 !important;
 }
@@ -1318,7 +1650,6 @@ input:checked+.slider:before {
   #stagelr .shiny-options-group,
   #size .shiny-options-group,
   #color .shiny-options-group,
-  #data_type .shiny-options-group,
   #data_type_exp .shiny-options-group,
   #plot .shiny-options-group,
   #embedding .shiny-options-group{
@@ -1340,9 +1671,7 @@ input:checked+.slider:before {
   }
 
 
-  #data_type .shiny-options-group {
-    width: 300px;
-  }
+
 
   .sidebar {
   display: none !important;
@@ -1575,25 +1904,104 @@ input:checked+.slider:before {
 }
 
 /* Gene Expression Tab - Data Type Radio Buttons Indentation */
-#data_type_exp {
-  padding-left: 40px;
+#data_type_exp,
+#data_type {
+  padding-left: 0;
 }
 
-#data_type_exp .control-label {
+#data_type_exp .control-label,
+#data_type .control-label {
   margin-left: 0;
   font-weight: 500;
   color: var(--color-text-primary);
 }
 
-#data_type_exp .shiny-options-group {
-  padding-left: 15px;
+#data_type_exp .shiny-options-group,
+#data_type .shiny-options-group {
+  padding-left: 0;
 }
 
-/* Optional: Style the radio buttons themselves for better appearance */
-#data_type_exp .radio label {
-  font-weight: 400;
-  color: var(--color-text-primary);
-  margin-bottom: 8px;
+/* Button-style Comparison Toggle */
+#compare_box {
+  display: flex;
+  align-items: center;
+  background: white;
+  padding: 0 !important;
+  border-radius: 20px;
+  border: 1px solid #ddd;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  overflow: hidden;
+  transition: all 0.3s ease;
+  min-width: 250px;
+  height: 44px;
+}
+
+#compare_box:hover {
+  border-color: #3498db;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+#compare_box .checkbox {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+}
+
+#compare_box label {
+  padding: 10px 25px 0 25px !important; /* Pushing text down to center vertically */
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  font-size: 1.1em;
+  text-align: center;
+}
+
+/* Add space between icon and text in green download button */
+.btn-download-green i {
+  margin-right: 12px !important;
+}
+
+#compare_box input[type="checkbox"] {
+  display: none;
+}
+
+/* Selected state - light blue like point size */
+#compare_box.active {
+  background-color: #d6eaf8 !important;
+  border-color: #3498db !important;
+}
+
+#compare_box.active label {
+  color: #2c3e50 !important;
+}
+
+/* Ensure data type radio buttons don't have a background when selected */
+#data_type .radio-inline.checked-label,
+#data_type_exp .radio-inline.checked-label {
+  background-color: transparent !important;
+  border-color: transparent !important;
+  font-weight: 500 !important;
+  color: inherit !important;
+}
+
+/* Green Download Button */
+.btn-download-green {
+  background-color: #326a42 !important;
+  border-color: #219150 !important;
+  color: white !important;
+}
+
+.btn-download-green:hover, .btn-download-green:focus {
+  background-color: #2ecc71 !important;
+  border-color: #27ae60 !important;
+  color: white !important;
+  box-shadow: 0 4px 8px rgba(46, 204, 113, 0.2) !important;
 }
 
 /* Gene Expression Tab - Gene Selection Row Indentation */
@@ -1670,12 +2078,18 @@ input:checked+.slider:before {
 .filters-container {
   margin-left: 0;
   margin-right: 0;
+  padding-bottom: 10px !important;
+  margin-bottom: 0 !important;
+}
+
+.filters-container .row {
+  margin-bottom: 0 !important;
 }
 
 /* Ensure consistent spacing for all filter rows and control boxes */
 .main .row {
-  margin-left: 0;
-  margin-right: 0;
+  margin-left: -15px;
+  margin-right: -15px;
 }
 
 .main .row > [class*='col-'] {

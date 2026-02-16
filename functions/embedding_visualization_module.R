@@ -9,13 +9,11 @@
 setup_embedding_gene_ui <- function(input, session, gene_data, genes_loading) {
     # Dynamic UI for gene selection
     shinyjs::hide("gene_snn_ui")
-    shinyjs::hide("data_type")
     
     observe({
         req(input$color)
         
         if (input$color == "genes") {
-            shinyjs::show("data_type")
             shinyjs::show("gene_snn_ui")
             shinyjs::show("gene_link_ui")
             shinyjs::show("switch_id")
@@ -28,7 +26,6 @@ setup_embedding_gene_ui <- function(input, session, gene_data, genes_loading) {
         } else {
             shinyjs::hide("gene_snn_ui")
             shinyjs::hide("gene_link_ui")
-            shinyjs::hide("data_type")
             shinyjs::hide("switch_id")
             genes_loading(FALSE)
         }
