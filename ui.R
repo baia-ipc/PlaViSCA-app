@@ -295,16 +295,17 @@ ui <- fluidPage(
                         conditionalPanel(
                           condition = "input.plot == '2d'",
                           div(
-                            style = "display: inline-flex; gap: 8px; align-items: center; margin-left: 10px;",
+                            class = "dimension-axes-container",
+                            style = "display: inline-flex; gap: 8px; align-items: center; margin-left: 15px;",
                             div(
                               style = "display: flex; flex-direction: column; align-items: center;",
                               tags$span("X", style = "font-size: 10px; font-weight: bold; color: #555; margin-bottom: -2px;"),
-                              selectInput("xaxis", NULL, choices = c("pc_1" = "pc_1"), selected = "pc_1", width = "90px")
+                              selectInput("xaxis", NULL, choices = c("pc_1" = "pc_1"), selected = "pc_1", width = "110px")
                             ),
                             div(
                               style = "display: flex; flex-direction: column; align-items: center;",
                               tags$span("Y", style = "font-size: 10px; font-weight: bold; color: #555; margin-bottom: -2px;"),
-                              selectInput("yaxis", NULL, choices = c("pc_2" = "pc_2"), selected = "pc_2", width = "90px")
+                              selectInput("yaxis", NULL, choices = c("pc_2" = "pc_2"), selected = "pc_2", width = "110px")
                             )
                           )
                         )
