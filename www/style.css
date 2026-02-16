@@ -2337,7 +2337,7 @@ input:checked+.slider:before {
 
 /* Style the gene link section */
 .gene_link_ui_exp {
-  padding-top: 25px;
+  padding-top: 30px;
   background: transparent !important;
 }
 

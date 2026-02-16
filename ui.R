@@ -294,7 +294,7 @@ ui <- fluidPage(
                         ),
                         conditionalPanel(
                           condition = "input.plot == '2d'",
-                          style = "margin-top: -18px;",
+                          style = "margin-top: -20px;",
                           div(
                             style = "display: inline-flex; gap: 8px; align-items: center; margin-left: 10px;",
                             div(
