@@ -382,41 +382,6 @@ ui <- fluidPage(
                         )
                       )
                     ),
-                          selected = "study_label",
-                          width = "100%"
-                        ),
-                        conditionalPanel(
-                          condition = "input.color == 'genes'",
-                          div(
-                            style = "background-color: #fffbea; padding: 10px 15px; border-radius: 8px; border: 1px solid #ffd700; margin-top: 5px; margin-bottom: 10px;",
-                            fluidRow(
-                              column(
-                                width = 5,
-                                div(
-                                  style = "display: flex; align-items: center; gap: 10px; height: 34px;",
-                                  tags$label(style = "margin: 0; font-weight: bold;", "Gene name"),
-                                  tags$label(
-                                    class = "switch",
-                                    style = "margin: 0;",
-                                    tags$input(id = "check", type = "checkbox", class = "toggle_exp"),
-                                    tags$span(class = "slider")
-                                  )
-                                )
-                              ),
-                              column(
-                                width = 7,
-                                div(
-                                  style = "display: flex; align-items: center; gap: 15px; height: 34px; justify-content: flex-end;",
-                                  tags$a(id = "plasmo_link", href = "#", target = "_blank", class = "gene-link", "🔬 PlasmoDB"),
-                                  tags$a(id = "ncbi_link", href = "#", target = "_blank", class = "gene-link", "🧬 NCBI")
-                                )
-                              )
-                            ),
-                            selectizeInput("genes_n", NULL, choices = "", multiple = TRUE, options = list(placeholder = "Select one or more genes", maxItems = 10), width = "100%")
-                          )
-                        )
-                      )
-                    ),
                     # Comparison Plot Colors (visible when comparing)
                     conditionalPanel(
                       condition = "input.enable_comparison",
