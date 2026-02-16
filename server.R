@@ -1720,6 +1720,11 @@ server <- function(input, output, session) {
           # Store current selection before updating choices
           current_selection <- input$genes_n
 
+          # If color by genes is selected and no gene is chosen, pick a default
+          if (is.null(current_selection) || length(current_selection) == 0) {
+            current_selection <- if (length(gene_choices) > 0) gene_choices[1] else NULL
+          }
+
           updateSelectizeInput(
             session,
             "genes_n",
@@ -2692,6 +2697,7 @@ server <- function(input, output, session) {
         if (!is.null(resolved_gene_col) && resolved_gene_col %in% colnames(df_local)) {
           color_column <- resolved_gene_col
         } else {
+          # If gene resolution failed, default to sample_type instead of returning NULL
           color_column <- "sample_type"
         }
       } else {
@@ -2703,12 +2709,23 @@ server <- function(input, output, session) {
         color_column <- "sample_type"
       }
 
+      # Determine proper legend title for gene expression
+      effective_legend_title <- if (isTRUE(input$color == "genes")) {
+        if (!is.null(input$genes_n) && length(input$genes_n) > 0) {
+          if (length(input$genes_n) == 1) input$genes_n[1] else paste0("Avg of ", length(input$genes_n), " genes")
+        } else {
+          "Gene expression"
+        }
+      } else {
+        input$color
+      }
+
       p <- embedding_plot(
         df_local,
         input$xaxis,
         input$yaxis,
         color_column,
-        input$genes_n,
+        effective_legend_title,
         input$size,
         plot_type = get_plot_type(),
         plot_dim = input$plot

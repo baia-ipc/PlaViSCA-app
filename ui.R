@@ -307,7 +307,7 @@ ui <- fluidPage(
 
                   # Comparison and Download (Formatted and Compact)
                   div(
-                    style = "margin-top: 5px; border-top: 1px solid #eee; padding: 10px 0; display: flex; justify-content: center; align-items: center; gap: 40px; background-color: #fafafa; border-radius: 8px; margin-bottom: 5px;",
+                    style = "margin-top: 5px; border-top: 1px solid #eee; padding: 2px 0; display: flex; justify-content: center; align-items: center; gap: 40px; background-color: #fafafa; border-radius: 8px; margin-bottom: 0;",
                     div(
                       id = "compare_box",
                       checkboxInput(
@@ -324,7 +324,7 @@ ui <- fluidPage(
 
                   # Color Selection(s) Row
                   fluidRow(
-                    style = "margin-top: 5px;",
+                    style = "margin-top: 0;",
                     # Single Plot Color (visible when NOT comparing - Aligned Left)
                     conditionalPanel(
                       condition = "!input.enable_comparison",
