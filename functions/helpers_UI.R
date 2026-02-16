@@ -341,37 +341,34 @@ subBlock <- function(i) {
           multiple = TRUE,
           options = list(maxItems = 4, placeholder = "Select genes...")
         ),
-        column(
-          width = 2,
-          class = "switch_exp",
+        div(
+          style = "display: flex; align-items: center; gap: 10px; margin-bottom: 10px; margin-top: -5px;",
+          tags$label(style = "margin: 0; font-weight: 600;", "Gene id"),
           tags$label(
             class = "switch",
+            style = "margin: 0; transform: scale(0.8);",
             tags$input(
               id = paste0("check_exp_", i),
               type = "checkbox",
               class = "toggle_exp"
             ),
             tags$span(class = "slider")
-          )
-        ),
-        column(
-          width = 4,
-          id = paste0("gene_link_exp_", i),
-          class = "gene_link_exp",
-          tags$div(
-            id = paste0("gene_link_ui_exp_", i),
-            class = "gene_link_ui_exp",
+          ),
+          div(
+            style = "display: flex; align-items: center; gap: 8px; margin-left: 15px;",
             tags$a(
               id = paste0("plasmo_link_exp_", i),
               href = "#",
               target = "_blank",
+              class = "gene-link",
               "🔬 PlasmoDB"
             ),
-            span("|"),
+            tags$span("|", style = "color: #ccc; margin: 0 5px;"),
             tags$a(
               id = paste0("ncbi_link_exp_", i),
               href = "#",
               target = "_blank",
+              class = "gene-link",
               "🧬 NCBI"
             )
           )

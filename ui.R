@@ -340,7 +340,7 @@ ui <- fluidPage(
                     conditionalPanel(
                       condition = "!input.enable_comparison",
                       column(
-                        width = 6,
+                        width = 4,
                         selectInput(
                           "color",
                           "Color by:",
@@ -361,32 +361,28 @@ ui <- fluidPage(
                           ),
                           selected = "study_label",
                           width = "100%"
-                        ),
+                        )
+                      ),
+                      column(
+                        width = 8,
                         conditionalPanel(
                           condition = "input.color == 'genes'",
                           div(
                             style = "background-color: #fffbea; padding: 10px 15px; border-radius: 8px; border: 1px solid #ffd700; margin-top: 5px; margin-bottom: 10px;",
-                            fluidRow(
-                              column(
-                                width = 5,
-                                div(
-                                  style = "display: flex; align-items: center; gap: 10px; height: 34px;",
-                                  tags$label(style = "margin: 0; font-weight: bold;", "Gene name"),
-                                  tags$label(
-                                    class = "switch",
-                                    style = "margin: 0;",
-                                    tags$input(id = "check", type = "checkbox", class = "toggle_exp"),
-                                    tags$span(class = "slider")
-                                  )
-                                )
+                            div(
+                              style = "display: flex; align-items: center; margin-bottom: 5px;",
+                              tags$label(style = "margin: 0; font-weight: bold;", "Gene name"),
+                              tags$label(
+                                class = "switch",
+                                style = "margin: 0; margin-left: 10px;",
+                                tags$input(id = "check", type = "checkbox", class = "toggle_exp"),
+                                tags$span(class = "slider")
                               ),
-                              column(
-                                width = 7,
-                                div(
-                                  style = "display: flex; align-items: center; gap: 15px; height: 34px; justify-content: flex-end;",
-                                  tags$a(id = "plasmo_link", href = "#", target = "_blank", class = "gene-link", "🔬 PlasmoDB"),
-                                  tags$a(id = "ncbi_link", href = "#", target = "_blank", class = "gene-link", "🧬 NCBI")
-                                )
+                              div(
+                                style = "display: flex; align-items: center; gap: 10px; margin-left: 20px;",
+                                tags$a(id = "plasmo_link", href = "#", target = "_blank", class = "gene-link", "🔬 PlasmoDB"),
+                                tags$span("|", style = "color: #ccc;"),
+                                tags$a(id = "ncbi_link", href = "#", target = "_blank", class = "gene-link", "🧬 NCBI")
                               )
                             ),
                             selectizeInput("genes_n", NULL, choices = "", multiple = TRUE, options = list(placeholder = "Select one or more genes", maxItems = 10), width = "100%")
@@ -433,27 +429,20 @@ ui <- fluidPage(
                                 condition = "input.color_first_comp == 'genes'",
                                 div(
                                   style = "background-color: white; padding: 8px 12px; border-radius: 8px; border: 1px solid #bbdefb;",
-                                  fluidRow(
-                                    column(
-                                      width = 6,
-                                      div(
-                                        style = "display: flex; align-items: center; gap: 8px; height: 24px;",
-                                        tags$label(style = "margin: 0; font-weight: 600; font-size: 0.85em;", "Gene name"),
-                                        tags$label(
-                                          class = "switch",
-                                          style = "transform: scale(0.7); margin: 0;",
-                                          tags$input(id = "check_first_comp", type = "checkbox", class = "toggle_exp"),
-                                          tags$span(class = "slider")
-                                        )
-                                      )
+                                  div(
+                                    style = "display: flex; align-items: center; margin-bottom: 5px;",
+                                    tags$label(style = "margin: 0; font-weight: 600; font-size: 0.85em;", "Gene name"),
+                                    tags$label(
+                                      class = "switch",
+                                      style = "margin: 0; margin-left: 10px; transform: scale(0.8);",
+                                      tags$input(id = "check_first_comp", type = "checkbox", class = "toggle_exp"),
+                                      tags$span(class = "slider")
                                     ),
-                                    column(
-                                      width = 6,
-                                      div(
-                                        style = "display: flex; align-items: center; gap: 10px; height: 24px; justify-content: flex-end; font-size: 0.8em;",
-                                        tags$a(id = "plasmo_link_first", href = "#", target = "_blank", class = "gene-link", "🔬 PlasmoDB"),
-                                        tags$a(id = "ncbi_link_first", href = "#", target = "_blank", class = "gene-link", "🧬 NCBI")
-                                      )
+                                    div(
+                                      style = "display: flex; align-items: center; gap: 8px; margin-left: 15px; font-size: 0.85em;",
+                                      tags$a(id = "plasmo_link_first", href = "#", target = "_blank", class = "gene-link", "🔬 PlasmoDB"),
+                                      tags$span("|", style = "color: #ccc;"),
+                                      tags$a(id = "ncbi_link_first", href = "#", target = "_blank", class = "gene-link", "🧬 NCBI")
                                     )
                                   ),
                                   selectizeInput("genes_n_first_comp", NULL, choices = "", multiple = TRUE, options = list(placeholder = "Select genes", maxItems = 10), width = "100%")
@@ -499,27 +488,20 @@ ui <- fluidPage(
                                 condition = "input.color_second == 'genes'",
                                 div(
                                   style = "background-color: white; padding: 8px 12px; border-radius: 8px; border: 1px solid #dcedc8;",
-                                  fluidRow(
-                                    column(
-                                      width = 6,
-                                      div(
-                                        style = "display: flex; align-items: center; gap: 8px; height: 24px;",
-                                        tags$label(style = "margin: 0; font-weight: 600; font-size: 0.85em;", "Gene name"),
-                                        tags$label(
-                                          class = "switch",
-                                          style = "transform: scale(0.7); margin: 0;",
-                                          tags$input(id = "check_second", type = "checkbox", class = "toggle_exp"),
-                                          tags$span(class = "slider")
-                                        )
-                                      )
+                                  div(
+                                    style = "display: flex; align-items: center; margin-bottom: 5px;",
+                                    tags$label(style = "margin: 0; font-weight: 600; font-size: 0.85em;", "Gene name"),
+                                    tags$label(
+                                      class = "switch",
+                                      style = "margin: 0; margin-left: 10px; transform: scale(0.8);",
+                                      tags$input(id = "check_second", type = "checkbox", class = "toggle_exp"),
+                                      tags$span(class = "slider")
                                     ),
-                                    column(
-                                      width = 6,
-                                      div(
-                                        style = "display: flex; align-items: center; gap: 10px; height: 24px; justify-content: flex-end; font-size: 0.8em;",
-                                        tags$a(id = "plasmo_link_second", href = "#", target = "_blank", class = "gene-link", "🔬 PlasmoDB"),
-                                        tags$a(id = "ncbi_link_second", href = "#", target = "_blank", class = "gene-link", "🧬 NCBI")
-                                      )
+                                    div(
+                                      style = "display: flex; align-items: center; gap: 8px; margin-left: 15px; font-size: 0.85em;",
+                                      tags$a(id = "plasmo_link_second", href = "#", target = "_blank", class = "gene-link", "🔬 PlasmoDB"),
+                                      tags$span("|", style = "color: #ccc;"),
+                                      tags$a(id = "ncbi_link_second", href = "#", target = "_blank", class = "gene-link", "🧬 NCBI")
                                     )
                                   ),
                                   selectizeInput("genes_second", NULL, choices = "", multiple = TRUE, options = list(placeholder = "Select genes", maxItems = 10), width = "100%")
