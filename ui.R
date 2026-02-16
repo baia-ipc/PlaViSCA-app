@@ -242,10 +242,10 @@ ui <- fluidPage(
                         div(
                           id = "tab_switch",
                           style = "text-align: center; margin-top: 0px; display: flex; align-items: center; gap: 8px;",
-                          tags$span(class = "left-label", "Unintegrated", style = "font-size: 11px; font-weight: 500;"),
+                          tags$span(class = "left-label", "Unintegrated", style = "font-size: 13px; font-weight: 500;"),
                           tags$label(
                             class = "switch",
-                            style = "transform: scale(0.8); margin-bottom: 0;",
+                            style = "margin-bottom: 0;",
                             tags$input(
                               id = "check_all",
                               type = "checkbox",
@@ -253,7 +253,7 @@ ui <- fluidPage(
                             ),
                             tags$span(class = "slider")
                           ),
-                          tags$span(class = "right-label", "Integrated", style = "font-size: 11px; font-weight: 500;")
+                          tags$span(class = "right-label", "Integrated", style = "font-size: 13px; font-weight: 500;")
                         )
                       )
                     ),
