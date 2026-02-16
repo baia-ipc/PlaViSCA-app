@@ -827,53 +827,99 @@ ul li:not(:last-child) {
   width: 100%;
 }
 
-/* --- Unified Control Button Styles --- */
+/* Consolidate radio button styles to prevent overlap and save space */
 #embedding .radio-inline,
 #size .radio-inline,
-#plot .radio-inline {
+#plot .radio-inline,
+#data_type .radio-inline,
+#data_type_exp .radio-inline {
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
-  min-width: 85px !important;
   width: auto !important;
-  height: 40px !important;
-  padding: 0 12px !important;
-  font-size: 15px !important;
+  min-width: 60px !important;
+  height: 34px !important;
+  padding: 0 8px !important;
+  font-size: 12px !important;
   border: 1px solid #ccc !important;
   border-radius: 6px !important;
   cursor: pointer !important;
-  margin: 0 8px 8px 0 !important;
+  margin: 0 4px 4px 0 !important;
   background-color: #fff !important;
   color: #333 !important;
   transition: all 0.2s ease;
-  position: relative !important;
-  z-index: 5 !important;
 }
 
-#embedding .radio-inline {
-  min-width: 95px !important;
-}
-
-/* Hide actual radio circle inside labels */
-#embedding .radio-inline input[type="radio"],
-#size .radio-inline input[type="radio"],
-#plot .radio-inline input[type="radio"] {
-  position: absolute !important;
-  opacity: 0 !important;
-  width: 1px !important;
-  height: 1px !important;
-  pointer-events: none !important;
-}
-
-/* Selected state styling */
 #embedding .radio-inline.checked-label,
 #size .radio-inline.checked-label,
-#plot .radio-inline.checked-label {
-  background-color: #007bff !important;
-  border-color: #0056b3 !important;
-  color: #fff !important;
+#plot .radio-inline.checked-label,
+#data_type .radio-inline.checked-label,
+#data_type_exp .radio-inline.checked-label {
+  background-color: #d6eaf8 !important;
+  border-color: #3498db !important;
+  color: #2c3e50 !important;
   font-weight: 600 !important;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+}
+
+/* Force horizontal layout for options */
+.shiny-options-group {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+}
+
+/* Grid Alignment and Label consistency */
+.filters-container label {
+  display: block !important;
+  font-weight: 600 !important;
+  margin-bottom: 8px !important;
+  color: #333 !important;
+  font-size: 14px !important;
+}
+
+#embedding > label,
+#size > label,
+#plot > label {
+  display: block !important;
+  font-weight: 600 !important;
+  margin-bottom: 8px !important;
+  color: #333 !important;
+  font-size: 14px !important;
+}
+
+/* Specific Dimension block alignment fix */
+.dimension-axes-container {
+  display: flex !important;
+  align-items: center !important;
+  margin-top: 0 !important;
+  height: 34px;
+}
+
+#xaxis-container, #yaxis-container {
+  padding: 0 !important;
+}
+
+/* Hide the actual radio circle */
+#embedding .radio-inline input,
+#size .radio-inline input,
+#plot .radio-inline input,
+#data_type .radio-inline input,
+#data_type_exp .radio-inline input {
+  display: none !important;
+}
+
+
+#embedding .radio-inline.checked-label,
+#size .radio-inline.checked-label,
+#plot .radio-inline.checked-label,
+#data_type .radio-inline.checked-label,
+#data_type_exp .radio-inline.checked-label {
+  background-color: #d6eaf8 !important;
+  border-color: #3498db !important;
+  color: #2c3e50 !important;
+  font-weight: 600 !important;
 }
 
 /* Force horizontal layout for options and ensure visibility */
@@ -1202,16 +1248,36 @@ ul li:not(:last-child) {
 
 #embedding .radio-inline,
 #size .radio-inline,
-#plot .radio-inline {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100px;
-  padding: 8px 12px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: background-color 0.3s, border-color 0.3s;
+#plot .radio-inline,
+#data_type .radio-inline,
+#data_type_exp .radio-inline {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: auto !important;
+  min-width: 60px !important;
+  height: 35px !important;
+  padding: 0 8px !important;
+  font-size: 13px !important;
+  border: 1px solid #ccc !important;
+  border-radius: 6px !important;
+  cursor: pointer !important;
+  margin: 0 5px 5px 0 !important;
+  background-color: #fff !important;
+  color: #333 !important;
+  transition: all 0.2s ease;
+}
+
+/* Selected state styling */
+#embedding .radio-inline.checked-label,
+#size .radio-inline.checked-label,
+#plot .radio-inline.checked-label,
+#data_type .radio-inline.checked-label,
+#data_type_exp .radio-inline.checked-label {
+  background-color: #d6eaf8 !important;
+  border-color: #3498db !important;
+  color: #2c3e50 !important;
+  font-weight: 600 !important;
 }
 
 #embedding .radio-inline input[type="radio"],
