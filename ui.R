@@ -219,12 +219,11 @@ ui <- fluidPage(
                     icon("cog"),
                     " Plot settings"
                   ),
-                  div(
-                    style = "display: flex; flex-wrap: wrap; gap: 25px; align-items: flex-start; justify-content: flex-start; padding-top: 10px;",
-
+                  fluidRow(
+                    style = "padding-top: 10px;",
                     # Data type
-                    div(
-                      style = "flex: 0 0 auto;",
+                    column(
+                      width = 2,
                       radioButtons(
                         "data_type",
                         "Data Type",
@@ -235,8 +234,8 @@ ui <- fluidPage(
                     ),
 
                     # Integration toggle
-                    div(
-                      style = "flex: 0 0 auto;",
+                    column(
+                      width = 2,
                       tags$label("Integration", class = "control-label", style = "margin-bottom: 5px; display: block;"),
                       div(
                         id = "tab_switch",
@@ -257,8 +256,8 @@ ui <- fluidPage(
                     ),
 
                     # Embedding type
-                    div(
-                      style = "flex: 0 0 auto;",
+                    column(
+                      width = 3,
                       radioButtons(
                         "embedding",
                         "Embedding",
@@ -269,8 +268,8 @@ ui <- fluidPage(
                     ),
 
                     # Point size
-                    div(
-                      style = "flex: 0 0 auto;",
+                    column(
+                      width = 2,
                       radioButtons(
                         "size",
                         "Point Size",
@@ -281,8 +280,8 @@ ui <- fluidPage(
                     ),
 
                     # Dimension & Axes
-                    div(
-                      style = "flex: 0 0 auto; min-width: 340px;",
+                    column(
+                      width = 3,
                       tags$label("Dimension", class = "control-label", style = "margin-bottom: 5px; display: block;"),
                       div(
                         style = "display: flex; align-items: center; gap: 15px; height: 34px;",
@@ -296,7 +295,7 @@ ui <- fluidPage(
                         conditionalPanel(
                           condition = "input.plot == '2d'",
                           div(
-                            style = "display: inline-flex; gap: 12px; align-items: center; margin-left: 20px;",
+                            style = "display: inline-flex; gap: 12px; align-items: center;",
                             selectInput("xaxis", NULL, choices = c("pc_1" = "pc_1"), selected = "pc_1", width = "105px"),
                             selectInput("yaxis", NULL, choices = c("pc_2" = "pc_2"), selected = "pc_2", width = "105px")
                           )
@@ -329,7 +328,7 @@ ui <- fluidPage(
                     conditionalPanel(
                       condition = "!input.enable_comparison",
                       column(
-                        width = 12,
+                        width = 6,
                         selectInput(
                           "color",
                           "Color by:",
