@@ -409,15 +409,14 @@ embedding_plot <- function(
     warning("Invalid color column, using 'sample_type' as fallback")
   }
 
-  # Robust coordinate resolution
-  if (is.null(xaxis_input) || !xaxis_input %in% names(df)) {
-    coords <- get_dim(plot_type)
-    xaxis_input <- coords[1]
+  # Robust coordinate resolution: ensure selected axes belong to the current embedding type
+  valid_coords <- get_dim(plot_type)
+  if (is.null(xaxis_input) || !xaxis_input %in% valid_coords) {
+    xaxis_input <- valid_coords[1]
   }
-  if (is.null(yaxis_input) || !yaxis_input %in% names(df)) {
-    coords <- get_dim(plot_type)
+  if (is.null(yaxis_input) || !yaxis_input %in% valid_coords) {
     # Try to pick a different one than xaxis if possible
-    yaxis_input <- if (length(coords) > 1) coords[2] else coords[1]
+    yaxis_input <- if (length(valid_coords) > 1) valid_coords[2] else valid_coords[1]
   }
 
   x <- df[[xaxis_input]]

@@ -1915,8 +1915,10 @@ server <- function(input, output, session) {
   # Create reactive expressions for each plot that only depend on their specific inputs
   first_plot_reactive <- reactive({
     req(input$enable_comparison)
-    # Ensure axes match the current embedding to avoid transition errors
-    req(input$xaxis, input$yaxis)
+    # Ensure axes are ready if in 2D mode
+    if (isTRUE(input$plot == "2d")) {
+      req(input$xaxis, input$yaxis)
+    }
 
     # Determine which inputs to use based on comparison mode
     color_val <- if (!is.null(input$color_first_comp)) input$color_first_comp else "sample_type"
@@ -1931,7 +1933,7 @@ server <- function(input, output, session) {
       yaxis = input$yaxis,
       size = if (!is.null(input$size)) input$size else 4,
       plot = if (!is.null(input$plot)) input$plot else "3d",
-      embedding = input$embedding, # Explicitly include to trigger on change
+      embedding = input$embedding,
       integration = input$check_all,
       timestamp = Sys.time()
     )
@@ -1940,7 +1942,9 @@ server <- function(input, output, session) {
   # Reactive expression for second plot parameters
   second_plot_reactive <- reactive({
     req(input$enable_comparison)
-    req(input$xaxis, input$yaxis)
+    if (isTRUE(input$plot == "2d")) {
+      req(input$xaxis, input$yaxis)
+    }
 
     color_val <- if (!is.null(input$color_second)) input$color_second else "sample_type"
     genes_val <- if (!is.null(input$genes_second)) input$genes_second else ""
@@ -2085,7 +2089,7 @@ server <- function(input, output, session) {
 
 
   # Helper function to generate embedding plots with different color options
-  generate_embedding_plot <- function(color_input, genes_input, check_input, xaxis_input, yaxis_input, size_input, plot_input, is_dual_plot = FALSE, data_source = NULL) {
+  generate_embedding_plot <- function(color_input, genes_input, check_input, xaxis_input, yaxis_input, size_input, plot_input, plot_type_input, is_dual_plot = FALSE, data_source = NULL) {
     # For dual plot mode, skip the global dependency checks and use simpler validation
     if (is_dual_plot) {
       # Basic data validation for comparison mode
@@ -2312,7 +2316,7 @@ server <- function(input, output, session) {
         color_column,
         effective_legend_title,
         size_input,
-        plot_type = get_plot_type(),
+        plot_type = plot_type_input,
         plot_dim = plot_input,
         is_dual_plot = is_dual_plot
       )
@@ -2590,6 +2594,7 @@ server <- function(input, output, session) {
       plot_params$yaxis,
       plot_params$size,
       plot_params$plot,
+      plot_type_input = get_plot_type(),
       is_dual_plot = TRUE,
       data_source = first_plot_data()
     )
@@ -2613,6 +2618,7 @@ server <- function(input, output, session) {
       plot_params$yaxis,
       plot_params$size,
       plot_params$plot,
+      plot_type_input = get_plot_type(),
       is_dual_plot = TRUE,
       data_source = second_plot_data()
     )
@@ -2628,6 +2634,9 @@ server <- function(input, output, session) {
     if (is.null(data()) || nrow(data()) == 0) {
       return(NULL)
     }
+
+    # Determine plot type outside isolate to add dependency
+    ptype <- get_plot_type()
 
     # Generate plot without progress bar
     isolate({
@@ -2763,7 +2772,7 @@ server <- function(input, output, session) {
         color_column,
         effective_legend_title,
         input$size,
-        plot_type = get_plot_type(),
+        plot_type = ptype,
         plot_dim = input$plot
       )
 
