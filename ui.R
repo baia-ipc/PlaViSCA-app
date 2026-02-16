@@ -220,7 +220,7 @@ ui <- fluidPage(
                     " Plot settings"
                   ),
                   div(
-                    style = "display: flex; flex-wrap: wrap; gap: 70px; align-items: flex-start; justify-content: flex-start; padding-top: 10px;",
+                    style = "display: flex; flex-wrap: wrap; gap: 25px; align-items: flex-start; justify-content: flex-start; padding-top: 10px;",
 
                     # Data type
                     div(
@@ -329,7 +329,7 @@ ui <- fluidPage(
                     conditionalPanel(
                       condition = "!input.enable_comparison",
                       column(
-                        width = 4,
+                        width = 12,
                         selectInput(
                           "color",
                           "Color by:",
@@ -350,14 +350,11 @@ ui <- fluidPage(
                           ),
                           selected = "study_label",
                           width = "100%"
-                        )
-                      ),
-                      column(
-                        width = 8,
+                        ),
                         conditionalPanel(
                           condition = "input.color == 'genes'",
                           div(
-                            style = "background-color: #fffbea; padding: 10px 15px; border-radius: 8px; border: 1px solid #ffd700; margin-top: 25px;",
+                            style = "background-color: #fffbea; padding: 10px 15px; border-radius: 8px; border: 1px solid #ffd700; margin-top: 5px; margin-bottom: 10px;",
                             fluidRow(
                               column(
                                 width = 5,
