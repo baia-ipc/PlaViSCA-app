@@ -295,8 +295,7 @@ ui <- fluidPage(
                         conditionalPanel(
                           condition = "input.plot == '2d'",
                           div(
-                            class = "dimension-axes-container",
-                            style = "display: inline-flex; gap: 8px; align-items: center; margin-left: 15px;",
+                            style = "display: inline-flex; gap: 8px; align-items: center; margin-left: 10px;",
                             div(
                               style = "display: flex; flex-direction: column; align-items: center;",
                               tags$span("X", style = "font-size: 10px; font-weight: bold; color: #555; margin-bottom: -2px;"),
