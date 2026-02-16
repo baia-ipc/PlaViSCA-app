@@ -334,19 +334,12 @@ subBlock <- function(i) {
       class = "gene-select-input",
       column(
         width = 6,
-        selectizeInput(
-          paste0("genes_exp_", i),
-          label = "Gene Name",
-          choices = NULL,
-          multiple = TRUE,
-          options = list(maxItems = 4, placeholder = "Select genes...")
-        ),
         div(
-          style = "display: flex; align-items: center; gap: 10px; margin-bottom: 10px; margin-top: -5px;",
-          tags$label(style = "margin: 0; font-weight: 600;", "Gene id"),
+          style = "display: flex; align-items: center; margin-bottom: 5px; white-space: nowrap;",
+          tags$label("Gene name", style = "margin: 0; font-weight: bold;"),
           tags$label(
             class = "switch",
-            style = "margin: 0; transform: scale(0.8);",
+            style = "margin: 0; margin-left: 10px;",
             tags$input(
               id = paste0("check_exp_", i),
               type = "checkbox",
@@ -355,7 +348,7 @@ subBlock <- function(i) {
             tags$span(class = "slider")
           ),
           div(
-            style = "display: flex; align-items: center; gap: 8px; margin-left: 15px;",
+            style = "display: flex; align-items: center; gap: 10px; margin-left: 15px;",
             tags$a(
               id = paste0("plasmo_link_exp_", i),
               href = "#",
@@ -372,6 +365,13 @@ subBlock <- function(i) {
               "🧬 NCBI"
             )
           )
+        ),
+        selectizeInput(
+          paste0("genes_exp_", i),
+          label = NULL,
+          choices = NULL,
+          multiple = TRUE,
+          options = list(maxItems = 4, placeholder = "Select genes...")
         )
       ),
       column(
