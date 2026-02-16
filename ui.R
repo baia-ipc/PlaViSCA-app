@@ -237,15 +237,15 @@ ui <- fluidPage(
                     conditionalPanel(
                       condition = "input.embedding != 'tsne'",
                       column(
-                        width = 3,
+                        width = 2,
                         tags$label("Integration", class = "control-label", style = "margin-bottom: 5px; display: block;"),
                         div(
                           id = "tab_switch",
-                          style = "text-align: center; margin-top: 15px; display: flex; align-items: center; gap: 10px;",
-                          tags$span(class = "left-label", "Unintegrated", style = "font-size: 12px;"),
+                          style = "text-align: center; margin-top: 15px; display: flex; align-items: center; gap: 5px;",
+                          tags$span(class = "left-label", "Un", style = "font-size: 11px;"),
                           tags$label(
                             class = "switch",
-                            style = "transform: scale(0.8); margin-bottom: 0;",
+                            style = "transform: scale(0.7); margin-bottom: 0;",
                             tags$input(
                               id = "check_all",
                               type = "checkbox",
@@ -253,14 +253,14 @@ ui <- fluidPage(
                             ),
                             tags$span(class = "slider")
                           ),
-                          tags$span(class = "right-label", "Integrated", style = "font-size: 12px;")
+                          tags$span(class = "right-label", "Int", style = "font-size: 11px;")
                         )
                       )
                     ),
 
                     # Embedding type
                     column(
-                      width = 2,
+                      width = 3,
                       radioButtons(
                         "embedding",
                         "Embedding",

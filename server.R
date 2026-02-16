@@ -303,7 +303,7 @@ server <- function(input, output, session) {
 
   # Main gene_data reactive - ONLY loads data, no filtering
   gene_data <- eventReactive(
-    data_loading_trigger(),
+    list(data_loading_trigger(), input$embedding, input$check_all),
     {
       if (!app_initialized()) {
         return(NULL)
@@ -311,17 +311,15 @@ server <- function(input, output, session) {
 
       current_type <- get_current_data_type()
       req(current_type)
+      # Force dependency on embedding and integration to ensure plots update
+      req(input$embedding)
 
       # Check if we can reuse cached data based ONLY on data type
-      if (
-        !is.null(cached_data$current_type) &&
-          cached_data$current_type == current_type
-      ) {
-        return(sessionData$last_gene_data)
-      }
+      # We removed the caching optimization here to ensure full reactivity
+      # on embedding switch since filtered_gene_data depends on this.
 
       # Show progress bar when loading new data
-      withProgress(message = "Loading data", value = 30, {
+      withProgress(message = "Updating visualization", value = 30, {
         display_name <- switch(current_type,
           raw = "Raw",
           normalize = "Normalized"
@@ -336,7 +334,7 @@ server <- function(input, output, session) {
           genes = genes(dataset, gff_data)
         )
 
-        # Cache the current state (only data type, no filter)
+        # Cache the current state
         cached_data$current_type <- current_type
         sessionData$last_gene_data <- result
         return(result)
