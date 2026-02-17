@@ -383,9 +383,9 @@ server <- function(input, output, session) {
           )
           updateSelectizeInput(
             session,
-            paste0("parasite_stage", suffix),
-            choices = unique(filt_data$parasite_stage),
-            selected = isolate(input[[paste0("parasite_stage", suffix)]]),
+            paste0("parasite_stages", suffix),
+            choices = unique(filt_data$parasite_stages),
+            selected = isolate(input[[paste0("parasite_stages", suffix)]]),
             server = TRUE
           )
           updateSelectizeInput(
@@ -441,7 +441,7 @@ server <- function(input, output, session) {
   # Sync filter values across all tabs
   # When a filter changes in any tab, update all other tabs to match
   filter_names <- c(
-    "study_label", "sample_type", "host_species", "parasite_stage",
+    "study_label", "sample_type", "host_species", "parasite_stages",
     "treatment", "development_phase", "strain", "hour_post_invasion",
     "sequencer", "sc_technology"
   )
@@ -488,7 +488,7 @@ server <- function(input, output, session) {
     current_inputs <- list(
       study_label = input$study_label,
       host_species = input$host_species,
-      parasite_stage = input$parasite_stage,
+      parasite_stages = input$parasite_stages,
       treatment = input$treatment,
       development_phase = input$development_phase,
       sample_type = input$sample_type,
@@ -624,9 +624,9 @@ server <- function(input, output, session) {
       paste0("blood_stage__", unique(mr_data$blood_stage)),
       unique(mr_data$blood_stage)
     ),
-    parasite_stage = setNames(
-      paste0("parasite_stage__", unique(mr_data$parasite_stage)),
-      unique(mr_data$parasite_stage)
+    parasite_stages = setNames(
+      paste0("parasite_stages__", unique(mr_data$parasite_stages)),
+      unique(mr_data$parasite_stages)
     ),
     study_label = setNames(
       paste0("study_label__", unique(mr_data$study_label)),
@@ -673,7 +673,7 @@ server <- function(input, output, session) {
       input$data_opt,
       input$study_label_meta,
       input$host_species_meta,
-      input$parasite_stage_meta,
+      input$parasite_stages_meta,
       input$treatment_meta,
       input$development_phase_meta,
       input$sample_type_meta,
@@ -687,7 +687,7 @@ server <- function(input, output, session) {
         study_label = input$study_label_meta,
         sample_type = input$sample_type_meta,
         host_species = input$host_species_meta,
-        parasite_stage = input$parasite_stage_meta,
+        parasite_stages = input$parasite_stages_meta,
         treatment = input$treatment_meta,
         development_phase = input$development_phase_meta,
         strain = input$strain_meta,
@@ -708,7 +708,7 @@ server <- function(input, output, session) {
                 starts_with("pca_"),
                 starts_with("t_sne_"),
                 barcode,
-                life_cycle_stage, # Exclude old life_cycle_stage column (hidden from UI)
+                parasite_stages, # Exclude old life_cycle_stage column (hidden from UI)
                 geographic_location,
                 day_post_infection
               )
@@ -719,14 +719,14 @@ server <- function(input, output, session) {
                 "study_label",
                 "sample_type",
                 "host_species",
-                "parasite_stage",
+                "parasite_stages",
                 "development_phase",
-                "blood_stage",
-                "treatment",
-                "strain",
-                "hour_post_invasion",
-                "sequencer",
-                "sc_technology"
+                # "blood_stage",
+                "treatment"
+                # "strain",
+                # "hour_post_invasion",
+                # "sequencer",
+                # "sc_technology"
               ))
             ) %>%
             rename(
@@ -801,13 +801,13 @@ server <- function(input, output, session) {
         )
       })
 
-      ## plot parasite stage vs count
+      ## plot parasite stages vs count
       output$life_cycle_plotly <- renderPlotly({
         meta_plotly(
           filt_data,
-          "parasite_stage",
+          "parasite_stages",
           "Count",
-          "Parasite stage",
+          "Parasite stages",
           "bar"
         )
       })
@@ -831,7 +831,7 @@ server <- function(input, output, session) {
       input$data_opt,
       input$study_label_qc,
       input$host_species_qc,
-      input$parasite_stage_qc,
+      input$parasite_stages_qc,
       input$treatment_qc,
       input$development_phase_qc,
       input$sample_type_qc,
@@ -844,7 +844,7 @@ server <- function(input, output, session) {
       current_inputs <- list(
         study_label = input$study_label_qc,
         host_species = input$host_species_qc,
-        parasite_stage = input$parasite_stage_qc,
+        parasite_stages = input$parasite_stages_qc,
         treatment = input$treatment_qc,
         development_phase = input$development_phase_qc,
         sample_type = input$sample_type_qc,
@@ -942,7 +942,7 @@ server <- function(input, output, session) {
     current_inputs <- list(
       study_label = input$study_label_gex,
       host_species = input$host_species_gex,
-      parasite_stage = input$parasite_stage_gex,
+      parasite_stages = input$parasite_stages_gex,
       treatment = input$treatment_gex,
       development_phase = input$development_phase_gex,
       sample_type = input$sample_type_gex,
@@ -995,7 +995,7 @@ server <- function(input, output, session) {
       input$data_opt,
       input$study_label_gex,
       input$host_species_gex,
-      input$parasite_stage_gex,
+      input$parasite_stages_gex,
       input$treatment_gex,
       input$development_phase_gex,
       input$sample_type_gex,
@@ -1983,7 +1983,7 @@ server <- function(input, output, session) {
       input$check_all,
       input$study_label,
       input$host_species,
-      input$parasite_stage,
+      input$parasite_stages,
       input$treatment,
       input$development_phase,
       input$sample_type,
@@ -2395,14 +2395,14 @@ server <- function(input, output, session) {
         "study_label" = "Study",
         "development_phase" = "Development phase",
         "blood_stage" = "Blood stage",
-        "parasite_stage" = "Parasite stage",
+        "parasite_stages" = "Development phase",
         "strain" = "Strain",
         "treatment" = "Treatment",
         "sample_type" = "Sample type",
         "host_species" = "Host species",
-        "sequencer" = "Sequencer",
-        "sc_technology" = "SC technology",
-        "day_post_infection" = "DPI",
+        # "sequencer" = "Sequencer",
+        # "sc_technology" = "SC technology",
+        # "day_post_infection" = "DPI",
         "hour_post_invasion" = "HPI",
         "genes" = "Genes"
       )
@@ -3059,9 +3059,9 @@ server <- function(input, output, session) {
                     "Group By",
                     "Study Label",
                     "Host Species",
-                    "Life Cycle Stage",
+                    "Parasite stages",
                     "Treatment",
-                    "Parasite Stage",
+                    "Development phase",
                     "Sample Type",
                     "Strain",
                     "Hour Post Invasion",
@@ -3215,9 +3215,9 @@ server <- function(input, output, session) {
                         "Group By",
                         "Study Label",
                         "Host Species",
-                        "Life Cycle Stage",
+                        "Parasite stages",
                         "Treatment",
-                        "Parasite Stage",
+                        "Development phase",
                         "Sample Type",
                         "Strain",
                         "Hour Post Invasion",

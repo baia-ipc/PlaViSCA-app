@@ -9,10 +9,10 @@ setwd("/srv/baia/prj/pvsca/pre_process_data")
 
 rds_files <- list.files(pattern = "^hazzard2024_pv.*\\.rds$")
 
-hazzard2022_list <- lapply(rds_files, readRDS)
+hazzard2024_list <- lapply(rds_files, readRDS)
 
 # Merge all
-pv.combined.all <- Reduce(function(x, y) merge(x, y = y), hazzard2022_list)
+pv.combined.all <- Reduce(function(x, y) merge(x, y = y), hazzard2024_list)
 
 # Join layers if needed (multi-layer data)
 pv.combined.all <- JoinLayers(pv.combined.all)

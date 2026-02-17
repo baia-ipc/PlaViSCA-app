@@ -177,7 +177,7 @@ build_hover_text <- function(df, legend_title, display_color, x_vals = NULL, y_v
     "Cell: ", df$barcode,
     "<br>", legend_title, ": ", display_color,
     "<br>Study: ", df$study_label,
-    "<br>Stage: ", df$parasite_stage
+    "<br>Stage: ", df$parasite_stages
   )
 
   # Add coordinates only if they are numeric

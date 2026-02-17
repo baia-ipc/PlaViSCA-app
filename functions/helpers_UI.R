@@ -176,8 +176,8 @@ create_meta_filter_row <- function(suffix = "") {
         div(
           class = "col-5-custom",
           selectizeInput(
-            inputId = paste0("parasite_stage", suffix),
-            "Parasite stage:",
+            inputId = paste0("parasite_stages", suffix),
+            "Parasite stages:",
             choices = c(""),
             multiple = TRUE,
             options = list(
@@ -334,12 +334,12 @@ subBlock <- function(i) {
       class = "gene-select-input",
       column(
         width = 6,
+        style = "position: relative;",
         div(
-          style = "display: flex; align-items: center; margin-bottom: 5px; white-space: nowrap;",
-          tags$label("Gene name", style = "margin: 0; font-weight: bold;"),
+          style = "position: absolute; top: 0px; left: 105px; display: flex; align-items: center; white-space: nowrap;",
           tags$label(
             class = "switch",
-            style = "margin: 0; margin-left: 10px;",
+            style = "margin: 0;",
             tags$input(
               id = paste0("check_exp_", i),
               type = "checkbox",
@@ -368,7 +368,7 @@ subBlock <- function(i) {
         ),
         selectizeInput(
           paste0("genes_exp_", i),
-          label = NULL,
+          label = "Gene name",
           choices = NULL,
           multiple = TRUE,
           options = list(maxItems = 4, placeholder = "Select genes...")

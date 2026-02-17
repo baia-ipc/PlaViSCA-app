@@ -60,7 +60,7 @@ The Analysis page is designed to facilitate interactive exploration of both meta
 
 **Video 1:** Metadata filtration
 
-A short video demonstration of the Metadata tab **Video 1**. This video provides an overview of how to filter datasets by biological and experimental attributes, such as host species, life cycle stage, treatment, parasite stage, and sample type. Applying filters dynamically updates both plots and tables, enabling users to focus on relevant data subsets for further analysis.
+A short video demonstration of the Metadata tab **Video 1**. This video provides an overview of how to filter datasets by biological and experimental attributes, such as host species, life cycle stage, treatment, parasite stages, and sample type. Applying filters dynamically updates both plots and tables, enabling users to focus on relevant data subsets for further analysis.
 
 **Interactive Features:**
 - **Plotly Charts**: Hover for details. Use controls (zoom, pan, download) in the top-right corner.
