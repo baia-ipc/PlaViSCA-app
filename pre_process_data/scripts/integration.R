@@ -2,7 +2,7 @@ library(DropletUtils) # scRNA-seq empty droplet detection
 library(Seurat) # contains scRNA-seq analysis functions
 
 # set current working directory
-setwd("/srv/baia/prj/pvsca/pre_process_data")
+setwd("/home/sopheap/pvsca_b/pre_process_data")
 
 # read all Seurat object
 files <- c(

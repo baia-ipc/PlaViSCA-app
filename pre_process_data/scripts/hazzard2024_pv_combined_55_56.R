@@ -13,7 +13,7 @@ library(scater)
 library(SingleCellExperiment)
 
 # set current working directory
-setwd("/srv/baia/prj/pvsca/pre_process_data")
+setwd("/home/sopheap/pvsca_b/pre_process_data")
 
 ##### --------------------------------------------------------------------------
 ##### 2. Load annotation files
@@ -63,7 +63,7 @@ all_pv <- list()
 for (sample_id in samples) {
   path <- file.path(
     paste0(
-      "/srv/baia/prj/pvsca/pre_process_data/counts/",
+      "./counts/",
       study_num,
       "/",
       sample_id,

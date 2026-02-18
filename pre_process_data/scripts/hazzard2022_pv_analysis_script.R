@@ -14,7 +14,7 @@ library(SingleCellExperiment)
 
 
 # set current working directory
-setwd("/srv/baia/prj/pvsca/pre_process_data")
+setwd("/home/sopheap/pvsca_b/pre_process_data")
 
 ##### --------------------------------------------------------------------------
 ##### 2. Load annotation files

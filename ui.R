@@ -347,7 +347,7 @@ ui <- fluidPage(
                           choices = list(
                             "Study" = "study_label",
                             "Development phase" = "development_phase",
-                            "Blood stage" = "blood_stage",
+                            # "Blood stage" = "blood_stage",
                             "Parasite stages" = "parasite_stages",
                             "Strain" = "strain",
                             "Treatment" = "treatment",
@@ -359,7 +359,7 @@ ui <- fluidPage(
                             # "HPI" = "hour_post_invasion",
                             "Genes" = "genes"
                           ),
-                          selected = "study_label",
+                          selected = "parasite_stages",
                           width = "100%"
                         )
                       ),
@@ -406,19 +406,19 @@ ui <- fluidPage(
                                 choices = list(
                                   "Study" = "study_label",
                                   "Development phase" = "development_phase",
-                                  "Blood stage" = "blood_stage",
+                                  # "Blood stage" = "blood_stage",
                                   "Parasite stages" = "parasite_stages",
                                   "Strain" = "strain",
                                   "Treatment" = "treatment",
                                   "Sample type" = "sample_type",
                                   "Host species" = "host_species",
-                                  "Sequencer" = "sequencer",
-                                  "SC. technology" = "sc_technology",
-                                  "DPI" = "day_post_infection",
-                                  "HPI" = "hour_post_invasion",
+                                  # "Sequencer" = "sequencer",
+                                  # "SC. technology" = "sc_technology",
+                                  # "DPI" = "day_post_infection",
+                                  # "HPI" = "hour_post_invasion",
                                   "Genes" = "genes"
                                 ),
-                                selected = "study_label",
+                                selected = "parasite_stages",
                                 width = "100%"
                               )
                             ),
@@ -464,19 +464,19 @@ ui <- fluidPage(
                                 choices = list(
                                   "Study" = "study_label",
                                   "Development phase" = "development_phase",
-                                  "Blood stage" = "blood_stage",
+                                  # "Blood stage" = "blood_stage",
                                   "Parasite stages" = "parasite_stages",
                                   "Strain" = "strain",
                                   "Treatment" = "treatment",
                                   "Sample type" = "sample_type",
                                   "Host species" = "host_species",
-                                  "Sequencer" = "sequencer",
-                                  "SC. technology" = "sc_technology",
-                                  "DPI" = "day_post_infection",
-                                  "HPI" = "hour_post_invasion",
+                                  # "Sequencer" = "sequencer",
+                                  # "SC. technology" = "sc_technology",
+                                  # "DPI" = "day_post_infection",
+                                  # "HPI" = "hour_post_invasion",
                                   "Genes" = "genes"
                                 ),
-                                selected = "sample_type",
+                                selected = "parasite_stages",
                                 width = "100%"
                               )
                             ),
@@ -641,7 +641,7 @@ ui <- fluidPage(
                 column(width = 4, plotlyOutput("treatment_plotly")),
                 column(
                   width = 4,
-                  plotlyOutput("life_cycle_plotly"),
+                  plotlyOutput("parasite_stages_plotly"),
                   div(
                     style = "text-align: center; margin-top: 5px; font-size: 12px; color: #666;",
                     HTML(

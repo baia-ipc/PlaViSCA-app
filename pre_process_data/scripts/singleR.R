@@ -8,7 +8,7 @@ library(scCustomize) # single-cell data handling and plotting tools
 library(tidyverse)
 
 # set current working directory
-setwd("/srv/baia/prj/pvsca/pre_process_data")
+setwd("/home/sopheap/pvsca_b/pre_process_data")
 
 pv.combined.all <- readRDS("./pv_all_studies.rds")
 
@@ -60,6 +60,8 @@ sce.all <- as.SingleCellExperiment(DietSeurat(
   layers = "data",
   assays = "RNA"
 ))
+rownames(sce.all) <- gsub("_", "-", rownames(sce.all))
+
 
 # Run SingleR
 pred.IDC.all <- SingleR(
@@ -130,7 +132,7 @@ pv.combined.all$parasite_stages[liver_form] <- pv.combined.all$liver_form[
 ]
 
 
-# Update life_cycle_stage only where refine_state is not NA
+# Update parasite_stages only where refine_state is not NA
 pv.combined.all$parasite_stages[!is.na(pv.combined.all$refine_state)] <-
   pv.combined.all$refine_state[!is.na(pv.combined.all$refine_state)]
 
@@ -143,7 +145,7 @@ pv.combined.all$parasite_stages[ruberto2022_2] <- "Sporozoite"
 hazzard2022 <- pv.combined.all$run_id %in% c("SRR20710498", "SRR20710499")
 pv.combined.all$parasite_stages[hazzard2022] <- "Sporozoite"
 
-# visualize the number of cells in the dataset assigned to a parasite stages:
+# visualize the number of cells in the dataset assigned to a parasite stage:
 SCpubr::do_BarPlot(
   pv.combined.all,
   group.by = "parasite_stages",
@@ -428,7 +430,7 @@ pv.combined.all@meta.data <- pv.combined.all@meta.data %>%
       parasite_stages == "Schizont (liver stage)" ~ "Liver stages",
       TRUE ~ "Blood stages"
     ),
-    
+
     # 2. Blood stage - blood-specific forms only (NA for non-blood)
     blood_stage = case_when(
       parasite_stages == "Merozoite" ~ "Merozoite",
@@ -439,8 +441,8 @@ pv.combined.all@meta.data <- pv.combined.all@meta.data %>%
       parasite_stages == "Male gametocyte" ~ "Male gametocyte",
       TRUE ~ NA_character_
     ),
-    
-    # 3. Parasite stages - specific forms across all phases
+
+    # 3. Parasite stage - specific forms across all phases
     parasite_stage = case_when(
       parasite_stages == "Sporozoite" ~ "Sporozoite",
       parasite_stages == "Merozoite" ~ "Merozoite",
@@ -455,6 +457,14 @@ pv.combined.all@meta.data <- pv.combined.all@meta.data %>%
     )
   )
 
+# Remove Male and female gametocyte prediction with Anopheles
+pv.combined.all <- subset(
+  pv.combined.all,
+  subset = !((parasite_stages %in% c("Male gametocyte", "Female gametocyte")) &
+    grepl("Anopheles", host_species))
+)
+
+
 # Verify the new columns
 cat("\n=== NEW TERMINOLOGY COLUMNS CREATED ===\n\n")
 cat("Development phase (3 categories):\n")
@@ -463,8 +473,8 @@ print(table(pv.combined.all$development_phase, useNA = "ifany"))
 cat("\n\nBlood stage (6 forms + NA for non-blood):\n")
 print(table(pv.combined.all$blood_stage, useNA = "ifany"))
 
-cat("\n\nParasite stages (9 specific forms):\n")
-print(table(pv.combined.all$parasite_stage, useNA = "ifany"))
+cat("\n\nParasite stage (9 specific forms):\n")
+print(table(pv.combined.all$parasite_stages, useNA = "ifany"))
 
 cat("\n=== VERIFICATION COMPLETE ===\n\n")
 

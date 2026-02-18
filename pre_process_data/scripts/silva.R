@@ -2,7 +2,7 @@ library(Seurat)
 library(dplyr)
 
 # set current working directory
-setwd("/srv/baia/prj/pvsca/pre_process_data")
+setwd("/home/sopheap/pvsca_b/pre_process_data")
 
 df <- readxl::read_xls("data/TableS2_Cell_Metadata.xls", skip = 1)
 df <- df |>

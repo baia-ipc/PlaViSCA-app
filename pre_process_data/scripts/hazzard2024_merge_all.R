@@ -5,7 +5,7 @@ library(Seurat)
 library(scater)
 library(SingleCellExperiment)
 
-setwd("/srv/baia/prj/pvsca/pre_process_data")
+setwd("/home/sopheap/pvsca_b/pre_process_data")
 
 rds_files <- list.files(pattern = "^hazzard2024_pv.*\\.rds$")
 

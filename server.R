@@ -708,7 +708,7 @@ server <- function(input, output, session) {
                 starts_with("pca_"),
                 starts_with("t_sne_"),
                 barcode,
-                parasite_stages, # Exclude old life_cycle_stage column (hidden from UI)
+                parasite_stages, # Exclude old parasite_stages column (hidden from UI)
                 geographic_location,
                 day_post_infection
               )
@@ -802,7 +802,7 @@ server <- function(input, output, session) {
       })
 
       ## plot parasite stages vs count
-      output$life_cycle_plotly <- renderPlotly({
+      output$parasite_stages_plotly <- renderPlotly({
         meta_plotly(
           filt_data,
           "parasite_stages",
@@ -924,7 +924,7 @@ server <- function(input, output, session) {
             scrollX = TRUE,
             autoWidth = FALSE,
             columnDefs = list(
-              list(width = "500px", targets = 3, className = "dt-left")
+              list(width = "500px", targets = 4, className = "dt-left")
             )
           ),
           selection = "single",
@@ -988,7 +988,7 @@ server <- function(input, output, session) {
         return(NULL)
       }
     )
-  }) %>% debounce(500) # Add 500ms debounce to batch filter changes
+  }) %>% debounce(500) 
 
   observeEvent(
     list(
@@ -1008,7 +1008,7 @@ server <- function(input, output, session) {
       current_inputs <- list(
         study_label = input$study_label_gex,
         host_species = input$host_species_gex,
-        parasite_stage = input$parasite_stage_gex,
+        parasite_stages = input$parasite_stages_gex,
         treatment = input$treatment_gex,
         development_phase = input$development_phase_gex,
         sample_type = input$sample_type_gex,
@@ -1048,7 +1048,7 @@ server <- function(input, output, session) {
       get_current_data_type(),
       input$study_label_gex,
       input$host_species_gex,
-      input$parasite_stage_gex,
+      input$parasite_stages_gex,
       input$treatment_gex,
       input$development_phase_gex,
       input$sample_type_gex,
@@ -1083,7 +1083,7 @@ server <- function(input, output, session) {
     )
 
     return(result)
-  }) %>% debounce(300) # Add 300ms debounce to reduce unnecessary re-renders
+  }) %>% debounce(300) 
 
   df_gene0 <- reactiveVal(NULL)
 
@@ -1163,7 +1163,7 @@ server <- function(input, output, session) {
   # Debounced gene selection to prevent flickering
   genes_exp_0_debounced <- reactive({
     input$genes_exp_0
-  }) %>% debounce(800) # Wait 800ms after user stops typing/selecting
+  }) %>% debounce(800) 
 
   group_exp_debounced <- reactive({
     input$group_exp_0
@@ -1196,7 +1196,7 @@ server <- function(input, output, session) {
         # 2. Use the already filtered data instead of applying only parasite_stage filter
         filtered_data <- filtered_gene_exp$data
         raw_data <- list(
-          data = filtered_gene_exp$full, # Full expression matrix
+          data = filtered_gene_exp$full,
           genes = filtered_gene_exp$genes
         )
 
@@ -1294,7 +1294,7 @@ server <- function(input, output, session) {
           group = group_values,
           stringsAsFactors = FALSE
         )
-        names(plot_data)[2] <- selected_group # Set correct column name for grouping
+        names(plot_data)[2] <- selected_group 
 
         # Remove NA values
         plot_data <- plot_data[!is.na(plot_data$gene_expr) & !is.na(plot_data[[selected_group]]), ]
@@ -1382,7 +1382,7 @@ server <- function(input, output, session) {
                 session,
                 inputId = paste0("genes_exp_", id),
                 choices = selectize_choices,
-                selected = default_selection, # Add default selection
+                selected = default_selection, 
                 server = TRUE
               )
             }
@@ -1489,7 +1489,7 @@ server <- function(input, output, session) {
                 session,
                 inputId = paste0("genes_exp_", id),
                 choices = selectize_choices,
-                selected = default_selection, # Add default selection
+                selected = default_selection, 
                 server = TRUE
               )
             }
@@ -1833,18 +1833,8 @@ server <- function(input, output, session) {
     ignoreInit = TRUE
   )
 
-  # Observer for updating second plot axis choices (for comparison mode)
-  # Removed: observeEvent for updating second plot axis choices
-  # Both plots now use the same axes from main controls
-
-  # Observer for updating second plot size based on 2D/3D selection
-  # Removed: observeEvent for plot_second to update size_second
-  # Size and plot dimension now inherited from main controls
-
   ## choose data based on input color
   data <- reactive({
-    # For embedding plots, we always need filtered_gene_data which contains coordinates
-    # The distinction is only about whether we're coloring by genes or metadata
     filtered_gene_data()$data
   })
 
@@ -1964,9 +1954,9 @@ server <- function(input, output, session) {
 
   # Add debouncing for plot updates
   plot_update_trigger <- reactiveVal(0)
-  plot_ready <- reactiveVal(TRUE) # Initialize to TRUE so plots can render on startup
+  plot_ready <- reactiveVal(TRUE)
   genes_loading <- reactiveVal(FALSE)
-  autoUpdatePlot <- reactiveVal(TRUE) # Initialize to TRUE so plots can render on startup
+  autoUpdatePlot <- reactiveVal(TRUE) 
 
   # Simplified debounced observer for plot-related inputs
   observe({
@@ -2123,17 +2113,13 @@ server <- function(input, output, session) {
       color_column <- NULL
 
       if (isTRUE(color_input == "genes")) {
-        # Resolve gene input robustly: user may supply display names or gene ids (multiple selection supported)
         gene_inputs <- genes_input
 
         # Handle empty or invalid gene inputs by falling back to sample_type
         if (is.null(gene_inputs) || length(gene_inputs) == 0 ||
           (length(gene_inputs) == 1 && (is.na(gene_inputs) || gene_inputs == ""))) {
-          # If genes are requested but none provided, fall back to sample_type
           color_column <- "sample_type"
         } else {
-          # Process gene inputs normally
-
           # For dual plot mode, use cached data to prevent interference between plots
           if (is_dual_plot && !is.null(data_source)) {
             gene_data_obj <- attr(data_source, "cached_genes")
@@ -2262,8 +2248,6 @@ server <- function(input, output, session) {
           }
 
           if (!is.null(resolved_gene_col)) {
-            # For single gene selection, attach the gene expression values from full_mat to df_local
-            # (Multi-gene averaging already attached values earlier)
             if (resolved_gene_col != "multi_gene_avg" && resolved_gene_col %in% colnames(full_mat)) {
               if (!is.null(row_idx) && length(row_idx) > 0) {
                 # Attach gene expression values for the filtered rows
@@ -2394,7 +2378,7 @@ server <- function(input, output, session) {
       color_names <- c(
         "study_label" = "Study",
         "development_phase" = "Development phase",
-        "blood_stage" = "Blood stage",
+        # "blood_stage" = "Blood stage",
         "parasite_stages" = "Development phase",
         "strain" = "Strain",
         "treatment" = "Treatment",
@@ -2403,7 +2387,7 @@ server <- function(input, output, session) {
         # "sequencer" = "Sequencer",
         # "sc_technology" = "SC technology",
         # "day_post_infection" = "DPI",
-        "hour_post_invasion" = "HPI",
+        # "hour_post_invasion" = "HPI",
         "genes" = "Genes"
       )
 
@@ -2495,7 +2479,7 @@ server <- function(input, output, session) {
     # For gene coloring, allow empty genes and let the plot function handle it
     if (color_second == "genes") {
       if (is.null(genes_second) || (length(genes_second) == 1 && genes_second == "")) {
-        genes_second <- "" # Set to empty but don't block
+        genes_second <- "" 
       }
     }
 
@@ -2507,7 +2491,7 @@ server <- function(input, output, session) {
       yaxis = yaxis_val,
       size = size_val,
       plot = plot_val,
-      timestamp = Sys.time() # Add timestamp to track when this changes
+      timestamp = Sys.time() 
     )
   })
 
@@ -2638,7 +2622,6 @@ server <- function(input, output, session) {
 
     # Generate plot without progress bar
     isolate({
-      # Work on a local copy so we can attach a temporary gene-expression column
       df_local <- data()
 
       color_column <- NULL
@@ -2895,7 +2878,6 @@ server <- function(input, output, session) {
     selected_table(long_tbl)
 
     # Showing the actual barcode
-    # mapped full row. Fall back to the original cell_key if barcode is missing.
     sel_barcode <- tryCatch(
       {
         if (!is.null(mapped_full_row) && !is.na(mapped_full_row) && "barcode" %in% colnames(full_mat)) {
@@ -3077,7 +3059,7 @@ server <- function(input, output, session) {
                     as.character(cur_group),
                     paste(isolate(input$study_label), collapse = ", "),
                     paste(isolate(input$host_species), collapse = ", "),
-                    paste(isolate(input$parasite_stage), collapse = ", "),
+                    paste(isolate(input$parasite_stages), collapse = ", "),
                     paste(isolate(input$treatment), collapse = ", "),
                     paste(isolate(input$development_phase), collapse = ", "),
                     paste(isolate(input$sample_type), collapse = ", "),
@@ -3233,7 +3215,7 @@ server <- function(input, output, session) {
                         as.character(cur_group),
                         paste(isolate(input$study_label), collapse = ", "),
                         paste(isolate(input$host_species), collapse = ", "),
-                        paste(isolate(input$parasite_stage), collapse = ", "),
+                        paste(isolate(input$parasite_stages), collapse = ", "),
                         paste(isolate(input$treatment), collapse = ", "),
                         paste(isolate(input$development_phase), collapse = ", "),
                         paste(isolate(input$sample_type), collapse = ", "),
