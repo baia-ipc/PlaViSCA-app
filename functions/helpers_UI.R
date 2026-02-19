@@ -113,8 +113,9 @@ create_meta_filter_row <- function(suffix = "") {
   card(
     class = "mb-3 shadow-sm",
     card_header(
-      class = "bg-primary text-white py-2",
-      tagList(fontawesome::fa("filter"), tags$strong(" Filters", class = "ms-2"))
+      class = "bg-primary text-white py-1",
+      fontawesome::fa("filter", height = "14px"),
+      tags$span("Filters", class = "fw-bold", style = "font-size: 0.9rem;")
     ),
     card_body(
       fluidRow(
@@ -128,6 +129,7 @@ create_meta_filter_row <- function(suffix = "") {
             multiple = TRUE,
             options = list(
               placeholder = "Select...",
+              dropdownParent = "body",
               onInitialize = I('function() { this.setValue(""); }')
             )
           )
@@ -136,11 +138,12 @@ create_meta_filter_row <- function(suffix = "") {
           class = "col-md-2",
           selectizeInput(
             inputId = paste0("development_phase", suffix),
-            label = tags$span("Phase", style = "font-size: 0.85rem; font-weight: 500;"),
+            label = tags$span("Development phase", style = "font-size: 0.85rem; font-weight: 500;"),
             choices = c(""),
             multiple = TRUE,
             options = list(
               placeholder = "Select...",
+              dropdownParent = "body",
               onInitialize = I('function() { this.setValue(""); }')
             )
           )
@@ -154,6 +157,7 @@ create_meta_filter_row <- function(suffix = "") {
             multiple = TRUE,
             options = list(
               placeholder = "Select...",
+              dropdownParent = "body",
               onInitialize = I('function() { this.setValue(""); }')
             )
           )
@@ -167,6 +171,7 @@ create_meta_filter_row <- function(suffix = "") {
             multiple = TRUE,
             options = list(
               placeholder = "Select...",
+              dropdownParent = "body",
               onInitialize = I('function() { this.setValue(""); }'),
               render = I(
                 '{
@@ -190,6 +195,7 @@ create_meta_filter_row <- function(suffix = "") {
             multiple = TRUE,
             options = list(
               placeholder = "Select...",
+              dropdownParent = "body",
               onInitialize = I('function() { this.setValue(""); }')
             )
           )
@@ -203,6 +209,7 @@ create_meta_filter_row <- function(suffix = "") {
             multiple = TRUE,
             options = list(
               placeholder = "Select...",
+              dropdownParent = "body",
               onInitialize = I('function() { this.setValue(""); }')
             )
           )
@@ -220,8 +227,9 @@ create_plot_controls <- function(data_type_id = "data_type", include_size_dim = 
   card(
     class = "mb-3 shadow-sm",
     card_header(
-      class = "bg-secondary text-white py-2",
-      tagList(fontawesome::fa("cog"), tags$strong(" Plot settings", class = "ms-2"))
+      class = "bg-secondary text-white py-1",
+      fontawesome::fa("cog", height = "14px"),
+      tags$span("Plot settings", class = "fw-bold", style = "font-size: 0.9rem;")
     ),
     card_body(
       layout_column_wrap(
@@ -280,7 +288,7 @@ subBlock <- function(i) {
             label = NULL,
             choices = NULL,
             multiple = TRUE,
-            options = list(maxItems = 10, placeholder = "Select genes...")
+            options = list(maxItems = 10, placeholder = "Select genes...", dropdownParent = "body")
           )
         ),
         column(

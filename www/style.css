@@ -209,7 +209,7 @@ body {
 .analysis-content {
   flex: 1;
   padding: 30px;
-  overflow-y: auto;
+  overflow: visible;
   background-color: var(--background-color);
 }
 
@@ -307,10 +307,36 @@ body {
   box-shadow: 0 2px 8px rgba(0,0,0,0.05) !important;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   margin-bottom: 15px !important;
+  overflow: visible !important;
+}
+
+.card-header {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  text-align: left !important;
+  padding: 8px 12px !important;
+  gap: 8px !important; /* Bring icon and text closer */
 }
 
 .card-body {
   padding: 12px 18px !important;
+  overflow: visible !important;
+}
+
+/* Ensure selectize dropdowns appear on top of everything and don't cause scroll */
+.selectize-dropdown {
+  z-index: 9999 !important;
+  position: absolute !important;
+}
+
+.selectize-control {
+  overflow: visible !important;
+  z-index: 10 !important;
+}
+
+.selectize-input {
+  overflow: visible !important;
 }
 
 .card:hover {
@@ -354,15 +380,23 @@ body {
 }
 
 .bg-primary {
-  background-color: var(--primary-color) !important;
+  background-color: #008080 !important; /* Professional Teal */
+  background-image: linear-gradient(120deg, #008080 0%, #006666 100%) !important;
 }
 
 .bg-secondary {
-  background-color: #455a64 !important;
+  background-color: #455a64 !important; /* Professional Slate Gray */
+  background-image: linear-gradient(120deg, #455a64 0%, #37474f 100%) !important;
 }
 
 .bg-dark {
   background-color: #263238 !important;
+  background-image: linear-gradient(120deg, #263238 0%, #1a232e 100%) !important;
+}
+
+/* Fix duplicate icon on download buttons when using bslib/fontawesome */
+#download_data i, .btn-download-green i {
+  display: none !important;
 }
 
 /* About Section */
