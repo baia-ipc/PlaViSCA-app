@@ -2832,7 +2832,7 @@ server <- function(input, output, session) {
 
       showModal(modalDialog(
         title = paste("Selected cell ID:", as.character(cell_key)),
-        div(style = "width: 100%;", DT::DTOutput("cell_expression_table")),
+        div(class = "width-100", DT::DTOutput("cell_expression_table")),
         size = "xl",
         easyClose = TRUE,
         footer = modalButton(label = tagList(icon("times")))
@@ -2887,7 +2887,7 @@ server <- function(input, output, session) {
 
     showModal(modalDialog(
       title = paste("Selected cell ID:", sel_barcode),
-      div(style = "width: 100%;", DT::DTOutput("cell_expression_table")),
+      div(class = "width-100", DT::DTOutput("cell_expression_table")),
       size = "xl",
       easyClose = TRUE,
       footer = tagList(

@@ -5,7 +5,7 @@ function initParticles(targetId) {
     const config = {
       particles: {
         number: { value: 200, density: { enable: true, value_area: 800 } },
-        color: { value: '#ffffff' },
+        color: { value: '#800080' },
         shape: { type: 'circle', stroke: { width: 0, color: '#000000' } },
         opacity: { value: 0.8 },
         size: { value: 5, random: true },

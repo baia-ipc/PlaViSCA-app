@@ -446,31 +446,15 @@ $(document).ready(function () {
   $analysisSection.hide();
   $aboutSection.hide();
 
-  // Initialize particles for home page with retry mechanism
-  function ensureHomeParticles() {
-    if (typeof initHomeParticles === 'function') {
-      try {
-        initHomeParticles();
-      } catch (e) {
-        console.warn('Failed to initialize home particles, retrying...', e);
-        setTimeout(() => {
-          try {
-            if (typeof initParticles === 'function') {
-              initParticles('particles-js-home');
-            }
-          } catch (retryError) {
-            console.error('Particle initialization failed completely:', retryError);
-          }
-        }, 1000);
-      }
+  // Initialize particles for home page
+  // The initParticles function is defined in particles-config.js
+  $(document).ready(function() {
+    if (typeof initParticles === 'function') {
+      initParticles('particles-js-home');
     } else {
-      // Fallback if initHomeParticles is not available yet
-      setTimeout(ensureHomeParticles, 500);
+      console.error("initParticles function not found.");
     }
-  }
-
-  // Initialize particles after a short delay to ensure DOM is ready
-  setTimeout(ensureHomeParticles, 200);
+  });
 
   // Use cached selector and single event handler  
   $hamburger.on('click', function () {

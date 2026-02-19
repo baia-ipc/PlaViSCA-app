@@ -23,25 +23,14 @@ ui <- fluidPage(
     tags$script(src = "particles.min.js"),
     tags$script(src = "particles-config.js")
   ),
-
+  
   # Menubar
   div(
     class = "menu-bar",
     div(
-      class = "logo ipc",
-      a(
-        href = "https://www.pasteur-kh.org/",
-        target = "_blank",
-        img(src = "ipc_logo.png", alt = "IPC Logo")
-      )
-    ),
-    div(
       class = "menu-title",
-      div(
-        class = "title-text",
-        h1("PlaViSca"),
-        span(tags$i("Plasmodium vivax"), " Single Cell Analysis Platform")
-      )
+      h1("PlaViSca"),
+      span(tags$i("Plasmodium vivax"), " Single Cell Analysis Platform")
     ),
     div(
       class = "menu-items",
@@ -50,148 +39,109 @@ ui <- fluidPage(
         label = tagList(icon("home"), " Home"),
         class = "menu-link active"
       ),
-      span("|"),
       actionLink(
         "analysis",
         label = tagList(icon("table"), " Analysis"),
         class = "menu-link"
       ),
-      span("|"),
       actionLink(
         "about",
         label = tagList(icon("info-circle"), " About"),
         class = "menu-link"
       )
-    ),
-    div(class = "logo baia", img(src = "baia_logo.png"))
+    )
   ),
-
+  
   # Home section
   div(
     id = "home_section",
+    class = "home-section",
+    div(id = "particles-js-home"),
     fluidRow(
       class = "introduction",
       column(
         width = 6,
         class = "intro-left",
+        h2("Welcome to PlaViSca"),
         p(
-          "PlaViSCA is a platform designed to support the malaria research
-        community in analyzing and visualizing single-cell RNA sequencing
-        (scRNA-seq) data. PlaViSca provides a user friendly interface for
-        exploring metadata and gene expression across various parasite life
-        cycle stages using interactive tables and 2D or 3D visualizations with
-        customizable filters and coloring. The platform also allows users to
-        download data for further analysis. PlaViSCA empowers researchers to
-        explore complex scRNA-seq for ",
+          "An interactive platform for the analysis and visualization of single-cell RNA sequencing (scRNA-seq) data from ",
           em("P. vivax"),
-          " without requiring any programming skills."
-        ),
-        div(
-          class = "logo mosquito-bottom",
-          img(
-            src = "mosquito-bottom.png",
-            alt = "mosquito"
-          )
+          ". Explore metadata, gene expression, and various parasite life cycle stages through interactive tables and 2D/3D visualizations."
         )
       ),
       column(
         width = 6,
         class = "intro-right",
         div(
-          class = "pages_link",
+          class = "pages-links",
           actionLink(
             "metadata_link",
             tagList(
-              img(src = "metadata.png", alt = "Metadata"),
+              img(src = "metadata.png", alt = "Metadata", class = "link-icon"),
               span("Metadata")
             )
           ),
           actionLink(
             "analysis_link",
             tagList(
-              img(src = "umap.png", alt = "Embedding"),
+              img(src = "umap.png", alt = "Embedding", class = "link-icon"),
               span("Embedding")
             )
           ),
           actionLink(
             "qc_link",
             tagList(
-              img(src = "qc.png", alt = "Quality control"),
+              img(src = "qc.png", alt = "Quality control", class = "link-icon"),
               span("Quality control")
             )
-          )
-        ),
-        div(
-          class = "pages_link",
+          ),
           actionLink(
             "sources_link",
             tagList(
-              img(src = "data_sources.png", alt = "Data sources"),
+              img(src = "data_sources.png", alt = "Data sources", class = "link-icon"),
               span("Data sources")
             )
           ),
           actionLink(
             "gene_exp_link",
             tagList(
-              img(src = "gene_exp.png", alt = "Gene Expression"),
+              img(src = "gene_exp.png", alt = "Gene Expression", class = "link-icon"),
               span("Gene expression")
             )
           ),
           actionLink(
-            "contribute_link",
-            tagList(
-              img(src = "contribute.png", alt = "Contribute"),
-              span("Contribute")
-            )
-          )
-        ),
-        div(
-          class = "pages_link",
-          actionLink(
             "usermanual_link",
             tagList(
-              img(src = "usermanual.png", alt = "User Manual"),
+              img(src = "usermanual.png", alt = "User Manual", class = "link-icon"),
               span("User Manual")
-            )
-          ),
-          tags$a(
-            href = "https://github.com/Sopheap15/pvsca",
-            target = "_blank",
-            tagList(
-              img(
-                src = "sources_code.png",
-                alt = "Source code",
-                height = "20px"
-              ),
-              span("Source code")
-            )
-          ),
-          actionLink(
-            "about_link",
-            tagList(
-              img(src = "about.png", alt = "About"),
-              span("About")
             )
           )
         )
       )
-    ),
-    fluidRow(id = "particles-js-home", class = "particles-js"),
-    fluidRow(p(class = "copyright", "© 2025 BAIA Team. All rights reserved."))
+    )
   ),
-
+  
   # Analysis section
   div(
     id = "analysis_section",
-    fluidRow(
-      class = "analysis-container",
-      column(
-        width = 12,
-        id = "main",
-        class = "main",
+    style = "display: none;",
+    div(
+      class = "analysis-dashboard",
+      # Sidebar for Analysis
+      div(
+        class = "analysis-sidebar",
+        actionLink("tab_embeddings", tagList(icon("project-diagram"), "Embeddings"), class = "analysis-nav-link active"),
+        actionLink("tab_expression", tagList(icon("chart-line"), "Gene Expression"), class = "analysis-nav-link"),
+        actionLink("tab_qc", tagList(icon("tasks"), "Quality Control"), class = "analysis-nav-link"),
+        actionLink("tab_metadata", tagList(icon("database"), "Metadata"), class = "analysis-nav-link"),
+        actionLink("tab_sources", tagList(icon("book"), "Data Sources"), class = "analysis-nav-link")
+      ),
+      # Main Content for Analysis
+      div(
+        class = "analysis-content",
         tabsetPanel(
           id = "tabset",
-
+          
           # embedding section
           tabPanel(
             "Embeddings",
@@ -204,23 +154,22 @@ ui <- fluidPage(
                 create_meta_filter_row("")
               )
             ),
-
+            
             # Control Row (Fixed duplication and alignment)
             fluidRow(
-              style = "margin-top: 20px; margin-bottom: 20px;",
+              class = "margin-v-20",
               column(
                 width = 12,
                 div(
-                  class = "filters-container",
-                  style = "border: 1px solid #ddd; border-radius: 8px; padding: 20px 20px 10px 20px; background-color: #f9f9f9; margin-bottom: 0;",
+                  class = "filters-container settings-box",
                   # Settings header
                   h4(
-                    style = "margin-top: 0; margin-bottom: 0; color: #333; font-weight: 600; border-bottom: 2px solid #3498db; padding-bottom: 10px;",
+                    class = "settings-header-alt",
                     icon("cog"),
                     " Plot settings"
                   ),
                   fluidRow(
-                    style = "padding-top: 10px;",
+                    class = "padding-t-10",
                     # Data type
                     column(
                       width = 2,
@@ -232,20 +181,19 @@ ui <- fluidPage(
                         inline = TRUE
                       )
                     ),
-
+                    
                     # Integration toggle
                     conditionalPanel(
                       condition = "input.embedding != 'tsne'",
                       column(
                         width = 2,
-                        tags$label("Integration", class = "control-label", style = "margin-bottom: 5px; display: block;"),
+                        tags$label("Integration", class = "control-label label-block"),
                         div(
                           id = "tab_switch",
-                          style = "text-align: center; margin-top: 0px; display: flex; align-items: center; gap: 8px;",
-                          tags$span(class = "left-label", "Unintegrated", style = "font-size: 13px; font-weight: 500;"),
+                          class = "switch-container",
+                          tags$span(class = "left-label switch-label", "Unintegrated"),
                           tags$label(
-                            class = "switch",
-                            style = "margin-bottom: 0;",
+                            class = "switch switch-margin-0",
                             tags$input(
                               id = "check_all",
                               type = "checkbox",
@@ -253,11 +201,11 @@ ui <- fluidPage(
                             ),
                             tags$span(class = "slider")
                           ),
-                          tags$span(class = "right-label", "Integrated", style = "font-size: 13px; font-weight: 500;")
+                          tags$span(class = "right-label switch-label", "Integrated")
                         )
                       )
                     ),
-
+                    
                     # Embedding type
                     column(
                       width = 3,
@@ -269,7 +217,7 @@ ui <- fluidPage(
                         selected = "umap"
                       )
                     ),
-
+                    
                     # Point size
                     column(
                       width = 2,
@@ -281,13 +229,13 @@ ui <- fluidPage(
                         inline = TRUE
                       )
                     ),
-
+                    
                     # Dimension & Axes
                     column(
                       width = 3,
-                      tags$label("Dimension", class = "control-label", style = "margin-bottom: 5px; display: block;"),
+                      tags$label("Dimension", class = "control-label label-block"),
                       div(
-                        style = "display: flex; align-items: center; gap: 10px; height: 34px;",
+                        class = "flex-center-gap-10 height-34",
                         radioButtons(
                           "plot",
                           NULL,
@@ -297,17 +245,17 @@ ui <- fluidPage(
                         ),
                         conditionalPanel(
                           condition = "input.plot == '2d'",
-                          style = "margin-top: -20px;",
+                          class = "margin-t-neg-20",
                           div(
-                            style = "display: inline-flex; gap: 8px; align-items: center; margin-left: 10px;",
+                            class = "axis-container",
                             div(
-                              style = "display: flex; flex-direction: column; align-items: center;",
-                              tags$span("X", style = "font-size: 10px; font-weight: bold; color: #555; margin-bottom: -2px;"),
+                              class = "axis-item",
+                              tags$span("X", class = "axis-label"),
                               selectInput("xaxis", NULL, choices = c("pc_1" = "pc_1"), selected = "pc_1", width = "110px")
                             ),
                             div(
-                              style = "display: flex; flex-direction: column; align-items: center;",
-                              tags$span("Y", style = "font-size: 10px; font-weight: bold; color: #555; margin-bottom: -2px;"),
+                              class = "axis-item",
+                              tags$span("Y", class = "axis-label"),
                               selectInput("yaxis", NULL, choices = c("pc_2" = "pc_2"), selected = "pc_2", width = "110px")
                             )
                           )
@@ -315,10 +263,10 @@ ui <- fluidPage(
                       )
                     )
                   ),
-
+                  
                   # Comparison and Download (Formatted and Compact)
                   div(
-                    style = "margin-top: 5px; border-top: 1px solid #eee; padding: 2px 0; display: flex; justify-content: center; align-items: center; gap: 40px; background-color: #fafafa; border-radius: 8px; margin-bottom: 0;",
+                    class = "action-bar",
                     div(
                       id = "compare_box",
                       checkboxInput(
@@ -328,14 +276,14 @@ ui <- fluidPage(
                       )
                     ),
                     div(
-                      style = "display: flex; align-items: center;",
-                      downloadButton("download_data", "Download Data", class = "btn-download-green", style = "min-width: 250px; border-radius: 20px; height: 44px; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 1.1em; box-shadow: 0 2px 4px rgba(0,0,0,0.1);")
+                      class = "flex-center",
+                      downloadButton("download_data", "Download Data", class = "btn-download-green btn-download-green-custom")
                     )
                   ),
-
+                  
                   # Color Selection(s) Row
                   fluidRow(
-                    style = "margin-top: 10px;",
+                    class = "margin-v-20",
                     # Single Plot Color (visible when NOT comparing - Aligned Left)
                     conditionalPanel(
                       condition = "!input.enable_comparison",
@@ -368,19 +316,18 @@ ui <- fluidPage(
                         conditionalPanel(
                           condition = "input.color == 'genes'",
                           div(
-                            style = "background-color: #fffbea; padding: 20px 15px 5px 15px; border-radius: 8px; border: 1px solid #ffd700; margin-top: 5px; margin-bottom: 10px; position: relative;",
+                            class = "gene-box",
                             div(
-                              style = "position: absolute; top: 20px; left: 105px; display: flex; align-items: center;",
+                              class = "gene-links-overlay",
                               tags$label(
-                                class = "switch",
-                                style = "margin: 0;",
+                                class = "switch switch-margin-0",
                                 tags$input(id = "check", type = "checkbox", class = "toggle_exp"),
                                 tags$span(class = "slider")
                               ),
                               div(
-                                style = "display: flex; align-items: center; gap: 10px; margin-left: 20px;",
+                                class = "flex-center-gap-10 margin-l-20",
                                 tags$a(id = "plasmo_link", href = "#", target = "_blank", class = "gene-link", "🔬 PlasmoDB"),
-                                tags$span("|", style = "color: #ccc;"),
+                                tags$span("|", class = "vertical-separator"),
                                 tags$a(id = "ncbi_link", href = "#", target = "_blank", class = "gene-link", "🧬 NCBI")
                               )
                             ),
@@ -395,8 +342,8 @@ ui <- fluidPage(
                       column(
                         width = 6,
                         div(
-                          style = "background-color: #e3f2fd; padding: 10px 15px; border-radius: 12px; border: 1px solid #2196f3; box-shadow: 0 4px 6px rgba(33, 150, 243, 0.1);",
-                          tags$h5("First Plot Color By:", style = "color: #1976d2; margin-top: 0; margin-bottom: 10px; font-weight: bold;"),
+                          class = "comparison-box-first",
+                          tags$h5("First Plot Color By:", class = "comparison-header-first"),
                           fluidRow(
                             column(
                               width = 4,
@@ -426,25 +373,24 @@ ui <- fluidPage(
                               width = 8,
                               conditionalPanel(
                                 condition = "input.color_first_comp == 'genes'",
+                                div(
+                                  class = "comparison-gene-box",
                                   div(
-                                    style = "background-color: white; padding: 22px 12px 5px 12px; border-radius: 8px; border: 1px solid #bbdefb; position: relative;",
-                                    div(
-                                      style = "position: absolute; top: 10px; left: 105px; display: flex; align-items: center;",
-                                      tags$label(
-                                        class = "switch",
-                                        style = "margin: 0; transform: scale(0.8);",
-                                        tags$input(id = "check_first_comp", type = "checkbox", class = "toggle_exp"),
-                                        tags$span(class = "slider")
-                                      ),
-                                      div(
-                                        style = "display: flex; align-items: center; gap: 8px; margin-left: 15px; font-size: 0.85em;",
-                                        tags$a(id = "plasmo_link_first", href = "#", target = "_blank", class = "gene-link", "🔬 PlasmoDB"),
-                                        tags$span("|", style = "color: #ccc;"),
-                                        tags$a(id = "ncbi_link_first", href = "#", target = "_blank", class = "gene-link", "🧬 NCBI")
-                                      )
+                                    class = "comparison-gene-overlay",
+                                    tags$label(
+                                      class = "switch switch-margin-0 transform-scale-08",
+                                      tags$input(id = "check_first_comp", type = "checkbox", class = "toggle_exp"),
+                                      tags$span(class = "slider")
                                     ),
-                                    selectizeInput("genes_n_first_comp", "Gene(s)", choices = "", multiple = TRUE, options = list(placeholder = "Select genes", maxItems = 10), width = "100%")
-                                  )
+                                    div(
+                                      class = "flex-center-gap-8 margin-l-15 font-small",
+                                      tags$a(id = "plasmo_link_first", href = "#", target = "_blank", class = "gene-link", "🔬 PlasmoDB"),
+                                      tags$span("|", class = "vertical-separator"),
+                                      tags$a(id = "ncbi_link_first", href = "#", target = "_blank", class = "gene-link", "🧬 NCBI")
+                                    )
+                                  ),
+                                  selectizeInput("genes_n_first_comp", "Gene(s)", choices = "", multiple = TRUE, options = list(placeholder = "Select genes", maxItems = 10), width = "100%")
+                                )
                               )
                             )
                           )
@@ -453,8 +399,8 @@ ui <- fluidPage(
                       column(
                         width = 6,
                         div(
-                          style = "background-color: #f1f8e9; padding: 10px 15px; border-radius: 12px; border: 1px solid #4caf50; box-shadow: 0 4px 6px rgba(76, 175, 80, 0.1);",
-                          tags$h5("Second Plot Color By:", style = "color: #388e3c; margin-top: 0; margin-bottom: 10px; font-weight: bold;"),
+                          class = "comparison-box-second",
+                          tags$h5("Second Plot Color By:", class = "comparison-header-second"),
                           fluidRow(
                             column(
                               width = 4,
@@ -484,25 +430,24 @@ ui <- fluidPage(
                               width = 8,
                               conditionalPanel(
                                 condition = "input.color_second == 'genes'",
+                                div(
+                                  class = "comparison-gene-box-alt",
                                   div(
-                                    style = "background-color: white; padding: 22px 12px 5px 12px; border-radius: 8px; border: 1px solid #dcedc8; position: relative;",
-                                    div(
-                                      style = "position: absolute; top: 10px; left: 105px; display: flex; align-items: center;",
-                                      tags$label(
-                                        class = "switch",
-                                        style = "margin: 0; transform: scale(0.8);",
-                                        tags$input(id = "check_second", type = "checkbox", class = "toggle_exp"),
-                                        tags$span(class = "slider")
-                                      ),
-                                      div(
-                                        style = "display: flex; align-items: center; gap: 8px; margin-left: 15px; font-size: 0.85em;",
-                                        tags$a(id = "plasmo_link_second", href = "#", target = "#", class = "gene-link", "🔬 PlasmoDB"),
-                                        tags$span("|", style = "color: #ccc;"),
-                                        tags$a(id = "ncbi_link_second", href = "#", target = "#", class = "gene-link", "🧬 NCBI")
-                                      )
+                                    class = "comparison-gene-overlay",
+                                    tags$label(
+                                      class = "switch switch-margin-0 transform-scale-08",
+                                      tags$input(id = "check_second", type = "checkbox", class = "toggle_exp"),
+                                      tags$span(class = "slider")
                                     ),
-                                    selectizeInput("genes_second", "Gene(s)", choices = "", multiple = TRUE, options = list(placeholder = "Select genes", maxItems = 10), width = "100%")
-                                  )
+                                    div(
+                                      class = "flex-center-gap-8 margin-l-15 font-small",
+                                      tags$a(id = "plasmo_link_second", href = "#", target = "#", class = "gene-link", "🔬 PlasmoDB"),
+                                      tags$span("|", class = "vertical-separator"),
+                                      tags$a(id = "ncbi_link_second", href = "#", target = "#", class = "gene-link", "🧬 NCBI")
+                                    )
+                                  ),
+                                  selectizeInput("genes_second", "Gene(s)", choices = "", multiple = TRUE, options = list(placeholder = "Select genes", maxItems = 10), width = "100%")
+                                )
                               )
                             )
                           )
@@ -513,7 +458,7 @@ ui <- fluidPage(
                 )
               )
             ),
-
+            
             # Single plot
             conditionalPanel(
               condition = "!input.enable_comparison",
@@ -529,7 +474,7 @@ ui <- fluidPage(
                 )
               )
             ),
-
+            
             # Comparison plots
             conditionalPanel(
               condition = "input.enable_comparison",
@@ -555,29 +500,46 @@ ui <- fluidPage(
               )
             )
           ),
-
+          
           # Gene expression section
           tabPanel(
             "Gene expression",
-            fluidRow(
-              id = "filter-row-gene-expression",
-              class = "filter-row",
-              column(
-                width = 12,
-                create_meta_filter_row("_gex")
-              )
-            ),
-            create_plot_controls("data_type_exp", FALSE, "_exp"),
-            fluidRow(
-              id = "gene_exp_container",
-              column(
-                width = 6,
-                id = "dynamic_col_0",
-                subBlock(0)
+            div(
+              class = "gene-expression-section",
+              h3(class = "gene-expression-header", "Gene Expression Analysis"),
+              # Shared filter row
+              fluidRow(
+                id = "filter-row-gene-expression",
+                class = "filter-row",
+                column(
+                  width = 12,
+                  create_meta_filter_row("_gex")
+                )
+              ),
+              # Gene expression controls
+              div(
+                class = "gene-controls-container",
+                fluidRow(
+                  column(
+                    width = 4,
+                    div(
+                      class = "gene-control-item",
+                      create_plot_controls("data_type_exp", FALSE, "_exp")
+                    )
+                  )
+                )
+              ),
+              fluidRow(
+                id = "gene_exp_container",
+                column(
+                  width = 6,
+                  id = "dynamic_col_0",
+                  subBlock(0)
+                )
               )
             )
           ),
-
+          
           # Quality control section
           tabPanel(
             "Quality control",
@@ -618,7 +580,7 @@ ui <- fluidPage(
               )
             )
           ),
-
+          
           # Metadata tab
           tabPanel(
             "Metadata",
@@ -643,7 +605,7 @@ ui <- fluidPage(
                   width = 4,
                   plotlyOutput("parasite_stages_plotly"),
                   div(
-                    style = "text-align: center; margin-top: 5px; font-size: 12px; color: #666;",
+                    class = "text-center-muted",
                     HTML(
                       "<em>Note: All parasite stages are predicted by SingleR, except sporozoites which are confirmed by sample type.</em>"
                     )
@@ -660,7 +622,7 @@ ui <- fluidPage(
               ))
             )
           ),
-
+          
           # Data sources tab
           tabPanel(
             "Data sources",
@@ -676,10 +638,11 @@ ui <- fluidPage(
       )
     )
   ),
-
+  
   # About section
   div(
     id = "about_section",
+    style = "display: none;",
     fluidRow(
       class = "about",
       column(
@@ -693,7 +656,7 @@ ui <- fluidPage(
         p(
           "We are open to collaboration and welcome opportunities to integrate
         additional relevant data into this platform. Please reach out to us
-        using following contact."
+        using the following contact."
         )
       ),
       column(
@@ -737,7 +700,7 @@ ui <- fluidPage(
       ),
       p(
         "PlaViSca is built using the R Shiny framework. For more detail, please
-        visit GitHub repo:",
+        visit the GitHub repo:",
         a(
           href = "https://github.com/Sopheap15/PlaViSca",
           HTML(
@@ -749,7 +712,24 @@ ui <- fluidPage(
         "."
       )
     ),
-    fluidRow(id = "particles-js-about", class = "particles-js"),
-    fluidRow(p(class = "copyright", "© 2025 BAIA Team. All rights reserved."))
+    fluidRow(id = "particles-js-about", class = "particles-js")
+  ),
+  
+  # Footer
+  conditionalPanel(
+    condition = "input.home || (!input.analysis && !input.about)", # Show footer only on home page
+    div(
+      class = "footer",
+      div(
+        class = "logo-container",
+        a(
+          href = "https://www.pasteur-kh.org/",
+          target = "_blank",
+          img(src = "ipc_logo.png", alt = "IPC Logo", class = "logo")
+        ),
+        img(src = "baia_logo.png", class = "logo")
+      ),
+      p(class = "copyright", "© 2025 BAIA Team. All rights reserved.")
+    )
   )
 )

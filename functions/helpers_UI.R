@@ -113,11 +113,10 @@ create_meta_filter_row <- function(suffix = "") {
   tagList(
     # Filters box container
     div(
-      class = "filters-container",
-      style = "border: 1px solid #ddd; border-radius: 8px; padding: 20px 20px 10px 20px; margin-bottom: 0; background-color: #f9f9f9;",
+      class = "filters-container settings-box",
       # Filters header
       h4(
-        style = "margin-top: 0; margin-bottom: 15px; color: #333; font-weight: 600; border-bottom: 2px solid #3498db; padding-bottom: 10px;",
+        class = "settings-header",
         icon("filter"),
         " Filters"
       ),
@@ -269,12 +268,11 @@ create_plot_controls <- function(data_type_id = "data_type", include_size_dim = 
   plot_id <- paste0("plot", suffix)
 
   fluidRow(
-    style = "margin-top: 20px; margin-bottom: 20px;",
+    class = "margin-v-20",
     column(
       width = 12,
       div(
-        class = "filters-container",
-        # style = "border: 1px solid #ddd; border-radius: 8px; padding: 20px 20px 10px 20px; background-color: #f9f9f9; margin-bottom: 0;",
+        class = "filters-container settings-box",
         fluidRow(
           column(
             width = if (include_size_dim) 4 else 12,
@@ -319,79 +317,83 @@ create_plot_controls <- function(data_type_id = "data_type", include_size_dim = 
 # Generate UI subBlock in gene expression
 subBlock <- function(i) {
   tagList(
-    fluidRow(
-      # class = "gene-select-input",
-      column(
-        width = 6,
-        style = "position: relative;",
-        div(
-          style = "position: absolute; top: 0px; left: 105px; display: flex; align-items: center; white-space: nowrap;",
-          tags$label(
-            class = "switch",
-            style = "margin: 10px;",
-            tags$input(
-              id = paste0("check_exp_", i),
-              type = "checkbox",
-              class = "toggle_exp"
-            ),
-            tags$span(class = "slider")
-          ),
+    div(
+      class = "gene-plot-container", # New container for each plot block
+      fluidRow(
+        column(
+          width = 6,
+          class = "relative",
           div(
-            style = "display: flex; align-items: center; gap: 10px; margin-left: 15px;",
-            tags$a(
-              id = paste0("plasmo_link_exp_", i),
-              href = "#",
-              target = "_blank",
-              class = "gene-link",
-              "🔬 PlasmoDB"
+            class = "gene-control-item", # Apply flex for alignment
+            tags$label(
+              class = "switch switch-margin-0 margin-10",
+              tags$input(
+                id = paste0("check_exp_", i),
+                type = "checkbox",
+                class = "toggle_exp"
+              ),
+              tags$span(class = "slider")
             ),
-            tags$span("|", style = "color: #ccc; margin: 0 5px;"),
-            tags$a(
-              id = paste0("ncbi_link_exp_", i),
-              href = "#",
-              target = "_blank",
-              class = "gene-link",
-              "🧬 NCBI"
+            div(
+              class = "gene-link-box", # Aligned links
+              tags$a(
+                id = paste0("plasmo_link_exp_", i),
+                href = "#",
+                target = "_blank",
+                class = "gene-link",
+                "🔬 PlasmoDB"
+              ),
+              tags$span("|", class = "vertical-separator"),
+              tags$a(
+                id = paste0("ncbi_link_exp_", i),
+                href = "#",
+                target = "_blank",
+                class = "gene-link",
+                "🧬 NCBI"
+              )
             )
+          ),
+          selectizeInput(
+            paste0("genes_exp_", i),
+            label = "Gene name",
+            choices = NULL,
+            multiple = TRUE,
+            options = list(maxItems = 4, placeholder = "Select genes...")
           )
         ),
-        selectizeInput(
-          paste0("genes_exp_", i),
-          label = "Gene name",
-          choices = NULL,
-          multiple = TRUE,
-          options = list(maxItems = 4, placeholder = "Select genes...")
+        column(
+          width = 6,
+          div(
+            class = "gene-control-item",
+            selectInput(
+              paste0("group_exp_", i),
+              "Group by",
+              choices = group_choices,
+              selected = if (!is.null(group_choices) && length(group_choices) > 0) group_choices[1] else "parasite_stages"
+            )
+          )
         )
       ),
-      column(
-        width = 6,
-        selectInput(
-          paste0("group_exp_", i),
-          "Group by",
-          choices = group_choices,
-          selected = if (!is.null(group_choices) && length(group_choices) > 0) group_choices[1] else "parasite_stages"
-        )
-      )
-    ),
-    fluidRow(
-      width = 12,
-      fluidRow(withSpinner(plotlyOutput(paste0("gene_exp_plotly_", i)), type = 6, size = 0.5, color = "#3498db")),
       fluidRow(
-        class = "btn-add-rm-container",
-        downloadButton(
-          paste0("download_gene_exp_", i),
-          label = "",
-          class = "btn btn-secondary btn_add"
-        ),
-        actionButton(
-          paste0("remove_btn_", i),
-          label = icon("minus"),
-          class = "btn btn-danger btn_remove"
-        ),
-        actionButton(
-          paste0("add_btn_", i),
-          label = icon("plus"),
-          class = "btn btn-success btn_add"
+        width = 12,
+        fluidRow(withSpinner(plotlyOutput(paste0("gene_exp_plotly_", i)), type = 6, size = 0.5, color = "#3498db")),
+        fluidRow(
+          class = "btn-add-rm-container",
+          downloadButton(
+            paste0("download_gene_exp_", i),
+            label = "",
+            class = "btn btn-secondary btn_add"
+          ),
+          actionButton(
+            paste0("remove_btn_", i),
+            label = icon("minus"),
+            class = "btn btn-danger btn_remove"
+          ),
+          actionButton(
+            paste0("add_btn_", i),
+            label = icon("plus"),
+            class = "btn btn-success btn_add"
+          )
         )
       )
     )
