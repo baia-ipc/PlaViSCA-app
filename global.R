@@ -1,5 +1,7 @@
 # Load required libraries for global scope
 library(memoise)
+library(bslib)
+library(fontawesome)
 suppressPackageStartupMessages(library(conflicted))
 
 # Resolve namespace conflicts BEFORE sourcing function files

@@ -110,28 +110,24 @@ gene_links_multiple <- function(gene_ids, target = "") {
 
 # Function that builds the full Metadata tab
 create_meta_filter_row <- function(suffix = "") {
-  tagList(
-    # Filters box container
-    div(
-      class = "filters-container settings-box",
-      # Filters header
-      h4(
-        class = "settings-header",
-        icon("filter"),
-        " Filters"
-      ),
-      # First row (5 boxes)
+  card(
+    class = "mb-3 shadow-sm",
+    card_header(
+      class = "bg-primary text-white py-2",
+      tagList(fontawesome::fa("filter"), tags$strong(" Filters", class = "ms-2"))
+    ),
+    card_body(
       fluidRow(
-        class = "meta-filter",
+        class = "meta-filter g-2", # g-2 for tighter gutters
         div(
           class = "col-md-2",
           selectizeInput(
             inputId = paste0("study_label", suffix),
-            "Study label:",
+            label = tags$span("Study label", style = "font-size: 0.85rem; font-weight: 500;"),
             choices = c(""),
             multiple = TRUE,
             options = list(
-              placeholder = "Select options...",
+              placeholder = "Select...",
               onInitialize = I('function() { this.setValue(""); }')
             )
           )
@@ -140,37 +136,24 @@ create_meta_filter_row <- function(suffix = "") {
           class = "col-md-2",
           selectizeInput(
             inputId = paste0("development_phase", suffix),
-            "Development phase:",
+            label = tags$span("Phase", style = "font-size: 0.85rem; font-weight: 500;"),
             choices = c(""),
             multiple = TRUE,
             options = list(
-              placeholder = "Select options...",
+              placeholder = "Select...",
               onInitialize = I('function() { this.setValue(""); }')
             )
           )
         ),
-        # div(
-        #   class = "col-md-2",
-        #   selectizeInput(
-        #     inputId = paste0("treatment", suffix),
-        #     "Treatment:",
-        #     choices = c(""),
-        #     multiple = TRUE,
-        #     options = list(
-        #       placeholder = "Select options...",
-        #       onInitialize = I('function() { this.setValue(""); }')
-        #     )
-        #   )
-        # ),
         div(
           class = "col-md-2",
           selectizeInput(
             inputId = paste0("parasite_stages", suffix),
-            "Parasite stages:",
+            label = tags$span("Parasite stages", style = "font-size: 0.85rem; font-weight: 500;"),
             choices = c(""),
             multiple = TRUE,
             options = list(
-              placeholder = "Select options...",
+              placeholder = "Select...",
               onInitialize = I('function() { this.setValue(""); }')
             )
           )
@@ -179,11 +162,11 @@ create_meta_filter_row <- function(suffix = "") {
           class = "col-md-2",
           selectizeInput(
             inputId = paste0("host_species", suffix),
-            "Host species:",
+            label = tags$span("Host species", style = "font-size: 0.85rem; font-weight: 500;"),
             choices = c(""),
             multiple = TRUE,
             options = list(
-              placeholder = "Select options...",
+              placeholder = "Select...",
               onInitialize = I('function() { this.setValue(""); }'),
               render = I(
                 '{
@@ -202,11 +185,11 @@ create_meta_filter_row <- function(suffix = "") {
           class = "col-md-2",
           selectizeInput(
             inputId = paste0("strain", suffix),
-            "Strain:",
+            label = tags$span("Strain", style = "font-size: 0.85rem; font-weight: 500;"),
             choices = c(""),
             multiple = TRUE,
             options = list(
-              placeholder = "Select options...",
+              placeholder = "Select...",
               onInitialize = I('function() { this.setValue(""); }')
             )
           )
@@ -215,50 +198,17 @@ create_meta_filter_row <- function(suffix = "") {
           class = "col-md-2",
           selectizeInput(
             inputId = paste0("hour_post_invasion", suffix),
-            "Hour post invasion:",
+            label = tags$span("HPI", style = "font-size: 0.85rem; font-weight: 500;"),
             choices = c(""),
             multiple = TRUE,
             options = list(
-              placeholder = "Select options...",
+              placeholder = "Select...",
               onInitialize = I('function() { this.setValue(""); }')
             )
           )
         )
       )
-
-      # Second row (5 boxes)
-      # fluidRow(
-      #   class = "meta-filter",
-       
-        
-        # div(
-        #   class = "col-5-custom",
-        #   selectizeInput(
-        #     inputId = paste0("sequencer", suffix),
-        #     "Sequencer:",
-        #     choices = c(""),
-        #     multiple = TRUE,
-        #     options = list(
-        #       placeholder = "Select options...",
-        #       onInitialize = I('function() { this.setValue(""); }')
-        #     )
-        #   )
-        # ),
-        # div(
-        #   class = "col-5-custom",
-        #   selectizeInput(
-        #     inputId = paste0("sc_technology", suffix),
-        #     "Single-cell technology:",
-        #     choices = c(""),
-        #     multiple = TRUE,
-        #     options = list(
-        #       placeholder = "Select options...",
-        #       onInitialize = I('function() { this.setValue(""); }')
-        #     )
-        #   )
-        # )
-      #) # Close second fluidRow
-    ) # Close filters-container div
+    )
   )
 }
 
@@ -267,48 +217,40 @@ create_plot_controls <- function(data_type_id = "data_type", include_size_dim = 
   size_id <- paste0("size", suffix)
   plot_id <- paste0("plot", suffix)
 
-  fluidRow(
-    class = "margin-v-20",
-    column(
-      width = 12,
-      div(
-        class = "filters-container settings-box",
-        fluidRow(
-          column(
-            width = if (include_size_dim) 4 else 12,
+  card(
+    class = "mb-3 shadow-sm",
+    card_header(
+      class = "bg-secondary text-white py-2",
+      tagList(fontawesome::fa("cog"), tags$strong(" Plot settings", class = "ms-2"))
+    ),
+    card_body(
+      layout_column_wrap(
+        width = 1/3,
+        radioButtons(
+          data_type_id,
+          tags$span("Data type", style = "font-size: 0.85rem; font-weight: 500;"),
+          choices = list("Raw" = "raw", "Normalized" = "normalize"),
+          selected = "normalize",
+          inline = TRUE
+        ),
+        if (include_size_dim) {
+          tagList(
             radioButtons(
-              data_type_id,
-              "Data type",
-              choices = list("Raw" = "raw", "Normalized" = "normalize"),
-              selected = "normalize",
+              size_id,
+              tags$span("Point size", style = "font-size: 0.85rem; font-weight: 500;"),
+              choices = list("Small" = 2, "Medium" = 4, "Large" = 6),
+              selected = 4,
+              inline = TRUE
+            ),
+            radioButtons(
+              plot_id,
+              tags$span("Dimension", style = "font-size: 0.85rem; font-weight: 500;"),
+              choices = list("2D" = "2d", "3D" = "3d"),
+              selected = "3d",
               inline = TRUE
             )
-          ),
-          if (include_size_dim) {
-            tagList(
-              column(
-                width = 4,
-                radioButtons(
-                  size_id,
-                  "Point size",
-                  choices = list("Small" = 2, "Medium" = 4, "Large" = 6),
-                  selected = 4,
-                  inline = TRUE
-                )
-              ),
-              column(
-                width = 4,
-                radioButtons(
-                  plot_id,
-                  "Dimension",
-                  choices = list("2D" = "2d", "3D" = "3d"),
-                  selected = "3d",
-                  inline = TRUE
-                )
-              )
-            )
-          }
-        )
+          )
+        }
       )
     )
   )
@@ -316,85 +258,47 @@ create_plot_controls <- function(data_type_id = "data_type", include_size_dim = 
 
 # Generate UI subBlock in gene expression
 subBlock <- function(i) {
-  tagList(
-    div(
-      class = "gene-plot-container", # New container for each plot block
+  card(
+    class = "shadow-sm mb-3",
+    card_body(
+      padding = "15px",
       fluidRow(
         column(
-          width = 6,
-          class = "relative",
+          width = 7,
           div(
-            class = "gene-control-item", # Apply flex for alignment
-            tags$label(
-              class = "switch switch-margin-0 margin-10",
-              tags$input(
-                id = paste0("check_exp_", i),
-                type = "checkbox",
-                class = "toggle_exp"
-              ),
-              tags$span(class = "slider")
-            ),
+            class = "d-flex align-items-center gap-2 mb-2",
+            input_switch(paste0("check_exp_", i), label = NULL, value = FALSE),
+            tags$span("Show Gene ID", class = "small text-muted"),
             div(
-              class = "gene-link-box", # Aligned links
-              tags$a(
-                id = paste0("plasmo_link_exp_", i),
-                href = "#",
-                target = "_blank",
-                class = "gene-link",
-                "🔬 PlasmoDB"
-              ),
-              tags$span("|", class = "vertical-separator"),
-              tags$a(
-                id = paste0("ncbi_link_exp_", i),
-                href = "#",
-                target = "_blank",
-                class = "gene-link",
-                "🧬 NCBI"
-              )
+              class = "ms-auto d-flex gap-2",
+              tags$a(id = paste0("plasmo_link_exp_", i), href = "#", target = "_blank", class = "btn btn-outline-info btn-xs", "PlasmoDB"),
+              tags$a(id = paste0("ncbi_link_exp_", i), href = "#", target = "_blank", class = "btn btn-outline-info btn-xs", "NCBI")
             )
           ),
           selectizeInput(
             paste0("genes_exp_", i),
-            label = "Gene name",
+            label = NULL,
             choices = NULL,
             multiple = TRUE,
-            options = list(maxItems = 4, placeholder = "Select genes...")
+            options = list(maxItems = 10, placeholder = "Select genes...")
           )
         ),
         column(
-          width = 6,
-          div(
-            class = "gene-control-item",
-            selectInput(
-              paste0("group_exp_", i),
-              "Group by",
-              choices = group_choices,
-              selected = if (!is.null(group_choices) && length(group_choices) > 0) group_choices[1] else "parasite_stages"
-            )
+          width = 5,
+          selectInput(
+            paste0("group_exp_", i),
+            "Group by",
+            choices = group_choices,
+            selected = if (!is.null(group_choices) && length(group_choices) > 0) group_choices[1] else "parasite_stages"
           )
         )
       ),
-      fluidRow(
-        width = 12,
-        fluidRow(withSpinner(plotlyOutput(paste0("gene_exp_plotly_", i)), type = 6, size = 0.5, color = "#3498db")),
-        fluidRow(
-          class = "btn-add-rm-container",
-          downloadButton(
-            paste0("download_gene_exp_", i),
-            label = "",
-            class = "btn btn-secondary btn_add"
-          ),
-          actionButton(
-            paste0("remove_btn_", i),
-            label = icon("minus"),
-            class = "btn btn-danger btn_remove"
-          ),
-          actionButton(
-            paste0("add_btn_", i),
-            label = icon("plus"),
-            class = "btn btn-success btn_add"
-          )
-        )
+      withSpinner(plotlyOutput(paste0("gene_exp_plotly_", i), height = "400px"), type = 6, size = 0.5, color = "#3498db"),
+      div(
+        class = "d-flex justify-content-end gap-2 mt-2",
+        downloadButton(paste0("download_gene_exp_", i), label = "Data", class = "btn-sm btn-outline-secondary"),
+        actionButton(paste0("remove_btn_", i), label = fontawesome::fa("minus"), class = "btn-sm btn-outline-danger"),
+        actionButton(paste0("add_btn_", i), label = fontawesome::fa("plus"), class = "btn-sm btn-outline-success")
       )
     )
   )

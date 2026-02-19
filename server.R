@@ -694,6 +694,34 @@ server <- function(input, output, session) {
 
       filt_data <- apply_secondary_filters(filtered_data(), current_inputs)
 
+      # Metadata Value Boxes
+      output$total_cells_meta <- renderUI({
+        value_box(
+          title = "Total Cells",
+          value = format(nrow(filt_data), big.mark = ","),
+          showcase = fontawesome::fa("dna"),
+          theme = "primary"
+        )
+      })
+
+      output$num_studies_meta <- renderUI({
+        value_box(
+          title = "Studies",
+          value = length(unique(filt_data$study_label)),
+          showcase = fontawesome::fa("book"),
+          theme = "secondary"
+        )
+      })
+
+      output$num_species_meta <- renderUI({
+        value_box(
+          title = "Host Species",
+          value = length(unique(filt_data$host_species)),
+          showcase = fontawesome::fa("microscope"),
+          theme = "info"
+        )
+      })
+
       output$data_table <- renderDT(
         {
           # Create metadata table with filtered columns and proper formatting
@@ -851,6 +879,36 @@ server <- function(input, output, session) {
       )
 
       filt_data <- apply_secondary_filters(filtered_data(), current_inputs)
+
+      # QC Value Boxes
+      output$total_cells_qc <- renderUI({
+        value_box(
+          title = "Total Cells",
+          value = format(nrow(filt_data), big.mark = ","),
+          showcase = fontawesome::fa("dna"),
+          theme = "primary"
+        )
+      })
+
+      output$mean_rna_qc <- renderUI({
+        avg_rna <- if(nrow(filt_data) > 0) round(mean(filt_data$n_count_rna, na.rm = TRUE), 0) else 0
+        value_box(
+          title = "Mean RNA Counts",
+          value = format(avg_rna, big.mark = ","),
+          showcase = fontawesome::fa("chart-bar"),
+          theme = "secondary"
+        )
+      })
+
+      output$mean_features_qc <- renderUI({
+        avg_feat <- if(nrow(filt_data) > 0) round(mean(filt_data$n_feature_rna, na.rm = TRUE), 0) else 0
+        value_box(
+          title = "Mean Features",
+          value = format(avg_feat, big.mark = ","),
+          showcase = fontawesome::fa("fingerprint"),
+          theme = "info"
+        )
+      })
 
       ## plot nCount in QC tab
       output$data_count_plotly <- renderPlotly({
@@ -1387,6 +1445,19 @@ server <- function(input, output, session) {
         )
       }, 0.25)
 
+      # Add observer for the new switch
+      observeEvent(input[[paste0("check_exp_", id)]], {
+        is_checked <- input[[paste0("check_exp_", id)]]
+        choice_exp(get_gene_choices(gene_data()$genes, is_checked))
+        updateSelectizeInput(
+          session,
+          paste0("genes_exp_", id),
+          label = if (is_checked) "Gene ID" else "Gene name",
+          choices = choice_exp(),
+          server = TRUE
+        )
+      })
+
       # Create the renderPlotly immediately (ensures render has access to reactives)
       output[[paste0("gene_exp_plotly_", id)]] <- local({
         plot_id <- id
@@ -1493,6 +1564,19 @@ server <- function(input, output, session) {
           error = function(e) {}
         )
       }, 0.25)
+
+      # Add observer for the new switch
+      observeEvent(input[[paste0("check_exp_", id)]], {
+        is_checked <- input[[paste0("check_exp_", id)]]
+        choice_exp(get_gene_choices(gene_data()$genes, is_checked))
+        updateSelectizeInput(
+          session,
+          paste0("genes_exp_", id),
+          label = if (is_checked) "Gene ID" else "Gene name",
+          choices = choice_exp(),
+          server = TRUE
+        )
+      })
 
       # Create the renderPlotly immediately so it captures reactive environment correctly
       output[[paste0("gene_exp_plotly_", id)]] <- local({
@@ -1613,6 +1697,19 @@ server <- function(input, output, session) {
   )
 
   ## update gene_id or name in SelectizeInput when toggle button click
+  observeEvent(input$check_exp_0, {
+    is_checked <- input$check_exp_0
+    choice_exp(get_gene_choices(gene_data()$genes, is_checked))
+
+    updateSelectizeInput(
+      session,
+      "genes_exp_0",
+      label = if (is_checked) "Gene ID" else "Gene name",
+      choices = choice_exp(),
+      server = TRUE
+    )
+  })
+
   observeEvent(list(input$click_toggle_exp), {
     req(input$click_toggle_exp)
 

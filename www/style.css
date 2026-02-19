@@ -206,42 +206,6 @@ body {
   min-height: calc(100vh - 80px);
 }
 
-.analysis-sidebar {
-  width: 250px;
-  background-color: #2c3e50;
-  padding: 30px 0;
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-  box-shadow: 2px 0 5px rgba(0,0,0,0.1);
-  z-index: 10;
-}
-
-.analysis-nav-link {
-  padding: 15px 25px;
-  color: #bdc3c7;
-  text-decoration: none;
-  font-size: 16px;
-  font-weight: 500;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  transition: all 0.3s;
-  cursor: pointer;
-}
-
-.analysis-nav-link:hover {
-  background-color: #34495e;
-  color: var(--white);
-  text-decoration: none;
-}
-
-.analysis-nav-link.active {
-  background-color: var(--primary-color);
-  color: var(--white);
-  border-left: 4px solid var(--accent-color);
-}
-
 .analysis-content {
   flex: 1;
   padding: 30px;
@@ -249,12 +213,43 @@ body {
   background-color: var(--background-color);
 }
 
-/* Hide the default tabset headers since we use the sidebar */
+/* Tabset styling */
 #tabset {
   border: none;
 }
+
 #tabset > .nav-tabs {
-  display: none;
+  display: flex;
+  border-bottom: 2px solid #ddd;
+  margin-bottom: 25px;
+  background-color: #fff;
+  padding: 10px 20px 0 20px;
+  border-radius: 8px 8px 0 0;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+#tabset > .nav-tabs > li > a {
+  border: none;
+  color: #5f6368;
+  font-weight: 500;
+  padding: 12px 20px;
+  border-radius: 8px 8px 0 0;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+}
+
+#tabset > .nav-tabs > li > a:hover {
+  background-color: #f1f3f4;
+  color: var(--primary-color);
+}
+
+#tabset > .nav-tabs > li.active > a {
+  color: var(--primary-color);
+  background-color: transparent;
+  border-bottom: 3px solid var(--primary-color);
 }
 
 /* Settings & Filters boxes */
@@ -303,6 +298,71 @@ body {
 /* Custom switch colors */
 .switch input:checked + .slider {
   background-color: var(--primary-color);
+}
+
+/* bslib card enhancements */
+.card {
+  border-radius: 12px !important;
+  border: 1px solid #e1e4e8 !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05) !important;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  margin-bottom: 15px !important;
+}
+
+.card-body {
+  padding: 12px 18px !important;
+}
+
+.card:hover {
+  box-shadow: 0 4px 16px rgba(0,0,0,0.08) !important;
+}
+
+/* Compact radio buttons */
+.shiny-input-container .radio-inline {
+  padding-top: 0 !important;
+  margin-bottom: 0 !important;
+  font-size: 0.85rem;
+}
+
+.shiny-input-container .control-label {
+  margin-bottom: 2px !important;
+}
+
+/* Custom switch colors and size */
+.form-check-input:checked {
+  background-color: var(--primary-color) !important;
+  border-color: var(--primary-color) !important;
+}
+
+.form-check.form-switch {
+  padding-left: 2.5em !important;
+}
+
+/* Value box styling */
+.bslib-value-box {
+  border-radius: 12px !important;
+  overflow: hidden;
+  height: 100px !important;
+}
+
+.bslib-value-box .value-box-value {
+  font-size: 1.5rem !important;
+}
+
+.bslib-value-box .value-box-title {
+  font-size: 0.9rem !important;
+}
+
+.bg-primary {
+  background-color: var(--primary-color) !important;
+}
+
+.bg-secondary {
+  background-color: #455a64 !important;
+}
+
+.bg-dark {
+  background-color: #263238 !important;
 }
 
 /* About Section */
