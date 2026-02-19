@@ -38,7 +38,7 @@ server <- function(input, output, session) {
 
   # Reactive values to preserve UI state across mode changes
   ui_state <- reactiveValues(
-    stored_color = "study_label",
+    stored_color = "development_phase",
     stored_genes = NULL,
     stored_check = FALSE
   )
@@ -858,7 +858,7 @@ server <- function(input, output, session) {
           filt_data,
           x = "study_label",
           y = "n_count_rna",
-          color = "sample_type",
+          color = "development_phase",
           y_title = "RNA count",
           title = "RNA Count"
         )
@@ -870,7 +870,7 @@ server <- function(input, output, session) {
           filt_data,
           x = "study_label",
           y = "n_feature_rna",
-          color = "sample_type",
+          color = "development_phase",
           y_title = "nFeature count",
           title = "Feature Count"
         )
@@ -1905,7 +1905,7 @@ server <- function(input, output, session) {
     }
 
     # Determine which inputs to use based on comparison mode
-    color_val <- if (!is.null(input$color_first_comp)) input$color_first_comp else "sample_type"
+    color_val <- if (!is.null(input$color_first_comp)) input$color_first_comp else "development_phase"
     genes_val <- if (!is.null(input$genes_n_first_comp)) input$genes_n_first_comp else ""
     check_val <- if (!is.null(input$check_first_comp)) input$check_first_comp else FALSE
 
@@ -1930,7 +1930,7 @@ server <- function(input, output, session) {
       req(input$xaxis, input$yaxis)
     }
 
-    color_val <- if (!is.null(input$color_second)) input$color_second else "sample_type"
+    color_val <- if (!is.null(input$color_second)) input$color_second else "development_phase"
     genes_val <- if (!is.null(input$genes_second)) input$genes_second else ""
     check_val <- if (!is.null(input$check_second)) input$check_second else FALSE
 
@@ -2114,7 +2114,7 @@ server <- function(input, output, session) {
         # Handle empty or invalid gene inputs by falling back to sample_type
         if (is.null(gene_inputs) || length(gene_inputs) == 0 ||
           (length(gene_inputs) == 1 && (is.na(gene_inputs) || gene_inputs == ""))) {
-          color_column <- "sample_type"
+          color_column <- "development_phase"
         } else {
           # For dual plot mode, use cached data to prevent interference between plots
           if (is_dual_plot && !is.null(data_source)) {
@@ -2719,8 +2719,8 @@ server <- function(input, output, session) {
         if (!is.null(resolved_gene_col) && resolved_gene_col %in% colnames(df_local)) {
           color_column <- resolved_gene_col
         } else {
-          # If gene resolution failed, default to sample_type instead of returning NULL
-          color_column <- "sample_type"
+          # If gene resolution failed, default to development_phase instead of returning NULL
+          color_column <- "development_phase"
         }
       } else {
         color_column <- input$color
@@ -2728,7 +2728,7 @@ server <- function(input, output, session) {
 
       # Final safety check: ensure the resolved color column exists in df_local
       if (is.null(color_column) || is.na(color_column) || color_column == "" || !(color_column %in% colnames(df_local))) {
-        color_column <- "sample_type"
+        color_column <- "development_phase"
       }
 
       # Determine proper legend title for gene expression

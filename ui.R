@@ -359,7 +359,7 @@ ui <- fluidPage(
                             # "HPI" = "hour_post_invasion",
                             "Genes" = "genes"
                           ),
-                          selected = "parasite_stages",
+                          selected = "development_phase",
                           width = "100%"
                         )
                       ),
@@ -418,7 +418,7 @@ ui <- fluidPage(
                                   # "HPI" = "hour_post_invasion",
                                   "Genes" = "genes"
                                 ),
-                                selected = "parasite_stages",
+                                selected = "development_phase",
                                 width = "100%"
                               )
                             ),
@@ -476,7 +476,7 @@ ui <- fluidPage(
                                   # "HPI" = "hour_post_invasion",
                                   "Genes" = "genes"
                                 ),
-                                selected = "parasite_stages",
+                                selected = "development_phase",
                                 width = "100%"
                               )
                             ),
