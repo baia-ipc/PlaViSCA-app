@@ -708,7 +708,7 @@ server <- function(input, output, session) {
                 starts_with("pca_"),
                 starts_with("t_sne_"),
                 barcode,
-                parasite_stages, # Exclude old parasite_stages column (hidden from UI)
+                # parasite_stage, 
                 geographic_location,
                 day_post_infection
               )
@@ -721,12 +721,12 @@ server <- function(input, output, session) {
                 "host_species",
                 "parasite_stages",
                 "development_phase",
-                # "blood_stage",
-                "treatment"
-                # "strain",
-                # "hour_post_invasion",
-                # "sequencer",
-                # "sc_technology"
+                "blood_stage",
+                "treatment",
+                "strain",
+                "hour_post_invasion",
+                "sequencer",
+                "sc_technology"
               ))
             ) %>%
             rename(
@@ -742,7 +742,7 @@ server <- function(input, output, session) {
               Strain,
               Treatment,
               Development_phase,
-              Parasite_stage,
+              Parasite_stages,
               Blood_stage,
               Hour_post_invasion,
               Sc_technology,
@@ -2379,7 +2379,7 @@ server <- function(input, output, session) {
         "study_label" = "Study",
         "development_phase" = "Development phase",
         # "blood_stage" = "Blood stage",
-        "parasite_stages" = "Development phase",
+        "parasite_stages" = "Parasite stage",
         "strain" = "Strain",
         "treatment" = "Treatment",
         "sample_type" = "Sample type",

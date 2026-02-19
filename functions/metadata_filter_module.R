@@ -6,9 +6,9 @@
 #' @return List of grouped filter choices
 initialize_filter_choices <- function(mr_data) {
     list(
-        parasite_stage = setNames(
-            paste0("parasite_stage__", unique(mr_data$parasite_stage)),
-            unique(mr_data$parasite_stage)
+        parasite_stages = setNames(
+            paste0("parasite_stages__", unique(mr_data$parasite_stages)),
+            unique(mr_data$parasite_stages)
         ),
         study_label = setNames(
             paste0("study_label__", unique(mr_data$study_label)),
@@ -137,8 +137,8 @@ update_filter_inputs <- function(session, filt_data, tab_suffix = "") {
     )
     updateSelectInput(
         session,
-        paste0("parasite_stage", tab_suffix),
-        choices = unique(filt_data$parasite_stage)
+        paste0("parasite_stages", tab_suffix),
+        choices = unique(filt_data$parasite_stages)
     )
     updateSelectInput(
         session,
@@ -175,8 +175,8 @@ render_metadata_outputs <- function(output, filt_data) {
                     starts_with("pca_"),
                     starts_with("t_sne_"),
                     barcode,
-                    life_cycle_stage,  # Hidden from UI
-                    parasite_stage,
+                    #life_cycle_stage,  # Hidden from UI
+                    # parasite_stage,
                     geographic_location,
                     day_post_infection
                 )
@@ -187,7 +187,7 @@ render_metadata_outputs <- function(output, filt_data) {
                     "study_label",
                     "sample_type",
                     "host_species",
-                    "life_cycle_stage",
+                    # "life_cycle_stage",
                     "treatment",
                     "strain",
                     "hour_post_invasion",
@@ -207,7 +207,7 @@ render_metadata_outputs <- function(output, filt_data) {
                 Host_species,
                 Strain,
                 Treatment,
-                Life_cycle_stage,
+                # Life_cycle_stage,
                 Hour_post_invasion,
                 Sc_technology,
                 Sequencer,
