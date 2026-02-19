@@ -125,7 +125,7 @@ create_meta_filter_row <- function(suffix = "") {
       fluidRow(
         class = "meta-filter",
         div(
-          class = "col-5-custom",
+          class = "col-md-2",
           selectizeInput(
             inputId = paste0("study_label", suffix),
             "Study label:",
@@ -138,10 +138,36 @@ create_meta_filter_row <- function(suffix = "") {
           )
         ),
         div(
-          class = "col-5-custom",
+          class = "col-md-2",
           selectizeInput(
-            inputId = paste0("sample_type", suffix),
-            "Sample type:",
+            inputId = paste0("development_phase", suffix),
+            "Development phase:",
+            choices = c(""),
+            multiple = TRUE,
+            options = list(
+              placeholder = "Select options...",
+              onInitialize = I('function() { this.setValue(""); }')
+            )
+          )
+        ),
+        # div(
+        #   class = "col-md-2",
+        #   selectizeInput(
+        #     inputId = paste0("treatment", suffix),
+        #     "Treatment:",
+        #     choices = c(""),
+        #     multiple = TRUE,
+        #     options = list(
+        #       placeholder = "Select options...",
+        #       onInitialize = I('function() { this.setValue(""); }')
+        #     )
+        #   )
+        # ),
+        div(
+          class = "col-md-2",
+          selectizeInput(
+            inputId = paste0("parasite_stages", suffix),
+            "Parasite stages:",
             choices = c(""),
             multiple = TRUE,
             options = list(
@@ -151,7 +177,7 @@ create_meta_filter_row <- function(suffix = "") {
           )
         ),
         div(
-          class = "col-5-custom",
+          class = "col-md-2",
           selectizeInput(
             inputId = paste0("host_species", suffix),
             "Host species:",
@@ -174,51 +200,7 @@ create_meta_filter_row <- function(suffix = "") {
           )
         ),
         div(
-          class = "col-5-custom",
-          selectizeInput(
-            inputId = paste0("parasite_stages", suffix),
-            "Parasite stages:",
-            choices = c(""),
-            multiple = TRUE,
-            options = list(
-              placeholder = "Select options...",
-              onInitialize = I('function() { this.setValue(""); }')
-            )
-          )
-        ),
-        div(
-          class = "col-5-custom",
-          selectizeInput(
-            inputId = paste0("treatment", suffix),
-            "Treatment:",
-            choices = c(""),
-            multiple = TRUE,
-            options = list(
-              placeholder = "Select options...",
-              onInitialize = I('function() { this.setValue(""); }')
-            )
-          )
-        )
-      ),
-
-      # Second row (5 boxes)
-      fluidRow(
-        class = "meta-filter",
-        div(
-          class = "col-5-custom",
-          selectizeInput(
-            inputId = paste0("development_phase", suffix),
-            "Development phase:",
-            choices = c(""),
-            multiple = TRUE,
-            options = list(
-              placeholder = "Select options...",
-              onInitialize = I('function() { this.setValue(""); }')
-            )
-          )
-        ),
-        div(
-          class = "col-5-custom",
+          class = "col-md-2",
           selectizeInput(
             inputId = paste0("strain", suffix),
             "Strain:",
@@ -231,7 +213,7 @@ create_meta_filter_row <- function(suffix = "") {
           )
         ),
         div(
-          class = "col-5-custom",
+          class = "col-md-2",
           selectizeInput(
             inputId = paste0("hour_post_invasion", suffix),
             "Hour post invasion:",
@@ -242,34 +224,41 @@ create_meta_filter_row <- function(suffix = "") {
               onInitialize = I('function() { this.setValue(""); }')
             )
           )
-        ),
-        div(
-          class = "col-5-custom",
-          selectizeInput(
-            inputId = paste0("sequencer", suffix),
-            "Sequencer:",
-            choices = c(""),
-            multiple = TRUE,
-            options = list(
-              placeholder = "Select options...",
-              onInitialize = I('function() { this.setValue(""); }')
-            )
-          )
-        ),
-        div(
-          class = "col-5-custom",
-          selectizeInput(
-            inputId = paste0("sc_technology", suffix),
-            "Single-cell technology:",
-            choices = c(""),
-            multiple = TRUE,
-            options = list(
-              placeholder = "Select options...",
-              onInitialize = I('function() { this.setValue(""); }')
-            )
-          )
         )
-      ) # Close second fluidRow
+      )
+
+      # Second row (5 boxes)
+      # fluidRow(
+      #   class = "meta-filter",
+       
+        
+        # div(
+        #   class = "col-5-custom",
+        #   selectizeInput(
+        #     inputId = paste0("sequencer", suffix),
+        #     "Sequencer:",
+        #     choices = c(""),
+        #     multiple = TRUE,
+        #     options = list(
+        #       placeholder = "Select options...",
+        #       onInitialize = I('function() { this.setValue(""); }')
+        #     )
+        #   )
+        # ),
+        # div(
+        #   class = "col-5-custom",
+        #   selectizeInput(
+        #     inputId = paste0("sc_technology", suffix),
+        #     "Single-cell technology:",
+        #     choices = c(""),
+        #     multiple = TRUE,
+        #     options = list(
+        #       placeholder = "Select options...",
+        #       onInitialize = I('function() { this.setValue(""); }')
+        #     )
+        #   )
+        # )
+      #) # Close second fluidRow
     ) # Close filters-container div
   )
 }
@@ -285,7 +274,7 @@ create_plot_controls <- function(data_type_id = "data_type", include_size_dim = 
       width = 12,
       div(
         class = "filters-container",
-        style = "border: 1px solid #ddd; border-radius: 8px; padding: 20px 20px 10px 20px; background-color: #f9f9f9; margin-bottom: 0;",
+        # style = "border: 1px solid #ddd; border-radius: 8px; padding: 20px 20px 10px 20px; background-color: #f9f9f9; margin-bottom: 0;",
         fluidRow(
           column(
             width = if (include_size_dim) 4 else 12,
@@ -331,7 +320,7 @@ create_plot_controls <- function(data_type_id = "data_type", include_size_dim = 
 subBlock <- function(i) {
   tagList(
     fluidRow(
-      class = "gene-select-input",
+      # class = "gene-select-input",
       column(
         width = 6,
         style = "position: relative;",
@@ -339,7 +328,7 @@ subBlock <- function(i) {
           style = "position: absolute; top: 0px; left: 105px; display: flex; align-items: center; white-space: nowrap;",
           tags$label(
             class = "switch",
-            style = "margin: 0;",
+            style = "margin: 10px;",
             tags$input(
               id = paste0("check_exp_", i),
               type = "checkbox",
@@ -380,7 +369,7 @@ subBlock <- function(i) {
           paste0("group_exp_", i),
           "Group by",
           choices = group_choices,
-          selected = if (!is.null(group_choices) && length(group_choices) > 0) group_choices[1] else "life_cycle_stage"
+          selected = if (!is.null(group_choices) && length(group_choices) > 0) group_choices[1] else "parasite_stages"
         )
       )
     ),

@@ -368,9 +368,9 @@ ui <- fluidPage(
                         conditionalPanel(
                           condition = "input.color == 'genes'",
                           div(
-                            style = "background-color: #fffbea; padding: 10px 15px; border-radius: 8px; border: 1px solid #ffd700; margin-top: 5px; margin-bottom: 10px; position: relative;",
+                            style = "background-color: #fffbea; padding: 20px 15px 5px 15px; border-radius: 8px; border: 1px solid #ffd700; margin-top: 5px; margin-bottom: 10px; position: relative;",
                             div(
-                              style = "position: absolute; top: 10px; left: 105px; display: flex; align-items: center;",
+                              style = "position: absolute; top: 20px; left: 105px; display: flex; align-items: center;",
                               tags$label(
                                 class = "switch",
                                 style = "margin: 0;",
@@ -384,7 +384,7 @@ ui <- fluidPage(
                                 tags$a(id = "ncbi_link", href = "#", target = "_blank", class = "gene-link", "🧬 NCBI")
                               )
                             ),
-                            selectizeInput("genes_n", NULL, choices = "", multiple = TRUE, options = list(placeholder = "Select one or more genes", maxItems = 10), width = "100%")
+                            selectizeInput("genes_n", "Gene(s)", choices = "", multiple = TRUE, options = list(placeholder = "Select one or more genes", maxItems = 10), width = "100%")
                           )
                         )
                       )
@@ -427,9 +427,9 @@ ui <- fluidPage(
                               conditionalPanel(
                                 condition = "input.color_first_comp == 'genes'",
                                   div(
-                                    style = "background-color: white; padding: 8px 12px; border-radius: 8px; border: 1px solid #bbdefb; position: relative;",
+                                    style = "background-color: white; padding: 22px 12px 5px 12px; border-radius: 8px; border: 1px solid #bbdefb; position: relative;",
                                     div(
-                                      style = "position: absolute; top: 8px; left: 105px; display: flex; align-items: center;",
+                                      style = "position: absolute; top: 10px; left: 105px; display: flex; align-items: center;",
                                       tags$label(
                                         class = "switch",
                                         style = "margin: 0; transform: scale(0.8);",
@@ -443,7 +443,7 @@ ui <- fluidPage(
                                         tags$a(id = "ncbi_link_first", href = "#", target = "_blank", class = "gene-link", "🧬 NCBI")
                                       )
                                     ),
-                                    selectizeInput("genes_n_first_comp", NULL, choices = "", multiple = TRUE, options = list(placeholder = "Select genes", maxItems = 10), width = "100%")
+                                    selectizeInput("genes_n_first_comp", "Gene(s)", choices = "", multiple = TRUE, options = list(placeholder = "Select genes", maxItems = 10), width = "100%")
                                   )
                               )
                             )
@@ -485,9 +485,9 @@ ui <- fluidPage(
                               conditionalPanel(
                                 condition = "input.color_second == 'genes'",
                                   div(
-                                    style = "background-color: white; padding: 8px 12px; border-radius: 8px; border: 1px solid #dcedc8; position: relative;",
+                                    style = "background-color: white; padding: 22px 12px 5px 12px; border-radius: 8px; border: 1px solid #dcedc8; position: relative;",
                                     div(
-                                      style = "position: absolute; top: 8px; left: 105px; display: flex; align-items: center;",
+                                      style = "position: absolute; top: 10px; left: 105px; display: flex; align-items: center;",
                                       tags$label(
                                         class = "switch",
                                         style = "margin: 0; transform: scale(0.8);",
@@ -501,7 +501,7 @@ ui <- fluidPage(
                                         tags$a(id = "ncbi_link_second", href = "#", target = "#", class = "gene-link", "🧬 NCBI")
                                       )
                                     ),
-                                    selectizeInput("genes_second", NULL, choices = "", multiple = TRUE, options = list(placeholder = "Select genes", maxItems = 10), width = "100%")
+                                    selectizeInput("genes_second", "Gene(s)", choices = "", multiple = TRUE, options = list(placeholder = "Select genes", maxItems = 10), width = "100%")
                                   )
                               )
                             )

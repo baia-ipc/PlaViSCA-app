@@ -111,8 +111,8 @@ function setupFilterSync() {
   // List of all filter input IDs
   const filterIds = [
     'study_label', 'sample_type', 'host_species', 'parasite_stage',
-    'treatment', 'development_phase', 'strain', 'hour_post_invasion',
-    'sequencer', 'sc_technology'
+    'treatment', 'development_phase', 'strain', 'hour_post_invasion'
+    // 'sequencer', 'sc_technology'
   ];
   
   // Function to copy options from first filter to all others

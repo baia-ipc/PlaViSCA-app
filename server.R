@@ -314,10 +314,6 @@ server <- function(input, output, session) {
       # Force dependency on embedding and integration to ensure plots update
       req(input$embedding)
 
-      # Check if we can reuse cached data based ONLY on data type
-      # We removed the caching optimization here to ensure full reactivity
-      # on embedding switch since filtered_gene_data depends on this.
-
       # Show progress bar when loading new data
       withProgress(message = "Updating visualization", value = 30, {
         display_name <- switch(current_type,
@@ -416,20 +412,20 @@ server <- function(input, output, session) {
             selected = isolate(input[[paste0("hour_post_invasion", suffix)]]),
             server = TRUE
           )
-          updateSelectizeInput(
-            session,
-            paste0("sequencer", suffix),
-            choices = unique(filt_data$sequencer),
-            selected = isolate(input[[paste0("sequencer", suffix)]]),
-            server = TRUE
-          )
-          updateSelectizeInput(
-            session,
-            paste0("sc_technology", suffix),
-            choices = unique(filt_data$sc_technology),
-            selected = isolate(input[[paste0("sc_technology", suffix)]]),
-            server = TRUE
-          )
+          # updateSelectizeInput(
+          #   session,
+          #   paste0("sequencer", suffix),
+          #   choices = unique(filt_data$sequencer),
+          #   selected = isolate(input[[paste0("sequencer", suffix)]]),
+          #   server = TRUE
+          # )
+          # updateSelectizeInput(
+          #   session,
+          #   paste0("sc_technology", suffix),
+          #   choices = unique(filt_data$sc_technology),
+          #   selected = isolate(input[[paste0("sc_technology", suffix)]]),
+          #   server = TRUE
+          # )
         }
       },
       error = function(e) {
@@ -442,8 +438,8 @@ server <- function(input, output, session) {
   # When a filter changes in any tab, update all other tabs to match
   filter_names <- c(
     "study_label", "sample_type", "host_species", "parasite_stages",
-    "treatment", "development_phase", "strain", "hour_post_invasion",
-    "sequencer", "sc_technology"
+    "treatment", "development_phase", "strain", "hour_post_invasion"
+    # "sequencer", "sc_technology"
   )
   filter_suffixes <- c("", "_gex", "_qc", "_meta")
 
@@ -493,9 +489,9 @@ server <- function(input, output, session) {
       development_phase = input$development_phase,
       sample_type = input$sample_type,
       strain = input$strain,
-      hour_post_invasion = input$hour_post_invasion,
-      sequencer = input$sequencer,
-      sc_technology = input$sc_technology
+      hour_post_invasion = input$hour_post_invasion
+      # sequencer = input$sequencer,
+      # sc_technology = input$sc_technology
     )
 
     # Create cache key for filtered gene data
@@ -620,10 +616,10 @@ server <- function(input, output, session) {
       paste0("development_phase__", unique(mr_data$development_phase)),
       unique(mr_data$development_phase)
     ),
-    blood_stage = setNames(
-      paste0("blood_stage__", unique(mr_data$blood_stage)),
-      unique(mr_data$blood_stage)
-    ),
+    # blood_stage = setNames(
+    #   paste0("blood_stage__", unique(mr_data$blood_stage)),
+    #   unique(mr_data$blood_stage)
+    # ),
     parasite_stages = setNames(
       paste0("parasite_stages__", unique(mr_data$parasite_stages)),
       unique(mr_data$parasite_stages)
@@ -636,18 +632,18 @@ server <- function(input, output, session) {
       paste0("geolocation__", unique(mr_data$geographic_location)),
       unique(mr_data$geographic_location)
     ),
-    sample_type = setNames(
-      paste0("sample_type__", unique(mr_data$sample_type)),
-      unique(mr_data$sample_type)
-    ),
-    sc_technology = setNames(
-      paste0("sc_technology__", unique(mr_data$sc_technology)),
-      unique(mr_data$sc_technology)
-    ),
-    sequencer = setNames(
-      paste0("sequencer__", unique(mr_data$sequencer)),
-      unique(mr_data$sequencer)
-    ),
+    # sample_type = setNames(
+    #   paste0("sample_type__", unique(mr_data$sample_type)),
+    #   unique(mr_data$sample_type)
+    # ),
+    # sc_technology = setNames(
+    #   paste0("sc_technology__", unique(mr_data$sc_technology)),
+    #   unique(mr_data$sc_technology)
+    # ),
+    # sequencer = setNames(
+    #   paste0("sequencer__", unique(mr_data$sequencer)),
+    #   unique(mr_data$sequencer)
+    # ),
     host_species = setNames(
       paste0("host_species__", unique(mr_data$host_species)),
       format_species_name(unique(mr_data$host_species))
@@ -678,9 +674,9 @@ server <- function(input, output, session) {
       input$development_phase_meta,
       input$sample_type_meta,
       input$strain_meta,
-      input$hour_post_invasion_meta,
-      input$sequencer_meta,
-      input$sc_technology_meta
+      input$hour_post_invasion_meta
+      # input$sequencer_meta,
+      # input$sc_technology_meta
     ),
     {
       current_inputs <- list(
@@ -691,9 +687,9 @@ server <- function(input, output, session) {
         treatment = input$treatment_meta,
         development_phase = input$development_phase_meta,
         strain = input$strain_meta,
-        hour_post_invasion = input$hour_post_invasion_meta,
-        sequencer = input$sequencer_meta,
-        sc_technology = input$sc_technology_meta
+        hour_post_invasion = input$hour_post_invasion_meta
+        # sequencer = input$sequencer_meta,
+        # sc_technology = input$sc_technology_meta
       )
 
       filt_data <- apply_secondary_filters(filtered_data(), current_inputs)
@@ -836,9 +832,9 @@ server <- function(input, output, session) {
       input$development_phase_qc,
       input$sample_type_qc,
       input$strain_qc,
-      input$hour_post_invasion_qc,
-      input$sequencer_qc,
-      input$sc_technology_qc
+      input$hour_post_invasion_qc
+      # input$sequencer_qc,
+      # input$sc_technology_qc
     ),
     {
       current_inputs <- list(
@@ -849,9 +845,9 @@ server <- function(input, output, session) {
         development_phase = input$development_phase_qc,
         sample_type = input$sample_type_qc,
         strain = input$strain_qc,
-        hour_post_invasion = input$hour_post_invasion_qc,
-        sequencer = input$sequencer_qc,
-        sc_technology = input$sc_technology_qc
+        hour_post_invasion = input$hour_post_invasion_qc
+        # sequencer = input$sequencer_qc,
+        # sc_technology = input$sc_technology_qc
       )
 
       filt_data <- apply_secondary_filters(filtered_data(), current_inputs)
@@ -947,9 +943,9 @@ server <- function(input, output, session) {
       development_phase = input$development_phase_gex,
       sample_type = input$sample_type_gex,
       strain = input$strain_gex,
-      hour_post_invasion = input$hour_post_invasion_gex,
-      sequencer = input$sequencer_gex,
-      sc_technology = input$sc_technology_gex
+      hour_post_invasion = input$hour_post_invasion_gex
+      # sequencer = input$sequencer_gex,
+      # sc_technology = input$sc_technology_gex
     )
 
     # Create cache key as a single string for filtered gene expression data
@@ -1000,9 +996,9 @@ server <- function(input, output, session) {
       input$development_phase_gex,
       input$sample_type_gex,
       input$strain_gex,
-      input$hour_post_invasion_gex,
-      input$sequencer_gex,
-      input$sc_technology_gex
+      input$hour_post_invasion_gex
+      # input$sequencer_gex,
+      # input$sc_technology_gex
     ),
     {
       current_inputs <- list(
@@ -1013,9 +1009,9 @@ server <- function(input, output, session) {
         development_phase = input$development_phase_gex,
         sample_type = input$sample_type_gex,
         strain = input$strain_gex,
-        hour_post_invasion = input$hour_post_invasion_gex,
-        sequencer = input$sequencer_gex,
-        sc_technology = input$sc_technology_gex
+        hour_post_invasion = input$hour_post_invasion_gex
+        # sequencer = input$sequencer_gex,
+        # sc_technology = input$sc_technology_gex
       )
 
       filt_data <- apply_secondary_filters(filtered_data(), current_inputs)
@@ -1053,9 +1049,9 @@ server <- function(input, output, session) {
       input$development_phase_gex,
       input$sample_type_gex,
       input$strain_gex,
-      input$hour_post_invasion_gex,
-      input$sequencer_gex,
-      input$sc_technology_gex
+      input$hour_post_invasion_gex
+      # input$sequencer_gex,
+      # input$sc_technology_gex
     )
 
     # Check cache first for instant gene switching
