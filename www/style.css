@@ -300,13 +300,41 @@ body {
   background-color: var(--primary-color);
 }
 
-/* bslib card enhancements */
+/* Vertical Space Optimization */
+.settings-card-compact .card-header {
+  padding: 4px 12px !important;
+}
+
+.settings-card-compact .card-body {
+  padding: 8px 12px !important;
+}
+
+.settings-card-compact hr {
+  margin: 4px 0 !important;
+}
+
+.settings-card-compact .control-label {
+  margin-bottom: 2px !important;
+  font-size: 0.75rem !important;
+}
+
+.settings-card-compact .shiny-input-container {
+  margin-bottom: 0 !important;
+}
+
+/* Compact the gene selection panels */
+#genes_single_panel, .comparison-controls {
+  padding: 6px 10px !important;
+  margin-top: 4px !important;
+}
+
+/* Standardize card margins */
 .card {
   border-radius: 12px !important;
   border: 1px solid #e1e4e8 !important;
   box-shadow: 0 2px 8px rgba(0,0,0,0.05) !important;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
-  margin-bottom: 15px !important;
+  margin-bottom: 8px !important; /* Reduced from 15px */
   overflow: visible !important;
 }
 
@@ -376,6 +404,73 @@ body {
 .switch-container-compact .form-check-input:checked {
   background-color: #198754;
   border-color: #198754;
+}
+
+.settings-card-compact .card-header {
+  padding: 4px 12px !important;
+}
+
+.settings-card-compact .card-body {
+  padding: 8px 12px !important;
+}
+
+.settings-card-compact .control-label {
+  margin-bottom: 2px !important;
+  font-size: 0.75rem !important;
+}
+
+.settings-card-compact .shiny-options-group {
+  margin-top: -2px;
+}
+
+/* Vertical Space Optimization */
+.settings-card-compact .card-header {
+  padding: 4px 12px !important;
+}
+
+.settings-card-compact .card-body {
+  padding: 6px 12px !important;
+}
+
+.settings-card-compact hr {
+  margin: 4px 0 !important;
+}
+
+.settings-card-compact .control-label {
+  margin-bottom: 2px !important;
+  font-size: 0.75rem !important;
+}
+
+.settings-card-compact .shiny-input-container {
+  margin-bottom: 0 !important;
+}
+
+/* Vertical Space Optimization for Settings */
+.settings-card-compact .card-header {
+  padding: 4px 12px !important;
+}
+
+.settings-card-compact .card-body {
+  padding: 6px 12px !important;
+}
+
+.settings-card-compact .control-label {
+  margin-bottom: 1px !important;
+  font-size: 0.75rem !important;
+}
+
+.settings-card-compact .shiny-options-group {
+  margin-top: -2px;
+}
+
+.settings-card-compact hr {
+  margin: 6px 0 !important;
+}
+
+/* Compact specific input groups */
+.settings-card-compact .selectize-input {
+  min-height: 30px !important;
+  padding: 2px 8px !important;
 }
 
 .card-body {

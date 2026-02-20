@@ -146,7 +146,7 @@ ui <- fluidPage(
 
             # Control Row (Fixed duplication and alignment)
             card(
-              class = "mb-3 shadow-sm",
+              class = "mb-2 shadow-sm settings-card-compact",
               card_header(
                 class = "bg-secondary text-white py-1",
                 fontawesome::fa("cog", height = "14px"),
@@ -252,11 +252,10 @@ ui <- fluidPage(
                     )
                   )
                 ),
-                hr(class = "my-2"),
-                # Hidden checkbox to track comparison mode for conditionalPanel
+                # Removed HR to save space
                 shinyjs::hidden(checkboxInput("comparison_active", NULL, value = FALSE)),
                 div(
-                  class = "d-flex justify-content-between align-items-center",
+                  class = "d-flex justify-content-between align-items-center mt-1",
                   # Left side: Color by (only when not comparing)
                   conditionalPanel(
                     condition = "!input.comparison_active",
@@ -300,22 +299,56 @@ ui <- fluidPage(
                 # Gene selection row
                 div(
                   id = "genes_single_panel",
-                  class = "mt-3 p-3 border rounded bg-white shadow-sm",
+                  class = "mt-2 p-2 border rounded bg-white shadow-sm",
                   style = "display: none;",
                   fluidRow(
+                    class = "g-1 align-items-end",
                     column(
-                      width = 5,
-                      selectizeInput("genes_n", "Select Genes", choices = "", multiple = TRUE, options = list(placeholder = "Search for genes...", maxItems = 10, dropdownParent = "body"), width = "100%")
+                      width = 10,
+                      div(
+                        class = "gene-select-wrapper",
+                        tags$label(
+                          class = "control-label",
+                          tags$span(class = "small", "Gene(s)"),
+                          tags$span(
+                            title = "Click to switch ID and name",
+                            `data-bs-toggle` = "tooltip",
+                            `data-bs-placement` = "top",
+                            input_switch("check", label = NULL, value = FALSE)
+                          )
+                        ),
+                        selectizeInput(
+                          "genes_n",
+                          label = NULL,
+                          choices = "", multiple = TRUE,
+                          options = list(placeholder = "Search for genes...", maxItems = 10, dropdownParent = "body"),
+                          width = "100%"
+                        )
+                      )
                     ),
                     column(
-                      width = 7,
+                      width = 2,
                       div(
-                        class = "d-flex align-items-center gap-3 mt-4 justify-content-end",
-                        input_switch("check", "Show Gene ID", value = FALSE),
-                        div(
-                          class = "btn-group",
-                          tags$a(id = "plasmo_link", href = "#", target = "_blank", class = "btn btn-outline-info btn-sm", tagList(fontawesome::fa("external-link-alt"), " PlasmoDB")),
-                          tags$a(id = "ncbi_link", href = "#", target = "_blank", class = "btn btn-outline-info btn-sm", tagList(fontawesome::fa("dna"), " NCBI"))
+                        class = "links-row",
+                        tags$a(
+                          id = "plasmo_link",
+                          href = "#",
+                          target = "_blank",
+                          class = "btn btn-outline-info btn-sm gene-link-btn",
+                          `data-bs-toggle` = "tooltip",
+                          `data-bs-placement` = "top",
+                          title = "PlasmoDB",
+                          tags$i(class = "fas fa-external-link-alt")
+                        ),
+                        tags$a(
+                          id = "ncbi_link",
+                          href = "#",
+                          target = "_blank",
+                          class = "btn btn-outline-info btn-sm gene-link-btn",
+                          `data-bs-toggle` = "tooltip",
+                          `data-bs-placement` = "top",
+                          title = "NCBI",
+                          tags$i(class = "fas fa-dna")
                         )
                       )
                     )
@@ -355,7 +388,7 @@ ui <- fluidPage(
                               class = "gene-select-wrapper",
                               tags$label(
                                 class = "control-label",
-                                tags$span(class = "small", "Genes"),
+                                tags$span(class = "small", "Gene(s)"),
                                 tags$span(
                                   title = "Click to switch ID and name",
                                   `data-bs-toggle` = "tooltip",
@@ -430,7 +463,7 @@ ui <- fluidPage(
                               class = "gene-select-wrapper",
                               tags$label(
                                 class = "control-label",
-                                tags$span(class = "small", "Genes"),
+                                tags$span(class = "small", "Gene(s)"),
                                 tags$span(
                                   title = "Click to switch ID and name",
                                   `data-bs-toggle` = "tooltip",
