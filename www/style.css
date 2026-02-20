@@ -441,7 +441,18 @@ body {
 }
 
 .shiny-input-container .control-label {
-  margin-bottom: 2px !important;
+  margin-bottom: 4px !important;
+  display: block;
+}
+
+/* Remove default margin-bottom from form groups in the control row for perfect alignment */
+.card-body .form-group {
+  margin-bottom: 0 !important;
+}
+
+/* Vertical alignment for switch text to match radio buttons */
+.switch-text {
+  padding-top: 2px;
 }
 
 /* Custom switch colors and size */

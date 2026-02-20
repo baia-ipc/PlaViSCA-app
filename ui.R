@@ -172,13 +172,17 @@ ui <- fluidPage(
                   ),
                   # Integration - 1 column
                   tags$div(
-                    class = "col-sm-1",
+                    class = "col-sm-1 d-flex flex-column justify-content-end",
                     style = "flex: 0 0 8.33%; max-width: 8.33%;",
                     conditionalPanel(
                       condition = "input.embedding != 'tsne'",
                       div(
-                        class = "integration-control-group",
-                        tags$label("Integration", class = "control-label fw-semibold d-block mb-1", style = "font-size: 0.8rem;"),
+                        class = "form-group shiny-input-container mb-0",
+                        tags$label(
+                          class = "control-label mb-1",
+                          `for` = "check_all",
+                          tags$span("Integration", style = "font-size: 0.8rem; font-weight: 600;")
+                        ),
                         div(
                           id = "tab_switch",
                           class = "switch-container-compact d-flex align-items-center gap-1",
