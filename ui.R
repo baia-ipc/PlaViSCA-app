@@ -229,33 +229,24 @@ ui <- fluidPage(
                   class = "d-flex justify-content-between align-items-center mt-3",
                   # Left side: Color by (only when not comparing)
                   div(
-                    class = "d-flex align-items-center",
-                    div(
-                      id = "color_by_single",
-                      class = "d-flex align-items-center gap-3",
-                      tags$span("Color by:", style = "font-size: 0.85rem; font-weight: 600; color: #2c3e50;"),
-                      selectInput(
-                        "color",
-                        NULL,
-                        choices = list(
-                          "Study" = "study_label",
-                          "Development phase" = "development_phase",
-                          "Parasite stages" = "parasite_stages",
-                          "Strain" = "strain",
-                          "Treatment" = "treatment",
-                          "Sample type" = "sample_type",
-                          "Host species" = "host_species",
-                          "Genes" = "genes"
-                        ),
-                        selected = "development_phase",
-                        width = "180px"
-                      )
-                    ),
-                    tags$span(
-                      id = "comparison_mode_badge",
-                      style = "display: none;",
-                      tagList(fontawesome::fa("columns", fill = "#008080"), " Comparison Mode Active"),
-                      class = "badge rounded-pill bg-light text-primary border p-2 px-3"
+                    id = "color_by_single",
+                    class = "d-flex align-items-center gap-3",
+                    tags$span("Color by:", style = "font-size: 0.85rem; font-weight: 600; color: #2c3e50;"),
+                    selectInput(
+                      "color",
+                      NULL,
+                      choices = list(
+                        "Study" = "study_label",
+                        "Development phase" = "development_phase",
+                        "Parasite stages" = "parasite_stages",
+                        "Strain" = "strain",
+                        "Treatment" = "treatment",
+                        "Sample type" = "sample_type",
+                        "Host species" = "host_species",
+                        "Genes" = "genes"
+                      ),
+                      selected = "development_phase",
+                      width = "180px"
                     )
                   ),
 
@@ -304,65 +295,138 @@ ui <- fluidPage(
                   id = "comparison_controls_panel",
                   class = "mt-3 comparison-controls",
                   style = "display: none;",
-                  div(
-                    class = "comparison-header",
-                    tagList(
-                      fontawesome::fa("clone", fill = "#008080"),
-                      tags$span("Side-by-Side Comparison", class = "fw-bold")
-                    )
-                  ),
                   fluidRow(
                     class = "g-0",
+                    # Plot A Section
                     column(
                       width = 6,
                       div(
-                        class = "comparison-plot-control plot-1-control",
+                        class = "comparison-plot-section plot-a-section",
+                        # Row 1: Color by dropdown
                         div(
-                          class = "plot-label",
-                          tagList(fontawesome::fa("circle", fill = "#007bff"), tags$strong("Plot A"))
-                        ),
-                        div(
-                          class = "d-flex align-items-center gap-2 flex-wrap",
+                          class = "color-row",
                           selectInput(
                             "color_first_comp",
-                            tags$span("Color by", style = "font-size: 0.8rem;"),
+                            NULL,
                             choices = list(
                               "Study" = "study_label", "Development phase" = "development_phase", "Parasite stages" = "parasite_stages",
                               "Strain" = "strain", "Treatment" = "treatment", "Sample type" = "sample_type",
                               "Host species" = "host_species", "Genes" = "genes"
                             ),
-                            selected = "development_phase", width = "180px"
-                          ),
-                          conditionalPanel(
-                            condition = "input.color_first_comp == 'genes'",
-                            selectizeInput("genes_n_first_comp", tags$span("Genes", style = "font-size: 0.8rem;"), choices = "", multiple = TRUE, options = list(placeholder = "Search genes...", maxItems = 10, dropdownParent = "body"), width = "200px")
+                            selected = "development_phase", width = "100%"
+                          )
+                        ),
+                        # Row 2: Gene selection (shown only when genes selected)
+                        conditionalPanel(
+                          condition = "input.color_first_comp == 'genes'",
+                          div(
+                            class = "gene-row",
+                            fluidRow(
+                              class = "g-1 align-items-center",
+                              column(
+                                width = 9,
+                                selectizeInput(
+                                  "genes_n_first_comp",
+                                  NULL,
+                                  choices = "", multiple = TRUE,
+                                  options = list(placeholder = "Search genes...", maxItems = 10, dropdownParent = "body"),
+                                  width = "100%"
+                                )
+                              ),
+                              column(
+                                width = 3,
+                                div(
+                                  class = "d-flex gap-1 justify-content-end",
+                                  tags$a(
+                                    id = "plasmo_link_a",
+                                    href = "#",
+                                    target = "_blank",
+                                    class = "btn btn-outline-primary btn-sm gene-link-btn",
+                                    `data-bs-toggle` = "tooltip",
+                                    `data-bs-placement` = "top",
+                                    title = "Open in PlasmoDB",
+                                    tags$i(class = "fas fa-external-link-alt")
+                                  ),
+                                  tags$a(
+                                    id = "ncbi_link_a",
+                                    href = "#",
+                                    target = "_blank",
+                                    class = "btn btn-outline-primary btn-sm gene-link-btn",
+                                    `data-bs-toggle` = "tooltip",
+                                    `data-bs-placement` = "top",
+                                    title = "Open in NCBI",
+                                    tags$i(class = "fas fa-dna")
+                                  )
+                                )
+                              )
+                            )
                           )
                         )
                       )
                     ),
+                    # Plot B Section
                     column(
                       width = 6,
                       div(
-                        class = "comparison-plot-control plot-2-control",
+                        class = "comparison-plot-section plot-b-section",
+                        # Row 1: Color by dropdown
                         div(
-                          class = "plot-label",
-                          tagList(fontawesome::fa("circle", fill = "#28a745"), tags$strong("Plot B"))
-                        ),
-                        div(
-                          class = "d-flex align-items-center gap-2 flex-wrap",
+                          class = "color-row",
                           selectInput(
                             "color_second",
-                            tags$span("Color by", style = "font-size: 0.8rem;"),
+                            NULL,
                             choices = list(
                               "Study" = "study_label", "Development phase" = "development_phase", "Parasite stages" = "parasite_stages",
                               "Strain" = "strain", "Treatment" = "treatment", "Sample type" = "sample_type",
                               "Host species" = "host_species", "Genes" = "genes"
                             ),
-                            selected = "parasite_stages", width = "180px"
-                          ),
-                          conditionalPanel(
-                            condition = "input.color_second == 'genes'",
-                            selectizeInput("genes_second", tags$span("Genes", style = "font-size: 0.8rem;"), choices = "", multiple = TRUE, options = list(placeholder = "Search genes...", maxItems = 10, dropdownParent = "body"), width = "200px")
+                            selected = "parasite_stages", width = "100%"
+                          )
+                        ),
+                        # Row 2: Gene selection (shown only when genes selected)
+                        conditionalPanel(
+                          condition = "input.color_second == 'genes'",
+                          div(
+                            class = "gene-row",
+                            fluidRow(
+                              class = "g-1 align-items-center",
+                              column(
+                                width = 9,
+                                selectizeInput(
+                                  "genes_second",
+                                  NULL,
+                                  choices = "", multiple = TRUE,
+                                  options = list(placeholder = "Search genes...", maxItems = 10, dropdownParent = "body"),
+                                  width = "100%"
+                                )
+                              ),
+                              column(
+                                width = 3,
+                                div(
+                                  class = "d-flex gap-1 justify-content-end",
+                                  tags$a(
+                                    id = "plasmo_link_b",
+                                    href = "#",
+                                    target = "_blank",
+                                    class = "btn btn-outline-success btn-sm gene-link-btn",
+                                    `data-bs-toggle` = "tooltip",
+                                    `data-bs-placement` = "top",
+                                    title = "Open in PlasmoDB",
+                                    tags$i(class = "fas fa-external-link-alt")
+                                  ),
+                                  tags$a(
+                                    id = "ncbi_link_b",
+                                    href = "#",
+                                    target = "_blank",
+                                    class = "btn btn-outline-success btn-sm gene-link-btn",
+                                    `data-bs-toggle` = "tooltip",
+                                    `data-bs-placement` = "top",
+                                    title = "Open in NCBI",
+                                    tags$i(class = "fas fa-dna")
+                                  )
+                                )
+                              )
+                            )
                           )
                         )
                       )

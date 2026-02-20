@@ -2452,7 +2452,9 @@ server <- function(input, output, session) {
       shinyjs::show("comparison_plots_panel")
       shinyjs::hide("single_plot_panel")
       shinyjs::hide("color_by_single")
-      shinyjs::show("comparison_mode_badge")
+
+      # Initialize Bootstrap tooltips
+      shinyjs::runjs("var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle=\"tooltip\"]')); var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) { return new bootstrap.Tooltip(tooltipTriggerEl); });")
 
       # Store current selections
       ui_state$stored_color <- input$color
@@ -2484,7 +2486,6 @@ server <- function(input, output, session) {
       shinyjs::hide("comparison_plots_panel")
       shinyjs::show("single_plot_panel")
       shinyjs::show("color_by_single")
-      shinyjs::hide("comparison_mode_badge")
 
       # Restore previous selections
       if (!is.null(ui_state$stored_color)) {
@@ -2653,7 +2654,7 @@ server <- function(input, output, session) {
         })
         gene_ids <- gene_ids[!is.null(gene_ids) & nzchar(gene_ids)]
         if (length(gene_ids) > 0) {
-          gene_links_multiple(gene_ids, target = "plasmo_link_first")
+          gene_links_multiple(gene_ids, target = "plasmo_link_a")
         }
       }
     }
@@ -2674,7 +2675,7 @@ server <- function(input, output, session) {
         })
         gene_ids <- gene_ids[!is.null(gene_ids) & nzchar(gene_ids)]
         if (length(gene_ids) > 0) {
-          gene_links_multiple(gene_ids, target = "plasmo_link_second")
+          gene_links_multiple(gene_ids, target = "plasmo_link_b")
         }
       }
     }

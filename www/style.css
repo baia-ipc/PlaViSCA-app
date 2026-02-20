@@ -257,7 +257,7 @@ body {
   background-color: var(--white);
   border-radius: 10px;
   padding: 20px;
-  margin-bottom: 25px;
+  margin-bottom: 20px;
   box-shadow: var(--shadow);
   border: 1px solid #e1e4e8;
 }
@@ -553,53 +553,59 @@ body {
 
 /* Comparison Mode Styles */
 .comparison-controls {
-  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  background: var(--white);
   border-radius: 12px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
   border: 1px solid #e1e4e8;
   overflow: visible;
-  position: relative;
-  z-index: 1;
 }
 
-.comparison-header {
-  background: linear-gradient(90deg, #008080 0%, #006666 100%);
-  color: white;
-  padding: 10px 16px;
-  font-size: 0.95rem;
-  display: flex;
-  align-items: center;
-  gap: 8px;
+.comparison-plot-section {
+  padding: 12px 16px;
 }
 
-.comparison-plot-control {
-  padding: 16px;
-  min-height: 80px;
+.plot-a-section {
+  background: linear-gradient(135deg, rgba(0, 123, 255, 0.02) 0%, rgba(0, 123, 255, 0.05) 100%);
+  border-right: 1px solid #e1e4e8;
 }
 
-.plot-1-control {
-  background: linear-gradient(135deg, rgba(0, 123, 255, 0.03) 0%, rgba(0, 123, 255, 0.08) 100%);
-  border-right: 2px solid #e1e4e8;
+.plot-b-section {
+  background: linear-gradient(135deg, rgba(40, 167, 69, 0.02) 0%, rgba(40, 167, 69, 0.05) 100%);
 }
 
-.plot-2-control {
-  background: linear-gradient(135deg, rgba(40, 167, 69, 0.03) 0%, rgba(40, 167, 69, 0.08) 100%);
+.color-row {
+  margin-bottom: 0;
 }
 
-.plot-label {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin-bottom: 10px;
-  font-size: 0.9rem;
+.gene-row {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px dashed #e1e4e8;
 }
 
-.plot-1-control .plot-label strong {
-  color: #007bff;
+.plot-a-section .gene-row {
+  border-top-color: rgba(0, 123, 255, 0.2);
 }
 
-.plot-2-control .plot-label strong {
-  color: #28a745;
+.plot-b-section .gene-row {
+  border-top-color: rgba(40, 167, 69, 0.2);
+}
+
+/* Gene link buttons with tooltips */
+.gene-link-btn {
+  padding: 6px 10px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.gene-link-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.gene-link-btn:focus {
+  outline: none;
 }
 
 /* Comparison Plot Cards */
