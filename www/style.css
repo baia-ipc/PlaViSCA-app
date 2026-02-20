@@ -561,7 +561,7 @@ body {
 }
 
 .comparison-plot-section {
-  padding: 8px 12px;
+  padding: 8px 10px;
 }
 
 .plot-a-section {
@@ -573,32 +573,65 @@ body {
   background: rgba(40, 167, 69, 0.02);
 }
 
-.color-label {
+/* Gene select wrapper */
+.gene-select-wrapper {
+  width: 100%;
+}
+
+.gene-select-wrapper label.control-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.gene-select-wrapper label.control-label .form-group {
+  margin-bottom: 0;
+}
+
+/* Gene options column styling */
+.gene-options-col {
+  display: flex;
+  flex-direction: column;
+  margin-left: 205px;
+}
+
+.gene-options-col .form-group {
+  margin-bottom: 0;
+}
+
+/* Toggle row */
+.toggle-row {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+}
+
+.toggle-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #495057;
   white-space: nowrap;
-  min-width: 65px;
 }
 
-.gene-row {
-  padding-top: 6px;
-  margin-top: 4px;
-  border-top: 1px dashed #dee2e6;
+/* Links row */
+.links-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
-.plot-a-section .gene-row {
-  border-top-color: rgba(0, 123, 255, 0.25);
-}
-
-.plot-b-section .gene-row {
-  border-top-color: rgba(40, 167, 69, 0.25);
+.links-row.align-items-end {
+  align-items: flex-end;
+  padding-bottom: 8px;
 }
 
 /* Gene link buttons with tooltips */
 .gene-link-btn {
-  padding: 4px 8px;
+  padding: 3px 6px;
   border-radius: 4px;
   transition: all 0.2s ease;
   cursor: pointer;
-  font-size: 0.75rem;
+  font-size: 0.7rem;
 }
 
 .gene-link-btn:hover {
