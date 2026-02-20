@@ -154,72 +154,96 @@ ui <- fluidPage(
               ),
               card_body(
                 fluidRow(
-                  class = "g-3 align-items-end",
-                  column(
-                    width = 2,
-                    radioButtons(
-                      "data_type",
-                      tags$span("Data Type", style = "font-size: 0.85rem; font-weight: 500;"),
-                      choices = list("Raw" = "raw", "Normalized" = "normalize"),
-                      selected = "normalize",
-                      inline = TRUE
-                    )
-                  ),
-                  column(
-                    width = 2,
-                    conditionalPanel(
-                      condition = "input.embedding != 'tsne'",
-                      div(
-                        id = "tab_switch",
-                        class = "switch-container d-flex align-items-center gap-2 mt-4",
-                        tags$span("Unintegrated", class = "small text-muted"),
-                        input_switch(
-                          "check_all",
-                          label = NULL,
-                          value = TRUE
-                        ),
-                        tags$span("Integrated", class = "small")
+                  class = "g-1 align-items-end",
+                  # Data Type - 2 columns
+                  tags$div(
+                    class = "col-sm-2",
+                    style = "flex: 0 0 16.66%; max-width: 16.66%;",
+                    tags$div(
+                      title = "Select raw or normalized expression data",
+                      radioButtons(
+                        "data_type",
+                        tags$span("Data Type", style = "font-size: 0.8rem; font-weight: 600;"),
+                        choices = list("Raw" = "raw", "Normalized" = "normalize"),
+                        selected = "normalize",
+                        inline = TRUE
                       )
                     )
                   ),
-                  column(
-                    width = 3,
-                    radioButtons(
-                      "embedding",
-                      tags$span("Embedding", style = "font-size: 0.85rem; font-weight: 500;"),
-                      inline = TRUE,
-                      choices = list("PCA" = "pca", "UMAP" = "umap", "tSNE" = "tsne"),
-                      selected = "umap"
+                  # Integration - 1 column
+                  tags$div(
+                    class = "col-sm-1",
+                    style = "flex: 0 0 8.33%; max-width: 8.33%;",
+                    conditionalPanel(
+                      condition = "input.embedding != 'tsne'",
+                      div(
+                        class = "integration-control-group",
+                        tags$label("Integration", class = "control-label fw-semibold d-block mb-1", style = "font-size: 0.8rem;"),
+                        div(
+                          id = "tab_switch",
+                          class = "switch-container-compact d-flex align-items-center gap-1",
+                          tags$span("Un.", class = "switch-text text-muted", style = "font-size: 0.65rem;"),
+                          input_switch("check_all", label = NULL, value = TRUE),
+                          tags$span("In.", class = "switch-text", style = "font-size: 0.65rem;")
+                        )
+                      )
                     )
                   ),
-                  column(
-                    width = 2,
-                    radioButtons(
-                      "size",
-                      tags$span("Point Size", style = "font-size: 0.85rem; font-weight: 500;"),
-                      choices = list("S" = 2, "M" = 4, "L" = 6),
-                      selected = 4,
-                      inline = TRUE
+                  # Embedding - 3 columns
+                  tags$div(
+                    class = "col-sm-3",
+                    style = "flex: 0 0 25%; max-width: 25%;",
+                    tags$div(
+                      title = "Choose the dimensionality reduction method",
+                      radioButtons(
+                        "embedding",
+                        tags$span("Embedding", style = "font-size: 0.8rem; font-weight: 600;"),
+                        inline = TRUE,
+                        choices = list("PCA" = "pca", "UMAP" = "umap", "tSNE" = "tsne"),
+                        selected = "umap"
+                      )
                     )
                   ),
-                  column(
-                    width = 3,
-                    div(
-                      class = "d-flex align-items-center gap-3",
+                  # Point Size - 2 columns
+                  tags$div(
+                    class = "col-sm-2",
+                    style = "flex: 0 0 16.66%; max-width: 16.66%;",
+                    tags$div(
+                      title = "Adjust the size of the points in the plot",
+                      radioButtons(
+                        "size",
+                        tags$span("Point Size", style = "font-size: 0.8rem; font-weight: 600;"),
+                        choices = list("S" = 2, "M" = 4, "L" = 6),
+                        selected = 4,
+                        inline = TRUE
+                      )
+                    )
+                  ),
+                  # Dimension - 2 columns
+                  tags$div(
+                    class = "col-sm-2",
+                    style = "flex: 0 0 16.66%; max-width: 16.66%;",
+                    tags$div(
+                      title = "Select 2D or 3D visualization",
                       radioButtons(
                         "plot",
-                        tags$span("Dim", style = "font-size: 0.85rem; font-weight: 500;"),
+                        tags$span("Dimension", style = "font-size: 0.8rem; font-weight: 600;"),
                         choices = list("2D" = "2d", "3D" = "3d"),
                         selected = "3d",
                         inline = TRUE
-                      ),
-                      conditionalPanel(
-                        condition = "input.plot == '2d'",
-                        div(
-                          class = "d-flex gap-1",
-                          selectInput("xaxis", NULL, choices = c("pc_1" = "pc_1"), selected = "pc_1", width = "80px"),
-                          selectInput("yaxis", NULL, choices = c("pc_2" = "pc_2"), selected = "pc_2", width = "80px")
-                        )
+                      )
+                    )
+                  ),
+                  # X/Y Selectors - 2 columns
+                  tags$div(
+                    class = "col-sm-2",
+                    style = "flex: 0 0 16.66%; max-width: 16.66%;",
+                    conditionalPanel(
+                      condition = "input.plot == '2d'",
+                      div(
+                        class = "xy-selector-stacked",
+                        div(class = "d-flex align-items-center gap-1", tags$span("X", style = "font-size: 0.7rem; font-weight: 800;"), tags$div(style = "flex-grow: 1", selectInput("xaxis", NULL, choices = c("pc_1" = "pc_1"), selected = "pc_1", width = "100%"))),
+                        div(class = "d-flex align-items-center gap-1", tags$span("Y", style = "font-size: 0.7rem; font-weight: 800;"), tags$div(style = "flex-grow: 1", selectInput("yaxis", NULL, choices = c("pc_2" = "pc_2"), selected = "pc_2", width = "100%")))
                       )
                     )
                   )
@@ -254,7 +278,7 @@ ui <- fluidPage(
                     )
                   ),
 
-                  # Right side: Actions (always visible, always on right)
+                  # Right side: Actions
                   div(
                     class = "ms-auto d-flex align-items-center gap-2",
                     actionButton(
@@ -269,7 +293,7 @@ ui <- fluidPage(
                   )
                 ),
 
-                # Gene selection row (compact)
+                # Gene selection row
                 div(
                   id = "genes_single_panel",
                   class = "mt-3 p-3 border rounded bg-white shadow-sm",
@@ -294,85 +318,82 @@ ui <- fluidPage(
                   )
                 ),
 
-                # Comparison Plot Colors (visible when comparing)
+                # Comparison Plot Controls
                 div(
                   id = "comparison_controls_panel",
                   class = "mt-2 comparison-controls",
                   style = "display: none;",
-                  fluidRow(
-                    class = "g-0",
+                  layout_column_wrap(
+                    width = 1 / 2,
                     # Plot A Section
-                    column(
-                      width = 6,
-                      div(
-                        class = "comparison-plot-section plot-a-section",
-                        fluidRow(
-                          class = "g-1 align-items-end",
-                          # Color by dropdown - 3 columns
+                    div(
+                      class = "comparison-plot-section plot-a-section",
+                      fluidRow(
+                        class = "g-1 align-items-end",
+                        column(
+                          width = 4,
+                          selectInput(
+                            "color_first_comp",
+                            tags$span("Color by", class = "small fw-semibold"),
+                            choices = list(
+                              "Study" = "study_label", "Development phase" = "development_phase", "Parasite stages" = "parasite_stages",
+                              "Strain" = "strain", "Treatment" = "treatment", "Sample type" = "sample_type",
+                              "Host species" = "host_species", "Genes" = "genes"
+                            ),
+                            selected = "development_phase", width = "100%"
+                          )
+                        ),
+                        conditionalPanel(
+                          condition = "input.color_first_comp == 'genes'",
                           column(
-                            width = 3,
-                            selectInput(
-                              "color_first_comp",
-                              tags$span("Color by", class = "small fw-semibold"),
-                              choices = list(
-                                "Study" = "study_label", "Development phase" = "development_phase", "Parasite stages" = "parasite_stages",
-                                "Strain" = "strain", "Treatment" = "treatment", "Sample type" = "sample_type",
-                                "Host species" = "host_species", "Genes" = "genes"
+                            width = 6,
+                            div(
+                              class = "gene-select-wrapper",
+                              tags$label(
+                                class = "control-label",
+                                tags$span(class = "small", "Genes"),
+                                tags$span(
+                                  title = "Click to switch ID and name",
+                                  `data-bs-toggle` = "tooltip",
+                                  `data-bs-placement` = "top",
+                                  bslib::input_switch("check_first_comp", label = NULL, value = FALSE)
+                                )
                               ),
-                              selected = "development_phase", width = "100%"
-                            )
-                          ),
-                          # Gene selection - 6 columns (shown only when genes selected)
-                          conditionalPanel(
-                            condition = "input.color_first_comp == 'genes'",
-                            column(
-                              width = 6,
                               selectizeInput(
                                 "genes_n_first_comp",
-                                tags$span("Genes", class = "small"),
+                                label = NULL,
                                 choices = "", multiple = TRUE,
                                 options = list(placeholder = "Search genes...", maxItems = 10, dropdownParent = "body"),
                                 width = "100%"
                               )
                             )
-                          ),
-                          # Toggle + Links - 3 columns, two rows (shown only when genes selected)
-                          conditionalPanel(
-                            condition = "input.color_first_comp == 'genes'",
-                            column(
-                              width = 3,
-                              div(
-                                class = "gene-options-col",
-                                # Row 1: Toggle
-                                div(
-                                  class = "toggle-row",
-                                  tags$span(class = "toggle-label", "Gene ID"),
-                                  bslib::input_switch("check_first_comp", label = NULL, value = FALSE)
-                                ),
-                                # Row 2: Links
-                                div(
-                                  class = "links-row",
-                                  tags$a(
-                                    id = "plasmo_link_a",
-                                    href = "#",
-                                    target = "_blank",
-                                    class = "btn btn-outline-primary btn-sm gene-link-btn",
-                                    `data-bs-toggle` = "tooltip",
-                                    `data-bs-placement` = "top",
-                                    title = "PlasmoDB",
-                                    tags$i(class = "fas fa-external-link-alt")
-                                  ),
-                                  tags$a(
-                                    id = "ncbi_link_a",
-                                    href = "#",
-                                    target = "_blank",
-                                    class = "btn btn-outline-primary btn-sm gene-link-btn",
-                                    `data-bs-toggle` = "tooltip",
-                                    `data-bs-placement` = "top",
-                                    title = "NCBI",
-                                    tags$i(class = "fas fa-dna")
-                                  )
-                                )
+                          )
+                        ),
+                        conditionalPanel(
+                          condition = "input.color_first_comp == 'genes'",
+                          column(
+                            width = 2,
+                            div(
+                              class = "links-row",
+                              tags$a(
+                                id = "plasmo_link_a",
+                                href = "#",
+                                target = "_blank",
+                                class = "btn btn-outline-primary btn-sm gene-link-btn",
+                                `data-bs-toggle` = "tooltip",
+                                `data-bs-placement` = "top",
+                                title = "PlasmoDB",
+                                tags$i(class = "fas fa-external-link-alt")
+                              ),
+                              tags$a(
+                                id = "ncbi_link_a",
+                                href = "#",
+                                target = "_blank",
+                                class = "btn btn-outline-primary btn-sm gene-link-btn",
+                                `data-bs-toggle` = "tooltip",
+                                `data-bs-placement` = "top",
+                                title = "NCBI",
+                                tags$i(class = "fas fa-dna")
                               )
                             )
                           )
@@ -380,80 +401,74 @@ ui <- fluidPage(
                       )
                     ),
                     # Plot B Section
-                    column(
-                      width = 6,
-                      div(
-                        class = "comparison-plot-section plot-b-section",
-                        fluidRow(
-                          class = "g-1 align-items-end",
-                          # Color by dropdown - 3 columns
+                    div(
+                      class = "comparison-plot-section plot-b-section",
+                      fluidRow(
+                        class = "g-1 align-items-end",
+                        column(
+                          width = 4,
+                          selectInput(
+                            "color_second",
+                            tags$span("Color by", class = "small fw-semibold"),
+                            choices = list(
+                              "Study" = "study_label", "Development phase" = "development_phase", "Parasite stages" = "parasite_stages",
+                              "Strain" = "strain", "Treatment" = "treatment", "Sample type" = "sample_type",
+                              "Host species" = "host_species", "Genes" = "genes"
+                            ),
+                            selected = "parasite_stages", width = "100%"
+                          )
+                        ),
+                        conditionalPanel(
+                          condition = "input.color_second == 'genes'",
                           column(
-                            width = 3,
-                            selectInput(
-                              "color_second",
-                              tags$span("Color by", class = "small fw-semibold"),
-                              choices = list(
-                                "Study" = "study_label", "Development phase" = "development_phase", "Parasite stages" = "parasite_stages",
-                                "Strain" = "strain", "Treatment" = "treatment", "Sample type" = "sample_type",
-                                "Host species" = "host_species", "Genes" = "genes"
-                              ),
-                              selected = "parasite_stages", width = "100%"
-                            )
-                          ),
-                          # Gene selection - 8 columns (shown only when genes selected)
-                          conditionalPanel(
-                            condition = "input.color_second == 'genes'",
-                            column(
-                              width = 8,
-                              div(
-                                class = "gene-select-wrapper",
-                                tags$label(
-                                  class = "control-label",
-                                  tags$span(class = "small", "Genes"),
-                                  tags$span(
-                                    title = "Click to switch ID and name",
-                                    `data-bs-toggle` = "tooltip",
-                                    `data-bs-placement` = "top",
-                                    bslib::input_switch("check_second", label = NULL, value = FALSE)
-                                  )
-                                ),
-                                selectizeInput(
-                                  "genes_second",
-                                  label = NULL,
-                                  choices = "", multiple = TRUE,
-                                  options = list(placeholder = "Search genes...", maxItems = 10, dropdownParent = "body"),
-                                  width = "100%"
+                            width = 6,
+                            div(
+                              class = "gene-select-wrapper",
+                              tags$label(
+                                class = "control-label",
+                                tags$span(class = "small", "Genes"),
+                                tags$span(
+                                  title = "Click to switch ID and name",
+                                  `data-bs-toggle` = "tooltip",
+                                  `data-bs-placement` = "top",
+                                  bslib::input_switch("check_second", label = NULL, value = FALSE)
                                 )
+                              ),
+                              selectizeInput(
+                                "genes_second",
+                                label = NULL,
+                                choices = "", multiple = TRUE,
+                                options = list(placeholder = "Search genes...", maxItems = 10, dropdownParent = "body"),
+                                width = "100%"
                               )
                             )
-                          ),
-                          # Links - 1 column (shown only when genes selected)
-                          conditionalPanel(
-                            condition = "input.color_second == 'genes'",
-                            column(
-                              width = 1,
-                              div(
-                                class = "links-row-vertical",
-                                tags$a(
-                                  id = "plasmo_link_b",
-                                  href = "#",
-                                  target = "_blank",
-                                  class = "btn btn-outline-success btn-sm gene-link-btn",
-                                  `data-bs-toggle` = "tooltip",
-                                  `data-bs-placement` = "top",
-                                  title = "PlasmoDB",
-                                  tags$i(class = "fas fa-external-link-alt")
-                                ),
-                                tags$a(
-                                  id = "ncbi_link_b",
-                                  href = "#",
-                                  target = "_blank",
-                                  class = "btn btn-outline-success btn-sm gene-link-btn",
-                                  `data-bs-toggle` = "tooltip",
-                                  `data-bs-placement` = "top",
-                                  title = "NCBI",
-                                  tags$i(class = "fas fa-dna")
-                                )
+                          )
+                        ),
+                        conditionalPanel(
+                          condition = "input.color_second == 'genes'",
+                          column(
+                            width = 2,
+                            div(
+                              class = "links-row",
+                              tags$a(
+                                id = "plasmo_link_b",
+                                href = "#",
+                                target = "_blank",
+                                class = "btn btn-outline-success btn-sm gene-link-btn",
+                                `data-bs-toggle` = "tooltip",
+                                `data-bs-placement` = "top",
+                                title = "PlasmoDB",
+                                tags$i(class = "fas fa-external-link-alt")
+                              ),
+                              tags$a(
+                                id = "ncbi_link_b",
+                                href = "#",
+                                target = "_blank",
+                                class = "btn btn-outline-success btn-sm gene-link-btn",
+                                `data-bs-toggle` = "tooltip",
+                                `data-bs-placement` = "top",
+                                title = "NCBI",
+                                tags$i(class = "fas fa-dna")
                               )
                             )
                           )
@@ -471,7 +486,6 @@ ui <- fluidPage(
               card(
                 full_screen = TRUE,
                 card_header(
-                  class = "d-flex justify-content-between align-items-center",
                   "Visualization"
                 ),
                 withSpinner(
@@ -490,26 +504,25 @@ ui <- fluidPage(
               style = "display: none;",
               layout_column_wrap(
                 width = 1 / 2,
+                height = "600px", # Increased height
+                heights_equal = "all",
                 card(
                   full_screen = TRUE,
                   class = "comparison-card plot-a-card",
                   card_header(
                     class = "comparison-card-header py-1",
                     div(
-                      class = "d-flex align-items-center justify-content-between w-100",
-                      div(
-                        class = "d-flex align-items-center gap-2",
-                        fontawesome::fa("circle", fill = "#007bff", height = "12px"),
-                        tags$span("Plot A", class = "fw-semibold small")
-                      ),
-                      tags$span(id = "plot_a_subtitle", class = "badge bg-light text-primary border small")
+                      class = "align-items-center gap-2",
+                      fontawesome::fa("circle", fill = "#007bff", height = "12px"),
+                      tags$span("Plot A", class = "fw-semibold small"),
+                      tags$span(id = "plot_a_subtitle", class = "badge bg-light text-primary border small ms-2")
                     )
                   ),
                   withSpinner(
                     type = 6,
                     size = 0.4,
                     color = "#007bff",
-                    plotlyOutput("first_plotly", height = "450px")
+                    plotlyOutput("first_plotly", height = "100%")
                   )
                 ),
                 card(
@@ -518,20 +531,17 @@ ui <- fluidPage(
                   card_header(
                     class = "comparison-card-header py-1",
                     div(
-                      class = "d-flex align-items-center justify-content-between w-100",
-                      div(
-                        class = "d-flex align-items-center gap-2",
-                        fontawesome::fa("circle", fill = "#28a745", height = "12px"),
-                        tags$span("Plot B", class = "fw-semibold small")
-                      ),
-                      tags$span(id = "plot_b_subtitle", class = "badge bg-light text-success border small")
+                      class = "align-items-center gap-2",
+                      fontawesome::fa("circle", fill = "#28a745", height = "12px"),
+                      tags$span("Plot B", class = "fw-semibold small"),
+                      tags$span(id = "plot_b_subtitle", class = "badge bg-light text-success border small ms-2")
                     )
                   ),
                   withSpinner(
                     type = 6,
                     size = 0.4,
                     color = "#28a745",
-                    plotlyOutput("second_plotly", height = "450px")
+                    plotlyOutput("second_plotly", height = "100%")
                   )
                 )
               )

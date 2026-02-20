@@ -319,13 +319,86 @@ body {
   gap: 8px !important; /* Bring icon and text closer */
 }
 
+/* Stacked X/Y Selectors - more compact */
+.xy-selector-stacked {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  width: 100%;
+}
+
+.xy-selector-stacked .form-group {
+  margin-bottom: 0 !important;
+}
+
+.xy-selector-stacked .selectize-input {
+  padding: 1px 6px !important;
+  min-height: 24px !important;
+  font-size: 0.75rem !important;
+}
+
+/* Simplified Compact Integration Switch */
+.integration-control-group {
+  margin-bottom: 0;
+}
+
+.switch-container-compact {
+  padding: 0;
+  display: inline-flex !important;
+  align-items: center;
+  gap: 6px !important;
+}
+
+.switch-text {
+  font-size: 0.7rem !important;
+  font-weight: 600;
+  white-space: nowrap;
+  color: #495057;
+}
+
+.switch-container-compact .form-switch {
+  padding-left: 2em;
+  margin-bottom: 0;
+  display: flex;
+  align-items: center;
+  width: 35px;
+}
+
+.switch-container-compact .form-check-input {
+  cursor: pointer;
+  width: 2em;
+  height: 1em;
+  background-color: #dee2e6;
+  border-color: #dee2e6;
+  margin-top: 0;
+}
+
+.switch-container-compact .form-check-input:checked {
+  background-color: #198754;
+  border-color: #198754;
+}
+
 .card-body {
   padding: 12px 18px !important;
   overflow: visible !important;
 }
 
-/* Ensure selectize dropdowns appear on top of everything and don't cause scroll */
-.selectize-dropdown {
+.comparison-card .card-body {
+  padding: 0 !important;
+  margin: 0 !important;
+  overflow: hidden !important;
+  display: block !important;
+}
+
+.comparison-card .plotly,
+.comparison-card .js-plotly-plot {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.comparison-card .plotly {
+  margin: 0 !important;
+}
   z-index: 10000 !important;
   position: absolute !important;
 }
@@ -358,7 +431,13 @@ body {
 .shiny-input-container .radio-inline {
   padding-top: 0 !important;
   margin-bottom: 0 !important;
+  margin-right: 10px !important;
   font-size: 0.85rem;
+}
+
+.shiny-input-container:has(.shiny-options-group) {
+  margin-bottom: 0 !important;
+  width: auto !important;
 }
 
 .shiny-input-container .control-label {
@@ -566,13 +645,14 @@ body {
 
 .plot-a-section {
   background: rgba(0, 123, 255, 0.02);
-  border-right: 1px solid #e1e4e8;
-  margin-right: 4px;
+  border: 1px solid #e1e4e8;
+  border-radius: 8px;
 }
 
 .plot-b-section {
   background: rgba(40, 167, 69, 0.02);
-  margin-left: 4px;
+  border: 1px solid #e1e4e8;
+  border-radius: 8px;
 }
 
 /* Gene select wrapper */
@@ -580,59 +660,23 @@ body {
   width: 100%;
 }
 
+.comparison-plot-section .shiny-input-container {
+  margin-bottom: 0 !important;
+}
+
 .gene-select-wrapper label.control-label {
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   gap: 8px;
 }
 
-.gene-select-wrapper label.control-label .form-group {
-  margin-bottom: 0;
-}
-
-/* Links row vertical */
-.links-row-vertical {
-  display: flex;
-  align-items: flex-end;
-  gap: 4px;
-  padding-bottom: 8px;
-}
-
-/* Gene options column styling */
-.gene-options-col {
-  display: flex;
-  flex-direction: column;
-  margin-left: 205px;
-}
-
-.gene-options-col .form-group {
-  margin-bottom: 0;
-}
-
-/* Toggle row */
-.toggle-row {
-  display: flex;
-  justify-content: center;
-  gap: 6px;
-}
-
-.toggle-label {
-  font-size: 0.7rem;
-  font-weight: 600;
-  color: #495057;
-  white-space: nowrap;
-}
-
-/* Links row */
+/* Links row - used for gene links alignment */
 .links-row {
   display: flex;
   align-items: center;
-  gap: 4px;
-}
-
-.links-row.align-items-end {
-  align-items: flex-end;
-  padding-bottom: 8px;
+  justify-content: flex-end;
+  gap: 6px;
+  height: 38px; /* Match standard Bootstrap input height */
 }
 
 /* Gene link buttons with tooltips */
@@ -680,6 +724,11 @@ body {
 .comparison-card .plotly {
   width: 100% !important;
   height: 100% !important;
+}
+
+/* Specific compact width only for toggles in headers */
+.switch-container-compact .shiny-input-container {
+  width: 40px !important;
 }
 
 .comparison-card .js-plotly-plot {

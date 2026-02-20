@@ -164,8 +164,8 @@ get_legend_layout <- function(legend_title, num_categories = NULL, is_dual_plot 
 
 # Get appropriate margins based on legend orientation
 get_plot_margins <- function(num_categories = NULL, is_dual_plot = FALSE) {
-  # Since legend is always overlaid at top-left, use consistent margins for all plots
-  list(l = 50, r = 50, t = 40, b = 40)
+  # Absolute minimum margins to maximize plot size
+  list(l = 10, r = 10, t = 10, b = 10)
 }
 
 
@@ -247,8 +247,6 @@ plot_2d <- function(
       text = hover_text,
       hoverinfo = "text",
       colors = colors,
-      width = 1000,
-      height = 700,
       source = "embedding",
       key = ~plotly_key
     ) %>%
@@ -257,7 +255,8 @@ plot_2d <- function(
         yaxis = list(title = paste("Y-", y)),
         legend = legend_layout,
         font = list(size = 14),
-        margin = plot_margins
+        margin = plot_margins,
+        autosize = TRUE
       )
   } else {
     p <- plot_ly(
@@ -268,8 +267,6 @@ plot_2d <- function(
       mode = "markers",
       text = hover_text,
       hoverinfo = "text",
-      width = 1000,
-      height = 700,
       key = ~plotly_key,
       source = "embedding",
       marker = list(
@@ -284,7 +281,8 @@ plot_2d <- function(
         xaxis = list(title = paste("X-", x)),
         yaxis = list(title = paste("Y-", y)),
         font = list(size = 14),
-        margin = plot_margins
+        margin = plot_margins,
+        autosize = TRUE
       )
   }
   return(p)
@@ -345,9 +343,7 @@ plot_3d <- function(
       marker = list(size = as.numeric(size) * 0.4),
       colors = colors,
       text = hover_text,
-      hoverinfo = "text",
-      width = 1000,
-      height = 700
+      hoverinfo = "text"
     ) %>%
       layout(
         scene = list(
@@ -357,7 +353,8 @@ plot_3d <- function(
         ),
         legend = legend_layout,
         font = list(size = 14),
-        margin = plot_margins
+        margin = plot_margins,
+        autosize = TRUE
       )
   } else {
     p <- plot_ly(
@@ -375,8 +372,6 @@ plot_3d <- function(
       ),
       text = hover_text,
       hoverinfo = "text",
-      width = 1000,
-      height = 700,
       source = "embedding",
       key = ~ df$id
     ) %>%
@@ -387,7 +382,8 @@ plot_3d <- function(
           zaxis = list(title = paste("Z-", z_col))
         ),
         font = list(size = 14),
-        margin = plot_margins
+        margin = plot_margins,
+        autosize = TRUE
       )
   }
   return(p)
