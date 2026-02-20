@@ -554,54 +554,56 @@ body {
 /* Comparison Mode Styles */
 .comparison-controls {
   background: var(--white);
-  border-radius: 12px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
   border: 1px solid #e1e4e8;
   overflow: visible;
 }
 
 .comparison-plot-section {
-  padding: 12px 16px;
+  padding: 8px 12px;
 }
 
 .plot-a-section {
-  background: linear-gradient(135deg, rgba(0, 123, 255, 0.02) 0%, rgba(0, 123, 255, 0.05) 100%);
+  background: rgba(0, 123, 255, 0.02);
   border-right: 1px solid #e1e4e8;
 }
 
 .plot-b-section {
-  background: linear-gradient(135deg, rgba(40, 167, 69, 0.02) 0%, rgba(40, 167, 69, 0.05) 100%);
+  background: rgba(40, 167, 69, 0.02);
 }
 
-.color-row {
-  margin-bottom: 0;
+.color-label {
+  white-space: nowrap;
+  min-width: 65px;
 }
 
 .gene-row {
-  margin-top: 8px;
-  padding-top: 8px;
-  border-top: 1px dashed #e1e4e8;
+  padding-top: 6px;
+  margin-top: 4px;
+  border-top: 1px dashed #dee2e6;
 }
 
 .plot-a-section .gene-row {
-  border-top-color: rgba(0, 123, 255, 0.2);
+  border-top-color: rgba(0, 123, 255, 0.25);
 }
 
 .plot-b-section .gene-row {
-  border-top-color: rgba(40, 167, 69, 0.2);
+  border-top-color: rgba(40, 167, 69, 0.25);
 }
 
 /* Gene link buttons with tooltips */
 .gene-link-btn {
-  padding: 6px 10px;
-  border-radius: 6px;
+  padding: 4px 8px;
+  border-radius: 4px;
   transition: all 0.2s ease;
   cursor: pointer;
+  font-size: 0.75rem;
 }
 
 .gene-link-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
 }
 
 .gene-link-btn:focus {
@@ -613,28 +615,46 @@ body {
   background-color: transparent;
 }
 
+.comparison-plots-container .card {
+  margin-bottom: 0 !important;
+}
+
 .comparison-card {
-  border-radius: 12px !important;
-  overflow: hidden;
-  transition: box-shadow 0.3s ease, transform 0.2s ease;
+  border-radius: 8px !important;
+  overflow: hidden !important;
+  transition: box-shadow 0.3s ease;
 }
 
 .comparison-card:hover {
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1) !important;
+}
+
+.comparison-card .card-body {
+  padding: 0 !important;
+  overflow: hidden !important;
+}
+
+.comparison-card .plotly {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.comparison-card .js-plotly-plot {
+  width: 100% !important;
 }
 
 .plot-a-card {
-  border-left: 4px solid #007bff !important;
+  border-left: 3px solid #007bff !important;
 }
 
 .plot-b-card {
-  border-left: 4px solid #28a745 !important;
+  border-left: 3px solid #28a745 !important;
 }
 
 .comparison-card-header {
-  background: linear-gradient(90deg, #f8f9fa 0%, #ffffff 100%) !important;
+  background: #f8f9fa !important;
   border-bottom: 1px solid #e1e4e8 !important;
-  padding: 10px 14px !important;
+  padding: 6px 10px !important;
 }
 
 .plot-a-card .comparison-card-header {
@@ -646,7 +666,7 @@ body {
 }
 
 .comparison-card-header .badge {
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   font-weight: 500;
 }
 
@@ -659,5 +679,163 @@ body {
   
   .comparison-plot-control {
     padding: 12px;
+  }
+}
+
+/* About Section Styles */
+.about-section {
+  min-height: calc(100vh - 80px);
+  background: linear-gradient(135deg, #f5f7fa 0%, #e4e8ed 100%);
+  padding: 0;
+}
+
+.about-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.about-hero {
+  position: relative;
+  background: linear-gradient(135deg, #008080 0%, #006666 100%);
+  padding: 60px 40px;
+  text-align: center;
+  overflow: hidden;
+}
+
+.about-hero .particles-js {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+}
+
+.about-hero-content {
+  position: relative;
+  z-index: 1;
+}
+
+.about-title {
+  color: white;
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.about-subtitle {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 1.2rem;
+  font-weight: 400;
+}
+
+.about-content {
+  padding: 40px;
+}
+
+.about-card {
+  border-radius: 12px !important;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08) !important;
+  border: none !important;
+}
+
+.about-card-header {
+  background: linear-gradient(90deg, rgba(0, 128, 128, 0.1) 0%, transparent 100%) !important;
+  border-bottom: 1px solid #e1e4e8 !important;
+  padding: 12px 16px !important;
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.team-section {
+  margin-top: 30px;
+}
+
+.team-title {
+  color: #2c3e50;
+  font-weight: 600;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.team-card {
+  background: white;
+  border-radius: 12px;
+  padding: 25px;
+  text-align: center;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  height: 100%;
+}
+
+.team-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.team-avatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 15px;
+  color: white;
+  font-size: 1.5rem;
+}
+
+.team-name {
+  color: #2c3e50;
+  font-weight: 600;
+  margin-bottom: 5px;
+}
+
+.team-role {
+  font-weight: 500;
+  margin-bottom: 5px;
+  font-size: 0.9rem;
+}
+
+.team-affiliation {
+  color: #6c757d;
+  font-size: 0.85rem;
+  margin-bottom: 10px;
+}
+
+.team-email {
+  color: #008080;
+  text-decoration: none;
+  font-size: 0.85rem;
+  transition: color 0.2s;
+}
+
+.team-email:hover {
+  color: #006666;
+  text-decoration: underline;
+}
+
+.github-card {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+}
+
+/* Responsive About Section */
+@media (max-width: 768px) {
+  .about-hero {
+    padding: 40px 20px;
+  }
+  
+  .about-title {
+    font-size: 2rem;
+  }
+  
+  .about-content {
+    padding: 20px;
+  }
+  
+  .team-card {
+    margin-bottom: 15px;
   }
 }

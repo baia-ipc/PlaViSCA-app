@@ -2451,7 +2451,8 @@ server <- function(input, output, session) {
       shinyjs::show("comparison_controls_panel")
       shinyjs::show("comparison_plots_panel")
       shinyjs::hide("single_plot_panel")
-      shinyjs::hide("color_by_single")
+      shinyjs::runjs("$('#color_by_single').hide();")
+      shinyjs::hide("genes_single_panel")
 
       # Initialize Bootstrap tooltips
       shinyjs::runjs("var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle=\"tooltip\"]')); var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) { return new bootstrap.Tooltip(tooltipTriggerEl); });")
@@ -2485,7 +2486,7 @@ server <- function(input, output, session) {
       shinyjs::hide("comparison_controls_panel")
       shinyjs::hide("comparison_plots_panel")
       shinyjs::show("single_plot_panel")
-      shinyjs::show("color_by_single")
+      shinyjs::runjs("$('#color_by_single').show();")
 
       # Restore previous selections
       if (!is.null(ui_state$stored_color)) {

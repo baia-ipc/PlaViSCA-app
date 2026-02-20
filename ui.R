@@ -250,7 +250,7 @@ ui <- fluidPage(
                     )
                   ),
 
-                  # Right side: Actions
+                  # Right side: Actions (always visible)
                   div(
                     class = "d-flex align-items-center gap-2",
                     actionButton(
@@ -293,7 +293,7 @@ ui <- fluidPage(
                 # Comparison Plot Colors (visible when comparing)
                 div(
                   id = "comparison_controls_panel",
-                  class = "mt-3 comparison-controls",
+                  class = "mt-2 comparison-controls",
                   style = "display: none;",
                   fluidRow(
                     class = "g-0",
@@ -302,9 +302,10 @@ ui <- fluidPage(
                       width = 6,
                       div(
                         class = "comparison-plot-section plot-a-section",
-                        # Row 1: Color by dropdown
+                        # Color by row
                         div(
-                          class = "color-row",
+                          class = "d-flex align-items-center gap-2",
+                          tags$span("Color by:", class = "color-label text-primary fw-semibold small"),
                           selectInput(
                             "color_first_comp",
                             NULL,
@@ -316,21 +317,29 @@ ui <- fluidPage(
                             selected = "development_phase", width = "100%"
                           )
                         ),
-                        # Row 2: Gene selection (shown only when genes selected)
+                        # Gene selection row (shown only when genes selected)
                         conditionalPanel(
                           condition = "input.color_first_comp == 'genes'",
                           div(
-                            class = "gene-row",
+                            class = "gene-row mt-1",
                             fluidRow(
                               class = "g-1 align-items-center",
                               column(
-                                width = 9,
+                                width = 7,
                                 selectizeInput(
                                   "genes_n_first_comp",
                                   NULL,
                                   choices = "", multiple = TRUE,
                                   options = list(placeholder = "Search genes...", maxItems = 10, dropdownParent = "body"),
                                   width = "100%"
+                                )
+                              ),
+                              column(
+                                width = 2,
+                                div(
+                                  class = "d-flex flex-column align-items-center",
+                                  tags$small("Gene ID", class = "text-muted", style = "font-size: 0.65rem;"),
+                                  bslib::input_switch("check_first_comp", label = NULL, value = FALSE)
                                 )
                               ),
                               column(
@@ -344,7 +353,7 @@ ui <- fluidPage(
                                     class = "btn btn-outline-primary btn-sm gene-link-btn",
                                     `data-bs-toggle` = "tooltip",
                                     `data-bs-placement` = "top",
-                                    title = "Open in PlasmoDB",
+                                    title = "Link to PlasmoDB",
                                     tags$i(class = "fas fa-external-link-alt")
                                   ),
                                   tags$a(
@@ -354,7 +363,7 @@ ui <- fluidPage(
                                     class = "btn btn-outline-primary btn-sm gene-link-btn",
                                     `data-bs-toggle` = "tooltip",
                                     `data-bs-placement` = "top",
-                                    title = "Open in NCBI",
+                                    title = "Link to NCBI",
                                     tags$i(class = "fas fa-dna")
                                   )
                                 )
@@ -369,9 +378,10 @@ ui <- fluidPage(
                       width = 6,
                       div(
                         class = "comparison-plot-section plot-b-section",
-                        # Row 1: Color by dropdown
+                        # Color by row
                         div(
-                          class = "color-row",
+                          class = "d-flex align-items-center gap-2",
+                          tags$span("Color by:", class = "color-label text-success fw-semibold small"),
                           selectInput(
                             "color_second",
                             NULL,
@@ -383,21 +393,29 @@ ui <- fluidPage(
                             selected = "parasite_stages", width = "100%"
                           )
                         ),
-                        # Row 2: Gene selection (shown only when genes selected)
+                        # Gene selection row (shown only when genes selected)
                         conditionalPanel(
                           condition = "input.color_second == 'genes'",
                           div(
-                            class = "gene-row",
+                            class = "gene-row mt-1",
                             fluidRow(
                               class = "g-1 align-items-center",
                               column(
-                                width = 9,
+                                width = 7,
                                 selectizeInput(
                                   "genes_second",
                                   NULL,
                                   choices = "", multiple = TRUE,
                                   options = list(placeholder = "Search genes...", maxItems = 10, dropdownParent = "body"),
                                   width = "100%"
+                                )
+                              ),
+                              column(
+                                width = 2,
+                                div(
+                                  class = "d-flex flex-column align-items-center",
+                                  tags$small("Gene ID", class = "text-muted", style = "font-size: 0.65rem;"),
+                                  bslib::input_switch("check_second", label = NULL, value = FALSE)
                                 )
                               ),
                               column(
@@ -411,7 +429,7 @@ ui <- fluidPage(
                                     class = "btn btn-outline-success btn-sm gene-link-btn",
                                     `data-bs-toggle` = "tooltip",
                                     `data-bs-placement` = "top",
-                                    title = "Open in PlasmoDB",
+                                    title = "Link to PlasmoDB",
                                     tags$i(class = "fas fa-external-link-alt")
                                   ),
                                   tags$a(
@@ -421,7 +439,7 @@ ui <- fluidPage(
                                     class = "btn btn-outline-success btn-sm gene-link-btn",
                                     `data-bs-toggle` = "tooltip",
                                     `data-bs-placement` = "top",
-                                    title = "Open in NCBI",
+                                    title = "Link to NCBI",
                                     tags$i(class = "fas fa-dna")
                                   )
                                 )
@@ -457,7 +475,7 @@ ui <- fluidPage(
             # Comparison plots
             div(
               id = "comparison_plots_panel",
-              class = "comparison-plots-container mt-3",
+              class = "comparison-plots-container mt-2",
               style = "display: none;",
               layout_column_wrap(
                 width = 1 / 2,
@@ -465,44 +483,44 @@ ui <- fluidPage(
                   full_screen = TRUE,
                   class = "comparison-card plot-a-card",
                   card_header(
-                    class = "comparison-card-header",
+                    class = "comparison-card-header py-1",
                     div(
                       class = "d-flex align-items-center justify-content-between w-100",
                       div(
                         class = "d-flex align-items-center gap-2",
-                        fontawesome::fa("circle", fill = "#007bff", height = "16px"),
-                        tags$span("Plot A", class = "fw-semibold")
+                        fontawesome::fa("circle", fill = "#007bff", height = "12px"),
+                        tags$span("Plot A", class = "fw-semibold small")
                       ),
-                      tags$span(id = "plot_a_subtitle", class = "badge bg-light text-primary border")
+                      tags$span(id = "plot_a_subtitle", class = "badge bg-light text-primary border small")
                     )
                   ),
                   withSpinner(
                     type = 6,
                     size = 0.4,
                     color = "#007bff",
-                    plotlyOutput("first_plotly", height = "550px")
+                    plotlyOutput("first_plotly", height = "450px")
                   )
                 ),
                 card(
                   full_screen = TRUE,
                   class = "comparison-card plot-b-card",
                   card_header(
-                    class = "comparison-card-header",
+                    class = "comparison-card-header py-1",
                     div(
                       class = "d-flex align-items-center justify-content-between w-100",
                       div(
                         class = "d-flex align-items-center gap-2",
-                        fontawesome::fa("circle", fill = "#28a745", height = "16px"),
-                        tags$span("Plot B", class = "fw-semibold")
+                        fontawesome::fa("circle", fill = "#28a745", height = "12px"),
+                        tags$span("Plot B", class = "fw-semibold small")
                       ),
-                      tags$span(id = "plot_b_subtitle", class = "badge bg-light text-success border")
+                      tags$span(id = "plot_b_subtitle", class = "badge bg-light text-success border small")
                     )
                   ),
                   withSpinner(
                     type = 6,
                     size = 0.4,
                     color = "#28a745",
-                    plotlyOutput("second_plotly", height = "550px")
+                    plotlyOutput("second_plotly", height = "450px")
                   )
                 )
               )
@@ -657,76 +675,132 @@ ui <- fluidPage(
   div(
     id = "about_section",
     style = "display: none;",
-    fluidRow(
-      class = "about",
-      column(
-        width = 8,
-        p(
-          "PlaViSca was developed by the Bioinformatics and Artificial Intelligence
-        Applications (BAIA) Unit at the Institut Pasteur du Cambodge (IPC),
-        in collaboration with the Malaria Unit at IPC and the Center for Tropical
-        and Emerging Global Diseases at the University of Georgia, USA."
-        ),
-        p(
-          "We are open to collaboration and welcome opportunities to integrate
-        additional relevant data into this platform. Please reach out to us
-        using the following contact."
+    class = "about-section",
+    div(
+      class = "about-container",
+      # Hero Section
+      div(
+        class = "about-hero",
+        div(id = "particles-js-about", class = "particles-js"),
+        div(
+          class = "about-hero-content",
+          h1("About PlaViSca", class = "about-title"),
+          p(
+            class = "about-subtitle",
+            "Plasmodium vivax Single-Cell Analysis Platform"
+          )
         )
       ),
-      column(
-        width = 4,
-        id = "colab-particles",
-        class = "collab-particles"
-      )
-    ),
-    fluidRow(
-      class = "contact",
-      tags$ul(
-        tags$li(
-          strong("Sopheap Oeng"),
-          " - Bioinformatic System Engineer, IPC, email: ",
-          a(href = "mailto:osopheap@pasteur-kh.org", "osopheap@pasteur-kh.org")
-        ),
-        tags$li(
-          strong("Anthony Ruberto"),
-          " - Postdoctoral researcher at the Center
-          for Tropical and Emerging Global Diseases, University of Georgia, USA,
-          email: ",
-          a(href = "mailto:aruberto@uga.edu", "aruberto@uga.edu")
-        ),
-        tags$li(
-          strong("Thomas Obadia"),
-          " - Bioinformatics and Biostatistcs Hub, Institut Pasteur, Paris, France.
-          - G5 Infectious Diseases Epidemiology and Analytics, Institut Pasteur, Paris, France,
-          email: ",
-          a(href = "mailto:thomas.obadia@pasteur.fr", "thomas.obadia@pasteur.fr")
-        ),
-        tags$li(
-          strong("Brice Feufack Donfack"),
-          " - Postdoctoral researcher, Malaria Research Unit, IPC, email: ",
-          a(href = "mailto:ldonfack@pasteur-kh.org", "ldonfack@pasteur-kh.org")
-        ),
-        tags$li(
-          strong("Giorgio Gonnella"),
-          " - Head, BAIA Unit, IPC, email: ",
-          a(href = "mailto:ggonnella@pasteur-kh.org", "ggonnella@pasteur-kh.org")
-        )
-      ),
-      p(
-        "PlaViSca is built using the R Shiny framework. For more detail, please
-        visit the GitHub repo:",
-        a(
-          href = "https://github.com/Sopheap15/PlaViSca",
-          HTML(
-            'https://github.com/Sopheap15/PlaViSca
-              <span class="point-emoji">👈 </span>'
+      # Main Content
+      div(
+        class = "about-content",
+        # Introduction Card
+        card(
+          class = "about-card mb-4",
+          card_header(
+            class = "about-card-header",
+            tagList(fontawesome::fa("info-circle", fill = "#008080"), " About the Project")
           ),
-          target = "_blank"
+          card_body(
+            p(
+              "PlaViSca is an interactive platform for the analysis and visualization of single-cell RNA sequencing (scRNA-seq) data from ",
+              em("P. vivax"),
+              ". The platform enables researchers to explore metadata, gene expression, and various parasite life cycle stages through interactive visualizations."
+            ),
+            p(
+              "This project was developed by the Bioinformatics and Artificial Intelligence Applications (BAIA) Unit at the Institut Pasteur du Cambodge (IPC), in collaboration with the Malaria Unit at IPC and the Center for Tropical and Emerging Global Diseases at the University of Georgia, USA."
+            )
+          )
         ),
-        "."
+        # Collaboration Card
+        card(
+          class = "about-card mb-4",
+          card_header(
+            class = "about-card-header",
+            tagList(fontawesome::fa("handshake", fill = "#008080"), " Collaboration")
+          ),
+          card_body(
+            p("We are open to collaboration and welcome opportunities to integrate additional relevant data into this platform. Please reach out to us using the contacts below.")
+          )
+        ),
+        # Team Section
+        div(
+          class = "team-section",
+          h3(class = "team-title", tagList(fontawesome::fa("users", fill = "#008080"), " Our Team")),
+          fluidRow(
+            column(
+              width = 4,
+              div(
+                class = "team-card",
+                div(class = "team-avatar bg-primary", tags$i(class = "fas fa-user")),
+                h5("Sopheap Oeng", class = "team-name"),
+                p(class = "team-role text-primary", "Bioinformatic System Engineer"),
+                p(class = "team-affiliation", "Institut Pasteur du Cambodge"),
+                a(href = "mailto:osopheap@pasteur-kh.org", class = "team-email", fontawesome::fa("envelope"), " osopheap@pasteur-kh.org")
+              )
+            ),
+            column(
+              width = 4,
+              div(
+                class = "team-card",
+                div(class = "team-avatar bg-success", tags$i(class = "fas fa-user")),
+                h5("Anthony Ruberto", class = "team-name"),
+                p(class = "team-role text-success", "Postdoctoral Researcher"),
+                p(class = "team-affiliation", "University of Georgia, USA"),
+                a(href = "mailto:aruberto@uga.edu", class = "team-email", fontawesome::fa("envelope"), " aruberto@uga.edu")
+              )
+            ),
+            column(
+              width = 4,
+              div(
+                class = "team-card",
+                div(class = "team-avatar bg-info", tags$i(class = "fas fa-user")),
+                h5("Thomas Obadia", class = "team-name"),
+                p(class = "team-role text-info", "Bioinformatics & Biostatistics"),
+                p(class = "team-affiliation", "Institut Pasteur, Paris"),
+                a(href = "mailto:thomas.obadia@pasteur.fr", class = "team-email", fontawesome::fa("envelope"), " thomas.obadia@pasteur.fr")
+              )
+            )
+          ),
+          fluidRow(
+            class = "mt-3",
+            column(
+              width = 4,
+              div(
+                class = "team-card",
+                div(class = "team-avatar bg-warning", tags$i(class = "fas fa-user")),
+                h5("Brice Feufack Donfack", class = "team-name"),
+                p(class = "team-role text-warning", "Postdoctoral Researcher"),
+                p(class = "team-affiliation", "Malaria Research Unit, IPC"),
+                a(href = "mailto:ldonfack@pasteur-kh.org", class = "team-email", fontawesome::fa("envelope"), " ldonfack@pasteur-kh.org")
+              )
+            ),
+            column(
+              width = 4,
+              div(
+                class = "team-card",
+                div(class = "team-avatar bg-danger", tags$i(class = "fas fa-user-tie")),
+                h5("Giorgio Gonnella", class = "team-name"),
+                p(class = "team-role text-danger", "Head, BAIA Unit"),
+                p(class = "team-affiliation", "Institut Pasteur du Cambodge"),
+                a(href = "mailto:ggonnella@pasteur-kh.org", class = "team-email", fontawesome::fa("envelope"), " ggonnella@pasteur-kh.org")
+              )
+            ),
+            column(
+              width = 4,
+              div(
+                class = "team-card github-card",
+                div(class = "team-avatar bg-dark", fontawesome::fa("github", fill = "white")),
+                h5("Source Code", class = "team-name"),
+                p(class = "team-role text-dark", "Open Source"),
+                p(class = "team-affiliation", "R Shiny Framework"),
+                a(href = "https://github.com/Sopheap15/PlaViSca", target = "_blank", class = "team-email", fontawesome::fa("github"), " View on GitHub")
+              )
+            )
+          )
+        )
       )
-    ),
-    fluidRow(id = "particles-js-about", class = "particles-js")
+    )
   ),
 
   # Footer
