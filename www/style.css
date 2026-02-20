@@ -567,10 +567,12 @@ body {
 .plot-a-section {
   background: rgba(0, 123, 255, 0.02);
   border-right: 1px solid #e1e4e8;
+  margin-right: 4px;
 }
 
 .plot-b-section {
   background: rgba(40, 167, 69, 0.02);
+  margin-left: 4px;
 }
 
 /* Gene select wrapper */
@@ -591,9 +593,9 @@ body {
 /* Links row vertical */
 .links-row-vertical {
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   gap: 4px;
-  padding-top: 24px;
+  padding-bottom: 8px;
 }
 
 /* Gene options column styling */
