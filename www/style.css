@@ -169,10 +169,10 @@ body {
   position: fixed;
   bottom: 0;
   left: 0; /* Ensure it starts from the left edge */
-  width: calc(100% - 30px); /* Adjusted width for margin-right */
+  width: calc(100% - 25px); /* Adjusted width for margin-right */
   box-sizing: border-box;
   margin-bottom: 5px; /* Small margin from bottom */
-  right: 15px; /* Added margin-right */
+  left: 12px;
   border-radius: 8px; /* Added border-radius */
   z-index: 999; /* Ensure footer is above other content */
 }
@@ -311,7 +311,7 @@ body {
 }
 
 .card-header {
-  display: flex !important;
+  /* display: flex !important; */
   align-items: center !important;
   justify-content: flex-start !important;
   text-align: left !important;
