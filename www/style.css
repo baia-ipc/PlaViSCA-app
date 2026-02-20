@@ -588,6 +588,14 @@ body {
   margin-bottom: 0;
 }
 
+/* Links row vertical */
+.links-row-vertical {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding-top: 24px;
+}
+
 /* Gene options column styling */
 .gene-options-col {
   display: flex;

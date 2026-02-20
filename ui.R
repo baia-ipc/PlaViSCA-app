@@ -228,7 +228,7 @@ ui <- fluidPage(
                 # Hidden checkbox to track comparison mode for conditionalPanel
                 shinyjs::hidden(checkboxInput("comparison_active", NULL, value = FALSE)),
                 div(
-                  class = "d-flex justify-content-between align-items-center mt-3",
+                  class = "d-flex justify-content-between align-items-center",
                   # Left side: Color by (only when not comparing)
                   conditionalPanel(
                     condition = "!input.comparison_active",
@@ -400,17 +400,22 @@ ui <- fluidPage(
                               selected = "parasite_stages", width = "100%"
                             )
                           ),
-                          # Gene selection - 7 columns (shown only when genes selected)
+                          # Gene selection - 8 columns (shown only when genes selected)
                           conditionalPanel(
                             condition = "input.color_second == 'genes'",
                             column(
-                              width = 7,
+                              width = 8,
                               div(
                                 class = "gene-select-wrapper",
                                 tags$label(
                                   class = "control-label",
                                   tags$span(class = "small", "Genes"),
-                                  bslib::input_switch("check_second", label = NULL, value = FALSE)
+                                  tags$span(
+                                    title = "Click to switch ID and name",
+                                    `data-bs-toggle` = "tooltip",
+                                    `data-bs-placement` = "top",
+                                    bslib::input_switch("check_second", label = NULL, value = FALSE)
+                                  )
                                 ),
                                 selectizeInput(
                                   "genes_second",
@@ -422,13 +427,13 @@ ui <- fluidPage(
                               )
                             )
                           ),
-                          # Links - 2 columns (shown only when genes selected)
+                          # Links - 1 column (shown only when genes selected)
                           conditionalPanel(
                             condition = "input.color_second == 'genes'",
                             column(
-                              width = 2,
+                              width = 1,
                               div(
-                                class = "links-row align-items-end",
+                                class = "links-row-vertical",
                                 tags$a(
                                   id = "plasmo_link_b",
                                   href = "#",
