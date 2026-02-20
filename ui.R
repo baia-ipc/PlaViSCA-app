@@ -225,28 +225,32 @@ ui <- fluidPage(
                   )
                 ),
                 hr(class = "my-2"),
+                # Hidden checkbox to track comparison mode for conditionalPanel
+                shinyjs::hidden(checkboxInput("comparison_active", NULL, value = FALSE)),
                 div(
                   class = "d-flex justify-content-between align-items-center mt-3",
                   # Left side: Color by (only when not comparing)
-                  div(
-                    id = "color_by_single",
-                    class = "d-flex align-items-center gap-3",
-                    tags$span("Color by:", style = "font-size: 0.85rem; font-weight: 600; color: #2c3e50;"),
-                    selectInput(
-                      "color",
-                      NULL,
-                      choices = list(
-                        "Study" = "study_label",
-                        "Development phase" = "development_phase",
-                        "Parasite stages" = "parasite_stages",
-                        "Strain" = "strain",
-                        "Treatment" = "treatment",
-                        "Sample type" = "sample_type",
-                        "Host species" = "host_species",
-                        "Genes" = "genes"
-                      ),
-                      selected = "development_phase",
-                      width = "180px"
+                  conditionalPanel(
+                    condition = "!input.comparison_active",
+                    div(
+                      class = "d-flex align-items-center gap-3",
+                      tags$span("Color by:", style = "font-size: 0.85rem; font-weight: 600; color: #2c3e50;"),
+                      selectInput(
+                        "color",
+                        NULL,
+                        choices = list(
+                          "Study" = "study_label",
+                          "Development phase" = "development_phase",
+                          "Parasite stages" = "parasite_stages",
+                          "Strain" = "strain",
+                          "Treatment" = "treatment",
+                          "Sample type" = "sample_type",
+                          "Host species" = "host_species",
+                          "Genes" = "genes"
+                        ),
+                        selected = "development_phase",
+                        width = "180px"
+                      )
                     )
                   ),
 
@@ -699,34 +703,107 @@ ui <- fluidPage(
           class = "about-card mb-4",
           card_header(
             class = "about-card-header",
-            tagList(fontawesome::fa("info-circle", fill = "#008080"), " About the Project")
+            tagList(fontawesome::fa("info-circle", fill = "#008080"), " What is PlaViSca?")
           ),
           card_body(
             p(
-              "PlaViSca is an interactive platform for the analysis and visualization of single-cell RNA sequencing (scRNA-seq) data from ",
-              em("P. vivax"),
-              ". The platform enables researchers to explore metadata, gene expression, and various parasite life cycle stages through interactive visualizations."
+              strong("PlaViSca"), " (", em("Plasmodium vivax"), " Single-Cell Analysis) is an interactive web platform designed for exploring and analyzing single-cell RNA sequencing data from ", em("P. vivax"), ", the most widespread human malaria parasite."
             ),
             p(
-              "This project was developed by the Bioinformatics and Artificial Intelligence Applications (BAIA) Unit at the Institut Pasteur du Cambodge (IPC), in collaboration with the Malaria Unit at IPC and the Center for Tropical and Emerging Global Diseases at the University of Georgia, USA."
+              "The platform enables researchers to:"
+            ),
+            tags$ul(
+              tags$li("Explore cell embeddings (PCA, UMAP, t-SNE) with interactive visualizations"),
+              tags$li("Investigate gene expression patterns across different parasite life stages"),
+              tags$li("Filter and analyze metadata across multiple studies"),
+              tags$li("Compare different visualization parameters side-by-side")
+            ),
+            p(
+              "This tool aims to accelerate malaria research by providing easy access to curated single-cell transcriptomic data."
             )
           )
         ),
-        # Collaboration Card
-        card(
-          class = "about-card mb-4",
-          card_header(
-            class = "about-card-header",
-            tagList(fontawesome::fa("handshake", fill = "#008080"), " Collaboration")
-          ),
-          card_body(
-            p("We are open to collaboration and welcome opportunities to integrate additional relevant data into this platform. Please reach out to us using the contacts below.")
+        # Features Section
+        div(
+          class = "features-section mb-4",
+          h3(class = "section-title", tagList(fontawesome::fa("star", fill = "#008080"), " Key Features")),
+          fluidRow(
+            column(
+              width = 3,
+              div(
+                class = "feature-card",
+                div(class = "feature-icon", fontawesome::fa("chart-area", fill = "#007bff")),
+                h5("Interactive Plots", class = "feature-title"),
+                p("Explore embeddings with zoom, pan, and hover tooltips")
+              )
+            ),
+            column(
+              width = 3,
+              div(
+                class = "feature-card",
+                div(class = "feature-icon", fontawesome::fa("dna", fill = "#28a745")),
+                h5("Gene Expression", class = "feature-title"),
+                p("Visualize expression across parasite life stages")
+              )
+            ),
+            column(
+              width = 3,
+              div(
+                class = "feature-card",
+                div(class = "feature-icon", fontawesome::fa("columns", fill = "#ffc107")),
+                h5("Side-by-Side Comparison", class = "feature-title"),
+                p("Compare different parameters simultaneously")
+              )
+            ),
+            column(
+              width = 3,
+              div(
+                class = "feature-card",
+                div(class = "feature-icon", fontawesome::fa("download", fill = "#17a2b8")),
+                h5("Data Export", class = "feature-title"),
+                p("Download filtered data for further analysis")
+              )
+            )
+          )
+        ),
+        # Collaboration Card - Enhanced
+        div(
+          class = "collab-section mb-4",
+          h3(class = "section-title", tagList(fontawesome::fa("handshake", fill = "#008080"), " Open for Collaboration")),
+          card(
+            class = "collab-card",
+            card_body(
+              fluidRow(
+                column(
+                  width = 8,
+                  h4("We Welcome New Partnerships!", class = "collab-heading"),
+                  p(
+                    "Are you working with ", em("P. vivax"), " single-cell data? We're actively seeking collaborations to expand our dataset and improve the platform's capabilities."
+                  ),
+                  tags$ul(
+                    tags$li("Integrate your ", em("P. vivax"), " scRNA-seq datasets"),
+                    tags$li("Contribute to method development"),
+                    tags$li("Share feedback and feature requests"),
+                    tags$li("Collaborate on joint publications")
+                  )
+                ),
+                column(
+                  width = 4,
+                  div(
+                    class = "collab-cta",
+                    fontawesome::fa("envelope-open-text", fill = "#008080", height = "40px"),
+                    h5("Get in Touch"),
+                    p("Contact our team to discuss collaboration opportunities.")
+                  )
+                )
+              )
+            )
           )
         ),
         # Team Section
         div(
-          class = "team-section",
-          h3(class = "team-title", tagList(fontawesome::fa("users", fill = "#008080"), " Our Team")),
+          class = "team-section mb-4",
+          h3(class = "section-title", tagList(fontawesome::fa("users", fill = "#008080"), " Research Team")),
           fluidRow(
             column(
               width = 4,
@@ -785,16 +862,70 @@ ui <- fluidPage(
                 p(class = "team-affiliation", "Institut Pasteur du Cambodge"),
                 a(href = "mailto:ggonnella@pasteur-kh.org", class = "team-email", fontawesome::fa("envelope"), " ggonnella@pasteur-kh.org")
               )
+            )
+          )
+        ),
+        # Source Code Section - Separate
+        div(
+          class = "source-section",
+          card(
+            class = "source-card",
+            card_body(
+              fluidRow(
+                column(
+                  width = 2,
+                  div(class = "source-icon-wrapper", fontawesome::fa("github", fill = "#333", height = "50px"))
+                ),
+                column(
+                  width = 7,
+                  h4("Open Source", class = "source-title"),
+                  p(
+                    "PlaViSca is built with R Shiny and is available as open-source software. Explore the code, report issues, or contribute to the project on GitHub."
+                  )
+                ),
+                column(
+                  width = 3,
+                  a(
+                    href = "https://github.com/Sopheap15/PlaViSca",
+                    target = "_blank",
+                    class = "btn btn-dark btn-lg source-btn",
+                    fontawesome::fa("github"), " View on GitHub"
+                  )
+                )
+              )
+            )
+          )
+        ),
+        # Affiliations Section
+        div(
+          class = "affiliations-section mt-4",
+          h3(class = "section-title", tagList(fontawesome::fa("building", fill = "#008080"), " Affiliations")),
+          fluidRow(
+            column(
+              width = 4,
+              div(
+                class = "affiliation-card",
+                h5("BAIA Unit"),
+                p("Bioinformatics and AI Applications"),
+                tags$small("Institut Pasteur du Cambodge")
+              )
             ),
             column(
               width = 4,
               div(
-                class = "team-card github-card",
-                div(class = "team-avatar bg-dark", fontawesome::fa("github", fill = "white")),
-                h5("Source Code", class = "team-name"),
-                p(class = "team-role text-dark", "Open Source"),
-                p(class = "team-affiliation", "R Shiny Framework"),
-                a(href = "https://github.com/Sopheap15/PlaViSca", target = "_blank", class = "team-email", fontawesome::fa("github"), " View on GitHub")
+                class = "affiliation-card",
+                h5("Malaria Unit"),
+                p("Malaria Research"),
+                tags$small("Institut Pasteur du Cambodge")
+              )
+            ),
+            column(
+              width = 4,
+              div(
+                class = "affiliation-card",
+                h5("CTEGD"),
+                p("Center for Tropical & Emerging Global Diseases"),
+                tags$small("University of Georgia, USA")
               )
             )
           )

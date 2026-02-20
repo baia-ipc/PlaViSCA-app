@@ -2438,6 +2438,9 @@ server <- function(input, output, session) {
     new_state <- !comparison_mode()
     comparison_mode(new_state)
 
+    # Update hidden checkbox for conditionalPanel
+    updateCheckboxInput(session, "comparison_active", value = new_state)
+
     # Update button appearance
     if (new_state) {
       updateActionButton(session, "enable_comparison",
@@ -2451,7 +2454,6 @@ server <- function(input, output, session) {
       shinyjs::show("comparison_controls_panel")
       shinyjs::show("comparison_plots_panel")
       shinyjs::hide("single_plot_panel")
-      shinyjs::runjs("$('#color_by_single').hide();")
       shinyjs::hide("genes_single_panel")
 
       # Initialize Bootstrap tooltips
@@ -2486,7 +2488,6 @@ server <- function(input, output, session) {
       shinyjs::hide("comparison_controls_panel")
       shinyjs::hide("comparison_plots_panel")
       shinyjs::show("single_plot_panel")
-      shinyjs::runjs("$('#color_by_single').show();")
 
       # Restore previous selections
       if (!is.null(ui_state$stored_color)) {

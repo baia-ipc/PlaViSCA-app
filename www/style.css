@@ -747,17 +747,96 @@ body {
   font-size: 1rem;
 }
 
-.team-section {
-  margin-top: 30px;
-}
-
-.team-title {
+.section-title {
   color: #2c3e50;
   font-weight: 600;
   margin-bottom: 20px;
   display: flex;
   align-items: center;
   gap: 10px;
+}
+
+/* Features Section */
+.features-section {
+  margin-top: 30px;
+}
+
+.feature-card {
+  background: white;
+  border-radius: 12px;
+  padding: 25px 20px;
+  text-align: center;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  height: 100%;
+}
+
+.feature-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.feature-icon {
+  margin-bottom: 15px;
+}
+
+.feature-title {
+  color: #2c3e50;
+  font-weight: 600;
+  margin-bottom: 10px;
+  font-size: 1rem;
+}
+
+.feature-card p {
+  color: #6c757d;
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+/* Collaboration Section */
+.collab-section {
+  margin-top: 30px;
+}
+
+.collab-card {
+  border-radius: 12px !important;
+  border: 2px solid #008080 !important;
+  box-shadow: none !important;
+  background: linear-gradient(135deg, rgba(0, 128, 128, 0.03) 0%, white 100%) !important;
+}
+
+.collab-heading {
+  color: #008080;
+  font-weight: 600;
+  margin-bottom: 15px;
+}
+
+.collab-cta {
+  background: linear-gradient(135deg, #008080 0%, #006666 100%);
+  border-radius: 12px;
+  padding: 25px;
+  text-align: center;
+  color: white;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.collab-cta h5 {
+  color: white;
+  margin: 15px 0 10px;
+}
+
+.collab-cta p {
+  font-size: 0.9rem;
+  opacity: 0.9;
+}
+
+/* Team Section */
+.team-section {
+  margin-top: 30px;
 }
 
 .team-card {
@@ -817,8 +896,66 @@ body {
   text-decoration: underline;
 }
 
-.github-card {
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+/* Source Code Section */
+.source-section {
+  margin-top: 30px;
+}
+
+.source-card {
+  border-radius: 12px !important;
+  border: 1px solid #dee2e6 !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06) !important;
+  background: linear-gradient(135deg, #f8f9fa 0%, white 100%) !important;
+}
+
+.source-icon-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
+.source-title {
+  color: #333;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.source-btn {
+  border-radius: 25px;
+  padding: 12px 25px;
+  font-weight: 600;
+}
+
+/* Affiliations Section */
+.affiliations-section {
+  margin-top: 30px;
+}
+
+.affiliation-card {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  border-left: 3px solid #008080;
+  height: 100%;
+}
+
+.affiliation-card h5 {
+  color: #008080;
+  font-weight: 600;
+  margin-bottom: 5px;
+}
+
+.affiliation-card p {
+  color: #2c3e50;
+  font-size: 0.9rem;
+  margin-bottom: 5px;
+}
+
+.affiliation-card small {
+  color: #6c757d;
 }
 
 /* Responsive About Section */
@@ -835,7 +972,12 @@ body {
     padding: 20px;
   }
   
-  .team-card {
+  .team-card,
+  .feature-card {
     margin-bottom: 15px;
+  }
+  
+  .collab-cta {
+    margin-top: 20px;
   }
 }
