@@ -26,7 +26,7 @@ ui <- fluidPage(
     tags$script(src = "particles.min.js"),
     tags$script(src = "particles-config.js")
   ),
-  
+
   # Menubar
   div(
     class = "menu-bar",
@@ -54,7 +54,7 @@ ui <- fluidPage(
       )
     )
   ),
-  
+
   # Home section
   div(
     id = "home_section",
@@ -123,7 +123,7 @@ ui <- fluidPage(
       )
     )
   ),
-  
+
   # Analysis section
   div(
     id = "analysis_section",
@@ -136,14 +136,14 @@ ui <- fluidPage(
         style = "overflow: visible;",
         tabsetPanel(
           id = "tabset",
-          
+
           # embedding section
           tabPanel(
             tagList(fontawesome::fa("diagram-project"), " Embeddings"),
             value = "Embeddings",
             # Shared filter row
             create_meta_filter_row(""),
-            
+
             # Control Row (Fixed duplication and alignment)
             card(
               class = "mb-3 shadow-sm",
@@ -224,83 +224,75 @@ ui <- fluidPage(
                     )
                   )
                 ),
-                
                 hr(class = "my-2"),
-                
                 div(
                   class = "d-flex justify-content-between align-items-center mt-3",
                   # Left side: Color by (only when not comparing)
                   div(
                     class = "d-flex align-items-center",
-                    conditionalPanel(
-                      condition = "!input.enable_comparison",
-                      div(
-                        class = "d-flex align-items-center gap-3",
-                        tags$span("Color by:", style = "font-size: 0.85rem; font-weight: 600; color: #2c3e50;"),
-                        selectInput(
-                          "color",
-                          NULL,
-                          choices = list(
-                            "Study" = "study_label",
-                            "Development phase" = "development_phase",
-                            "Parasite stages" = "parasite_stages",
-                            "Strain" = "strain",
-                            "Treatment" = "treatment",
-                            "Sample type" = "sample_type",
-                            "Host species" = "host_species",
-                            "Genes" = "genes"
-                          ),
-                          selected = "development_phase",
-                          width = "180px"
-                        )
+                    div(
+                      id = "color_by_single",
+                      class = "d-flex align-items-center gap-3",
+                      tags$span("Color by:", style = "font-size: 0.85rem; font-weight: 600; color: #2c3e50;"),
+                      selectInput(
+                        "color",
+                        NULL,
+                        choices = list(
+                          "Study" = "study_label",
+                          "Development phase" = "development_phase",
+                          "Parasite stages" = "parasite_stages",
+                          "Strain" = "strain",
+                          "Treatment" = "treatment",
+                          "Sample type" = "sample_type",
+                          "Host species" = "host_species",
+                          "Genes" = "genes"
+                        ),
+                        selected = "development_phase",
+                        width = "180px"
                       )
                     ),
-                    conditionalPanel(
-                      condition = "input.enable_comparison",
-                      tags$span(tagList(fontawesome::fa("columns", fill = "#008080"), " Comparison Mode Active"), class = "badge rounded-pill bg-light text-primary border p-2 px-3")
+                    tags$span(
+                      id = "comparison_mode_badge",
+                      style = "display: none;",
+                      tagList(fontawesome::fa("columns", fill = "#008080"), " Comparison Mode Active"),
+                      class = "badge rounded-pill bg-light text-primary border p-2 px-3"
                     )
                   ),
-                  
+
                   # Right side: Actions
                   div(
-                    class = "d-flex align-items-center gap-3",
-                    # Professional Compare Toggle using bslib
-                    div(
-                      class = "bg-light border rounded-pill px-3 py-1 shadow-sm d-flex align-items-center",
-                      bslib::input_switch(
-                        "enable_comparison", 
-                        label = tags$span("Compare plots", class = "small fw-bold text-secondary"),
-                        value = FALSE
-                      )
+                    class = "d-flex align-items-center gap-2",
+                    actionButton(
+                      "enable_comparison",
+                      tagList(fontawesome::fa("columns"), " Compare Plots"),
+                      class = "btn-outline-primary shadow-sm rounded-pill px-4 btn-sm fw-bold"
                     ),
                     downloadButton(
-                      "download_data", 
-                      "Download Data", 
+                      "download_data", " Download Data",
                       class = "btn-success shadow-sm rounded-pill px-4 btn-sm fw-bold"
                     )
                   )
                 ),
-                
+
                 # Gene selection row (compact)
-                conditionalPanel(
-                  condition = "input.color == 'genes' && !input.enable_comparison",
-                  div(
-                    class = "mt-3 p-3 border rounded bg-white shadow-sm",
-                    fluidRow(
-                      column(
-                        width = 5,
-                        selectizeInput("genes_n", "Select Genes", choices = "", multiple = TRUE, options = list(placeholder = "Search for genes...", maxItems = 10, dropdownParent = "body"), width = "100%")
-                      ),
-                      column(
-                        width = 7,
+                div(
+                  id = "genes_single_panel",
+                  class = "mt-3 p-3 border rounded bg-white shadow-sm",
+                  style = "display: none;",
+                  fluidRow(
+                    column(
+                      width = 5,
+                      selectizeInput("genes_n", "Select Genes", choices = "", multiple = TRUE, options = list(placeholder = "Search for genes...", maxItems = 10, dropdownParent = "body"), width = "100%")
+                    ),
+                    column(
+                      width = 7,
+                      div(
+                        class = "d-flex align-items-center gap-3 mt-4 justify-content-end",
+                        input_switch("check", "Show Gene ID", value = FALSE),
                         div(
-                          class = "d-flex align-items-center gap-3 mt-4 justify-content-end",
-                          input_switch("check", "Show Gene ID", value = FALSE),
-                          div(
-                            class = "btn-group",
-                            tags$a(id = "plasmo_link", href = "#", target = "_blank", class = "btn btn-outline-info btn-sm", tagList(fontawesome::fa("external-link-alt"), " PlasmoDB")),
-                            tags$a(id = "ncbi_link", href = "#", target = "_blank", class = "btn btn-outline-info btn-sm", tagList(fontawesome::fa("dna"), " NCBI"))
-                          )
+                          class = "btn-group",
+                          tags$a(id = "plasmo_link", href = "#", target = "_blank", class = "btn btn-outline-info btn-sm", tagList(fontawesome::fa("external-link-alt"), " PlasmoDB")),
+                          tags$a(id = "ncbi_link", href = "#", target = "_blank", class = "btn btn-outline-info btn-sm", tagList(fontawesome::fa("dna"), " NCBI"))
                         )
                       )
                     )
@@ -308,50 +300,69 @@ ui <- fluidPage(
                 ),
 
                 # Comparison Plot Colors (visible when comparing)
-                conditionalPanel(
-                  condition = "input.enable_comparison",
+                div(
+                  id = "comparison_controls_panel",
+                  class = "mt-3 comparison-controls",
+                  style = "display: none;",
                   div(
-                    class = "mt-3 p-3 border rounded bg-white shadow-sm",
-                    fluidRow(
-                      column(
-                        width = 6,
+                    class = "comparison-header",
+                    tagList(
+                      fontawesome::fa("clone", fill = "#008080"),
+                      tags$span("Side-by-Side Comparison", class = "fw-bold")
+                    )
+                  ),
+                  fluidRow(
+                    class = "g-0",
+                    column(
+                      width = 6,
+                      div(
+                        class = "comparison-plot-control plot-1-control",
                         div(
-                          class = "d-flex align-items-center gap-3 p-2 border-end",
-                          tags$strong("Plot 1:", class = "text-primary"),
+                          class = "plot-label",
+                          tagList(fontawesome::fa("circle", fill = "#007bff"), tags$strong("Plot A"))
+                        ),
+                        div(
+                          class = "d-flex align-items-center gap-2 flex-wrap",
                           selectInput(
                             "color_first_comp",
-                            NULL,
+                            tags$span("Color by", style = "font-size: 0.8rem;"),
                             choices = list(
                               "Study" = "study_label", "Development phase" = "development_phase", "Parasite stages" = "parasite_stages",
                               "Strain" = "strain", "Treatment" = "treatment", "Sample type" = "sample_type",
                               "Host species" = "host_species", "Genes" = "genes"
                             ),
-                            selected = "development_phase", width = "160px"
+                            selected = "development_phase", width = "180px"
                           ),
                           conditionalPanel(
                             condition = "input.color_first_comp == 'genes'",
-                            selectizeInput("genes_n_first_comp", NULL, choices = "", multiple = TRUE, options = list(placeholder = "Genes...", maxItems = 10, dropdownParent = "body"), width = "200px")
+                            selectizeInput("genes_n_first_comp", tags$span("Genes", style = "font-size: 0.8rem;"), choices = "", multiple = TRUE, options = list(placeholder = "Search genes...", maxItems = 10, dropdownParent = "body"), width = "200px")
                           )
                         )
-                      ),
-                      column(
-                        width = 6,
+                      )
+                    ),
+                    column(
+                      width = 6,
+                      div(
+                        class = "comparison-plot-control plot-2-control",
                         div(
-                          class = "d-flex align-items-center gap-3 p-2",
-                          tags$strong("Plot 2:", class = "text-success"),
+                          class = "plot-label",
+                          tagList(fontawesome::fa("circle", fill = "#28a745"), tags$strong("Plot B"))
+                        ),
+                        div(
+                          class = "d-flex align-items-center gap-2 flex-wrap",
                           selectInput(
                             "color_second",
-                            NULL,
+                            tags$span("Color by", style = "font-size: 0.8rem;"),
                             choices = list(
                               "Study" = "study_label", "Development phase" = "development_phase", "Parasite stages" = "parasite_stages",
                               "Strain" = "strain", "Treatment" = "treatment", "Sample type" = "sample_type",
                               "Host species" = "host_species", "Genes" = "genes"
                             ),
-                            selected = "development_phase", width = "160px"
+                            selected = "parasite_stages", width = "180px"
                           ),
                           conditionalPanel(
                             condition = "input.color_second == 'genes'",
-                            selectizeInput("genes_second", NULL, choices = "", multiple = TRUE, options = list(placeholder = "Genes...", maxItems = 10, dropdownParent = "body"), width = "200px")
+                            selectizeInput("genes_second", tags$span("Genes", style = "font-size: 0.8rem;"), choices = "", multiple = TRUE, options = list(placeholder = "Search genes...", maxItems = 10, dropdownParent = "body"), width = "200px")
                           )
                         )
                       )
@@ -360,10 +371,10 @@ ui <- fluidPage(
                 )
               )
             ),
-            
+
             # Single plot
-            conditionalPanel(
-              condition = "!input.enable_comparison",
+            div(
+              id = "single_plot_panel",
               card(
                 full_screen = TRUE,
                 card_header(
@@ -378,15 +389,29 @@ ui <- fluidPage(
                 )
               )
             ),
-            
+
             # Comparison plots
-            conditionalPanel(
-              condition = "input.enable_comparison",
+            div(
+              id = "comparison_plots_panel",
+              class = "comparison-plots-container mt-3",
+              style = "display: none;",
               layout_column_wrap(
-                width = 1/2,
+                width = 1 / 2,
                 card(
                   full_screen = TRUE,
-                  card_header("First Plot"),
+                  class = "comparison-card plot-a-card",
+                  card_header(
+                    class = "comparison-card-header",
+                    div(
+                      class = "d-flex align-items-center justify-content-between w-100",
+                      div(
+                        class = "d-flex align-items-center gap-2",
+                        fontawesome::fa("circle", fill = "#007bff", height = "16px"),
+                        tags$span("Plot A", class = "fw-semibold")
+                      ),
+                      tags$span(id = "plot_a_subtitle", class = "badge bg-light text-primary border")
+                    )
+                  ),
                   withSpinner(
                     type = 6,
                     size = 0.4,
@@ -396,7 +421,19 @@ ui <- fluidPage(
                 ),
                 card(
                   full_screen = TRUE,
-                  card_header("Second Plot"),
+                  class = "comparison-card plot-b-card",
+                  card_header(
+                    class = "comparison-card-header",
+                    div(
+                      class = "d-flex align-items-center justify-content-between w-100",
+                      div(
+                        class = "d-flex align-items-center gap-2",
+                        fontawesome::fa("circle", fill = "#28a745", height = "16px"),
+                        tags$span("Plot B", class = "fw-semibold")
+                      ),
+                      tags$span(id = "plot_b_subtitle", class = "badge bg-light text-success border")
+                    )
+                  ),
                   withSpinner(
                     type = 6,
                     size = 0.4,
@@ -407,7 +444,7 @@ ui <- fluidPage(
               )
             )
           ),
-          
+
           # Gene expression section
           tabPanel(
             tagList(fontawesome::fa("dna"), " Gene expression"),
@@ -418,10 +455,9 @@ ui <- fluidPage(
               h3(class = "gene-expression-header mb-4", "Gene Expression Analysis"),
               # Shared filter row
               create_meta_filter_row("_gex"),
-              
+
               # Gene expression controls
               create_plot_controls("data_type_exp", FALSE, "_exp"),
-              
               fluidRow(
                 id = "gene_exp_container",
                 class = "mt-3",
@@ -433,25 +469,23 @@ ui <- fluidPage(
               )
             )
           ),
-          
+
           # Quality control section
           tabPanel(
             tagList(fontawesome::fa("vial-circle-check"), " Quality control"),
             value = "Quality control",
             create_meta_filter_row("_qc"),
-            
             layout_column_wrap(
-              width = 1/3,
+              width = 1 / 3,
               class = "mt-3 mb-3",
               uiOutput("total_cells_qc"),
               uiOutput("mean_rna_qc"),
               uiOutput("mean_features_qc")
             ),
-            
             div(
               id = "qual_section",
               layout_column_wrap(
-                width = 1/2,
+                width = 1 / 2,
                 card(
                   full_screen = TRUE,
                   card_header("RNA Count distribution"),
@@ -474,7 +508,7 @@ ui <- fluidPage(
                 )
               ),
               layout_column_wrap(
-                width = 1/2,
+                width = 1 / 2,
                 class = "mt-3",
                 card(
                   full_screen = TRUE,
@@ -489,31 +523,29 @@ ui <- fluidPage(
               )
             )
           ),
-          
+
           # Metadata tab
           tabPanel(
             tagList(fontawesome::fa("table-list"), " Metadata"),
             value = "Metadata",
             create_meta_filter_row("_meta"),
-            
             layout_column_wrap(
-              width = 1/3,
+              width = 1 / 3,
               class = "mt-3 mb-3",
               uiOutput("total_cells_meta"),
               uiOutput("num_studies_meta"),
               uiOutput("num_species_meta")
             ),
-            
             div(
               id = "meta_section",
               layout_column_wrap(
-                width = 1/3,
+                width = 1 / 3,
                 card(card_header("Sample Type"), plotlyOutput("sample_plotly")),
                 card(card_header("Host Species"), plotlyOutput("species_plotly")),
                 card(card_header("Strain"), plotlyOutput("strain_plotly"))
               ),
               layout_column_wrap(
-                width = 1/3,
+                width = 1 / 3,
                 class = "mt-3",
                 card(card_header("Treatment"), plotlyOutput("treatment_plotly")),
                 card(
@@ -538,7 +570,7 @@ ui <- fluidPage(
               )
             )
           ),
-          
+
           # Data sources tab
           tabPanel(
             tagList(fontawesome::fa("book-open"), " Data sources"),
@@ -556,7 +588,7 @@ ui <- fluidPage(
       )
     )
   ),
-  
+
   # About section
   div(
     id = "about_section",
@@ -632,7 +664,7 @@ ui <- fluidPage(
     ),
     fluidRow(id = "particles-js-about", class = "particles-js")
   ),
-  
+
   # Footer
   conditionalPanel(
     condition = "input.home || (!input.analysis && !input.about)", # Show footer only on home page

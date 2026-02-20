@@ -36,6 +36,9 @@ create_empty_plot <- function(title = "") {
 server <- function(input, output, session) {
   sessionData <- new.env(parent = emptyenv())
 
+  # Reactive value for comparison mode (toggled by action button)
+  comparison_mode <- reactiveVal(FALSE)
+
   # Reactive values to preserve UI state across mode changes
   ui_state <- reactiveValues(
     stored_color = "development_phase",
@@ -732,7 +735,7 @@ server <- function(input, output, session) {
                 starts_with("pca_"),
                 starts_with("t_sne_"),
                 barcode,
-                # parasite_stage, 
+                # parasite_stage,
                 geographic_location,
                 day_post_infection
               )
@@ -891,7 +894,7 @@ server <- function(input, output, session) {
       })
 
       output$mean_rna_qc <- renderUI({
-        avg_rna <- if(nrow(filt_data) > 0) round(mean(filt_data$n_count_rna, na.rm = TRUE), 0) else 0
+        avg_rna <- if (nrow(filt_data) > 0) round(mean(filt_data$n_count_rna, na.rm = TRUE), 0) else 0
         value_box(
           title = "Mean RNA Counts",
           value = format(avg_rna, big.mark = ","),
@@ -901,7 +904,7 @@ server <- function(input, output, session) {
       })
 
       output$mean_features_qc <- renderUI({
-        avg_feat <- if(nrow(filt_data) > 0) round(mean(filt_data$n_feature_rna, na.rm = TRUE), 0) else 0
+        avg_feat <- if (nrow(filt_data) > 0) round(mean(filt_data$n_feature_rna, na.rm = TRUE), 0) else 0
         value_box(
           title = "Mean Features",
           value = format(avg_feat, big.mark = ","),
@@ -1042,7 +1045,7 @@ server <- function(input, output, session) {
         return(NULL)
       }
     )
-  }) %>% debounce(500) 
+  }) %>% debounce(500)
 
   observeEvent(
     list(
@@ -1137,7 +1140,7 @@ server <- function(input, output, session) {
     )
 
     return(result)
-  }) %>% debounce(300) 
+  }) %>% debounce(300)
 
   df_gene0 <- reactiveVal(NULL)
 
@@ -1217,7 +1220,7 @@ server <- function(input, output, session) {
   # Debounced gene selection to prevent flickering
   genes_exp_0_debounced <- reactive({
     input$genes_exp_0
-  }) %>% debounce(800) 
+  }) %>% debounce(800)
 
   group_exp_debounced <- reactive({
     input$group_exp_0
@@ -1348,7 +1351,7 @@ server <- function(input, output, session) {
           group = group_values,
           stringsAsFactors = FALSE
         )
-        names(plot_data)[2] <- selected_group 
+        names(plot_data)[2] <- selected_group
 
         # Remove NA values
         plot_data <- plot_data[!is.na(plot_data$gene_expr) & !is.na(plot_data[[selected_group]]), ]
@@ -1436,7 +1439,7 @@ server <- function(input, output, session) {
                 session,
                 inputId = paste0("genes_exp_", id),
                 choices = selectize_choices,
-                selected = default_selection, 
+                selected = default_selection,
                 server = TRUE
               )
             }
@@ -1556,7 +1559,7 @@ server <- function(input, output, session) {
                 session,
                 inputId = paste0("genes_exp_", id),
                 choices = selectize_choices,
-                selected = default_selection, 
+                selected = default_selection,
                 server = TRUE
               )
             }
@@ -1933,7 +1936,7 @@ server <- function(input, output, session) {
 
   # Separate data reactive for first plot (used in comparison mode)
   first_plot_data <- reactive({
-    req(input$enable_comparison)
+    req(comparison_mode())
 
     # Cache the data and gene objects at evaluation time to avoid interference
     tryCatch(
@@ -1958,7 +1961,7 @@ server <- function(input, output, session) {
 
   # Separate data reactive for second plot (used in comparison mode)
   second_plot_data <- reactive({
-    req(input$enable_comparison)
+    req(comparison_mode())
 
     # Cache the data and gene objects at evaluation time to avoid interference
     tryCatch(
@@ -1983,7 +1986,7 @@ server <- function(input, output, session) {
 
   # Observer to update gene choices for first plot in comparison mode
   observeEvent(list(input$color_first_comp, input$check_first_comp), {
-    req(isTRUE(input$enable_comparison), identical(input$color_first_comp, "genes"), gene_data()$genes)
+    req(isTRUE(comparison_mode()), identical(input$color_first_comp, "genes"), gene_data()$genes)
     tryCatch(
       {
         choices <- get_gene_choices(gene_data()$genes, isTRUE(input$check_first_comp))
@@ -1995,7 +1998,7 @@ server <- function(input, output, session) {
 
   # Create reactive expressions for each plot that only depend on their specific inputs
   first_plot_reactive <- reactive({
-    req(input$enable_comparison)
+    req(comparison_mode())
     # Ensure axes are ready if in 2D mode
     if (isTRUE(input$plot == "2d")) {
       req(input$xaxis, input$yaxis)
@@ -2022,7 +2025,7 @@ server <- function(input, output, session) {
 
   # Reactive expression for second plot parameters
   second_plot_reactive <- reactive({
-    req(input$enable_comparison)
+    req(comparison_mode())
     if (isTRUE(input$plot == "2d")) {
       req(input$xaxis, input$yaxis)
     }
@@ -2045,11 +2048,33 @@ server <- function(input, output, session) {
     )
   })
 
+  # Update plot subtitles based on selected color option
+  observe({
+    req(comparison_mode())
+
+    color_map <- list(
+      study_label = "Study",
+      development_phase = "Development Phase",
+      parasite_stages = "Parasite Stages",
+      strain = "Strain",
+      treatment = "Treatment",
+      sample_type = "Sample Type",
+      host_species = "Host Species",
+      genes = "Genes"
+    )
+
+    plot_a_label <- color_map[[input$color_first_comp]] %||% "Development Phase"
+    plot_b_label <- color_map[[input$color_second]] %||% "Parasite Stages"
+
+    shinyjs::html("plot_a_subtitle", plot_a_label)
+    shinyjs::html("plot_b_subtitle", plot_b_label)
+  })
+
   # Add debouncing for plot updates
   plot_update_trigger <- reactiveVal(0)
   plot_ready <- reactiveVal(TRUE)
   genes_loading <- reactiveVal(FALSE)
-  autoUpdatePlot <- reactiveVal(TRUE) 
+  autoUpdatePlot <- reactiveVal(TRUE)
 
   # Simplified debounced observer for plot-related inputs
   observe({
@@ -2408,63 +2433,88 @@ server <- function(input, output, session) {
     })
   }
 
-  # Remove comparison button handler
-  observeEvent(input$remove_comparison, {
-    updateCheckboxInput(session, "enable_comparison", value = FALSE)
-  })
+  # Handle Compare Plots button click (toggle comparison mode)
+  observeEvent(input$enable_comparison, {
+    new_state <- !comparison_mode()
+    comparison_mode(new_state)
 
-  # Preserve UI state when toggling comparison mode
-  observeEvent(input$enable_comparison,
-    {
-      # Toggle active class for the comparison box UI
-      if (isTRUE(input$enable_comparison)) {
-        runjs("$('#compare_box').addClass('active');")
-        # Store current selections before enabling comparison
-        ui_state$stored_color <- input$color
-        ui_state$stored_genes <- input$genes_n
-        ui_state$stored_check <- input$check
+    # Update button appearance
+    if (new_state) {
+      updateActionButton(session, "enable_comparison",
+        label = tagList(fontawesome::fa("columns"), " Single Plot"),
+        icon = NULL
+      )
+      shinyjs::addClass("enable_comparison", "btn-primary")
+      shinyjs::removeClass("enable_comparison", "btn-outline-primary")
 
-        # Update label for first plot (no longer needed as we use color_first_comp)
+      # Show comparison panels, hide single plot
+      shinyjs::show("comparison_controls_panel")
+      shinyjs::show("comparison_plots_panel")
+      shinyjs::hide("single_plot_panel")
+      shinyjs::hide("color_by_single")
+      shinyjs::show("comparison_mode_badge")
 
-        # Initialize comparison plots with same settings as main plot
-        updateSelectInput(session, "color_first_comp", selected = input$color)
-        updateSelectInput(session, "color_second", selected = input$color)
+      # Store current selections
+      ui_state$stored_color <- input$color
+      ui_state$stored_genes <- input$genes_n
+      ui_state$stored_check <- input$check
 
-        # If first plot is using genes, also copy gene selection
-        if (!is.null(input$color) && input$color == "genes" && !is.null(input$genes_n) && length(input$genes_n) > 0) {
-          current_genes <- input$genes_n
-          current_check <- input$check
-          later(function() {
-            updateCheckboxInput(session, "check_first_comp", value = current_check)
-            updateCheckboxInput(session, "check_second", value = current_check)
-            updateSelectizeInput(session, "genes_n_first_comp", selected = current_genes)
-            updateSelectizeInput(session, "genes_second", selected = current_genes)
-          }, 0.2)
-        }
-      } else {
-        runjs("$('#compare_box').removeClass('active');")
-        # When disabling comparison, restore previous selections (optional, but keep for consistency)
-        if (!is.null(ui_state$stored_color)) {
-          updateSelectInput(session, "color", selected = ui_state$stored_color)
-        }
+      # Initialize comparison plots with same settings as main plot
+      updateSelectInput(session, "color_first_comp", selected = input$color)
+      updateSelectInput(session, "color_second", selected = input$color)
+
+      # If using genes, copy gene selection
+      if (!is.null(input$color) && input$color == "genes" && !is.null(input$genes_n) && length(input$genes_n) > 0) {
+        current_genes <- input$genes_n
+        later(function() {
+          updateSelectizeInput(session, "genes_n_first_comp", selected = current_genes)
+          updateSelectizeInput(session, "genes_second", selected = current_genes)
+        }, 0.2)
       }
-    },
-    ignoreInit = TRUE
-  )
+    } else {
+      updateActionButton(session, "enable_comparison",
+        label = tagList(fontawesome::fa("columns"), " Compare Plots"),
+        icon = NULL
+      )
+      shinyjs::removeClass("enable_comparison", "btn-primary")
+      shinyjs::addClass("enable_comparison", "btn-outline-primary")
+
+      # Hide comparison panels, show single plot
+      shinyjs::hide("comparison_controls_panel")
+      shinyjs::hide("comparison_plots_panel")
+      shinyjs::show("single_plot_panel")
+      shinyjs::show("color_by_single")
+      shinyjs::hide("comparison_mode_badge")
+
+      # Restore previous selections
+      if (!is.null(ui_state$stored_color)) {
+        updateSelectInput(session, "color", selected = ui_state$stored_color)
+      }
+    }
+  })
 
   # Continuously update stored state when user makes changes (only when comparison is disabled)
   observe({
-    if (!isTRUE(input$enable_comparison)) {
+    if (!comparison_mode()) {
       ui_state$stored_color <- input$color
       ui_state$stored_genes <- input$genes_n
       ui_state$stored_check <- input$check
     }
   })
 
+  # Handle genes panel visibility for single plot mode
+  observe({
+    if (!comparison_mode() && !is.null(input$color) && input$color == "genes") {
+      shinyjs::show("genes_single_panel")
+    } else {
+      shinyjs::hide("genes_single_panel")
+    }
+  })
+
   # Separate observer for second plot color
   observe({
     # Only update second plot label if comparison is enabled
-    if (isTRUE(input$enable_comparison)) {
+    if (isTRUE(comparison_mode())) {
       req(input$color_second)
 
       # Map color values to display names
@@ -2492,7 +2542,7 @@ server <- function(input, output, session) {
   # Update gene choices for second plot when comparison mode and color_second changes
   observeEvent(list(input$color_second, input$check_second),
     {
-      if (!isTRUE(input$enable_comparison) || !identical(input$color_second, "genes")) {
+      if (!isTRUE(comparison_mode()) || !identical(input$color_second, "genes")) {
         return()
       }
 
@@ -2557,7 +2607,7 @@ server <- function(input, output, session) {
   }
 
   second_plot_reactive <- reactive({
-    req(input$enable_comparison)
+    req(comparison_mode())
 
     # Get current values with defaults
     color_second <- if (!is.null(input$color_second)) input$color_second else "sample_type"
@@ -2572,7 +2622,7 @@ server <- function(input, output, session) {
     # For gene coloring, allow empty genes and let the plot function handle it
     if (color_second == "genes") {
       if (is.null(genes_second) || (length(genes_second) == 1 && genes_second == "")) {
-        genes_second <- "" 
+        genes_second <- ""
       }
     }
 
@@ -2584,13 +2634,13 @@ server <- function(input, output, session) {
       yaxis = yaxis_val,
       size = size_val,
       plot = plot_val,
-      timestamp = Sys.time() 
+      timestamp = Sys.time()
     )
   })
 
   # Observer for first plot gene links (during comparison)
   observe({
-    req(input$enable_comparison, input$color_first_comp == "genes", input$genes_n_first_comp)
+    req(comparison_mode(), input$color_first_comp == "genes", input$genes_n_first_comp)
 
     # Get all selected genes for links
     selected_genes <- input$genes_n_first_comp
@@ -2611,7 +2661,7 @@ server <- function(input, output, session) {
 
   # Observer for second plot gene links
   observe({
-    req(input$enable_comparison, input$color_second == "genes", input$genes_second)
+    req(comparison_mode(), input$color_second == "genes", input$genes_second)
 
     # Get all selected genes for links
     selected_genes <- input$genes_second
@@ -2632,7 +2682,7 @@ server <- function(input, output, session) {
 
   # Observer for single plot gene links (when comparison is disabled)
   observe({
-    req(!isTRUE(input$enable_comparison), input$color == "genes", input$genes_n)
+    req(!isTRUE(comparison_mode()), input$color == "genes", input$genes_n)
 
     # Get all selected genes for links
     selected_genes <- input$genes_n
@@ -2702,7 +2752,7 @@ server <- function(input, output, session) {
   # Keep the original plot for backward compatibility
   output$all_plotly <- renderPlotly({
     # Only render when comparison is NOT enabled
-    req(!isTRUE(input$enable_comparison))
+    req(!isTRUE(comparison_mode()))
     req(all_dependencies_ready(), embedding_ready())
 
     # Triple-check data is still valid

@@ -34,11 +34,13 @@ assign_colors <- function(num_categories) {
       n = max(num_categories, 3),
       name = "Set2"
     )[1:num_categories])
+  } else if (num_categories <= 12) {
+    return(RColorBrewer::brewer.pal(
+      n = max(num_categories, 3),
+      name = "Set3"
+    )[1:num_categories])
   } else {
-    return(rep(
-      RColorBrewer::brewer.pal(8, "Set2"),
-      length.out = num_categories
-    ))
+    colorRampPalette(RColorBrewer::brewer.pal(12, "Set3"))(num_categories)
   }
 }
 

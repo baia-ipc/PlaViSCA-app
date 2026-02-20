@@ -186,7 +186,7 @@ body {
 }
 
 .footer .logo {
-  height: 30px; /* Adjusted logo size */
+  height: 40px; /* Adjusted logo size */
   filter: none; /* Removed filter */
 }
 
@@ -326,16 +326,27 @@ body {
 
 /* Ensure selectize dropdowns appear on top of everything and don't cause scroll */
 .selectize-dropdown {
-  z-index: 9999 !important;
+  z-index: 10000 !important;
   position: absolute !important;
 }
 
 .selectize-control {
   overflow: visible !important;
-  z-index: 10 !important;
+  z-index: 100 !important;
 }
 
 .selectize-input {
+  overflow: visible !important;
+}
+
+/* Gene selection panel - ensure dropdowns are visible */
+#genes_single_panel {
+  overflow: visible !important;
+  position: relative;
+  z-index: 5;
+}
+
+#comparison_controls_panel {
   overflow: visible !important;
 }
 
@@ -394,9 +405,20 @@ body {
   background-image: linear-gradient(120deg, #263238 0%, #1a232e 100%) !important;
 }
 
-/* Fix duplicate icon on download buttons when using bslib/fontawesome */
-#download_data i, .btn-download-green i {
-  display: none !important;
+/* Action buttons styling */
+#enable_comparison, #download_data {
+  min-width: 150px;
+  transition: all 0.3s ease;
+}
+
+#enable_comparison:hover, #download_data:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+#enable_comparison.btn-primary {
+  background-color: var(--primary-color) !important;
+  border-color: var(--primary-color) !important;
 }
 
 /* About Section */
@@ -527,4 +549,109 @@ body {
 
 .gene-link:hover {
   color: var(--accent-color);
+}
+
+/* Comparison Mode Styles */
+.comparison-controls {
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e1e4e8;
+  overflow: visible;
+  position: relative;
+  z-index: 1;
+}
+
+.comparison-header {
+  background: linear-gradient(90deg, #008080 0%, #006666 100%);
+  color: white;
+  padding: 10px 16px;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.comparison-plot-control {
+  padding: 16px;
+  min-height: 80px;
+}
+
+.plot-1-control {
+  background: linear-gradient(135deg, rgba(0, 123, 255, 0.03) 0%, rgba(0, 123, 255, 0.08) 100%);
+  border-right: 2px solid #e1e4e8;
+}
+
+.plot-2-control {
+  background: linear-gradient(135deg, rgba(40, 167, 69, 0.03) 0%, rgba(40, 167, 69, 0.08) 100%);
+}
+
+.plot-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 10px;
+  font-size: 0.9rem;
+}
+
+.plot-1-control .plot-label strong {
+  color: #007bff;
+}
+
+.plot-2-control .plot-label strong {
+  color: #28a745;
+}
+
+/* Comparison Plot Cards */
+.comparison-plots-container {
+  background-color: transparent;
+}
+
+.comparison-card {
+  border-radius: 12px !important;
+  overflow: hidden;
+  transition: box-shadow 0.3s ease, transform 0.2s ease;
+}
+
+.comparison-card:hover {
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12) !important;
+}
+
+.plot-a-card {
+  border-left: 4px solid #007bff !important;
+}
+
+.plot-b-card {
+  border-left: 4px solid #28a745 !important;
+}
+
+.comparison-card-header {
+  background: linear-gradient(90deg, #f8f9fa 0%, #ffffff 100%) !important;
+  border-bottom: 1px solid #e1e4e8 !important;
+  padding: 10px 14px !important;
+}
+
+.plot-a-card .comparison-card-header {
+  border-bottom: 2px solid rgba(0, 123, 255, 0.3) !important;
+}
+
+.plot-b-card .comparison-card-header {
+  border-bottom: 2px solid rgba(40, 167, 69, 0.3) !important;
+}
+
+.comparison-card-header .badge {
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+/* Responsive adjustments for comparison mode */
+@media (max-width: 992px) {
+  .plot-1-control {
+    border-right: none;
+    border-bottom: 2px solid #e1e4e8;
+  }
+  
+  .comparison-plot-control {
+    padding: 12px;
+  }
 }
