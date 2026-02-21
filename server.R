@@ -38,15 +38,20 @@ server <- function(input, output, session) {
 
   # Dynamic labels for gene selection
   output$genes_label_single <- renderText({
-    if (isTRUE(input$check)) "Gene ID(s)" else "Gene(s)"
+    if (isTRUE(input$check)) "Gene(s) id" else "Gene(s) name"
   })
 
   output$genes_label_first_comp <- renderText({
-    if (isTRUE(input$check_first_comp)) "Gene ID(s)" else "Gene(s)"
+    if (isTRUE(input$check_first_comp)) "Gene(s) id" else "Gene(s) name"
   })
 
   output$genes_label_second <- renderText({
-    if (isTRUE(input$check_second)) "Gene ID(s)" else "Gene(s)"
+    if (isTRUE(input$check_second)) "Gene(s) id" else "Gene(s) name"
+  })
+
+  # Dynamic label for initial gene expression block
+  output$genes_label_exp_0 <- renderText({
+    if (isTRUE(input$check_exp_0)) "Gene(s) id" else "Gene(s) name"
   })
 
   # Reactive value for comparison mode (toggled by action button)
@@ -1171,7 +1176,6 @@ server <- function(input, output, session) {
           updateSelectizeInput(
             session,
             "genes_exp_0",
-            label = "Gene name",
             choices = initial_choices,
             selected = initial_choices[1],
             options = list(
@@ -1468,7 +1472,6 @@ server <- function(input, output, session) {
         updateSelectizeInput(
           session,
           paste0("genes_exp_", id),
-          label = if (is_checked) "Gene ID" else "Gene name",
           choices = choice_exp(),
           server = TRUE
         )
@@ -1588,7 +1591,6 @@ server <- function(input, output, session) {
         updateSelectizeInput(
           session,
           paste0("genes_exp_", id),
-          label = if (is_checked) "Gene ID" else "Gene name",
           choices = choice_exp(),
           server = TRUE
         )
@@ -1720,7 +1722,6 @@ server <- function(input, output, session) {
     updateSelectizeInput(
       session,
       "genes_exp_0",
-      label = if (is_checked) "Gene ID" else "Gene name",
       choices = choice_exp(),
       server = TRUE
     )
@@ -1738,7 +1739,6 @@ server <- function(input, output, session) {
     updateSelectizeInput(
       session,
       paste0("genes_exp_", id),
-      label = if (is_checked) "Gene ID" else "Gene name",
       choices = choice_exp(),
       server = TRUE
     )

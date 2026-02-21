@@ -469,7 +469,7 @@ body {
 .col-custom-3 { flex: 0 0 25% !important; max-width: 25% !important; }
 
 .settings-label {
-  font-size: 0.8rem !important;
+  font-size: 0.85rem !important;
   font-weight: 600 !important;
 }
 
@@ -575,31 +575,29 @@ body {
   padding-left: 2.5em !important;
 }
 
-/* Targeted alignment for gene expression toggle only */
-.gene-expression-toggle-wrapper {
-  position: absolute;
-  top: -2px;
-  left: 8em;
-  z-index: 10;
+/* Targeted alignment for gene selection toggles (Single, Comparison, and Gene Expression) */
+.gene-expression-toggle-container,
+.single-toggle-container,
+.comparison-toggle-container-a,
+.comparison-toggle-container-b {
+  display: inline-block;
+  margin-left: 4px;
 }
 
-/* Targeted alignment for comparison plot toggles */
-.comparison-toggle-wrapper, .single-toggle-wrapper {
-  position: absolute;
-  top: -2px;
-  left: 80px; /* Positioned after 'Gene ID(s)' or 'Gene(s)' */
-  z-index: 10;
-}
-
-.gene-expression-toggle-wrapper .form-check.form-switch,
-.comparison-toggle-wrapper .form-check.form-switch,
-.single-toggle-wrapper .form-check.form-switch {
+.gene-expression-toggle-container .form-check.form-switch,
+.single-toggle-container .form-check.form-switch,
+.comparison-toggle-container-a .form-check.form-switch,
+.comparison-toggle-container-b .form-check.form-switch {
   padding-left: 2.5em !important;
+  margin-bottom: 0 !important;
   margin-top: 0 !important;
 }
 
-.gene-expression-toggle-wrapper .form-check-input {
-  margin-left: -5px !important;
+.gene-expression-toggle-container .form-check-input,
+.single-toggle-container .form-check-input,
+.comparison-toggle-container-a .form-check-input,
+.comparison-toggle-container-b .form-check-input {
+  margin-left: 0 !important;
   --bs-form-switch-bg: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='rgba%280, 0, 0, 0.25%29'/%3e%3c/svg%3e");
   width: 2em;
   background-image: var(--bs-form-switch-bg);

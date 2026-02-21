@@ -276,17 +276,15 @@ subBlock <- function(i) {
           width = 6,
           div(
             class = "gene-select-wrapper",
-            style = "position: relative;",
             tags$label(
-              class = "control-label",
-              tags$span(
+              class = "control-label d-flex align-items-center gap-2",
+              tags$span(textOutput(paste0("genes_label_exp_", i), inline = TRUE), class = "settings-label"),
+              div(
+                class = "gene-expression-toggle-container",
                 title = "Click to switch ID and name",
                 `data-bs-toggle` = "tooltip",
                 `data-bs-placement` = "top",
-                div(
-                  class = "gene-expression-toggle-wrapper",
-                  input_switch(paste0("check_exp_", i), label = NULL, value = FALSE)
-                )
+                input_switch(paste0("check_exp_", i), label = NULL, value = FALSE)
               )
             ),
             selectizeInput(
@@ -360,6 +358,11 @@ newBlock <- function(new_count, counter, choice_exp, dynamicBlock, session) {
   )
 
   shinyjs::delay(100, {
+    # Add dynamic label rendering for the new block
+    output[[paste0("genes_label_exp_", new_count)]] <- renderText({
+      if (isTRUE(input[[paste0("check_exp_", new_count)]])) "Gene(s) id" else "Gene(s) name"
+    })
+
     updateSelectizeInput(
       session,
       inputId = paste0("genes_exp_", new_count),

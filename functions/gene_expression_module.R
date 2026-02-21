@@ -87,7 +87,6 @@ setup_gene_exp_ui_observers <- function(input, session, gene_data) {
                     updateSelectizeInput(
                         session,
                         "genes_exp_0",
-                        label = "Gene name",
                         choices = initial_choices,
                         options = list(
                             placeholder = "Select one or more genes",
@@ -436,7 +435,6 @@ setup_dynamic_gene_panels <- function(input, session, filtered_gene_exp_data,
         updateSelectizeInput(
             session,
             paste0("genes_exp_", id),
-            label = if (is_checked) "Gene ID" else "Gene name",
             choices = choice_exp(),
             server = TRUE
         )

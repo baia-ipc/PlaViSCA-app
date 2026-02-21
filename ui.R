@@ -303,16 +303,14 @@ ui <- fluidPage(
                         class = "gene-select-wrapper",
                         style = "position: relative;",
                         tags$label(
-                          class = "control-label",
-                          textOutput("genes_label_single", inline = TRUE),
-                          tags$span(
+                          class = "control-label d-flex align-items-center gap-2",
+                          tags$span(textOutput("genes_label_single", inline = TRUE), class = "settings-label"),
+                          div(
+                            class = "single-toggle-container",
                             title = "Click to switch ID and name",
                             `data-bs-toggle` = "tooltip",
                             `data-bs-placement` = "top",
-                            div(
-                              class = "single-toggle-wrapper",
-                              input_switch("check", label = NULL, value = FALSE)
-                            )
+                            input_switch("check", label = NULL, value = FALSE)
                           )
                         ),
                         selectizeInput(
@@ -386,16 +384,14 @@ ui <- fluidPage(
                               class = "gene-select-wrapper",
                               style = "position: relative;",
                               tags$label(
-                                class = "control-label",
-                                textOutput("genes_label_first_comp", inline = TRUE),
-                                tags$span(
+                                class = "control-label d-flex align-items-center gap-2",
+                                tags$span(textOutput("genes_label_first_comp", inline = TRUE), class = "settings-label"),
+                                div(
+                                  class = "comparison-toggle-container-a",
                                   title = "Click to switch ID and name",
                                   `data-bs-toggle` = "tooltip",
                                   `data-bs-placement` = "top",
-                                  div(
-                                    class = "comparison-toggle-wrapper",
-                                    bslib::input_switch("check_first_comp", label = NULL, value = FALSE)
-                                  )
+                                  bslib::input_switch("check_first_comp", label = NULL, value = FALSE)
                                 )
                               ),
                               selectizeInput(
@@ -465,16 +461,14 @@ ui <- fluidPage(
                               class = "gene-select-wrapper",
                               style = "position: relative;",
                               tags$label(
-                                class = "control-label",
-                                textOutput("genes_label_second", inline = TRUE),
-                                tags$span(
+                                class = "control-label d-flex align-items-center gap-2",
+                                tags$span(textOutput("genes_label_second", inline = TRUE), class = "settings-label"),
+                                div(
+                                  class = "comparison-toggle-container-b",
                                   title = "Click to switch ID and name",
                                   `data-bs-toggle` = "tooltip",
                                   `data-bs-placement` = "top",
-                                  div(
-                                    class = "comparison-toggle-wrapper",
-                                    bslib::input_switch("check_second", label = NULL, value = FALSE)
-                                  )
+                                  bslib::input_switch("check_second", label = NULL, value = FALSE)
                                 )
                               ),
                               selectizeInput(
