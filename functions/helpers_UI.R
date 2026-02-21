@@ -225,7 +225,7 @@ create_plot_controls <- function(data_type_id = "data_type", include_size_dim = 
   plot_id <- paste0("plot", suffix)
 
   card(
-    class = "mb-3 shadow-sm",
+    class = "mb-2 shadow-sm settings-card-compact",
     card_header(
       class = "bg-secondary text-white py-1",
       fontawesome::fa("cog", height = "14px"),
@@ -236,7 +236,7 @@ create_plot_controls <- function(data_type_id = "data_type", include_size_dim = 
         width = 1/3,
         radioButtons(
           data_type_id,
-          tags$span("Data type", style = "font-size: 0.85rem; font-weight: 500;"),
+          tags$span("Data type", class = "settings-label"),
           choices = list("Raw" = "raw", "Normalized" = "normalize"),
           selected = "normalize",
           inline = TRUE
@@ -245,14 +245,14 @@ create_plot_controls <- function(data_type_id = "data_type", include_size_dim = 
           tagList(
             radioButtons(
               size_id,
-              tags$span("Point size", style = "font-size: 0.85rem; font-weight: 500;"),
-              choices = list("Small" = 2, "Medium" = 4, "Large" = 6),
+              tags$span("Point size", class = "settings-label"),
+              choices = list("S" = 2, "M" = 4, "L" = 6),
               selected = 4,
               inline = TRUE
             ),
             radioButtons(
               plot_id,
-              tags$span("Dimension", style = "font-size: 0.85rem; font-weight: 500;"),
+              tags$span("Dimension", class = "settings-label"),
               choices = list("2D" = "2d", "3D" = "3d"),
               selected = "3d",
               inline = TRUE
@@ -269,35 +269,69 @@ subBlock <- function(i) {
   card(
     class = "shadow-sm mb-3",
     card_body(
-      padding = "15px",
+      padding = "10px",
       fluidRow(
+        class = "g-1 align-items-end",
         column(
-          width = 7,
+          width = 6,
           div(
-            class = "d-flex align-items-center gap-2 mb-2",
-            input_switch(paste0("check_exp_", i), label = NULL, value = FALSE),
-            tags$span("Show Gene ID", class = "small text-muted"),
-            div(
-              class = "ms-auto d-flex gap-2",
-              tags$a(id = paste0("plasmo_link_exp_", i), href = "#", target = "_blank", class = "btn btn-outline-info btn-xs", "PlasmoDB"),
-              tags$a(id = paste0("ncbi_link_exp_", i), href = "#", target = "_blank", class = "btn btn-outline-info btn-xs", "NCBI")
+            class = "gene-select-wrapper",
+            style = "position: relative;",
+            tags$label(
+              class = "control-label",
+              tags$span(
+                title = "Click to switch ID and name",
+                `data-bs-toggle` = "tooltip",
+                `data-bs-placement` = "top",
+                div(
+                  class = "gene-expression-toggle-wrapper",
+                  input_switch(paste0("check_exp_", i), label = NULL, value = FALSE)
+                )
+              )
+            ),
+            selectizeInput(
+              paste0("genes_exp_", i),
+              label = NULL,
+              choices = NULL,
+              multiple = TRUE,
+              options = list(maxItems = 10, placeholder = "Search genes...", dropdownParent = "body")
             )
-          ),
-          selectizeInput(
-            paste0("genes_exp_", i),
-            label = NULL,
-            choices = NULL,
-            multiple = TRUE,
-            options = list(maxItems = 10, placeholder = "Select genes...", dropdownParent = "body")
           )
         ),
         column(
-          width = 5,
+          width = 4,
           selectInput(
             paste0("group_exp_", i),
-            "Group by",
+            tags$span("Group by", class = "small fw-semibold"),
             choices = group_choices,
-            selected = if (!is.null(group_choices) && length(group_choices) > 0) group_choices[1] else "parasite_stages"
+            selected = if (!is.null(group_choices) && length(group_choices) > 0) group_choices[1] else "parasite_stages",
+            width = "100%"
+          )
+        ),
+        column(
+          width = 2,
+          div(
+            class = "links-row",
+            tags$a(
+              id = paste0("plasmo_link_exp_", i),
+              href = "#",
+              target = "_blank",
+              class = "btn btn-outline-info btn-sm gene-link-btn",
+              `data-bs-toggle` = "tooltip",
+              `data-bs-placement` = "top",
+              title = "PlasmoDB",
+              tags$i(class = "fas fa-external-link-alt")
+            ),
+            tags$a(
+              id = paste0("ncbi_link_exp_", i),
+              href = "#",
+              target = "_blank",
+              class = "btn btn-outline-info btn-sm gene-link-btn",
+              `data-bs-toggle` = "tooltip",
+              `data-bs-placement` = "top",
+              title = "NCBI",
+              tags$i(class = "fas fa-dna")
+            )
           )
         )
       ),

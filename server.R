@@ -36,6 +36,19 @@ create_empty_plot <- function(title = "") {
 server <- function(input, output, session) {
   sessionData <- new.env(parent = emptyenv())
 
+  # Dynamic labels for gene selection
+  output$genes_label_single <- renderText({
+    if (isTRUE(input$check)) "Gene ID(s)" else "Gene(s)"
+  })
+
+  output$genes_label_first_comp <- renderText({
+    if (isTRUE(input$check_first_comp)) "Gene ID(s)" else "Gene(s)"
+  })
+
+  output$genes_label_second <- renderText({
+    if (isTRUE(input$check_second)) "Gene ID(s)" else "Gene(s)"
+  })
+
   # Reactive value for comparison mode (toggled by action button)
   comparison_mode <- reactiveVal(FALSE)
 

@@ -157,13 +157,12 @@ ui <- fluidPage(
                   class = "g-1 align-items-end",
                   # Data Type - 2 columns
                   tags$div(
-                    class = "col-sm-2",
-                    style = "flex: 0 0 16.66%; max-width: 16.66%;",
+                    class = "col-sm-2 col-custom-2",
                     tags$div(
                       title = "Select raw or normalized expression data",
                       radioButtons(
                         "data_type",
-                        tags$span("Data Type", style = "font-size: 0.8rem; font-weight: 600;"),
+                        tags$span("Data Type", class = "settings-label"),
                         choices = list("Raw" = "raw", "Normalized" = "normalize"),
                         selected = "normalize",
                         inline = TRUE
@@ -172,36 +171,34 @@ ui <- fluidPage(
                   ),
                   # Integration - 1 column
                   tags$div(
-                    class = "col-sm-1 d-flex flex-column justify-content-end",
-                    style = "flex: 0 0 8.33%; max-width: 8.33%;",
+                    class = "col-sm-1 col-custom-1 d-flex flex-column justify-content-end",
                     conditionalPanel(
                       condition = "input.embedding != 'tsne'",
                       div(
                         class = "form-group shiny-input-container mb-0",
                         tags$label(
-                          class = "control-label mb-1",
+                          class = "control-label",
                           `for` = "check_all",
-                          tags$span("Integration", style = "font-size: 0.8rem; font-weight: 600;")
+                          tags$span("Integration", class = "settings-label")
                         ),
                         div(
                           id = "tab_switch",
                           class = "switch-container-compact d-flex align-items-center gap-1",
-                          tags$span("Un.", class = "switch-text text-muted", style = "font-size: 0.65rem;"),
+                          tags$span("Un.", class = "switch-text text-muted switch-text-small"),
                           input_switch("check_all", label = NULL, value = TRUE),
-                          tags$span("In.", class = "switch-text", style = "font-size: 0.65rem;")
+                          tags$span("In.", class = "switch-text switch-text-small")
                         )
                       )
                     )
                   ),
                   # Embedding - 3 columns
                   tags$div(
-                    class = "col-sm-3",
-                    style = "flex: 0 0 25%; max-width: 25%;",
+                    class = "col-sm-3 col-custom-3",
                     tags$div(
                       title = "Choose the dimensionality reduction method",
                       radioButtons(
                         "embedding",
-                        tags$span("Embedding", style = "font-size: 0.8rem; font-weight: 600;"),
+                        tags$span("Embedding", class = "settings-label"),
                         inline = TRUE,
                         choices = list("PCA" = "pca", "UMAP" = "umap", "tSNE" = "tsne"),
                         selected = "umap"
@@ -210,13 +207,12 @@ ui <- fluidPage(
                   ),
                   # Point Size - 2 columns
                   tags$div(
-                    class = "col-sm-2",
-                    style = "flex: 0 0 16.66%; max-width: 16.66%;",
+                    class = "col-sm-2 col-custom-2",
                     tags$div(
                       title = "Adjust the size of the points in the plot",
                       radioButtons(
                         "size",
-                        tags$span("Point Size", style = "font-size: 0.8rem; font-weight: 600;"),
+                        tags$span("Point Size", class = "settings-label"),
                         choices = list("S" = 2, "M" = 4, "L" = 6),
                         selected = 4,
                         inline = TRUE
@@ -225,13 +221,12 @@ ui <- fluidPage(
                   ),
                   # Dimension - 2 columns
                   tags$div(
-                    class = "col-sm-2",
-                    style = "flex: 0 0 16.66%; max-width: 16.66%;",
+                    class = "col-sm-2 col-custom-2",
                     tags$div(
                       title = "Select 2D or 3D visualization",
                       radioButtons(
                         "plot",
-                        tags$span("Dimension", style = "font-size: 0.8rem; font-weight: 600;"),
+                        tags$span("Dimension", class = "settings-label"),
                         choices = list("2D" = "2d", "3D" = "3d"),
                         selected = "3d",
                         inline = TRUE
@@ -240,14 +235,13 @@ ui <- fluidPage(
                   ),
                   # X/Y Selectors - 2 columns
                   tags$div(
-                    class = "col-sm-2",
-                    style = "flex: 0 0 16.66%; max-width: 16.66%;",
+                    class = "col-sm-2 col-custom-2",
                     conditionalPanel(
                       condition = "input.plot == '2d'",
                       div(
-                        class = "xy-selector-stacked",
-                        div(class = "d-flex align-items-center gap-1", tags$span("X", style = "font-size: 0.7rem; font-weight: 800;"), tags$div(style = "flex-grow: 1", selectInput("xaxis", NULL, choices = c("pc_1" = "pc_1"), selected = "pc_1", width = "100%"))),
-                        div(class = "d-flex align-items-center gap-1", tags$span("Y", style = "font-size: 0.7rem; font-weight: 800;"), tags$div(style = "flex-grow: 1", selectInput("yaxis", NULL, choices = c("pc_2" = "pc_2"), selected = "pc_2", width = "100%")))
+                        class = "xy-selector-horizontal",
+                        div(class = "d-flex align-items-center gap-1", tags$span("X", class = "xy-label"), tags$div(selectInput("xaxis", NULL, choices = c("pc_1" = "pc_1"), selected = "pc_1", width = "80px"))),
+                        div(class = "d-flex align-items-center gap-1", tags$span("Y", class = "xy-label"), tags$div(selectInput("yaxis", NULL, choices = c("pc_2" = "pc_2"), selected = "pc_2", width = "80px")))
                       )
                     )
                   )
@@ -261,7 +255,7 @@ ui <- fluidPage(
                     condition = "!input.comparison_active",
                     div(
                       class = "d-flex align-items-center gap-3",
-                      tags$span("Color by:", style = "font-size: 0.85rem; font-weight: 600; color: #2c3e50;"),
+                      tags$span("Color by:", class = "color-by-label"),
                       selectInput(
                         "color",
                         NULL,
@@ -309,7 +303,7 @@ ui <- fluidPage(
                         class = "gene-select-wrapper",
                         tags$label(
                           class = "control-label",
-                          tags$span(class = "small", "Gene(s)"),
+                          textOutput("genes_label_single", inline = TRUE),
                           tags$span(
                             title = "Click to switch ID and name",
                             `data-bs-toggle` = "tooltip",
@@ -388,7 +382,7 @@ ui <- fluidPage(
                               class = "gene-select-wrapper",
                               tags$label(
                                 class = "control-label",
-                                tags$span(class = "small", "Gene(s)"),
+                                textOutput("genes_label_first_comp", inline = TRUE),
                                 tags$span(
                                   title = "Click to switch ID and name",
                                   `data-bs-toggle` = "tooltip",
@@ -463,7 +457,7 @@ ui <- fluidPage(
                               class = "gene-select-wrapper",
                               tags$label(
                                 class = "control-label",
-                                tags$span(class = "small", "Gene(s)"),
+                                textOutput("genes_label_second", inline = TRUE),
                                 tags$span(
                                   title = "Click to switch ID and name",
                                   `data-bs-toggle` = "tooltip",
@@ -590,9 +584,9 @@ ui <- fluidPage(
             tagList(fontawesome::fa("dna"), " Gene expression"),
             value = "Gene expression",
             div(
-              class = "gene-expression-section",
+              class = "gene-expression-section py-2", # Added py-2 for less padding
               style = "overflow: visible;",
-              h3(class = "gene-expression-header mb-4", "Gene Expression Analysis"),
+              # Removed Header
               # Shared filter row
               create_meta_filter_row("_gex"),
 

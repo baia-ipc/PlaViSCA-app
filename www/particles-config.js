@@ -10,7 +10,7 @@ function initParticles(targetId) {
         opacity: { value: 0.8 },
         size: { value: 5, random: true },
         line_linked: {
-          enable: true, distance: 150, color: '#ffffff', opacity: 0.4, width: 1
+          enable: true, distance: 150, color: '#800080', opacity: 0.4, width: 1
         },
         move: {
           enable: true, speed: 2, direction: 'none', out_mode: 'out'

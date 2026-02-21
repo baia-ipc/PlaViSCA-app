@@ -339,27 +339,50 @@ body {
 }
 
 .card-header {
-  /* display: flex !important; */
-  align-items: center !important;
-  justify-content: flex-start !important;
+  display: block !important; /* Force block to ensure left alignment */
   text-align: left !important;
-  padding: 8px 12px !important;
-  gap: 8px !important; /* Bring icon and text closer */
+  padding: 4px 12px !important;
 }
 
-/* Stacked X/Y Selectors - more compact */
-.xy-selector-stacked {
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-  width: 100%;
+.card-header div, .card-header span, .card-header i {
+  display: inline-block !important;
+  vertical-align: middle;
 }
 
-.xy-selector-stacked .form-group {
+.form-check, .shiny-input-container .checkbox, .shiny-input-container .radio {
+  display: block;
+  min-height: 1.5rem;
+  padding-left: 0;
+  margin-bottom: -1.25rem !important; /* Move switch down as requested */
+}
+
+/* Restore default alignment for the integration switch specifically */
+.switch-container-compact .form-check {
   margin-bottom: 0 !important;
 }
 
-.xy-selector-stacked .selectize-input {
+/* Move gene toggle switch down and make it narrow */
+.gene-select-wrapper .form-group.shiny-input-container:not(.shiny-input-container-inline):has(.bslib-input-switch) {
+  margin-top: 5px !important;
+  margin-left: 0 !important;
+  width: 30px !important;
+  max-width: 100% !important;
+}
+
+/* Horizontal X/Y Selectors - side by side */
+.xy-selector-horizontal {
+  display: flex;
+  flex-direction: row;
+  gap: 2px;
+  width: 100%;
+  align-items: center;
+}
+
+.xy-selector-horizontal .form-group {
+  margin-bottom: 0 !important;
+}
+
+.xy-selector-horizontal .selectize-input {
   padding: 1px 6px !important;
   min-height: 24px !important;
   font-size: 0.75rem !important;
@@ -374,7 +397,7 @@ body {
   padding: 0;
   display: inline-flex !important;
   align-items: center;
-  gap: 6px !important;
+  gap: 2px !important;
 }
 
 .switch-text {
@@ -389,7 +412,13 @@ body {
   margin-bottom: 0;
   display: flex;
   align-items: center;
-  width: 35px;
+  width: 30px !important; /* Force smaller toggle container */
+}
+
+/* Also ensure the inner shiny container is compact */
+.switch-container-compact .shiny-input-container {
+  width: 30px !important;
+  margin-right: 3px !important;
 }
 
 .switch-container-compact .form-check-input {
@@ -404,45 +433,6 @@ body {
 .switch-container-compact .form-check-input:checked {
   background-color: #198754;
   border-color: #198754;
-}
-
-.settings-card-compact .card-header {
-  padding: 4px 12px !important;
-}
-
-.settings-card-compact .card-body {
-  padding: 8px 12px !important;
-}
-
-.settings-card-compact .control-label {
-  margin-bottom: 2px !important;
-  font-size: 0.75rem !important;
-}
-
-.settings-card-compact .shiny-options-group {
-  margin-top: -2px;
-}
-
-/* Vertical Space Optimization */
-.settings-card-compact .card-header {
-  padding: 4px 12px !important;
-}
-
-.settings-card-compact .card-body {
-  padding: 6px 12px !important;
-}
-
-.settings-card-compact hr {
-  margin: 4px 0 !important;
-}
-
-.settings-card-compact .control-label {
-  margin-bottom: 2px !important;
-  font-size: 0.75rem !important;
-}
-
-.settings-card-compact .shiny-input-container {
-  margin-bottom: 0 !important;
 }
 
 /* Vertical Space Optimization for Settings */
@@ -471,6 +461,31 @@ body {
 .settings-card-compact .selectize-input {
   min-height: 30px !important;
   padding: 2px 8px !important;
+}
+
+/* Custom Grid and Label Utility Classes */
+.col-custom-1 { flex: 0 0 8.33% !important; max-width: 8.33% !important; }
+.col-custom-2 { flex: 0 0 16.66% !important; max-width: 16.66% !important; }
+.col-custom-3 { flex: 0 0 25% !important; max-width: 25% !important; }
+
+.settings-label {
+  font-size: 0.8rem !important;
+  font-weight: 600 !important;
+}
+
+.switch-text-small {
+  font-size: 0.65rem !important;
+}
+
+.xy-label {
+  font-size: 0.7rem !important;
+  font-weight: 800 !important;
+}
+
+.color-by-label {
+  font-size: 0.85rem !important;
+  font-weight: 600 !important;
+  color: #2c3e50 !important;
 }
 
 .card-body {
@@ -560,6 +575,29 @@ body {
   padding-left: 2.5em !important;
 }
 
+/* Targeted alignment for gene expression toggle only */
+.gene-expression-toggle-wrapper {
+  position: absolute;
+  top: -2px;
+  left: 8em;
+  z-index: 10;
+}
+
+.gene-expression-toggle-wrapper .form-check.form-switch {
+  padding-left: 2.5em !important;
+  margin-top: 0 !important;
+}
+
+.gene-expression-toggle-wrapper .form-check-input {
+  margin-left: -5px !important;
+  --bs-form-switch-bg: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='rgba%280, 0, 0, 0.25%29'/%3e%3c/svg%3e");
+  width: 2em;
+  background-image: var(--bs-form-switch-bg);
+  background-position: left center;
+  border-radius: 2em;
+  transition: background-position 0.15s ease-in-out;
+}
+
 /* Value box styling */
 .bslib-value-box {
   border-radius: 12px !important;
@@ -626,11 +664,11 @@ body {
 
 /* Gene Expression Specific Styles */
 .gene-expression-section {
-  padding: 30px;
+  padding: 10px 20px; /* Reduced from 30px */
   background-color: var(--background-color);
   border-radius: 12px;
   box-shadow: var(--shadow);
-  margin-top: 20px;
+  margin-top: 10px; /* Reduced from 20px */
 }
 
 .gene-expression-header {
@@ -830,11 +868,6 @@ body {
 .comparison-card .plotly {
   width: 100% !important;
   height: 100% !important;
-}
-
-/* Specific compact width only for toggles in headers */
-.switch-container-compact .shiny-input-container {
-  width: 40px !important;
 }
 
 .comparison-card .js-plotly-plot {
