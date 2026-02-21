@@ -583,7 +583,17 @@ body {
   z-index: 10;
 }
 
-.gene-expression-toggle-wrapper .form-check.form-switch {
+/* Targeted alignment for comparison plot toggles */
+.comparison-toggle-wrapper, .single-toggle-wrapper {
+  position: absolute;
+  top: -2px;
+  left: 80px; /* Positioned after 'Gene ID(s)' or 'Gene(s)' */
+  z-index: 10;
+}
+
+.gene-expression-toggle-wrapper .form-check.form-switch,
+.comparison-toggle-wrapper .form-check.form-switch,
+.single-toggle-wrapper .form-check.form-switch {
   padding-left: 2.5em !important;
   margin-top: 0 !important;
 }
