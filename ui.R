@@ -693,7 +693,7 @@ ui <- fluidPage(
                   plotlyOutput("parasite_stages_plotly"),
                   card_footer(
                     class = "text-muted small italic",
-                    "Note: All parasite stages are predicted by SingleR, except sporozoites which are confirmed by sample type."
+                    "Note: All parasite stages are predicted by SingleR, except sporozoite which are confirmed by sample type."
                   )
                 ),
                 card(card_header("Infection development stage"), plotlyOutput("HPI_plotly"))

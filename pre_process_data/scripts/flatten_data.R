@@ -37,12 +37,12 @@ mr_data <- FetchData(
   clean_names()
 
 
-# modify life_cycle_stage to include parasite_stage for schizont stage
+# modify life_cycle_stage to include parasite_stages for schizont stage
 # mr_data <- mr_data %>%
 #   mutate(
 #     life_cycle_stage = case_when(
 #       life_cycle_stage == "Schizont" ~
-#         paste0(life_cycle_stage, " (", parasite_stage, ")"),
+#         paste0(life_cycle_stage, " (", parasite_stages, ")"),
 #       TRUE ~ life_cycle_stage
 #     )
 #   )
@@ -66,7 +66,7 @@ mr_data <- mr_data %>%
   select(
     -c(
       "pred_gametocyte",
-      "parasite_stage",
+      "parasite_stages",
       "liver_form",
       "refine_state",
       grep("snn", colnames(mr_data), value = TRUE)

@@ -748,7 +748,7 @@ server <- function(input, output, session) {
                 starts_with("pca_"),
                 starts_with("t_sne_"),
                 barcode,
-                # parasite_stage,
+                # parasite_stages,
                 geographic_location,
                 day_post_infection
               )
@@ -858,7 +858,7 @@ server <- function(input, output, session) {
           filt_data,
           "hour_post_invasion",
           "Count",
-          "Intra erythrocyte development stage",
+          "Intra erythrocyte development phase",
           "bar"
         )
       })
@@ -1241,11 +1241,15 @@ server <- function(input, output, session) {
     input$group_exp_0
   }) %>% debounce(500)
 
-  # df_exp_0 when the user selects a gene/group - IMPROVED VERSION
+  # Use a local cache for plot results to avoid re-rendering identical plots
+  gene_plot_cache <- new.env(parent = emptyenv())
+
+  # df_exp_0 when the user selects a gene/group - OPTIMIZED VERSION
   output$gene_exp_plotly_0 <- renderPlotly({
-    # Use debounced inputs to prevent flickering
+    # Use debounced inputs
     selected_genes <- genes_exp_0_debounced()
     selected_group <- group_exp_debounced()
+    selected_check <- input$check_exp_0
 
     # Validate inputs
     if (is.null(selected_genes) || length(selected_genes) == 0 || is.null(selected_group)) {
@@ -1256,130 +1260,54 @@ server <- function(input, output, session) {
       return(create_empty_plot("Loading..."))
     }
 
-    # FIXED: Use filtered_gene_exp_data() which includes ALL filters, not just parasite_stage
     tryCatch(
       {
-        # 1. Get the filtered data with ALL filters applied
-        filtered_gene_exp <- filtered_gene_exp_data()
-        if (is.null(filtered_gene_exp) || is.null(filtered_gene_exp$data)) {
+        # Get the filtered data
+        fg <- filtered_gene_exp_data()
+        if (is.null(fg) || is.null(fg$data)) {
           return(create_empty_plot("Data not loaded"))
         }
 
-        # 2. Use the already filtered data instead of applying only parasite_stage filter
-        filtered_data <- filtered_gene_exp$data
-        raw_data <- list(
-          data = filtered_gene_exp$full,
-          genes = filtered_gene_exp$genes
+        # Create a cache key for this specific plot configuration
+        cache_key <- paste(
+          "plot0",
+          paste(sort(selected_genes), collapse = ","),
+          selected_group,
+          isTRUE(selected_check),
+          filtered_gene_exp_cache_key(input),
+          sep = "_"
         )
 
-        # 3. Get full expression matrix from the filtered data object
-        full_matrix <- filtered_gene_exp$full
-
-        # 4. Use row indices from the filtered metadata if available
-        row_idx <- attr(filtered_data, "row_idx")
-
-        # 5. Process each selected gene and collect expression values
-        gene_expression_matrix <- list()
-        valid_gene_names <- c()
-
-        for (gene_name in selected_genes) {
-          gene_id <- NULL
-          if (!is.null(raw_data$genes)) {
-            gene_match <- raw_data$genes[raw_data$genes$name == gene_name, ]
-            if (nrow(gene_match) > 0) {
-              gene_id <- gene_match$gene[1]
-            }
-          }
-
-          if (is.null(gene_id)) {
-            next # Skip this gene if not found
-          }
-
-          if (!(gene_id %in% colnames(full_matrix))) {
-            next # Skip if gene expression not found
-          }
-
-          # Get row indices for filtered data
-          if (!is.null(row_idx) && length(row_idx) > 0) {
-            # Use row indices from filtered metadata (this is the correct approach)
-            gene_expression <- full_matrix[[gene_id]][row_idx]
-          } else {
-            # Fallback: match by rownames (less efficient but safer)
-            row_indices <- match(rownames(filtered_data), rownames(full_matrix))
-            valid_indices <- !is.na(row_indices)
-
-            if (sum(valid_indices) == 0) {
-              next # Skip if no matching data
-            }
-
-            # Extract expression values for filtered cells
-            gene_expression <- full_matrix[[gene_id]][row_indices[valid_indices]]
-          }
-
-          gene_expression_matrix[[gene_name]] <- gene_expression
-          valid_gene_names <- c(valid_gene_names, gene_name)
+        if (exists(cache_key, envir = gene_plot_cache, inherits = FALSE)) {
+          return(gene_plot_cache[[cache_key]])
         }
 
-        # Check if we have any valid data
-        if (length(gene_expression_matrix) == 0) {
-          return(create_empty_plot("No data available for selected genes"))
+        # Identify gene IDs
+        gene_ids <- if (isTRUE(selected_check)) selected_genes else get_gene_id(selected_genes, fg$genes)
+        valid_gene_ids <- gene_ids[gene_ids %in% colnames(fg$full)]
+
+        if (length(valid_gene_ids) == 0) {
+          return(create_empty_plot("No valid genes found in data"))
         }
 
-        # 5. Calculate average expression across all selected genes
-        if (length(valid_gene_names) == 1) {
-          # Single gene - use expression directly as vector
-          avg_expression <- gene_expression_matrix[[1]]
-          plot_title <- valid_gene_names[1]
+        # Extract data
+        static_df <- fg$data
+        row_idx <- fg$row_idx
+
+        if (length(valid_gene_ids) > 1) {
+          static_df$gene_expr <- rowMeans(fg$full[row_idx, valid_gene_ids, drop = FALSE], na.rm = TRUE)
+          plot_title <- paste("Average of", length(valid_gene_ids), "genes:", paste(selected_genes, collapse = ", "))
         } else {
-          # Multiple genes - calculate mean across genes for each cell
-          # Convert to matrix and calculate row means
-          expr_matrix <- do.call(cbind, gene_expression_matrix)
-          avg_expression <- rowMeans(expr_matrix, na.rm = TRUE)
-          plot_title <- paste(
-            "Average of", length(valid_gene_names), "genes:",
-            paste(valid_gene_names, collapse = ", ")
-          )
+          static_df$gene_expr <- fg$full[row_idx, valid_gene_ids]
+          plot_title <- selected_genes[1]
         }
 
-        # 6. Get group values (make sure they match the expression data length)
-        if (!is.null(row_idx) && length(row_idx) > 0) {
-          # Use the same row indices for group values to ensure consistency
-          group_values <- filtered_data[[selected_group]]
-        } else {
-          # Fallback: match by rownames
-          row_indices <- match(rownames(filtered_data), rownames(full_matrix))
-          valid_indices <- !is.na(row_indices)
-          group_values <- filtered_data[[selected_group]][valid_indices]
-        }
+        # Generate plot
+        p <- gene_exp_plot(static_df, tolower(selected_group), add_title = plot_title)
 
-        # Ensure lengths match
-        if (length(avg_expression) != length(group_values)) {
-          # This should not happen, but handle it gracefully
-          min_len <- min(length(avg_expression), length(group_values))
-          avg_expression <- avg_expression[1:min_len]
-          group_values <- group_values[1:min_len]
-        }
-
-        # 7. Create final plot data
-        plot_data <- data.frame(
-          gene_expr = avg_expression,
-          group = group_values,
-          stringsAsFactors = FALSE
-        )
-        names(plot_data)[2] <- selected_group
-
-        # Remove NA values
-        plot_data <- plot_data[!is.na(plot_data$gene_expr) & !is.na(plot_data[[selected_group]]), ]
-
-        if (nrow(plot_data) == 0) {
-          return(create_empty_plot("No data available for selected filters"))
-        }
-
-        # 8. Create the plot with title showing which genes were averaged
-        group_col <- tolower(selected_group)
-        result <- gene_exp_plot(plot_data, group_col, add_title = plot_title)
-
-        return(result)
+        # Cache the result
+        gene_plot_cache[[cache_key]] <- p
+        return(p)
       },
       error = function(e) {
         return(create_empty_plot(paste("Error:", e$message)))
@@ -1475,7 +1403,21 @@ server <- function(input, output, session) {
               return(create_empty_plot("No genes selected"))
             }
 
-            gene_ids <- if (isTRUE(cur_check)) cur_genes else get_gene_id(cur_genes, gene_data()$genes)
+            # Create a cache key for this specific dynamic plot
+            cache_key <- paste(
+              "dynamic", curr_id,
+              paste(sort(cur_genes), collapse = ","),
+              cur_group,
+              isTRUE(cur_check),
+              filtered_gene_exp_cache_key(input),
+              sep = "_"
+            )
+
+            if (exists(cache_key, envir = gene_plot_cache, inherits = FALSE)) {
+              return(gene_plot_cache[[cache_key]])
+            }
+
+            gene_ids <- if (isTRUE(cur_check)) cur_genes else get_gene_id(cur_genes, fg$genes)
             valid_gene_ids <- gene_ids[gene_ids %in% colnames(fg$full)]
 
             if (length(valid_gene_ids) == 0) {
@@ -1487,18 +1429,17 @@ server <- function(input, output, session) {
 
             if (length(valid_gene_ids) > 1) {
               static_df$gene_expr <- rowMeans(fg$full[row_idx, valid_gene_ids, drop = FALSE], na.rm = TRUE)
+              plot_title <- paste("Average of", length(valid_gene_ids), "genes:", paste(cur_genes, collapse = ", "))
             } else {
               static_df$gene_expr <- fg$full[row_idx, valid_gene_ids]
+              plot_title <- cur_genes[1]
             }
 
-            valid_genes_display <- cur_genes[gene_ids %in% valid_gene_ids]
-            plot_title <- if (length(valid_gene_ids) == 1) {
-              valid_genes_display[1]
-            } else {
-              paste("Average of", length(valid_gene_ids), "genes:", paste(valid_genes_display, collapse = ", "))
-            }
+            p <- gene_exp_plot(static_df, tolower(cur_group), add_title = plot_title)
 
-            gene_exp_plot(static_df, tolower(cur_group), add_title = plot_title)
+            # Cache result
+            gene_plot_cache[[cache_key]] <- p
+            return(p)
           },
           error = function(e) {
             return(create_empty_plot(paste("Error:", e$message)))
@@ -2375,7 +2316,7 @@ server <- function(input, output, session) {
         "study_label" = "Study",
         "development_phase" = "Development phase",
         # "blood_stage" = "Blood stage",
-        "parasite_stages" = "Parasite stage",
+        "parasite_stages" = "Parasite stages",
         "strain" = "Strain",
         "treatment" = "Treatment",
         "sample_type" = "Sample type",

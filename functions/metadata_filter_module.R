@@ -14,6 +14,10 @@ initialize_filter_choices <- function(mr_data) {
             paste0("study_label__", unique(mr_data$study_label)),
             unique(mr_data$study_label)
         ),
+        development_phase = setNames(
+            paste0("development_phase__", unique(mr_data$development_phase)),
+            unique(mr_data$development_phase)
+        ),
         geographic_location = setNames(
             paste0("geolocation__", unique(mr_data$geographic_location)),
             unique(mr_data$geographic_location)
@@ -142,6 +146,11 @@ update_filter_inputs <- function(session, filt_data, tab_suffix = "") {
     )
     updateSelectInput(
         session,
+        paste0("development_phase", tab_suffix),
+        choices = unique(filt_data$development_phase)
+    )
+    updateSelectInput(
+        session,
         paste0("strain", tab_suffix),
         choices = unique(filt_data$strain)
     )
@@ -167,75 +176,78 @@ update_filter_inputs <- function(session, filt_data, tab_suffix = "") {
 #' @param filt_data Filtered data dataframe
 render_metadata_outputs <- function(output, filt_data) {
     # Create metadata table
-    output$data_table <- renderDT({
-        processed_data <- filt_data %>%
-            select(
-                -c(
-                    starts_with("umap_"),
-                    starts_with("pca_"),
-                    starts_with("t_sne_"),
-                    barcode,
-                    #life_cycle_stage,  # Hidden from UI
-                    # parasite_stage,
-                    geographic_location,
-                    day_post_infection
-                )
-            ) %>%
-            rename_with(
-                ~ str_to_title(.),
-                .cols = any_of(c(
-                    "study_label",
-                    "sample_type",
-                    "host_species",
-                    # "life_cycle_stage",
-                    "treatment",
-                    "strain",
-                    "hour_post_invasion",
-                    "sequencer",
-                    "sc_technology"
-                ))
-            ) %>%
-            rename(
-                nCount_RNA = n_count_rna,
-                nFeature_RNA = n_feature_rna,
-                Study_Label = Study_label
-            ) %>%
-            arrange(Study_Label, desc(nCount_RNA)) %>%
-            select(
-                Study_Label,
-                Sample_type,
-                Host_species,
-                Strain,
-                Treatment,
-                # Life_cycle_stage,
-                Hour_post_invasion,
-                Sc_technology,
-                Sequencer,
-                nCount_RNA,
-                nFeature_RNA
-            )
-
-        DT::datatable(
-            processed_data,
-            escape = FALSE,
-            extensions = "Buttons",
-            options = list(
-                pageLength = 10,
-                scrollX = TRUE,
-                dom = "frtipB",
-                buttons = list(
-                    list(
-                        extend = "csv",
-                        text = "Export .csv",
-                        className = "btn btn-success"
+    output$data_table <- renderDT(
+        {
+            processed_data <- filt_data %>%
+                select(
+                    -c(
+                        starts_with("umap_"),
+                        starts_with("pca_"),
+                        starts_with("t_sne_"),
+                        barcode,
+                        # life_cycle_stage,  # Hidden from UI
+                        # parasite_stages,
+                        geographic_location,
+                        day_post_infection
                     )
+                ) %>%
+                rename_with(
+                    ~ str_to_title(.),
+                    .cols = any_of(c(
+                        "study_label",
+                        "sample_type",
+                        "host_species",
+                        # "life_cycle_stage",
+                        "treatment",
+                        "strain",
+                        "hour_post_invasion",
+                        "sequencer",
+                        "sc_technology"
+                    ))
+                ) %>%
+                rename(
+                    nCount_RNA = n_count_rna,
+                    nFeature_RNA = n_feature_rna,
+                    Study_Label = Study_label
+                ) %>%
+                arrange(Study_Label, desc(nCount_RNA)) %>%
+                select(
+                    Study_Label,
+                    Sample_type,
+                    Host_species,
+                    Strain,
+                    Treatment,
+                    # Life_cycle_stage,
+                    Hour_post_invasion,
+                    Sc_technology,
+                    Sequencer,
+                    nCount_RNA,
+                    nFeature_RNA
                 )
-            ),
-            selection = "single",
-            filter = "top",
-            rownames = FALSE
-        )
-    }, server = TRUE)
+
+            DT::datatable(
+                processed_data,
+                escape = FALSE,
+                extensions = "Buttons",
+                options = list(
+                    pageLength = 10,
+                    scrollX = TRUE,
+                    dom = "frtipB",
+                    buttons = list(
+                        list(
+                            extend = "csv",
+                            text = "Export .csv",
+                            className = "btn btn-success"
+                        )
+                    )
+                ),
+                selection = "single",
+                filter = "top",
+                rownames = FALSE
+            )
+        },
+        server = TRUE
+    )
 
     # Metadata plots
     output$sample_plotly <- renderPlotly({

@@ -77,7 +77,7 @@ setup_qc_observer <- function(input, output, filtered_data, pca_df, hiv_data, mr
             input$data_opt,
             input$study_label_qc,
             input$host_species_qc,
-            input$parasite_stage_qc,
+            input$parasite_stages_qc,
             input$treatment_qc,
             input$development_phase_qc,
             input$sample_type_qc,
@@ -90,7 +90,7 @@ setup_qc_observer <- function(input, output, filtered_data, pca_df, hiv_data, mr
             current_inputs <- list(
                 study_label = input$study_label_qc,
                 host_species = input$host_species_qc,
-                parasite_stage = input$parasite_stage_qc,
+                parasite_stages = input$parasite_stages_qc,
                 treatment = input$treatment_qc,
                 development_phase = input$development_phase_qc,
                 sample_type = input$sample_type_qc,

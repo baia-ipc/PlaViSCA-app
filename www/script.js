@@ -110,106 +110,106 @@ $(document).ready(function () {
 function setupFilterSync() {
   // List of all filter input IDs
   const filterIds = [
-    'study_label', 'sample_type', 'host_species', 'parasite_stage',
+    'study_label', 'sample_type', 'host_species', 'parasite_stages',
     'treatment', 'development_phase', 'strain', 'hour_post_invasion'
     // 'sequencer', 'sc_technology'
   ];
-  
+
   // Function to copy options from first filter to all others
   function syncFilterOptions(inputId) {
     // Get all select elements with this ID
     const allSelects = $('select[id="' + inputId + '"]');
     if (allSelects.length === 0) return;
-    
+
     // Find the first one that has options (usually from Embeddings tab)
     let sourceSelectize = null;
-    allSelects.each(function() {
+    allSelects.each(function () {
       if (this.selectize && Object.keys(this.selectize.options).length > 0) {
         sourceSelectize = this.selectize;
         return false; // break
       }
     });
-    
+
     if (!sourceSelectize) return;
-    
+
     const options = sourceSelectize.options;
     const value = sourceSelectize.getValue();
-    
+
     console.log('Syncing options for', inputId, 'from source with', Object.keys(options).length, 'options');
-    
+
     // Update all other selectize instances
-    allSelects.each(function() {
+    allSelects.each(function () {
       if (this.selectize && this.selectize !== sourceSelectize) {
         const selectize = this.selectize;
-        
+
         // Clear and add options
         selectize.clearOptions();
-        Object.keys(options).forEach(function(key) {
+        Object.keys(options).forEach(function (key) {
           selectize.addOption(options[key]);
         });
-        
+
         // Set the same value
         selectize.setValue(value, true);
         selectize.refreshOptions(false);
-        
+
         console.log('Synced', inputId, 'to another instance');
       }
     });
   }
-  
+
   // Function to sync all filters
   function syncAllFilters() {
     console.log('Syncing all filters...');
-    filterIds.forEach(function(filterId) {
+    filterIds.forEach(function (filterId) {
       syncFilterOptions(filterId);
     });
   }
-  
+
   // Function to sync a specific filter value across all filter rows
   function syncFilterValue(inputId, value) {
-    $('select[id="' + inputId + '"]').each(function() {
+    $('select[id="' + inputId + '"]').each(function () {
       const selectize = this.selectize;
       if (selectize && selectize.getValue() !== value) {
         selectize.setValue(value, true);
       }
     });
   }
-  
+
   // Listen for changes on any filter input
-  filterIds.forEach(function(filterId) {
-    $(document).on('change', 'select[id="' + filterId + '"]', function() {
+  filterIds.forEach(function (filterId) {
+    $(document).on('change', 'select[id="' + filterId + '"]', function () {
       const value = $(this).val();
       syncFilterValue(filterId, value);
     });
   });
-  
+
   // Listen for when Shiny finishes updating inputs
   let syncTimer = null;
-  $(document).on('shiny:value', function(event) {
+  $(document).on('shiny:value', function (event) {
     // Check if this is one of our filter inputs
     if (filterIds.includes(event.name)) {
       console.log('Shiny updated', event.name);
       // Debounce: wait for all updates to finish
       clearTimeout(syncTimer);
-      syncTimer = setTimeout(function() {
+      syncTimer = setTimeout(function () {
         syncAllFilters();
       }, 500);
     }
   });
-  
+
   // Poll for selectize initialization and sync periodically
   let pollCount = 0;
   const maxPolls = 20; // Poll for up to 10 seconds
-  
+
   function pollAndSync() {
     pollCount++;
-    
+
     // Check if embeddings filter has been populated
     const embeddingsFilter = $('#filter-row-embeddings select[id="study_label"]')[0];
     if (embeddingsFilter && embeddingsFilter.selectize) {
       const optionCount = Object.keys(embeddingsFilter.selectize.options).length;
       console.log('Poll', pollCount, '- study_label has', optionCount, 'options');
-      
+
       if (optionCount > 0) {
         console.log('Filters populated! Syncing all...');
         syncAllFilters();
@@ -220,7 +220,7 @@ function setupFilterSync() {
         return;
       }
     }
-    
+
     // Continue polling if not done yet
     if (pollCount < maxPolls) {
       setTimeout(pollAndSync, 500);
@@ -228,12 +228,12 @@ function setupFilterSync() {
       console.log('Stopped polling after', pollCount, 'attempts');
     }
   }
-  
+
   // Start polling after a short delay
   setTimeout(pollAndSync, 1000);
-  
+
   // Also try syncing when user switches tabs
-  $(document).on('shown.bs.tab', 'a[data-toggle="tab"]', function(e) {
+  $(document).on('shown.bs.tab', 'a[data-toggle="tab"]', function (e) {
     setTimeout(syncAllFilters, 200);
   });
 }
@@ -448,7 +448,7 @@ $(document).ready(function () {
 
   // Initialize particles for home page
   // The initParticles function is defined in particles-config.js
-  $(document).ready(function() {
+  $(document).ready(function () {
     if (typeof initParticles === 'function') {
       initParticles('particles-js-home');
     } else {

@@ -72,7 +72,7 @@ PlaViSca requires gene expression data and metadata files. These files can be do
 - host_species: Host species from which the sample was derived (e.g., Anopheles stephensi, Saimiri boliviensis).
 - host_id: Identifier for the individual host organism (Saimiri boliviensis 3879).
 - sample_type: Type of biological material collected (e.g., vector salivary gland, host blood).
-- parasite_stage: Parasite lifecycle stage represented in the sample (e.g., blood stage).
+- parasite_stages: Parasite lifecycle stage represented in the sample (e.g., blood stage).
 - strain: Parasite strain or isolate (e.g., Sal1, Sal1/Chesson).
 - day_post_infection: Number of days after infection when the sample was collected.
 - life_cycle_stage: Annotated lifecycle stage of the parasite (e.g., ring, trophozoite, schizont, gametocyte).
