@@ -584,6 +584,14 @@ body {
   margin-left: 4px;
 }
 
+/* Specifically position the gene expression toggle next to its dropdown label */
+.gene-select-wrapper .gene-expression-toggle-container {
+  position: absolute;
+  top: 0;
+  left: 105px;
+  z-index: 10;
+}
+
 .gene-expression-toggle-container .form-check.form-switch,
 .single-toggle-container .form-check.form-switch,
 .comparison-toggle-container-a .form-check.form-switch,

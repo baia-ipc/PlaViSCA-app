@@ -49,11 +49,6 @@ server <- function(input, output, session) {
     if (isTRUE(input$check_second)) "Gene(s) id" else "Gene(s) name"
   })
 
-  # Dynamic label for initial gene expression block
-  output$genes_label_exp_0 <- renderText({
-    if (isTRUE(input$check_exp_0)) "Gene(s) id" else "Gene(s) name"
-  })
-
   # Reactive value for comparison mode (toggled by action button)
   comparison_mode <- reactiveVal(FALSE)
 
@@ -1196,9 +1191,11 @@ server <- function(input, output, session) {
   # Update dropdown when check box changes
   observeEvent(input$check_exp_0, {
     req(gene_data()$genes)
+    is_checked <- input$check_exp_0
 
     # Get choices based on checkbox state
-    choices <- get_gene_choices(gene_data()$genes, input$check_exp_0)
+    choices <- get_gene_choices(gene_data()$genes, is_checked)
+    label <- if (is_checked) "Gene(s) id" else "Gene(s) name"
 
     # Try to preserve current selection if it's still valid in new choices
     current_selection <- input$genes_exp_0
@@ -1214,6 +1211,7 @@ server <- function(input, output, session) {
         updateSelectizeInput(
           session,
           "genes_exp_0",
+          label = label,
           choices = choices,
           selected = default_selection,
           options = list(
@@ -1412,264 +1410,103 @@ server <- function(input, output, session) {
     btn_id <- input$click_add_btn
     req(btn_id)
 
-    id <- as.numeric(gsub("add_btn_?", "", btn_id))
-
-    # Validate that id is a valid number
+    id <- as.numeric(gsub("add_btn_", "", btn_id))
     if (is.na(id)) {
       return(NULL)
     }
 
     shinyjs::hide(paste0("add_btn_", id))
+    counter(id)
 
-    # Use the filtered gene-expression data for choices so selection respects metadata filters
     req(filtered_gene_exp_data())
     choice_exp(isolate(get_gene_choices(filtered_gene_exp_data()$genes, FALSE)))
 
-    ## add ui block to the right after gene_exp_tar
-    if (id == 0) {
-      id <- id + 1
-      insertUI(
-        selector = "#gene_exp_container",
-        where = "beforeEnd",
-        ui = column(
-          width = 6,
-          id = paste0("dynamic_col_", id),
-          subBlock(id)
-        )
+    new_id <- id + 1
+
+    insertUI(
+      selector = "#gene_exp_container",
+      where = "beforeEnd",
+      ui = column(
+        width = 6,
+        id = paste0("dynamic_col_", new_id),
+        subBlock(new_id)
       )
-      # Capture choices now (reactive) then populate selectize shortly after so UI appears quickly
-      selectize_choices <- NULL
-      try(
+    )
+
+    shinyjs::delay(100, {
+      observeEvent(input[[paste0("check_exp_", new_id)]],
         {
-          selectize_choices <- choice_exp()
+          is_checked <- input[[paste0("check_exp_", new_id)]]
+          label <- if (is_checked) "Gene(s) id" else "Gene(s) name"
+          choices <- get_gene_choices(gene_data()$genes, is_checked)
+          updateSelectizeInput(session, paste0("genes_exp_", new_id), label = label, choices = choices, server = TRUE)
         },
-        silent = TRUE
+        ignoreInit = FALSE
       )
-      later(function() {
-        tryCatch(
-          {
-            if (!is.null(selectize_choices)) {
-              # Set default selection to first available choice
-              default_selection <- if (length(selectize_choices) > 0) selectize_choices[1] else NULL
 
-              updateSelectizeInput(
-                session,
-                inputId = paste0("genes_exp_", id),
-                choices = selectize_choices,
-                selected = default_selection,
-                server = TRUE
-              )
-            }
-          },
-          error = function(e) {}
-        )
-      }, 0.25)
-
-      # Add observer for the new switch
-      observeEvent(input[[paste0("check_exp_", id)]], {
-        is_checked <- input[[paste0("check_exp_", id)]]
-        choice_exp(get_gene_choices(gene_data()$genes, is_checked))
+      initial_choices <- choice_exp()
+      if (!is.null(initial_choices)) {
         updateSelectizeInput(
           session,
-          paste0("genes_exp_", id),
-          choices = choice_exp(),
+          inputId = paste0("genes_exp_", new_id),
+          choices = initial_choices,
+          selected = initial_choices[1],
           server = TRUE
         )
-      })
+      }
+    })
 
-      # Create the renderPlotly immediately (ensures render has access to reactives)
-      output[[paste0("gene_exp_plotly_", id)]] <- local({
-        plot_id <- id
-        renderPlotly({
-          # Only proceed if we have data and inputs
-          req(
-            gene_data(),
-            input[[paste0("genes_exp_", plot_id)]],
-            input[[paste0("group_exp_", plot_id)]]
-          )
+    output[[paste0("gene_exp_plotly_", new_id)]] <- local({
+      curr_id <- new_id
+      renderPlotly({
+        req(gene_data(), input[[paste0("genes_exp_", curr_id)]], input[[paste0("group_exp_", curr_id)]])
+        if (global_loading()) {
+          return(NULL)
+        }
 
-          # Skip during loading states
-          if (global_loading()) {
-            return(NULL)
-          }
-
-          tryCatch(
-            {
-              fg <- filtered_gene_exp_data()
-              cur_genes <- isolate(input[[paste0("genes_exp_", plot_id)]])
-              cur_group <- isolate(input[[paste0("group_exp_", plot_id)]])
-              cur_check <- isolate(input[[paste0("check_exp_", plot_id)]])
-
-              # Handle multiple genes
-              if (is.null(cur_genes) || length(cur_genes) == 0) {
-                return(create_empty_plot("No genes selected"))
-              }
-
-              # Convert gene names to IDs
-              gene_ids <- c()
-              if (isTRUE(cur_check)) {
-                # User entered gene IDs directly
-                gene_ids <- cur_genes
-              } else {
-                # User selected gene names - convert to IDs
-                for (gene_name in cur_genes) {
-                  gene_id <- get_gene_id(gene_name, fg$genes)
-                  if (!is.na(gene_id)) {
-                    gene_ids <- c(gene_ids, gene_id)
-                  }
-                }
-              }
-
-              if (length(gene_ids) == 0) {
-                return(create_empty_plot("No valid genes found"))
-              }
-
-              # Build plot data with average if multiple genes
-              static_df <- tryCatch(
-                {
-                  build_plot_slim(fg$data, fg$full, gene_ids, cur_group)
-                },
-                error = function(e) {
-                  NULL
-                }
-              )
-
-              if (is.null(static_df) || nrow(static_df) == 0) {
-                return(create_empty_plot("No data"))
-              }
-
-              # Create title showing gene info
-              plot_title <- if (length(gene_ids) == 1) {
-                cur_genes[1]
-              } else {
-                paste("Average of", length(gene_ids), "genes:", paste(cur_genes, collapse = ", "))
-              }
-
-              gene_exp_plot(static_df, tolower(cur_group), add_title = plot_title)
-            },
-            error = function(e) {
-              return(NULL)
-            }
-          )
-        })
-      })
-    } else {
-      ## add ui block to button
-      id <- id + 1
-      newBlock(id, counter, choice_exp(), subBlock, session)
-      selectize_choices <- NULL
-      try(
-        {
-          selectize_choices <- choice_exp()
-        },
-        silent = TRUE
-      )
-      later(function() {
         tryCatch(
           {
-            if (!is.null(selectize_choices)) {
-              # Set default selection to first available choice
-              default_selection <- if (length(selectize_choices) > 0) selectize_choices[1] else NULL
+            fg <- filtered_gene_exp_data()
+            cur_genes <- isolate(input[[paste0("genes_exp_", curr_id)]])
+            cur_group <- isolate(input[[paste0("group_exp_", curr_id)]])
+            cur_check <- isolate(input[[paste0("check_exp_", curr_id)]])
 
-              updateSelectizeInput(
-                session,
-                inputId = paste0("genes_exp_", id),
-                choices = selectize_choices,
-                selected = default_selection,
-                server = TRUE
-              )
+            if (is.null(cur_genes) || length(cur_genes) == 0) {
+              return(create_empty_plot("No genes selected"))
             }
+
+            gene_ids <- if (isTRUE(cur_check)) cur_genes else get_gene_id(cur_genes, gene_data()$genes)
+            valid_gene_ids <- gene_ids[gene_ids %in% colnames(fg$full)]
+
+            if (length(valid_gene_ids) == 0) {
+              return(create_empty_plot("Selected gene(s) not found in data"))
+            }
+
+            static_df <- fg$data
+            row_idx <- fg$row_idx
+
+            if (length(valid_gene_ids) > 1) {
+              static_df$gene_expr <- rowMeans(fg$full[row_idx, valid_gene_ids, drop = FALSE], na.rm = TRUE)
+            } else {
+              static_df$gene_expr <- fg$full[row_idx, valid_gene_ids]
+            }
+
+            valid_genes_display <- cur_genes[gene_ids %in% valid_gene_ids]
+            plot_title <- if (length(valid_gene_ids) == 1) {
+              valid_genes_display[1]
+            } else {
+              paste("Average of", length(valid_gene_ids), "genes:", paste(valid_genes_display, collapse = ", "))
+            }
+
+            gene_exp_plot(static_df, tolower(cur_group), add_title = plot_title)
           },
-          error = function(e) {}
-        )
-      }, 0.25)
-
-      # Add observer for the new switch
-      observeEvent(input[[paste0("check_exp_", id)]], {
-        is_checked <- input[[paste0("check_exp_", id)]]
-        choice_exp(get_gene_choices(gene_data()$genes, is_checked))
-        updateSelectizeInput(
-          session,
-          paste0("genes_exp_", id),
-          choices = choice_exp(),
-          server = TRUE
-        )
-      })
-
-      # Create the renderPlotly immediately so it captures reactive environment correctly
-      output[[paste0("gene_exp_plotly_", id)]] <- local({
-        plot_id <- id
-        renderPlotly({
-          req(
-            gene_data(),
-            input[[paste0("genes_exp_", plot_id)]],
-            input[[paste0("group_exp_", plot_id)]]
-          )
-
-          # Skip during loading states
-          if (global_loading()) {
-            return(NULL)
+          error = function(e) {
+            return(create_empty_plot(paste("Error:", e$message)))
           }
-
-          tryCatch(
-            {
-              fg <- filtered_gene_exp_data()
-              cur_genes <- isolate(input[[paste0("genes_exp_", plot_id)]])
-              cur_group <- isolate(input[[paste0("group_exp_", plot_id)]])
-              cur_check <- isolate(input[[paste0("check_exp_", plot_id)]])
-
-              # Handle multiple gene selection
-              if (length(cur_genes) == 0 || any(is.null(cur_genes)) || any(cur_genes == "")) {
-                return(create_empty_plot("No genes selected"))
-              }
-
-              # Convert gene names to IDs
-              gene_ids <- if (isTRUE(cur_check)) {
-                cur_genes
-              } else {
-                sapply(cur_genes, function(gene) get_gene_id(gene, fg$genes), USE.NAMES = FALSE)
-              }
-
-              # Remove any invalid gene IDs
-              valid_genes <- cur_genes[!is.na(gene_ids) & gene_ids != ""]
-              valid_gene_ids <- gene_ids[!is.na(gene_ids) & gene_ids != ""]
-
-              if (length(valid_gene_ids) == 0) {
-                return(create_empty_plot("No valid genes found"))
-              }
-
-              static_df <- tryCatch(
-                {
-                  build_plot_slim(fg$data, fg$full, valid_gene_ids, cur_group)
-                },
-                error = function(e) {
-                  NULL
-                }
-              )
-
-              if (is.null(static_df) || nrow(static_df) == 0) {
-                return(create_empty_plot("No data"))
-              }
-
-              # Create title showing gene info
-              plot_title <- if (length(valid_gene_ids) == 1) {
-                valid_genes[1]
-              } else {
-                paste("Average of", length(valid_gene_ids), "genes:", paste(valid_genes, collapse = ", "))
-              }
-
-              gene_exp_plot(static_df, tolower(cur_group), add_title = plot_title)
-            },
-            error = function(e) {
-              return(NULL)
-            }
-          )
-        })
+        )
       })
-    }
-  })
-
-  # observe remove button click from js
+    })
+  }) # observe remove button click from js
   observeEvent(
     input$click_remove_btn,
     {

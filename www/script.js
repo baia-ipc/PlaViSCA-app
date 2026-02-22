@@ -510,7 +510,7 @@ $(document).ready(function () {
   });
 
   //  Optimized toggle and gene expression handlers
-  $(document).on('click', '.toggle_exp', function () {
+  $(document).on('click', '.gene-expression-toggle-container input', function () {
     Shiny.setInputValue('click_toggle_exp', { id: this.id, value: this.checked },
       { priority: 'event' });
   });

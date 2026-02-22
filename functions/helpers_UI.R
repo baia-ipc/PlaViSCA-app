@@ -276,20 +276,17 @@ subBlock <- function(i) {
           width = 6,
           div(
             class = "gene-select-wrapper",
-            tags$label(
-              class = "control-label d-flex align-items-center gap-2",
-              tags$span(textOutput(paste0("genes_label_exp_", i), inline = TRUE), class = "settings-label"),
-              div(
-                class = "gene-expression-toggle-container",
-                title = "Click to switch ID and name",
-                `data-bs-toggle` = "tooltip",
-                `data-bs-placement` = "top",
-                input_switch(paste0("check_exp_", i), label = NULL, value = FALSE)
-              )
+            style = "position: relative;",
+            div(
+              class = "gene-expression-toggle-container",
+              title = "Click to switch ID and name",
+              `data-bs-toggle` = "tooltip",
+              `data-bs-placement` = "top",
+              input_switch(paste0("check_exp_", i), label = NULL, value = FALSE)
             ),
             selectizeInput(
               paste0("genes_exp_", i),
-              label = NULL,
+              label = "Gene(s) name",
               choices = NULL,
               multiple = TRUE,
               options = list(maxItems = 10, placeholder = "Search genes...", dropdownParent = "body")
@@ -337,8 +334,8 @@ subBlock <- function(i) {
       div(
         class = "d-flex justify-content-end gap-2 mt-2",
         downloadButton(paste0("download_gene_exp_", i), label = "Data", class = "btn-sm btn-outline-secondary"),
-        actionButton(paste0("remove_btn_", i), label = fontawesome::fa("minus"), class = "btn-sm btn-outline-danger"),
-        actionButton(paste0("add_btn_", i), label = fontawesome::fa("plus"), class = "btn-sm btn-outline-success")
+        actionButton(paste0("remove_btn_", i), label = fontawesome::fa("minus"), class = "btn-sm btn-outline-danger btn_remove"),
+        actionButton(paste0("add_btn_", i), label = fontawesome::fa("plus"), class = "btn-sm btn-outline-success btn_add")
       )
     )
   )
@@ -359,9 +356,11 @@ newBlock <- function(new_count, counter, choice_exp, dynamicBlock, session) {
 
   shinyjs::delay(100, {
     # Add dynamic label rendering for the new block
-    output[[paste0("genes_label_exp_", new_count)]] <- renderText({
-      if (isTRUE(input[[paste0("check_exp_", new_count)]])) "Gene(s) id" else "Gene(s) name"
-    })
+    observeEvent(input[[paste0("check_exp_", new_count)]], {
+      is_checked <- input[[paste0("check_exp_", new_count)]]
+      label <- if (is_checked) "Gene(s) id" else "Gene(s) name"
+      updateSelectizeInput(session, paste0("genes_exp_", new_count), label = label)
+    }, ignoreInit = FALSE)
 
     updateSelectizeInput(
       session,

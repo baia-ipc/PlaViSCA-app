@@ -407,27 +407,28 @@ get_gene_choices <- function(genes_df, checked) {
 
 # Get gene id
 get_gene_id <- function(gene_name, gene_names) {
-    # Handle NULL or empty input
-    if (is.null(gene_name) || length(gene_name) == 0) {
-        return(NA)
+  # Handle NULL or empty input
+  if (is.null(gene_name) || length(gene_name) == 0) {
+    return(NA)
+  }
+  
+  # Ensure gene_names is a data.frame with 'name' and 'gene' columns
+  if (!is.data.frame(gene_names) || !all(c("name", "gene") %in% names(gene_names))) {
+    return(rep(NA, length(gene_name)))
+  }
+  
+  # Create a lookup map for faster matching
+  gene_map <- setNames(gene_names$gene, gene_names$name)
+  
+  # Match input gene names to the map
+  sapply(gene_name, function(name) {
+    if (is.na(name) || name == "") {
+      return(NA)
     }
     
-    # Handle vector input - return only the first match
-    if (length(gene_name) > 1) {
-        gene_name <- gene_name[1]
-    }
-    
-    # Handle NA or empty string
-    if (is.na(gene_name) || gene_name == "") {
-        return(NA)
-    }
-
-    if (gene_name %in% gene_names$name) {
-        result <- gene_names$gene[gene_names$name == gene_name]
-        return(result[1])  # Return only first match
-    } else {
-        return(NA)
-    }
+    # Return the gene ID from the map, or NA if not found
+    unname(gene_map[name])
+  }, USE.NAMES = FALSE)
 }
 
 

@@ -456,7 +456,8 @@ create_gene_exp_render <- function(output, plot_id, input, filtered_gene_exp_dat
             req(
                 gene_data(),
                 input[[paste0("genes_exp_", p_id)]],
-                input[[paste0("group_exp_", p_id)]]
+                input[[paste0("group_exp_", p_id)]],
+                !is.null(input[[paste0("check_exp_", p_id)]])
             )
 
             if (global_loading()) {
@@ -465,26 +466,23 @@ create_gene_exp_render <- function(output, plot_id, input, filtered_gene_exp_dat
 
             tryCatch({
                 fg <- filtered_gene_exp_data()
-                cur_genes <- isolate(input[[paste0("genes_exp_", p_id)]])
-                cur_group <- isolate(input[[paste0("group_exp_", p_id)]])
-                cur_check <- isolate(input[[paste0("check_exp_", p_id)]])
+                cur_genes <- input[[paste0("genes_exp_", p_id)]]
+                cur_group <- input[[paste0("group_exp_", p_id)]]
+                cur_check <- input[[paste0("check_exp_", p_id)]]
 
                 if (is.null(cur_genes) || length(cur_genes) == 0) {
                     return(create_empty_plot("No genes selected"))
                 }
                 
                 # Convert gene names to IDs
-                gene_ids <- c()
-                if (isTRUE(cur_check)) {
-                    gene_ids <- cur_genes
+                gene_ids <- if (isTRUE(cur_check)) {
+                    cur_genes
                 } else {
-                    for (gene_name in cur_genes) {
-                        gene_id <- get_gene_id(gene_name, fg$genes)
-                        if (!is.na(gene_id)) {
-                            gene_ids <- c(gene_ids, gene_id)
-                        }
-                    }
+                    get_gene_id(cur_genes, fg$genes)
                 }
+                
+                # Remove any NAs that might have been returned
+                gene_ids <- gene_ids[!is.na(gene_ids)]
                 
                 if (length(gene_ids) == 0) {
                     return(create_empty_plot("No valid genes found"))
