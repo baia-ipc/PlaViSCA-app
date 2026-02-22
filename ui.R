@@ -738,249 +738,63 @@ ui <- fluidPage(
       class = "about-container",
       # Hero Section
       div(
-        class = "about-hero",
-        div(id = "particles-js-about", class = "particles-js"),
+        class = "about-page-wrapper",
+        div(id = "particles-js-about", class = "particles-js-full"),
         div(
-          class = "about-hero-content",
-          h1("About PlaViSca", class = "about-title"),
-          p(
-            class = "about-subtitle",
-            "Plasmodium vivax Single-Cell Analysis Platform"
-          )
-        )
-      ),
-      # Main Content
-      div(
-        class = "about-content",
-        # Introduction Card
-        card(
-          class = "about-card mb-4",
-          card_header(
-            class = "about-card-header",
-            tagList(fontawesome::fa("info-circle", fill = "#008080"), " What is PlaViSca?")
+          class = "about-content-minimal",
+          # Introduction Section
+          div(
+            class = "text-center mb-5",
+            h1("What is PlaViSca?", class = "minimal-title"),
+            p(class = "minimal-subtitle", "Plasmodium vivax Single-Cell Analysis Platform")
           ),
-          card_body(
+          div(
+            class = "about-section-condensed mb-5",
             p(
-              strong("PlaViSca"), " (", em("Plasmodium vivax"), " Single-Cell Analysis) is an interactive web platform designed for exploring and analyzing single-cell RNA sequencing data from ", em("P. vivax"), ", the most widespread human malaria parasite."
-            ),
-            p(
-              "The platform enables researchers to:"
-            ),
+              strong("PlaViSca"), " is a professional platform for the high-resolution exploration of ", em("P. vivax"), " single-cell transcriptomics. We provide intuitive tools to bridge the gap between complex genomic data and biological discovery."
+            )
+          ),
+
+          # Capabilities
+          div(
+            class = "about-section-condensed mb-5",
+            h3(class = "minimal-section-header", "Key Capabilities"),
             tags$ul(
-              tags$li("Explore cell embeddings (PCA, UMAP, t-SNE) with interactive visualizations"),
-              tags$li("Investigate gene expression patterns across different parasite life stages"),
-              tags$li("Filter and analyze metadata across multiple studies"),
-              tags$li("Compare different visualization parameters side-by-side")
-            ),
-            p(
-              "This tool aims to accelerate malaria research by providing easy access to curated single-cell transcriptomic data."
+              class = "minimal-list",
+              tags$li(strong("Embeddings:"), " Seamless navigation of UMAP, PCA, and t-SNE projections."),
+              tags$li(strong("Expression:"), " Real-time visualization of gene expression across life stages."),
+              tags$li(strong("Integration:"), " Unified access to multi-study datasets and metadata."),
+              tags$li(strong("Comparison:"), " Side-by-side analysis of biological conditions.")
             )
-          )
-        ),
-        # Features Section
-        div(
-          class = "features-section mb-4",
-          h3(class = "section-title", tagList(fontawesome::fa("star", fill = "#008080"), " Key Features")),
-          fluidRow(
-            column(
-              width = 3,
-              div(
-                class = "feature-card",
-                div(class = "feature-icon", fontawesome::fa("chart-area", fill = "#007bff")),
-                h5("Interactive Plots", class = "feature-title"),
-                p("Explore embeddings with zoom, pan, and hover tooltips")
-              )
-            ),
-            column(
-              width = 3,
-              div(
-                class = "feature-card",
-                div(class = "feature-icon", fontawesome::fa("dna", fill = "#28a745")),
-                h5("Gene Expression", class = "feature-title"),
-                p("Visualize expression across parasite life stages")
-              )
-            ),
-            column(
-              width = 3,
-              div(
-                class = "feature-card",
-                div(class = "feature-icon", fontawesome::fa("columns", fill = "#ffc107")),
-                h5("Side-by-Side Comparison", class = "feature-title"),
-                p("Compare different parameters simultaneously")
-              )
-            ),
-            column(
-              width = 3,
-              div(
-                class = "feature-card",
-                div(class = "feature-icon", fontawesome::fa("download", fill = "#17a2b8")),
-                h5("Data Export", class = "feature-title"),
-                p("Download filtered data for further analysis")
-              )
-            )
-          )
-        ),
-        # Collaboration Card - Enhanced
-        div(
-          class = "collab-section mb-4",
-          h3(class = "section-title", tagList(fontawesome::fa("handshake", fill = "#008080"), " Open for Collaboration")),
-          card(
-            class = "collab-card",
-            card_body(
-              fluidRow(
-                column(
-                  width = 8,
-                  h4("We Welcome New Partnerships!", class = "collab-heading"),
-                  p(
-                    "Are you working with ", em("P. vivax"), " single-cell data? We're actively seeking collaborations to expand our dataset and improve the platform's capabilities."
-                  ),
-                  tags$ul(
-                    tags$li("Integrate your ", em("P. vivax"), " scRNA-seq datasets"),
-                    tags$li("Contribute to method development"),
-                    tags$li("Share feedback and feature requests"),
-                    tags$li("Collaborate on joint publications")
-                  )
-                ),
-                column(
-                  width = 4,
-                  div(
-                    class = "collab-cta",
-                    fontawesome::fa("envelope-open-text", fill = "#008080", height = "40px"),
-                    h5("Get in Touch"),
-                    p("Contact our team to discuss collaboration opportunities.")
-                  )
-                )
-              )
-            )
-          )
-        ),
-        # Team Section
-        div(
-          class = "team-section mb-4",
-          h3(class = "section-title", tagList(fontawesome::fa("users", fill = "#008080"), " Research Team")),
-          fluidRow(
-            column(
-              width = 4,
-              div(
-                class = "team-card",
-                div(class = "team-avatar bg-primary", tags$i(class = "fas fa-user")),
-                h5("Sopheap Oeng", class = "team-name"),
-                p(class = "team-role text-primary", "Bioinformatic System Engineer"),
-                p(class = "team-affiliation", "Institut Pasteur du Cambodge"),
-                a(href = "mailto:osopheap@pasteur-kh.org", class = "team-email", fontawesome::fa("envelope"), " osopheap@pasteur-kh.org")
-              )
-            ),
-            column(
-              width = 4,
-              div(
-                class = "team-card",
-                div(class = "team-avatar bg-success", tags$i(class = "fas fa-user")),
-                h5("Anthony Ruberto", class = "team-name"),
-                p(class = "team-role text-success", "Postdoctoral Researcher"),
-                p(class = "team-affiliation", "University of Georgia, USA"),
-                a(href = "mailto:aruberto@uga.edu", class = "team-email", fontawesome::fa("envelope"), " aruberto@uga.edu")
-              )
-            ),
-            column(
-              width = 4,
-              div(
-                class = "team-card",
-                div(class = "team-avatar bg-info", tags$i(class = "fas fa-user")),
-                h5("Thomas Obadia", class = "team-name"),
-                p(class = "team-role text-info", "Bioinformatics & Biostatistics"),
-                p(class = "team-affiliation", "Institut Pasteur, Paris"),
-                a(href = "mailto:thomas.obadia@pasteur.fr", class = "team-email", fontawesome::fa("envelope"), " thomas.obadia@pasteur.fr")
+          ),
+
+          # Collaboration & Source
+          div(
+            class = "about-section-condensed mb-5",
+            h3(class = "minimal-section-header", "Collaboration & Open Source"),
+            p("Open science is at our core. We welcome dataset integrations and partnerships."),
+            div(
+              class = "mt-3",
+              a(
+                href = "https://github.com/Sopheap15/PlaViSca",
+                target = "_blank",
+                class = "github-link-beautiful",
+                fontawesome::fa("github"), " Explore Source Code"
               )
             )
           ),
-          fluidRow(
-            class = "mt-3",
-            column(
-              width = 4,
-              div(
-                class = "team-card",
-                div(class = "team-avatar bg-warning", tags$i(class = "fas fa-user")),
-                h5("Brice Feufack Donfack", class = "team-name"),
-                p(class = "team-role text-warning", "Postdoctoral Researcher"),
-                p(class = "team-affiliation", "Malaria Research Unit, IPC"),
-                a(href = "mailto:ldonfack@pasteur-kh.org", class = "team-email", fontawesome::fa("envelope"), " ldonfack@pasteur-kh.org")
-              )
-            ),
-            column(
-              width = 4,
-              div(
-                class = "team-card",
-                div(class = "team-avatar bg-danger", tags$i(class = "fas fa-user-tie")),
-                h5("Giorgio Gonnella", class = "team-name"),
-                p(class = "team-role text-danger", "Head, BAIA Unit"),
-                p(class = "team-affiliation", "Institut Pasteur du Cambodge"),
-                a(href = "mailto:ggonnella@pasteur-kh.org", class = "team-email", fontawesome::fa("envelope"), " ggonnella@pasteur-kh.org")
-              )
-            )
-          )
-        ),
-        # Source Code Section - Separate
-        div(
-          class = "source-section",
-          card(
-            class = "source-card",
-            card_body(
-              fluidRow(
-                column(
-                  width = 2,
-                  div(class = "source-icon-wrapper", fontawesome::fa("github", fill = "#333", height = "50px"))
-                ),
-                column(
-                  width = 7,
-                  h4("Open Source", class = "source-title"),
-                  p(
-                    "PlaViSca is built with R Shiny and is available as open-source software. Explore the code, report issues, or contribute to the project on GitHub."
-                  )
-                ),
-                column(
-                  width = 3,
-                  a(
-                    href = "https://github.com/Sopheap15/PlaViSca",
-                    target = "_blank",
-                    class = "btn btn-dark btn-lg source-btn",
-                    fontawesome::fa("github"), " View on GitHub"
-                  )
-                )
-              )
-            )
-          )
-        ),
-        # Affiliations Section
-        div(
-          class = "affiliations-section mt-4",
-          h3(class = "section-title", tagList(fontawesome::fa("building", fill = "#008080"), " Affiliations")),
-          fluidRow(
-            column(
-              width = 4,
-              div(
-                class = "affiliation-card",
-                h5("BAIA Unit"),
-                p("Bioinformatics and AI Applications"),
-                tags$small("Institut Pasteur du Cambodge")
-              )
-            ),
-            column(
-              width = 4,
-              div(
-                class = "affiliation-card",
-                h5("Malaria Unit"),
-                p("Malaria Research"),
-                tags$small("Institut Pasteur du Cambodge")
-              )
-            ),
-            column(
-              width = 4,
-              div(
-                class = "affiliation-card",
-                h5("CTEGD"),
-                p("Center for Tropical & Emerging Global Diseases"),
-                tags$small("University of Georgia, USA")
-              )
+
+          # Team Section
+          div(
+            class = "team-section-condensed mb-5",
+            h3(class = "minimal-section-header", "Development Team"),
+            div(
+              class = "team-grid-minimal",
+              div(class = "team-member-minimal", "Sopheap Oeng", tags$span("Bioinformatic System Engineer")),
+              div(class = "team-member-minimal", "Anthony Ruberto", tags$span("Postdoctoral Researcher")),
+              div(class = "team-member-minimal", "Thomas Obadia", tags$span("Bioinformatics & Biostatistics")),
+              div(class = "team-member-minimal", "Brice Feufack Donfack", tags$span("Postdoctoral Researcher")),
+              div(class = "team-member-minimal", "Giorgio Gonnella", tags$span("Head, BAIA Unit"))
             )
           )
         )

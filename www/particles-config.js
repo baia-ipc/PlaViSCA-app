@@ -4,16 +4,16 @@ function initParticles(targetId) {
   if (typeof particlesJS !== 'undefined') {
     const config = {
       particles: {
-        number: { value: 200, density: { enable: true, value_area: 800 } },
-        color: { value: '#800080' },
+        number: { value: 100, density: { enable: true, value_area: 800 } },
+        color: { value: '#008080' },
         shape: { type: 'circle', stroke: { width: 0, color: '#000000' } },
-        opacity: { value: 0.8 },
-        size: { value: 5, random: true },
+        opacity: { value: 0.5 },
+        size: { value: 3, random: true },
         line_linked: {
-          enable: true, distance: 150, color: '#800080', opacity: 0.4, width: 1
+          enable: true, distance: 150, color: '#008080', opacity: 0.3, width: 1
         },
         move: {
-          enable: true, speed: 2, direction: 'none', out_mode: 'out'
+          enable: true, speed: 1.5, direction: 'none', out_mode: 'out'
         }
       },
       interactivity: {
@@ -23,8 +23,8 @@ function initParticles(targetId) {
           onclick: { enable: true, mode: 'push' }
         },
         modes: {
-          grab: { distance: 140, line_linked: { opacity: 1 } },
-          push: { particles_nb: 0 }
+          grab: { distance: 140, line_linked: { opacity: 0.8 } },
+          push: { particles_nb: 4 }
         }
       },
       retina_detect: true
@@ -54,4 +54,5 @@ function initParticles(targetId) {
 
 $(document).ready(function () {
   initParticles('particles-js-home');
+  initParticles('particles-js-about');
 });
