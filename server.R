@@ -858,7 +858,7 @@ server <- function(input, output, session) {
           filt_data,
           "hour_post_invasion",
           "Count",
-          "Intra erythrocyte development phase",
+          "Intra erythrocyte development stage",
           "bar"
         )
       })

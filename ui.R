@@ -742,7 +742,7 @@ ui <- fluidPage(
         div(id = "particles-js-about", class = "particles-js-full"),
         div(
           class = "about-content-minimal",
-          # Introduction Section
+          # Introduction
           div(
             class = "text-center mb-5",
             h1("What is PlaViSca?", class = "minimal-title"),
@@ -751,7 +751,7 @@ ui <- fluidPage(
           div(
             class = "about-section-condensed mb-5",
             p(
-              strong("PlaViSca"), " is a professional platform for the high-resolution exploration of ", em("P. vivax"), " single-cell transcriptomics. We provide intuitive tools to bridge the gap between complex genomic data and biological discovery."
+              strong("PlaViSca"), " is a high-performance platform for the multi-dimensional exploration of ", em("P. vivax"), " single-cell transcriptomics. We provide researchers with the tools to translate complex genomic data into impactful biological insights."
             )
           ),
 
@@ -761,45 +761,90 @@ ui <- fluidPage(
             h3(class = "minimal-section-header", "Key Capabilities"),
             tags$ul(
               class = "minimal-list",
-              tags$li(strong("Embeddings:"), " Seamless navigation of UMAP, PCA, and t-SNE projections."),
-              tags$li(strong("Expression:"), " Real-time visualization of gene expression across life stages."),
-              tags$li(strong("Integration:"), " Unified access to multi-study datasets and metadata."),
-              tags$li(strong("Comparison:"), " Side-by-side analysis of biological conditions.")
+              tags$li(strong("professional embeddings:"), " Interactive navigation of UMAP, PCA, and t-SNE projections."),
+              tags$li(strong("gene expression:"), " High-resolution visualization of expression across life stages."),
+              tags$li(strong("unified metadata:"), " Centralized access to curated multi-study datasets."),
+              tags$li(strong("comparative analytics:"), " Advanced side-by-side analysis of biological states.")
             )
           ),
 
-          # Collaboration & Source
+          # Team Section - Professional Cards
           div(
             class = "about-section-condensed mb-5",
-            h3(class = "minimal-section-header", "Collaboration & Open Source"),
-            p("Open science is at our core. We welcome dataset integrations and partnerships."),
+            h3(class = "minimal-section-header", "Development Team"),
             div(
-              class = "mt-3",
-              a(
-                href = "https://github.com/Sopheap15/PlaViSca",
-                target = "_blank",
-                class = "github-link-beautiful",
-                fontawesome::fa("github"), " Explore Source Code"
+              class = "team-grid-professional",
+              div(
+                class = "team-card-prof accent-teal",
+                h5("Sopheap Oeng", class = "team-name-prof"),
+                span("bioinformatic system engineer", class = "team-role-prof"),
+                a(href = "mailto:osopheap@pasteur-kh.org", class = "team-email-prof", fontawesome::fa("envelope"), " osopheap@pasteur-kh.org")
+              ),
+              div(
+                class = "team-card-prof accent-blue",
+                h5("Anthony Ruberto", class = "team-name-prof"),
+                span("postdoctoral researcher", class = "team-role-prof"),
+                a(href = "mailto:aruberto@uga.edu", class = "team-email-prof", fontawesome::fa("envelope"), " aruberto@uga.edu")
+              ),
+              div(
+                class = "team-card-prof accent-green",
+                h5("Thomas Obadia", class = "team-name-prof"),
+                span("bioinformatics & biostatistics", class = "team-role-prof"),
+                a(href = "mailto:thomas.obadia@pasteur.fr", class = "team-email-prof", fontawesome::fa("envelope"), " thomas.obadia@pasteur.fr")
+              ),
+              div(
+                class = "team-card-prof accent-purple",
+                h5("Brice Feufack Donfack", class = "team-name-prof"),
+                span("postdoctoral researcher", class = "team-role-prof"),
+                a(href = "mailto:ldonfack@pasteur-kh.org", class = "team-email-prof", fontawesome::fa("envelope"), " ldonfack@pasteur-kh.org")
+              ),
+              div(
+                class = "team-card-prof accent-orange",
+                h5("Giorgio Gonnella", class = "team-name-prof"),
+                span("head, baia unit", class = "team-role-prof"),
+                a(href = "mailto:ggonnella@pasteur-kh.org", class = "team-email-prof", fontawesome::fa("envelope"), " ggonnella@pasteur-kh.org")
               )
             )
           ),
 
-          # Team Section
+          # Collaboration & Open Science Section
           div(
-            class = "team-section-condensed mb-5",
-            h3(class = "minimal-section-header", "Development Team"),
+            class = "collaboration-box",
+            h3("Collaboration & Open Science", class = "collab-header"),
             div(
-              class = "team-grid-minimal",
-              div(class = "team-member-minimal", "Sopheap Oeng", tags$span("Bioinformatic System Engineer")),
-              div(class = "team-member-minimal", "Anthony Ruberto", tags$span("Postdoctoral Researcher")),
-              div(class = "team-member-minimal", "Thomas Obadia", tags$span("Bioinformatics & Biostatistics")),
-              div(class = "team-member-minimal", "Brice Feufack Donfack", tags$span("Postdoctoral Researcher")),
-              div(class = "team-member-minimal", "Giorgio Gonnella", tags$span("Head, BAIA Unit"))
+              class = "collab-grid",
+              div(
+                class = "collab-item",
+                fontawesome::fa("microscope"),
+                h4("open source mission"),
+                p("open science is at our core. we believe in transparent, reproducible research and provide open source tools to accelerate biological discovery globally.")
+              ),
+              div(
+                class = "collab-item",
+                fontawesome::fa("database"),
+                h4("dataset integrations"),
+                p("we welcome raw and processed dataset submissions to expand our multi-dimensional view of ", tags$em("P. vivax"), " single-cell biology.")
+              ),
+              div(
+                class = "collab-item",
+                fontawesome::fa("globe"),
+                h4("global partnerships"),
+                p("PlaViSca thrives on international collaboration. we invite researchers and institutions to join our network to extend the platform and seek funding to support these activities.")
+              )
+            ),
+            div(
+              class = "github-footer-minimal",
+              a(
+                href = "https://github.com/Sopheap15/PlaViSca",
+                target = "_blank",
+                class = "github-link-beautiful",
+                fontawesome::fa("github"), " Explore Source Code on GitHub"
+              )
             )
           )
         )
       )
-    )
+    ),
   ),
 
   # Footer
