@@ -170,24 +170,24 @@ body {
 
 /* Footer */
 .footer {
-  background-color: #343a40;
-  /* Dark gray */
-  color: #f8f9fa;
-  padding: 8px 20px;
-  /* Reduced padding for smaller height */
-  text-align: center;
+  background-color: transparent;
+  color: #666;
+  /* Subtle gray for copyright text */
   position: fixed;
   bottom: 0;
   left: 0;
+  padding: 15px 20px;
+  /* Increased padding for better spacing */
   /* Ensure it starts from the left edge */
   width: calc(100% - 25px);
   /* Adjusted width for margin-right */
   box-sizing: border-box;
-  margin-bottom: 5px;
-  /* Small margin from bottom */
-  left: 12px;
-  border-radius: 8px;
-  /* Added border-radius */
+  margin-bottom: 0px;
+  /* Moved to absolute bottom */
+  left: 0;
+  width: 100%;
+  border-radius: 0;
+  border: none;
   z-index: 999;
   /* Ensure footer is above other content */
 }
@@ -1023,7 +1023,8 @@ body {
   top: 0;
   left: 0;
   width: 100%;
-  height: 100%;
+  height: calc(100% - 80px);
+  /* Slightly shorter to avoid footer overlap */
   z-index: 0;
   pointer-events: none;
   /* Allow clicking through to content */
@@ -1187,11 +1188,12 @@ body {
 /* Collaboration & Open Science Section */
 .collaboration-box {
   margin-top: 40px;
-  padding: 30px 40px;
-  background: white;
-  border-radius: 16px;
-  border: 1px solid #edf2f7;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.02);
+  padding: 20px 0;
+  /* Seamless padding */
+  background: transparent;
+  border-radius: 0;
+  border: none;
+  box-shadow: none;
   text-align: center;
   position: relative;
   z-index: 3;
@@ -1248,22 +1250,22 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 12px;
-  background: #24292e;
-  /* GitHub Dark */
-  color: white !important;
-  padding: 12px 24px;
+  background: transparent;
+  color: var(--primary-color) !important;
+  padding: 10px 20px;
+  border: 2px solid var(--primary-color);
   border-radius: 6px;
   font-weight: 600;
   font-size: 0.95rem;
   text-decoration: none !important;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .github-link-beautiful:hover {
-  background: #000;
+  background: var(--primary-color);
+  color: white !important;
   transform: translateY(-2px);
-  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .team-avatar {

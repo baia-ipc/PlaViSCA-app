@@ -782,21 +782,21 @@ ui <- fluidPage(
               ),
               div(
                 class = "team-card-prof accent-blue",
-                h5("Anthony Ruberto", class = "team-name-prof"),
+                h5("Lionel Brice Feufack-Donfack", class = "team-name-prof"),
                 span("postdoctoral researcher", class = "team-role-prof"),
-                a(href = "mailto:aruberto@uga.edu", class = "team-email-prof", fontawesome::fa("envelope"), " aruberto@uga.edu")
+                a(href = "mailto:ldonfack@pasteur-kh.org", class = "team-email-prof", fontawesome::fa("envelope"), " ldonfack@pasteur-kh.org")
               ),
               div(
                 class = "team-card-prof accent-green",
                 h5("Thomas Obadia", class = "team-name-prof"),
-                span("bioinformatics & biostatistics", class = "team-role-prof"),
-                a(href = "mailto:thomas.obadia@pasteur.fr", class = "team-email-prof", fontawesome::fa("envelope"), " thomas.obadia@pasteur.fr")
+                span("senior scientist", class = "team-role-prof"),
+                a(href = "mailto:tobadia@pasteur-kh.org", class = "team-email-prof", fontawesome::fa("envelope"), " tobadia@pasteur-kh.org")
               ),
               div(
                 class = "team-card-prof accent-purple",
-                h5("Brice Feufack Donfack", class = "team-name-prof"),
-                span("postdoctoral researcher", class = "team-role-prof"),
-                a(href = "mailto:ldonfack@pasteur-kh.org", class = "team-email-prof", fontawesome::fa("envelope"), " ldonfack@pasteur-kh.org")
+                h5("Anthony Ruberto", class = "team-name-prof"),
+                span("senior scientist", class = "team-role-prof"),
+                a(href = "mailto:aruberto02@gmail.com", class = "team-email-prof", fontawesome::fa("envelope"), " aruberto02@gmail.com")
               ),
               div(
                 class = "team-card-prof accent-orange",
