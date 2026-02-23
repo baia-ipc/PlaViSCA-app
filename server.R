@@ -124,6 +124,13 @@ server <- function(input, output, session) {
       "
     $('.menu-link').removeClass('active');
     $('#analysis').addClass('active');
+
+    // Initialize particles for analysis page with slightly longer delay for full rendering
+    setTimeout(function() {
+      if (typeof initParticles === 'function') {
+        initParticles('particles-js-analysis');
+      }
+    }, 500);
   "
     )
   })

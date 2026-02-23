@@ -176,29 +176,22 @@ body {
   position: fixed;
   bottom: 0;
   left: 0;
-  padding: 15px 20px;
-  /* Increased padding for better spacing */
-  /* Ensure it starts from the left edge */
-  width: calc(100% - 25px);
-  /* Adjusted width for margin-right */
-  box-sizing: border-box;
-  margin-bottom: 0px;
-  /* Moved to absolute bottom */
-  left: 0;
+  padding: 15px 0;
   width: 100%;
-  border-radius: 0;
-  border: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 40px;
   z-index: 999;
-  /* Ensure footer is above other content */
+  border: none;
 }
 
 .footer .logo-container {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 50px;
-  margin-bottom: 5px;
-  /* Reduced margin */
+  gap: 30px;
+  margin-bottom: 0;
 }
 
 .footer .logo {
@@ -209,27 +202,53 @@ body {
 }
 
 .copyright {
-  font-size: 12px;
-  /* Reduced font size */
+  font-size: 11px;
+  margin: 0;
 }
 
 /* Analysis & About Sections */
 #analysis_section {
   padding: 0;
-  background-color: var(--background-color);
+  background: linear-gradient(135deg, #f5f7fa 0%, #e4e8ed 100%);
   min-height: calc(100vh - 80px);
+  position: relative;
+}
+
+#particles-js-analysis {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1 !important;
+  pointer-events: none;
 }
 
 .analysis-dashboard {
   display: flex;
   min-height: calc(100vh - 80px);
+  position: relative;
+  z-index: 5;
+  background: transparent !important;
 }
 
-.analysis-content {
+.analysis-content-wrapper {
   flex: 1;
+  position: relative;
+  min-height: calc(100vh - 80px);
+  background: transparent !important;
+  overflow: hidden;
+  /* Contain particles */
+}
+
+/* Analysis Content Transparency */
+.analysis-content {
+  width: 100%;
   padding: 30px;
   overflow: visible;
-  background-color: var(--background-color);
+  background-color: transparent !important;
+  position: relative;
+  z-index: 5;
 }
 
 /* Tabset styling */
@@ -239,21 +258,22 @@ body {
 
 #tabset>.nav-tabs {
   display: flex;
-  border-bottom: 2px solid #ddd;
+  border-bottom: 2px solid rgba(0, 128, 128, 0.2);
   margin-bottom: 25px;
-  background-color: #fff;
+  background-color: transparent !important;
   padding: 10px 20px 0 20px;
   border-radius: 8px 8px 0 0;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  box-shadow: none !important;
 }
 
 #tabset>.nav-tabs>li>a {
   border: none;
-  color: #5f6368;
+  background-color: transparent !important;
+  color: #555;
   font-weight: 500;
-  padding: 12px 20px;
-  border-radius: 8px 8px 0 0;
-  transition: all 0.3s;
+  padding: 10px 15px;
+  position: relative;
+  transition: all 0.3s ease;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -273,12 +293,14 @@ body {
 
 /* Settings & Filters boxes */
 .settings-box {
-  background-color: var(--white);
+  background-color: rgba(255, 255, 255, 0.4) !important;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   border-radius: 10px;
   padding: 20px;
   margin-bottom: 20px;
   box-shadow: var(--shadow);
-  border: 1px solid #e1e4e8;
+  border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
 .settings-header,
@@ -352,6 +374,17 @@ body {
 }
 
 /* Standardize card margins */
+/* Glassmorphism Effect for Cards on Analysis Page */
+#analysis_section .card,
+#analysis_section .bslib-card,
+#analysis_section .card-body {
+  background: rgba(255, 255, 255, 0.4) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  box-shadow: 0 8px 32px 0 rgba(0, 128, 128, 0.08) !important;
+}
+
 .card {
   border-radius: 12px !important;
   border: 1px solid #e1e4e8 !important;
@@ -1023,8 +1056,8 @@ body {
   top: 0;
   left: 0;
   width: 100%;
-  height: calc(100% - 80px);
-  /* Slightly shorter to avoid footer overlap */
+  height: 100%;
+  /* Ensure full coverage */
   z-index: 0;
   pointer-events: none;
   /* Allow clicking through to content */

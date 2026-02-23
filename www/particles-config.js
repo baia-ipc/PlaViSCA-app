@@ -55,4 +55,5 @@ function initParticles(targetId) {
 $(document).ready(function () {
   initParticles('particles-js-home');
   initParticles('particles-js-about');
+  initParticles('particles-js-analysis');
 });
