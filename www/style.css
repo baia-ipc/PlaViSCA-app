@@ -647,7 +647,6 @@ table.dataTable thead th {
 .shiny-input-container .control-label,
 .settings-label,
 .xy-label {
-  margin-bottom: 4px !important;
   display: block;
   font-weight: 700 !important;
 }

@@ -1850,7 +1850,7 @@ server <- function(input, output, session) {
     req(comparison_mode())
 
     color_map <- list(
-      study_label = "Study",
+      study_label = "Study label",
       development_phase = "Development Phase",
       parasite_stages = "Parasite Stages",
       strain = "Strain",
@@ -2319,7 +2319,7 @@ server <- function(input, output, session) {
 
       # Map color values to display names
       color_names <- c(
-        "study_label" = "Study",
+        "study_label" = "Study label",
         "development_phase" = "Development phase",
         # "blood_stage" = "Blood stage",
         "parasite_stages" = "Parasite stages",

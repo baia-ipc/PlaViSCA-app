@@ -182,7 +182,7 @@ ui <- fluidPage(
                           tags$label(
                             class = "control-label",
                             `for` = "check_all",
-                            tags$span("Integration", class = "settings-label")
+                            tags$span("Integration", class = "settings-label", style = "margin-bottom: -5px;")
                           ),
                           div(
                             id = "tab_switch",
@@ -259,21 +259,20 @@ ui <- fluidPage(
                       div(
                         class = "d-flex align-items-center gap-3",
                         tags$span("Color by:", class = "color-by-label"),
-                        selectInput(
+                        selectizeInput(
                           "color",
                           NULL,
                           choices = list(
-                            "Study" = "study_label",
+                            "Study label" = "study_label",
                             "Development phase" = "development_phase",
                             "Parasite stages" = "parasite_stages",
-                            "Strain" = "strain",
                             "Treatment" = "treatment",
-                            "Sample type" = "sample_type",
                             "Host species" = "host_species",
                             "Genes" = "genes"
                           ),
                           selected = "development_phase",
-                          width = "180px"
+                          width = "180px",
+                          options = list(dropdownParent = "body")
                         )
                       )
                     ),
@@ -368,15 +367,16 @@ ui <- fluidPage(
                           class = "g-1 align-items-end",
                           column(
                             width = 4,
-                            selectInput(
+                            selectizeInput(
                               "color_first_comp",
                               tags$span("Color by", class = "small fw-semibold"),
                               choices = list(
-                                "Study" = "study_label", "Development phase" = "development_phase", "Parasite stages" = "parasite_stages",
-                                "Strain" = "strain", "Treatment" = "treatment", "Sample type" = "sample_type",
+                                "Study label" = "study_label", "Development phase" = "development_phase", "Parasite stages" = "parasite_stages",
+                                "Treatment" = "treatment",
                                 "Host species" = "host_species", "Genes" = "genes"
                               ),
-                              selected = "development_phase", width = "100%"
+                              selected = "development_phase", width = "100%",
+                              options = list(dropdownParent = "body")
                             )
                           ),
                           conditionalPanel(
@@ -445,15 +445,16 @@ ui <- fluidPage(
                           class = "g-1 align-items-end",
                           column(
                             width = 4,
-                            selectInput(
+                            selectizeInput(
                               "color_second",
                               tags$span("Color by", class = "small fw-semibold"),
                               choices = list(
-                                "Study" = "study_label", "Development phase" = "development_phase", "Parasite stages" = "parasite_stages",
-                                "Strain" = "strain", "Treatment" = "treatment", "Sample type" = "sample_type",
+                                "Study label" = "study_label", "Development phase" = "development_phase", "Parasite stages" = "parasite_stages",
+                                "Treatment" = "treatment",
                                 "Host species" = "host_species", "Genes" = "genes"
                               ),
-                              selected = "parasite_stages", width = "100%"
+                              selected = "parasite_stages", width = "100%",
+                              options = list(dropdownParent = "body")
                             )
                           ),
                           conditionalPanel(
