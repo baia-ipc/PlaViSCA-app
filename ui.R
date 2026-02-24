@@ -19,7 +19,7 @@ ui <- fluidPage(
     tags$link(rel = "preconnect", href = "https://fonts.googleapis.com"),
     tags$link(rel = "preconnect", href = "https://fonts.gstatic.com"),
     tags$link(
-      href = "https://fonts.googleapis.com/css2?family=Roboto:wght@900&display=swap",
+      href = "https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap",
       rel = "stylesheet"
     ),
     tags$script(src = "https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"),
@@ -803,7 +803,7 @@ ui <- fluidPage(
               div(
                 class = "team-card-prof accent-orange",
                 h5("Giorgio Gonnella", class = "team-name-prof"),
-                span("head, baia unit", class = "team-role-prof"),
+                span("Head, BAIA Unit", class = "team-role-prof"),
                 a(href = "mailto:ggonnella@pasteur-kh.org", class = "team-email-prof", fontawesome::fa("envelope"), " ggonnella@pasteur-kh.org")
               )
             )

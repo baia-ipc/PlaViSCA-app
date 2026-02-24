@@ -199,17 +199,16 @@ render_gene_exp_plot <- function(output, input, filtered_gene_exp_data, global_l
                     }
 
                     # Get expression values
-                    if (!is.null(row_idx) && length(row_idx) > 0) {
+                    if (!is.null(row_idx) && length(row_idx) > 0 && length(row_idx) == nrow(filtered_data)) {
                         gene_expression <- full_matrix[[gene_id]][row_idx]
                     } else {
                         row_indices <- match(rownames(filtered_data), rownames(full_matrix))
                         valid_indices <- !is.na(row_indices)
 
-                        if (sum(valid_indices) == 0) {
-                            next
+                        gene_expression <- rep(NA_real_, nrow(filtered_data))
+                        if (sum(valid_indices) > 0) {
+                            gene_expression[valid_indices] <- full_matrix[[gene_id]][row_indices[valid_indices]]
                         }
-
-                        gene_expression <- full_matrix[[gene_id]][row_indices[valid_indices]]
                     }
 
                     gene_expression_matrix[[gene_name]] <- gene_expression

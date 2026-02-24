@@ -1029,19 +1029,13 @@ server <- function(input, output, session) {
       # sc_technology = input$sc_technology_gex
     )
 
-    # Create cache key as a single string for filtered gene expression data
-    cache_key <- filtered_gene_exp_cache_key(input)
-    if (exists(cache_key, envir = sessionData, inherits = FALSE)) {
-      return(sessionData[[cache_key]])
-    }
-
     tryCatch(
       {
-        # Get the full expression matrix from the cached_data storage where
+        # Get the full expression matrix from the cached_data storage
         full_df <- if (!is.null(cached_data[[get_current_data_type()]])) cached_data[[get_current_data_type()]] else gene_data()$data
 
         filt_meta <- apply_secondary_filters(
-          gene_data()$data, # Use raw gene_data() instead of filtered_gene_data()
+          gene_data()$data,
           current_inputs,
           keep_gene_matrix = FALSE,
           genes = if (!is.null(gene_data()$genes)) gene_data()$genes$gene else NULL
@@ -1050,16 +1044,12 @@ server <- function(input, output, session) {
         # Ensure row indices are available on the metadata result
         row_idx <- attr(filt_meta, "row_idx")
 
-        result <- list(
+        list(
           data = filt_meta,
-          genes = gene_data()$genes, # FIXED: Use gene_data() instead of filtered_gene_data()
+          genes = gene_data()$genes,
           full = full_df,
           row_idx = row_idx
         )
-
-        sessionData[[cache_key]] <- result
-
-        return(result)
       },
       error = function(e) {
         return(NULL)
@@ -1067,40 +1057,88 @@ server <- function(input, output, session) {
     )
   }) %>% debounce(500)
 
-  observeEvent(
-    list(
-      input$data_opt,
-      input$study_label_gex,
-      input$host_species_gex,
-      input$parasite_stages_gex,
-      input$treatment_gex,
-      input$development_phase_gex,
-      input$sample_type_gex,
-      input$strain_gex,
-      input$hour_post_invasion_gex
-      # input$sequencer_gex,
-      # input$sc_technology_gex
-    ),
+
+  # --- Cross-Filtering and Dynamic Grouping for GEX tab ---
+  # Initialize dynamic IDs for panels early
+  choice_exp <- reactiveVal()
+  counter <- reactiveVal(0)
+
+  observeEvent(filtered_gene_exp_data(),
     {
-      current_inputs <- list(
-        study_label = input$study_label_gex,
-        host_species = input$host_species_gex,
-        parasite_stages = input$parasite_stages_gex,
-        treatment = input$treatment_gex,
-        development_phase = input$development_phase_gex,
-        sample_type = input$sample_type_gex,
-        strain = input$strain_gex,
-        hour_post_invasion = input$hour_post_invasion_gex
-        # sequencer = input$sequencer_gex,
-        # sc_technology = input$sc_technology_gex
+      fg <- filtered_gene_exp_data()
+      if (is.null(fg) || is.null(fg$data)) {
+        return()
+      }
+
+      filt_df <- fg$data
+
+      # Update Group-By choices based on the filtered data
+      # Priority 1: Always keep biological units (Phase/Stage)
+      # Priority 2: Per user request, hide "annophel" (host_species) for Sporozoite
+      # Priority 3: Show others only if they help distinguish data (>1 group)
+
+      current_phases <- unique(na.omit(filt_df$development_phase))
+      is_only_sporozoite <- length(current_phases) == 1 && current_phases[1] == "Sporozoite"
+
+      valid_group_choices <- Filter(function(col) {
+        if (!col %in% colnames(filt_df)) {
+          return(FALSE)
+        }
+
+        # Biological columns ALWAYS kept
+        if (col %in% c("parasite_stages", "development_phase")) {
+          return(TRUE)
+        }
+
+        # Sporozoite exception: avoid Host Species groups
+        if (col == "host_species" && is_only_sporozoite) {
+          return(FALSE)
+        }
+
+        # Others: require diversity
+        length(unique(na.omit(filt_df[[col]]))) >= 2
+      }, group_choices)
+
+      if (length(valid_group_choices) == 0) valid_group_choices <- group_choices
+
+      # Smart default selection priority (Stage > Phase)
+      best_selection <- function(current) {
+        if (!is.null(current) && current %in% valid_group_choices) {
+          return(current)
+        }
+        if ("parasite_stages" %in% valid_group_choices) {
+          return("parasite_stages")
+        }
+        if ("development_phase" %in% valid_group_choices) {
+          return("development_phase")
+        }
+        valid_group_choices[1]
+      }
+
+      # Update panel 0
+      updateSelectInput(
+        session,
+        "group_exp_0",
+        choices = valid_group_choices,
+        selected = best_selection(isolate(input$group_exp_0))
       )
 
-      filt_data <- apply_secondary_filters(filtered_data(), current_inputs)
-    }
+      # Update any active dynamic panels (IDs 1 ... counter())
+      max_id <- isolate(counter())
+      if (!is.null(max_id) && max_id >= 1) {
+        for (d_id in 1:max_id) {
+          updateSelectInput(
+            session,
+            paste0("group_exp_", d_id),
+            choices = valid_group_choices,
+            selected = best_selection(isolate(input[[paste0("group_exp_", d_id)]]))
+          )
+        }
+      }
+    },
+    ignoreInit = TRUE
   )
 
-
-  # Manipulation tabset "Gene Exp"
   ## gene_exp_0 block with minimal caching for speed
   choice_exp_0 <- reactive({
     req(gene_data()$genes)
@@ -1248,10 +1286,7 @@ server <- function(input, output, session) {
     input$group_exp_0
   }) %>% debounce(500)
 
-  # Use a local cache for plot results to avoid re-rendering identical plots
-  gene_plot_cache <- new.env(parent = emptyenv())
-
-  # df_exp_0 when the user selects a gene/group - OPTIMIZED VERSION
+  # df_exp_0 when the user selects a gene/group
   output$gene_exp_plotly_0 <- renderPlotly({
     # Use debounced inputs
     selected_genes <- genes_exp_0_debounced()
@@ -1275,20 +1310,6 @@ server <- function(input, output, session) {
           return(create_empty_plot("Data not loaded"))
         }
 
-        # Create a cache key for this specific plot configuration
-        cache_key <- paste(
-          "plot0",
-          paste(sort(selected_genes), collapse = ","),
-          selected_group,
-          isTRUE(selected_check),
-          filtered_gene_exp_cache_key(input),
-          sep = "_"
-        )
-
-        if (exists(cache_key, envir = gene_plot_cache, inherits = FALSE)) {
-          return(gene_plot_cache[[cache_key]])
-        }
-
         # Identify gene IDs
         gene_ids <- if (isTRUE(selected_check)) selected_genes else get_gene_id(selected_genes, fg$genes)
         valid_gene_ids <- gene_ids[gene_ids %in% colnames(fg$full)]
@@ -1297,7 +1318,7 @@ server <- function(input, output, session) {
           return(create_empty_plot("No valid genes found in data"))
         }
 
-        # Extract data
+        # Extract filtered data and expression values
         static_df <- fg$data
         row_idx <- fg$row_idx
 
@@ -1309,11 +1330,8 @@ server <- function(input, output, session) {
           plot_title <- selected_genes[1]
         }
 
-        # Generate plot
+        # Generate plot using filtered data
         p <- gene_exp_plot(static_df, tolower(selected_group), add_title = plot_title)
-
-        # Cache the result
-        gene_plot_cache[[cache_key]] <- p
         return(p)
       },
       error = function(e) {
@@ -1339,8 +1357,6 @@ server <- function(input, output, session) {
 
   # gene_exp_i block
   # observe add button click from js
-  choice_exp <- reactiveVal()
-  counter <- reactiveVal(0)
   observeEvent(input$click_add_btn, {
     btn_id <- input$click_add_btn
     req(btn_id)
@@ -1410,20 +1426,6 @@ server <- function(input, output, session) {
               return(create_empty_plot("No genes selected"))
             }
 
-            # Create a cache key for this specific dynamic plot
-            cache_key <- paste(
-              "dynamic", curr_id,
-              paste(sort(cur_genes), collapse = ","),
-              cur_group,
-              isTRUE(cur_check),
-              filtered_gene_exp_cache_key(input),
-              sep = "_"
-            )
-
-            if (exists(cache_key, envir = gene_plot_cache, inherits = FALSE)) {
-              return(gene_plot_cache[[cache_key]])
-            }
-
             gene_ids <- if (isTRUE(cur_check)) cur_genes else get_gene_id(cur_genes, fg$genes)
             valid_gene_ids <- gene_ids[gene_ids %in% colnames(fg$full)]
 
@@ -1443,9 +1445,6 @@ server <- function(input, output, session) {
             }
 
             p <- gene_exp_plot(static_df, tolower(cur_group), add_title = plot_title)
-
-            # Cache result
-            gene_plot_cache[[cache_key]] <- p
             return(p)
           },
           error = function(e) {

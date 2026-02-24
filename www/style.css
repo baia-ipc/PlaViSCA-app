@@ -12,6 +12,7 @@
 
 body {
   font-family: 'Roboto', 'Segoe UI', sans-serif;
+  font-weight: 400;
   background-color: var(--background-color);
   color: var(--text-color);
   margin: 0;
@@ -57,7 +58,7 @@ body {
 .menu-link {
   font-size: 18px;
   /* Increased font size */
-  font-weight: 500;
+  font-weight: 700;
   color: var(--secondary-color);
   text-decoration: none;
   display: flex;
@@ -270,7 +271,7 @@ body {
   border: none;
   background-color: transparent !important;
   color: #555;
-  font-weight: 500;
+  font-weight: 700 !important;
   padding: 10px 15px;
   position: relative;
   transition: all 0.3s ease;
@@ -311,7 +312,7 @@ body {
   border-bottom: 1px solid #eee;
   color: #2c3e50;
   font-size: 18px;
-  font-weight: 600;
+  font-weight: 700 !important;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -328,10 +329,16 @@ body {
 
 /* Improved Inputs */
 .form-control,
-.selectize-input {
+.selectize-input,
+.selectize-input .item {
   border-radius: 6px !important;
-  border: 1px solid #d1d5da !important;
   box-shadow: none !important;
+  font-weight: 400 !important;
+}
+
+.selectize-dropdown-content,
+.selectize-dropdown-content .option {
+  font-weight: 400 !important;
 }
 
 .selectize-input.focus {
@@ -559,7 +566,7 @@ body {
 
 .color-by-label {
   font-size: 0.85rem !important;
-  font-weight: 600 !important;
+  font-weight: 700 !important;
   color: #2c3e50 !important;
 }
 
@@ -583,6 +590,21 @@ body {
 
 .comparison-card .plotly {
   margin: 0 !important;
+}
+
+/* Ensure table data and search boxes are normal weight, but headers are bold */
+.dataTable tbody td,
+.dataTables_filter input,
+table.dataTable thead input {
+  font-weight: 400 !important;
+}
+
+table.dataTable thead th {
+  font-weight: 700 !important;
+}
+
+.card-header {
+  font-weight: 700 !important;
 }
 
 .selectize-control {
@@ -622,9 +644,12 @@ body {
   width: auto !important;
 }
 
-.shiny-input-container .control-label {
+.shiny-input-container .control-label,
+.settings-label,
+.xy-label {
   margin-bottom: 4px !important;
   display: block;
+  font-weight: 700 !important;
 }
 
 /* Remove default margin-bottom from form groups in the control row for perfect alignment */
