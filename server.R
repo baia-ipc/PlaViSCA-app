@@ -822,9 +822,9 @@ server <- function(input, output, session) {
         server = TRUE
       )
 
-      ## plot sample vs count
+      ## plot sample/development phase vs count
       output$sample_plotly <- renderPlotly({
-        meta_plotly(filt_data, "sample_type", "Count", "Sample type", "bar")
+        meta_plotly(filt_data, "development_phase", "Count", "Development phase", "bar")
       })
 
       ## plot species vs count
@@ -865,7 +865,7 @@ server <- function(input, output, session) {
           filt_data,
           "hour_post_invasion",
           "Count",
-          "Intra erythrocyte development stage",
+          "Intra erythrocyte developement stage",
           "bar"
         )
       })

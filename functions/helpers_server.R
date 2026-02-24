@@ -713,15 +713,18 @@ meta_plotly <- function(data, x_var, x_label, y_label, plt_type = "bar") {
         levels = data_summary[[x_var]]
     )
 
+    num_colors <- length(unique(data_summary[[x_var]]))
+    colors_vec <- RColorBrewer::brewer.pal(
+        n = max(3, num_colors),
+        name = "Set3"
+    )[1:num_colors]
+
     plot_ly(
         data_summary,
         x = ~count,
         y = ~formatted_labels,
         color = ~ .data[[x_var]],
-        colors = brewer.pal(
-            n = length(unique(data_summary[[x_var]])),
-            name = "Set3"
-        ),
+        colors = colors_vec,
         type = plt_type
     ) %>%
         layout(

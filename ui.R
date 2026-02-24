@@ -684,14 +684,7 @@ ui <- fluidPage(
                 id = "meta_section",
                 layout_column_wrap(
                   width = 1 / 3,
-                  card(card_header("Sample Type"), plotlyOutput("sample_plotly")),
-                  card(card_header("Host Species"), plotlyOutput("species_plotly")),
-                  card(card_header("Strain"), plotlyOutput("strain_plotly"))
-                ),
-                layout_column_wrap(
-                  width = 1 / 3,
-                  class = "mt-3",
-                  card(card_header("Treatment"), plotlyOutput("treatment_plotly")),
+                  card(card_header("Development Phase"), plotlyOutput("sample_plotly")),
                   card(
                     card_header("Parasite Stages"),
                     plotlyOutput("parasite_stages_plotly"),
@@ -700,7 +693,14 @@ ui <- fluidPage(
                       "Note: All parasite stages are predicted by SingleR, except sporozoite which are confirmed by sample type."
                     )
                   ),
-                  card(card_header("Infection development stage"), plotlyOutput("HPI_plotly"))
+                  card(card_header("Host Species"), plotlyOutput("species_plotly"))
+                ),
+                layout_column_wrap(
+                  width = 1 / 3,
+                  class = "mt-3",
+                  card(card_header("Strain"), plotlyOutput("strain_plotly")),
+                  card(card_header("Treatment"), plotlyOutput("treatment_plotly")),
+                  card(card_header("Intra erythrocyte developement stage"), plotlyOutput("HPI_plotly"))
                 ),
                 card(
                   class = "mt-3",
@@ -749,7 +749,7 @@ ui <- fluidPage(
           div(
             class = "text-center mb-5",
             h1("What is PlaViSca?", class = "minimal-title"),
-            p(class = "minimal-subtitle", "Plasmodium vivax Single-Cell Analysis Platform")
+            p(class = "minimal-subtitle", tags$em("Plasmodium vivax"), " Single-Cell Analysis Platform")
           ),
           div(
             class = "about-section-condensed mb-5",
