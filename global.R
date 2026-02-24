@@ -73,9 +73,9 @@ tsne <- grep("t_sne", colnames(mr_data), ignore.case = TRUE, value = TRUE)
 
 # Static definitions
 group_choices <- c(
-  "development_phase",
-  "parasite_stages",
-  "host_species",
-  "treatment",
-  "study_label"
+  "Study label" = "study_label",
+  "Development phase" = "development_phase",
+  "Parasite stages" = "parasite_stages",
+  "Host species" = "host_species",
+  "Treatment" = "treatment"
 )

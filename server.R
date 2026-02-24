@@ -723,7 +723,7 @@ server <- function(input, output, session) {
           title = "Total Cells",
           value = format(nrow(filt_data), big.mark = ","),
           showcase = fontawesome::fa("dna"),
-          theme = "primary"
+          theme = "cells"
         )
       })
 
@@ -732,7 +732,7 @@ server <- function(input, output, session) {
           title = "Studies",
           value = length(unique(filt_data$study_label)),
           showcase = fontawesome::fa("book"),
-          theme = "secondary"
+          theme = "rna"
         )
       })
 
@@ -741,7 +741,7 @@ server <- function(input, output, session) {
           title = "Host Species",
           value = length(unique(filt_data$host_species)),
           showcase = fontawesome::fa("microscope"),
-          theme = "info"
+          theme = "features"
         )
       })
 
@@ -909,7 +909,7 @@ server <- function(input, output, session) {
           title = "Total Cells",
           value = format(nrow(filt_data), big.mark = ","),
           showcase = fontawesome::fa("dna"),
-          theme = "primary"
+          theme = "cells"
         )
       })
 
@@ -919,7 +919,7 @@ server <- function(input, output, session) {
           title = "Mean RNA Counts",
           value = format(avg_rna, big.mark = ","),
           showcase = fontawesome::fa("chart-bar"),
-          theme = "secondary"
+          theme = "rna"
         )
       })
 
@@ -929,7 +929,7 @@ server <- function(input, output, session) {
           title = "Mean Features",
           value = format(avg_feat, big.mark = ","),
           showcase = fontawesome::fa("fingerprint"),
-          theme = "info"
+          theme = "features"
         )
       })
 
@@ -1073,30 +1073,11 @@ server <- function(input, output, session) {
       filt_df <- fg$data
 
       # Update Group-By choices based on the filtered data
-      # Priority 1: Always keep biological units (Phase/Stage)
-      # Priority 2: Per user request, hide "annophel" (host_species) for Sporozoite
-      # Priority 3: Show others only if they help distinguish data (>1 group)
-
-      current_phases <- unique(na.omit(filt_df$development_phase))
-      is_only_sporozoite <- length(current_phases) == 1 && current_phases[1] == "Sporozoite"
+      # Update Group-By choices based on the filtered data
+      # Per user request, ensure all defined group_choices are available if they exist in the data
 
       valid_group_choices <- Filter(function(col) {
-        if (!col %in% colnames(filt_df)) {
-          return(FALSE)
-        }
-
-        # Biological columns ALWAYS kept
-        if (col %in% c("parasite_stages", "development_phase")) {
-          return(TRUE)
-        }
-
-        # Sporozoite exception: avoid Host Species groups
-        if (col == "host_species" && is_only_sporozoite) {
-          return(FALSE)
-        }
-
-        # Others: require diversity
-        length(unique(na.omit(filt_df[[col]]))) >= 2
+        col %in% colnames(filt_df)
       }, group_choices)
 
       if (length(valid_group_choices) == 0) valid_group_choices <- group_choices

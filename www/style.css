@@ -742,6 +742,54 @@ table.dataTable thead th {
   background-image: linear-gradient(120deg, #263238 0%, #1a232e 100%) !important;
 }
 
+/* Custom Value Box Gradients with higher specificity and optimized contrast */
+#analysis_section .bslib-value-box.bg-cells,
+.bg-cells {
+  background-color: #006666 !important;
+  background-image: linear-gradient(135deg, #006666 0%, #004040 100%) !important;
+  color: white !important;
+}
+
+#analysis_section .bslib-value-box.bg-rna,
+.bg-rna {
+  background-color: #5b2c91 !important;
+  background-image: linear-gradient(135deg, #5b2c91 0%, #3e1e63 100%) !important;
+  color: white !important;
+}
+
+#analysis_section .bslib-value-box.bg-features,
+.bg-features {
+  background-color: #0a58ca !important;
+  background-image: linear-gradient(135deg, #0a58ca 0%, #084298 100%) !important;
+  color: white !important;
+}
+
+#analysis_section .bslib-value-box.bg-studies,
+.bg-studies {
+  background-color: #495057 !important;
+  background-image: linear-gradient(135deg, #495057 0%, #343a40 100%) !important;
+  color: white !important;
+}
+
+#analysis_section .bslib-value-box.bg-species,
+.bg-species {
+  background-color: #146c43 !important;
+  background-image: linear-gradient(135deg, #146c43 0%, #0a3622 100%) !important;
+  color: white !important;
+}
+
+/* Ensure value box content is transparent and text is white */
+.bslib-value-box .card-body,
+.bslib-value-box .value-box-value,
+.bslib-value-box .value-box-title,
+.bslib-value-box .showcase i {
+  background: transparent !important;
+  color: white !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+
 /* Action buttons styling */
 #enable_comparison,
 #download_data {
