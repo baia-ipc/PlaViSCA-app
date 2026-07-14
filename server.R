@@ -2157,7 +2157,14 @@ server <- function(input, output, session) {
           displaylogo = FALSE,
           scrollZoom = TRUE,
           modeBarButtonsToRemove = c(),
-          displayModeBar = TRUE
+          displayModeBar = TRUE,
+          toImageButtonOptions = list(
+            format = "png",
+            filename = "embedding_plot",
+            width = 1600,
+            height = 1200,
+            scale = 3
+          )
         )
 
       return(p)
@@ -2640,7 +2647,14 @@ server <- function(input, output, session) {
           displaylogo = FALSE,
           scrollZoom = TRUE,
           modeBarButtonsToRemove = c(),
-          displayModeBar = TRUE
+          displayModeBar = TRUE,
+          toImageButtonOptions = list(
+            format = "png",
+            filename = "embedding_plot",
+            width = 1600,
+            height = 1200,
+            scale = 3
+          )
         )
 
       embplot(TRUE)
