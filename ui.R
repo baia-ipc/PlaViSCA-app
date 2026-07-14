@@ -151,13 +151,13 @@ ui <- fluidPage(
               card(
                 class = "mb-2 shadow-sm settings-card-compact",
                 card_header(
-                  class = "bg-secondary text-white py-1",
+                  class = "bg-primary text-white py-1",
                   fontawesome::fa("cog", height = "14px"),
                   tags$span("Plot settings", class = "fw-bold", style = "font-size: 0.9rem;")
                 ),
                 card_body(
                   fluidRow(
-                    class = "g-1 align-items-end",
+                    class = "g-1 align-items-end mb-n2",
                     # Data Type - 2 columns
                     tags$div(
                       class = "col-sm-2 col-custom-2",
@@ -252,7 +252,7 @@ ui <- fluidPage(
                   # Removed HR to save space
                   shinyjs::hidden(checkboxInput("comparison_active", NULL, value = FALSE)),
                   div(
-                    class = "d-flex justify-content-between align-items-center mt-1",
+                    class = "d-flex justify-content-between align-items-center mt-n1",
                     # Left side: Color by (only when not comparing)
                     conditionalPanel(
                       condition = "!input.comparison_active",
@@ -529,6 +529,7 @@ ui <- fluidPage(
                 id = "single_plot_panel",
                 card(
                   full_screen = TRUE,
+                  height = "650px",
                   card_header(
                     "Visualization"
                   ),
@@ -536,7 +537,7 @@ ui <- fluidPage(
                     type = 6,
                     size = 0.5,
                     color = "#3498db",
-                    plotlyOutput("all_plotly", height = "650px")
+                    plotlyOutput("all_plotly", height = "100%")
                   )
                 )
               ),

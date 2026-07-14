@@ -772,6 +772,34 @@ table.dataTable thead th {
   color: white !important;
 }
 
+/* Make the Visualization plot fill the card, including when expanded full-screen */
+#single_plot_panel .card {
+  display: flex !important;
+  flex-direction: column;
+}
+
+#single_plot_panel .card-body {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+#single_plot_panel .card-body > div,
+#single_plot_panel .shiny-spinner-output-container,
+#single_plot_panel .html-widget,
+#single_plot_panel .plotly,
+#single_plot_panel .js-plotly-plot {
+  flex: 1 1 auto;
+  height: 100% !important;
+  width: 100% !important;
+  min-height: 0;
+}
+
+#single_plot_panel .card[data-full-screen="true"] {
+  height: auto !important;
+}
+
 #analysis_section .bslib-value-box.bg-studies,
 .bg-studies {
   background-color: #495057 !important;

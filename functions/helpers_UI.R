@@ -111,7 +111,7 @@ gene_links_multiple <- function(gene_ids, target = "") {
 # Function that builds the full Metadata tab
 create_meta_filter_row <- function(suffix = "") {
   card(
-    class = "mb-3 shadow-sm",
+    class = "mb-3 shadow-sm settings-card-compact",
     card_header(
       class = "bg-primary text-white py-1",
       fontawesome::fa("filter", height = "14px"),
@@ -124,7 +124,7 @@ create_meta_filter_row <- function(suffix = "") {
           class = "col-md-2",
           selectizeInput(
             inputId = paste0("study_label", suffix),
-            label = tags$span("Study label", style = "font-size: 0.85rem; font-weight: 500;"),
+            label = tags$span("Study label", class = "settings-label"),
             choices = c(""),
             multiple = TRUE,
             options = list(
@@ -138,7 +138,7 @@ create_meta_filter_row <- function(suffix = "") {
           class = "col-md-2",
           selectizeInput(
             inputId = paste0("development_phase", suffix),
-            label = tags$span("Development phase", style = "font-size: 0.85rem; font-weight: 500;"),
+            label = tags$span("Development phase", class = "settings-label"),
             choices = c(""),
             multiple = TRUE,
             options = list(
@@ -152,7 +152,7 @@ create_meta_filter_row <- function(suffix = "") {
           class = "col-md-2",
           selectizeInput(
             inputId = paste0("parasite_stages", suffix),
-            label = tags$span("Parasite stages", style = "font-size: 0.85rem; font-weight: 500;"),
+            label = tags$span("Parasite stages", class = "settings-label"),
             choices = c(""),
             multiple = TRUE,
             options = list(
@@ -166,7 +166,7 @@ create_meta_filter_row <- function(suffix = "") {
           class = "col-md-2",
           selectizeInput(
             inputId = paste0("host_species", suffix),
-            label = tags$span("Host species", style = "font-size: 0.85rem; font-weight: 500;"),
+            label = tags$span("Host species", class = "settings-label"),
             choices = c(""),
             multiple = TRUE,
             options = list(
@@ -190,7 +190,7 @@ create_meta_filter_row <- function(suffix = "") {
           class = "col-md-2",
           selectizeInput(
             inputId = paste0("strain", suffix),
-            label = tags$span("Strain", style = "font-size: 0.85rem; font-weight: 500;"),
+            label = tags$span("Strain", class = "settings-label"),
             choices = c(""),
             multiple = TRUE,
             options = list(
@@ -204,7 +204,7 @@ create_meta_filter_row <- function(suffix = "") {
           class = "col-md-2",
           selectizeInput(
             inputId = paste0("hour_post_invasion", suffix),
-            label = tags$span("HPI", style = "font-size: 0.85rem; font-weight: 500;"),
+            label = tags$span("HPI", class = "settings-label"),
             choices = c(""),
             multiple = TRUE,
             options = list(
@@ -227,7 +227,7 @@ create_plot_controls <- function(data_type_id = "data_type", include_size_dim = 
   card(
     class = "mb-2 shadow-sm settings-card-compact",
     card_header(
-      class = "bg-secondary text-white py-1",
+      class = "bg-primary text-white py-1",
       fontawesome::fa("cog", height = "14px"),
       tags$span("Plot settings", class = "fw-bold", style = "font-size: 0.9rem;")
     ),
