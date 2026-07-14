@@ -51,6 +51,12 @@ is_categorical_data <- function(x) {
 }
 
 
+# Manual overrides for auto-assigned category colors that are hard to read
+# against a white background (e.g. Set3's pale yellow).
+CATEGORY_COLOR_OVERRIDES <- c(
+  "Female gametocyte" = "#DAA520"
+)
+
 # Colors for categorical data
 prepare_categorical_colors <- function(df, color) {
   df[[color]] <- as.character(df[[color]])
@@ -104,6 +110,9 @@ prepare_categorical_colors <- function(df, color) {
   } else {
     setNames(palette, final_levels)
   }
+
+  overridden <- intersect(names(colors), names(CATEGORY_COLOR_OVERRIDES))
+  colors[overridden] <- CATEGORY_COLOR_OVERRIDES[overridden]
 
   # Crucially, create a factor with the correctly ordered levels
   df[[color]] <- factor(df[[color]], levels = final_levels)
