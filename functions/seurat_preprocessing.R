@@ -4,8 +4,11 @@ library(Seurat)
 library(tidyverse)
 library(rtracklayer)
 
-path <- "/srv/baia/prj/pvsca/data/so_repro_data/results/STARSOLO"
-ref_file <- "/srv/baia/prj/pvsca/data/so_repro_data/ref/PlasmoDB-68_PvivaxP01.gff"
+# TODO: these hard-coded paths must be removed
+DIR="/home/baia/prj/PlaViSca/"
+
+path <- paste0(DIR, "data/so_repro_data/results/STARSOLO")
+ref_file <- paste0(DIR, "data/so_repro_data/ref/PlasmoDB-68_PvivaxP01.gff")
 
 # Import rRNA IDs
 rRNA <- rtracklayer::import.gff3(ref_file) %>%
