@@ -262,15 +262,14 @@ ui <- fluidPage(
                         selectizeInput(
                           "color",
                           NULL,
-                          choices = list(
-                            "Study label" = "study_label",
-                            "Development phase" = "development_phase",
-                            "Parasite stages" = "parasite_stages",
-                            "Treatment" = "treatment",
-                            "Host species" = "host_species",
+                          choices = c(
+                            field_choices(c(
+                              "study_label", "development_phase", "parasite_stages",
+                              "treatment", "host_species"
+                            )),
                             "Genes" = "genes"
                           ),
-                          selected = "development_phase",
+                          selected = get_data_column("development_phase"),
                           width = "180px",
                           options = list(dropdownParent = "body")
                         )
@@ -370,12 +369,14 @@ ui <- fluidPage(
                             selectizeInput(
                               "color_first_comp",
                               tags$span("Color by", class = "small fw-semibold"),
-                              choices = list(
-                                "Study label" = "study_label", "Development phase" = "development_phase", "Parasite stages" = "parasite_stages",
-                                "Treatment" = "treatment",
-                                "Host species" = "host_species", "Genes" = "genes"
+                              choices = c(
+                                field_choices(c(
+                                  "study_label", "development_phase", "parasite_stages",
+                                  "treatment", "host_species"
+                                )),
+                                "Genes" = "genes"
                               ),
-                              selected = "development_phase", width = "100%",
+                              selected = get_data_column("development_phase"), width = "100%",
                               options = list(dropdownParent = "body")
                             )
                           ),
@@ -448,12 +449,14 @@ ui <- fluidPage(
                             selectizeInput(
                               "color_second",
                               tags$span("Color by", class = "small fw-semibold"),
-                              choices = list(
-                                "Study label" = "study_label", "Development phase" = "development_phase", "Parasite stages" = "parasite_stages",
-                                "Treatment" = "treatment",
-                                "Host species" = "host_species", "Genes" = "genes"
+                              choices = c(
+                                field_choices(c(
+                                  "study_label", "development_phase", "parasite_stages",
+                                  "treatment", "host_species"
+                                )),
+                                "Genes" = "genes"
                               ),
-                              selected = "parasite_stages", width = "100%",
+                              selected = get_data_column("parasite_stages"), width = "100%",
                               options = list(dropdownParent = "body")
                             )
                           ),

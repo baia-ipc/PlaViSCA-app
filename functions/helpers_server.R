@@ -1,6 +1,24 @@
 # Helper function for creating safe cache keys
 # Helper functions for server-side operations
 
+# Standard set of metadata filter fields (see config/data_columns.yml) shared by
+# the Embeddings, Metadata, QC and Gene expression tabs.
+FILTER_FIELDS <- c(
+    "study_label", "host_species", "parasite_stages", "treatment",
+    "development_phase", "sample_type", "strain", "hour_post_invasion"
+)
+
+# Collects the current filter widget selections into a named list keyed by the
+# actual data column names (via get_data_column()), suitable for
+# apply_secondary_filters()/fun_filter_df(). `suffix` selects which tab's set
+# of widgets to read (e.g. "_meta", "_qc", "_gex", or "" for Embeddings).
+collect_filter_inputs <- function(input, suffix = "") {
+    setNames(
+        lapply(FILTER_FIELDS, function(field) input[[paste0(field, suffix)]]),
+        vapply(FILTER_FIELDS, get_data_column, character(1))
+    )
+}
+
 # Function to create multi-gene violin plots
 create_multi_gene_plot <- function(gene_data_list, x_col) {
     # gene_data_list is a named list where each element is a data frame for one gene
@@ -202,10 +220,10 @@ analyze_data_diversity <- function(data, group_col) {
             )
 
             # Provide context-specific suggestions
-            if (group_col == "parasite_stages") {
-                suggestion <- "This is biologically correct - try grouping by development_phase, host_species, or sample_type instead"
-            } else if (group_col == "development_phase") {
-                suggestion <- "This is expected when filtering by development phase - try parasite_stages or host_species grouping"
+            if (group_col == get_data_column("parasite_stages")) {
+                suggestion <- "This is biologically correct - try grouping by development phase, host species, or sample type instead"
+            } else if (group_col == get_data_column("development_phase")) {
+                suggestion <- "This is expected when filtering by development phase - try parasite stages or host species grouping"
             } else if (group_col == "host_species") {
                 suggestion <- "This filtered dataset contains data from only one host species - try sample_type or study_label grouping"
             } else if (group_col == "sample_type") {
@@ -307,10 +325,9 @@ apply_secondary_filters <- function(data, inputs, keep_gene_matrix = TRUE, genes
     metadata_cols <- c(
         "study_label",
         "host_species",
-        "development_phase",
+        get_data_column("development_phase"),
         "treatment",
-        "parasite_stages",
-        "blood_stage",
+        get_data_column("parasite_stages"),
         "sample_type",
         "geographic_location",
         "sc_technology",
@@ -1077,7 +1094,7 @@ generate_data_summary <- function(data, filters_applied = NULL) {
     # Key metadata columns to summarize
     summary_cols <- c(
         "study_label", "host_species", "sample_type",
-        "development_phase", "blood_stage", "parasite_stages",
+        get_data_column("development_phase"), get_data_column("parasite_stages"),
         "strain", "geographic_location", "treatment"
     )
 

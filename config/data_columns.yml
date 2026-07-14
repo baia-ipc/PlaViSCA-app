@@ -1,0 +1,46 @@
+# Maps the logical metadata fields used throughout the app UI/server to the
+# actual column names in data/normalize_df.rds, data/raw_df.rds and
+# cleaned_dataset.rds$mr_data.
+#
+# Every field referenced by ui.R/server.R/functions/*.R as a "Color by",
+# "Group by", or filter option must be listed here. Do not hardcode a
+# metadata column name anywhere else in the app - look it up via
+# get_data_column()/get_data_label() (see functions/data_columns_config.R)
+# so a rename only has to happen in this one place.
+fields:
+  study_label:
+    label: "Study label"
+    column: study_label
+  development_phase:
+    label: "Development phase"
+    column: parasite_stage
+  parasite_stages:
+    label: "Parasite stages"
+    column: life_cycle_stage
+  host_species:
+    label: "Host species"
+    column: host_species
+  treatment:
+    label: "Treatment"
+    column: treatment
+  sample_type:
+    label: "Sample type"
+    column: sample_type
+  strain:
+    label: "Strain"
+    column: strain
+  hour_post_invasion:
+    label: "HPI"
+    column: hour_post_invasion
+  day_post_infection:
+    label: "Day post infection"
+    column: day_post_infection
+  geographic_location:
+    label: "Geographic location"
+    column: geographic_location
+  sc_technology:
+    label: "SC technology"
+    column: sc_technology
+  sequencer:
+    label: "Sequencer"
+    column: sequencer

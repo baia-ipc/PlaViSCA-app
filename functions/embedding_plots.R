@@ -179,7 +179,7 @@ build_hover_text <- function(df, legend_title, display_color, x_vals = NULL, y_v
     "Cell: ", df$barcode,
     "<br>", legend_title, ": ", display_color,
     "<br>Study: ", df$study_label,
-    "<br>Stage: ", df$parasite_stages
+    "<br>Stage: ", df$life_cycle_stage
   )
 
   # Add coordinates only if they are numeric
@@ -432,8 +432,8 @@ embedding_plot <- function(
   selected_color <- df[[color]]
   is_categorical <- is_categorical_data(selected_color)
 
-  if (!is.numeric(selected_color)) {
-    legend_title <- color
+  if (!is.numeric(selected_color) && (is.null(legend_title) || is.na(legend_title) || legend_title == "")) {
+    legend_title <- get_label_for_column(color)
   }
 
   if (is_categorical) {

@@ -299,7 +299,7 @@ subBlock <- function(i) {
             paste0("group_exp_", i),
             tags$span("Group by", class = "small fw-semibold"),
             choices = group_choices,
-            selected = if (!is.null(group_choices) && length(group_choices) > 0) group_choices[1] else "parasite_stages",
+            selected = if (!is.null(group_choices) && length(group_choices) > 0) group_choices[1] else get_data_column("parasite_stages"),
             width = "100%"
           )
         ),

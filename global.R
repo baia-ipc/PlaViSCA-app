@@ -7,6 +7,9 @@ suppressPackageStartupMessages(library(conflicted))
 # Resolve namespace conflicts BEFORE sourcing function files
 suppressMessages(conflict_prefer("layout", "plotly"))
 
+# Source data column config first - other function files rely on get_data_column()/get_data_label()
+source("functions/data_columns_config.R")
+
 # Source helper functions
 source("functions/helpers_server.R")
 source("functions/helpers_UI.R")
@@ -44,6 +47,9 @@ pca_df <- cleaned_data_list$pca_df
 
 rm(cleaned_data_list)
 
+# Fail fast if config/data_columns.yml drifts from the actual data (e.g. after a data refresh)
+validate_data_columns(mr_data)
+
 # Define column variables based on the pre-loaded metadata
 pca_u <- grep(
   "^pca_u_\\d+",
@@ -72,10 +78,10 @@ umap_u <- grep(
 tsne <- grep("t_sne", colnames(mr_data), ignore.case = TRUE, value = TRUE)
 
 # Static definitions
-group_choices <- c(
-  "Study label" = "study_label",
-  "Development phase" = "development_phase",
-  "Parasite stages" = "parasite_stages",
-  "Host species" = "host_species",
-  "Treatment" = "treatment"
-)
+group_choices <- unlist(field_choices(c(
+  "study_label",
+  "development_phase",
+  "parasite_stages",
+  "host_species",
+  "treatment"
+)))
