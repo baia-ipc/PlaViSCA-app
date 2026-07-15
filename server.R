@@ -431,7 +431,7 @@ server <- function(input, output, session) {
           updateSelectizeInput(
             session,
             paste0("hour_post_invasion", suffix),
-            choices = unique(filt_data$hour_post_invasion),
+            choices = sort_numeric_choices(filt_data$hour_post_invasion),
             selected = isolate(input[[paste0("hour_post_invasion", suffix)]]),
             server = TRUE
           )

@@ -157,7 +157,7 @@ update_filter_inputs <- function(session, filt_data, tab_suffix = "") {
     updateSelectInput(
         session,
         paste0("hour_post_invasion", tab_suffix),
-        choices = unique(filt_data$hour_post_invasion)
+        choices = sort_numeric_choices(filt_data$hour_post_invasion)
     )
     updateSelectInput(
         session,

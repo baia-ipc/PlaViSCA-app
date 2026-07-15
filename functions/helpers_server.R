@@ -8,6 +8,14 @@ FILTER_FIELDS <- c(
     "development_phase", "sample_type", "strain", "hour_post_invasion"
 )
 
+# Order numeric filter values by magnitude while preserving their original type.
+sort_numeric_choices <- function(values) {
+    values <- unique(values)
+    numeric_values <- suppressWarnings(as.numeric(as.character(values)))
+
+    values[order(is.na(numeric_values), numeric_values, as.character(values), na.last = TRUE)]
+}
+
 # Collects the current filter widget selections into a named list keyed by the
 # actual data column names (via get_data_column()), suitable for
 # apply_secondary_filters()/fun_filter_df(). `suffix` selects which tab's set
