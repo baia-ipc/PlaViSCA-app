@@ -108,16 +108,3 @@ Contributions are welcome! Please:
 
 This project is provided under the CC-BY 4.0 license (see `LICENSE`).
 
-## Acknowledgements
-
-PlaViSCA was developed by the BAIA Team with contributions from the
-Plasmodium research community.
-
-## Contact
-
-For questions or support, open an issue on GitHub or contact the maintainers
-via the repository.
-
----
-
-© 2025 BAIA Team. All rights reserved.
