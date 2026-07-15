@@ -95,15 +95,6 @@ columns.
 - Gene Expression: view per-gene expression across groups and download
   results.
 
-## Contributing
-
-Contributions are welcome! Please:
-
-1. Open an issue to discuss major changes or bugs.
-2. Fork the repository and create a feature branch.
-3. Submit a pull request with a clear description and, where applicable,
-   reproducible examples.
-
 ## License & attribution
 
 This project is provided under the CC-BY 4.0 license (see `LICENSE`).
