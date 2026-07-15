@@ -1,13 +1,11 @@
-# PlaViSCA — Plasmodium vivax Single-Cell Analysis (Interactive Shiny App)
+# PlaViSCA — _Plasmodium vivax_  Single-Cell RNA-seq Meta-Analysis and Interactive Atlas
 
 [![R](https://img.shields.io/badge/R-%3E%3D%204.0-blue?logo=r&logoColor=white)](https://www.r-project.org/)
 [![Shiny](https://img.shields.io/badge/Shiny-%3E%3D%201.7.0-brightgreen?logo=r&logoColor=white)](https://shiny.rstudio.com/)
 [![Version](https://img.shields.io/badge/version-0.1.0-orange.svg)](https://github.com/Sopheap15/PlaViSca/releases)
 
 PlaViSCA is an interactive R/Shiny application for exploring single-cell RNA-seq
-data from Plasmodium vivax. The app is intended for researchers, public health
-professionals, and educators who want to visualize embeddings, explore gene
-expression across stages, and filter datasets without writing code.
+data from _Plasmodium vivax_.
 
 ## Key features
 
@@ -61,20 +59,11 @@ install.packages(c(
 
 ### 3. Run the app
 
-#### Option A: Using the helper script (Recommended)
 ```bash
 chmod +x run_app.sh
 ./run_app.sh
 ```
 Run `./run_app.sh --help` for options (host, port, etc.).
-
-#### Option B: From RStudio
-Open `app.R` and click "Run App".
-
-#### Option C: From terminal
-```bash
-R -e "shiny::runApp('.', launch.browser = TRUE)"
-```
 
 Then open `http://<server-ip>:3838` in a browser.
 
