@@ -1,0 +1,104 @@
+scope	file	line	token	is_comment	context	at20_violation
+live	server.R	620	development_phase	TRUE	# non-existent physical columns mr_data$development_phase /	FALSE
+live	server.R	621	parasite_stages	TRUE	# mr_data$parasite_stages / mr_data$geographic_location (defect D063).	FALSE
+live	server.R	621	geographic_location	TRUE	# mr_data$parasite_stages / mr_data$geographic_location (defect D063).	FALSE
+live	functions/data_contract.R	225	hour_post_invasion	FALSE	"hour_post_invasion_not_required",	FALSE
+live	functions/data_contract.R	226	hour_post_invasion	FALSE	!("hour_post_invasion" %in% required_data_columns()),	FALSE
+live	functions/data_contract.R	227	hour_post_invasion	FALSE	"the app must not require the obsolete hour_post_invasion column"	FALSE
+live	functions/embedding_plots.R	86	blood_stage	TRUE	# Phase 3: the dead "blood_stage" special case is gone (there has never been a	FALSE
+live	config/data_columns.yml	17	development_phase	TRUE	#     `development_phase` (which mapped to the *singular* physical column	FALSE
+live	config/data_columns.yml	18	parasite_stages	TRUE	#     `parasite_stage`) and `parasite_stages` (which mapped to	FALSE
+live	config/data_columns.yml	18	parasite_stage\b	TRUE	#     `parasite_stage`) and `parasite_stages` (which mapped to	FALSE
+live	config/data_columns.yml	19	life_cycle_stage	TRUE	#     `life_cycle_stage`) were an inverted naming trap (D063) and are gone.	FALSE
+live	config/data_columns.yml	22	hour_post_invasion	TRUE	#   * `hour_post_invasion` is gone. The Phase-2 field is	FALSE
+live	config/data_columns.yml	25	geographic_location	TRUE	#   * `geographic_location` is gone; parasite_origin_location is the primary	FALSE
+live	config/data_columns.yml	46	development_phase	FALSE	- development_phase	FALSE
+live	config/data_columns.yml	47	parasite_stages	FALSE	- parasite_stages	FALSE
+live	config/data_columns.yml	48	parasite_stage\b	FALSE	- parasite_stage	FALSE
+live	config/data_columns.yml	49	life_cycle_stage	FALSE	- life_cycle_stage	FALSE
+live	config/data_columns.yml	50	hour_post_invasion	FALSE	- hour_post_invasion	FALSE
+live	config/data_columns.yml	51	geographic_location	FALSE	- geographic_location	FALSE
+live	config/data_columns.yml	52	blood_stage	FALSE	- blood_stage	FALSE
+legacy_excluded	docs/legacy/data_loading_module.R	10	development_phase	TRUE	# exist (e.g. parasite_stages, development_phase, life_cycle_stage,	FALSE
+legacy_excluded	docs/legacy/data_loading_module.R	10	parasite_stages	TRUE	# exist (e.g. parasite_stages, development_phase, life_cycle_stage,	FALSE
+legacy_excluded	docs/legacy/data_loading_module.R	10	life_cycle_stage	TRUE	# exist (e.g. parasite_stages, development_phase, life_cycle_stage,	FALSE
+legacy_excluded	docs/legacy/data_loading_module.R	11	hour_post_invasion	TRUE	# hour_post_invasion, geographic_location).	FALSE
+legacy_excluded	docs/legacy/data_loading_module.R	11	geographic_location	TRUE	# hour_post_invasion, geographic_location).	FALSE
+legacy_excluded	docs/legacy/embedding_visualization_module.R	10	development_phase	TRUE	# exist (e.g. parasite_stages, development_phase, life_cycle_stage,	FALSE
+legacy_excluded	docs/legacy/embedding_visualization_module.R	10	parasite_stages	TRUE	# exist (e.g. parasite_stages, development_phase, life_cycle_stage,	FALSE
+legacy_excluded	docs/legacy/embedding_visualization_module.R	10	life_cycle_stage	TRUE	# exist (e.g. parasite_stages, development_phase, life_cycle_stage,	FALSE
+legacy_excluded	docs/legacy/embedding_visualization_module.R	11	hour_post_invasion	TRUE	# hour_post_invasion, geographic_location).	FALSE
+legacy_excluded	docs/legacy/embedding_visualization_module.R	11	geographic_location	TRUE	# hour_post_invasion, geographic_location).	FALSE
+legacy_excluded	docs/legacy/gene_expression_module.R	10	development_phase	TRUE	# exist (e.g. parasite_stages, development_phase, life_cycle_stage,	FALSE
+legacy_excluded	docs/legacy/gene_expression_module.R	10	parasite_stages	TRUE	# exist (e.g. parasite_stages, development_phase, life_cycle_stage,	FALSE
+legacy_excluded	docs/legacy/gene_expression_module.R	10	life_cycle_stage	TRUE	# exist (e.g. parasite_stages, development_phase, life_cycle_stage,	FALSE
+legacy_excluded	docs/legacy/gene_expression_module.R	11	hour_post_invasion	TRUE	# hour_post_invasion, geographic_location).	FALSE
+legacy_excluded	docs/legacy/gene_expression_module.R	11	geographic_location	TRUE	# hour_post_invasion, geographic_location).	FALSE
+legacy_excluded	docs/legacy/gene_expression_module.R	38	parasite_stages	FALSE	parasite_stages = input$parasite_stages,	FALSE
+legacy_excluded	docs/legacy/gene_expression_module.R	40	development_phase	FALSE	development_phase = input$development_phase,	FALSE
+legacy_excluded	docs/legacy/gene_expression_module.R	43	hour_post_invasion	FALSE	hour_post_invasion = input$hour_post_invasion,	FALSE
+legacy_excluded	docs/legacy/metadata_filter_module.R	10	development_phase	TRUE	# exist (e.g. parasite_stages, development_phase, life_cycle_stage,	FALSE
+legacy_excluded	docs/legacy/metadata_filter_module.R	10	parasite_stages	TRUE	# exist (e.g. parasite_stages, development_phase, life_cycle_stage,	FALSE
+legacy_excluded	docs/legacy/metadata_filter_module.R	10	life_cycle_stage	TRUE	# exist (e.g. parasite_stages, development_phase, life_cycle_stage,	FALSE
+legacy_excluded	docs/legacy/metadata_filter_module.R	11	hour_post_invasion	TRUE	# hour_post_invasion, geographic_location).	FALSE
+legacy_excluded	docs/legacy/metadata_filter_module.R	11	geographic_location	TRUE	# hour_post_invasion, geographic_location).	FALSE
+legacy_excluded	docs/legacy/metadata_filter_module.R	28	parasite_stages	FALSE	parasite_stages = setNames(	FALSE
+legacy_excluded	docs/legacy/metadata_filter_module.R	29	parasite_stages	FALSE	paste0("parasite_stages__", unique(mr_data$parasite_stages)),	FALSE
+legacy_excluded	docs/legacy/metadata_filter_module.R	30	parasite_stages	FALSE	unique(mr_data$parasite_stages)	FALSE
+legacy_excluded	docs/legacy/metadata_filter_module.R	36	development_phase	FALSE	development_phase = setNames(	FALSE
+legacy_excluded	docs/legacy/metadata_filter_module.R	37	development_phase	FALSE	paste0("development_phase__", unique(mr_data$development_phase)),	FALSE
+legacy_excluded	docs/legacy/metadata_filter_module.R	38	development_phase	FALSE	unique(mr_data$development_phase)	FALSE
+legacy_excluded	docs/legacy/metadata_filter_module.R	40	geographic_location	FALSE	geographic_location = setNames(	FALSE
+legacy_excluded	docs/legacy/metadata_filter_module.R	41	geographic_location	FALSE	paste0("geolocation__", unique(mr_data$geographic_location)),	FALSE
+legacy_excluded	docs/legacy/metadata_filter_module.R	42	geographic_location	FALSE	unique(mr_data$geographic_location)	FALSE
+legacy_excluded	docs/legacy/metadata_filter_module.R	60	life_cycle_stage	FALSE	life_cycle_stage = setNames(	FALSE
+legacy_excluded	docs/legacy/metadata_filter_module.R	61	life_cycle_stage	FALSE	paste0("life_cycle_stage__", unique(mr_data$life_cycle_stage)),	FALSE
+legacy_excluded	docs/legacy/metadata_filter_module.R	62	life_cycle_stage	FALSE	unique(mr_data$life_cycle_stage)	FALSE
+legacy_excluded	docs/legacy/metadata_filter_module.R	153	life_cycle_stage	FALSE	paste0("life_cycle_stage", tab_suffix),	FALSE
+legacy_excluded	docs/legacy/metadata_filter_module.R	154	life_cycle_stage	FALSE	choices = unique(filt_data$life_cycle_stage)	FALSE
+legacy_excluded	docs/legacy/metadata_filter_module.R	163	parasite_stages	FALSE	paste0("parasite_stages", tab_suffix),	FALSE
+legacy_excluded	docs/legacy/metadata_filter_module.R	164	parasite_stages	FALSE	choices = unique(filt_data$parasite_stages)	FALSE
+legacy_excluded	docs/legacy/metadata_filter_module.R	168	development_phase	FALSE	paste0("development_phase", tab_suffix),	FALSE
+legacy_excluded	docs/legacy/metadata_filter_module.R	169	development_phase	FALSE	choices = unique(filt_data$development_phase)	FALSE
+legacy_excluded	docs/legacy/metadata_filter_module.R	178	hour_post_invasion	FALSE	paste0("hour_post_invasion", tab_suffix),	FALSE
+legacy_excluded	docs/legacy/metadata_filter_module.R	179	hour_post_invasion	FALSE	choices = sort_numeric_choices(filt_data$hour_post_invasion)	FALSE
+legacy_excluded	docs/legacy/metadata_filter_module.R	207	life_cycle_stage	TRUE	# life_cycle_stage,  # Hidden from UI	FALSE
+legacy_excluded	docs/legacy/metadata_filter_module.R	208	parasite_stages	TRUE	# parasite_stages,	FALSE
+legacy_excluded	docs/legacy/metadata_filter_module.R	209	geographic_location	FALSE	geographic_location,	FALSE
+legacy_excluded	docs/legacy/metadata_filter_module.R	219	life_cycle_stage	TRUE	# "life_cycle_stage",	FALSE
+legacy_excluded	docs/legacy/metadata_filter_module.R	222	hour_post_invasion	FALSE	"hour_post_invasion",	FALSE
+legacy_excluded	docs/legacy/metadata_filter_module.R	289	life_cycle_stage	FALSE	meta_plotly(filt_data, "life_cycle_stage", "Count", "Life cyle stage", "bar")	FALSE
+legacy_excluded	docs/legacy/metadata_filter_module.R	295	hour_post_invasion	FALSE	"hour_post_invasion",	FALSE
+legacy_excluded	docs/legacy/navigation_module.R	10	development_phase	TRUE	# exist (e.g. parasite_stages, development_phase, life_cycle_stage,	FALSE
+legacy_excluded	docs/legacy/navigation_module.R	10	parasite_stages	TRUE	# exist (e.g. parasite_stages, development_phase, life_cycle_stage,	FALSE
+legacy_excluded	docs/legacy/navigation_module.R	10	life_cycle_stage	TRUE	# exist (e.g. parasite_stages, development_phase, life_cycle_stage,	FALSE
+legacy_excluded	docs/legacy/navigation_module.R	11	hour_post_invasion	TRUE	# hour_post_invasion, geographic_location).	FALSE
+legacy_excluded	docs/legacy/navigation_module.R	11	geographic_location	TRUE	# hour_post_invasion, geographic_location).	FALSE
+legacy_excluded	docs/legacy/preprocessing.R	10	development_phase	TRUE	# exist (e.g. parasite_stages, development_phase, life_cycle_stage,	FALSE
+legacy_excluded	docs/legacy/preprocessing.R	10	parasite_stages	TRUE	# exist (e.g. parasite_stages, development_phase, life_cycle_stage,	FALSE
+legacy_excluded	docs/legacy/preprocessing.R	10	life_cycle_stage	TRUE	# exist (e.g. parasite_stages, development_phase, life_cycle_stage,	FALSE
+legacy_excluded	docs/legacy/preprocessing.R	11	hour_post_invasion	TRUE	# hour_post_invasion, geographic_location).	FALSE
+legacy_excluded	docs/legacy/preprocessing.R	11	geographic_location	TRUE	# hour_post_invasion, geographic_location).	FALSE
+legacy_excluded	docs/legacy/preprocessing.R	57	parasite_stages	TRUE	# modify life_cycle_stage to include parasite_stages for schizont stage	FALSE
+legacy_excluded	docs/legacy/preprocessing.R	57	life_cycle_stage	TRUE	# modify life_cycle_stage to include parasite_stages for schizont stage	FALSE
+legacy_excluded	docs/legacy/preprocessing.R	60	life_cycle_stage	FALSE	life_cycle_stage = case_when(	FALSE
+legacy_excluded	docs/legacy/preprocessing.R	61	life_cycle_stage	FALSE	life_cycle_stage == "Schizont" ~	FALSE
+legacy_excluded	docs/legacy/preprocessing.R	62	parasite_stages	FALSE	paste0(life_cycle_stage, " (", parasite_stages, ")"),	FALSE
+legacy_excluded	docs/legacy/preprocessing.R	62	life_cycle_stage	FALSE	paste0(life_cycle_stage, " (", parasite_stages, ")"),	FALSE
+legacy_excluded	docs/legacy/preprocessing.R	63	life_cycle_stage	FALSE	TRUE ~ life_cycle_stage	FALSE
+legacy_excluded	docs/legacy/quality_control_module.R	10	development_phase	TRUE	# exist (e.g. parasite_stages, development_phase, life_cycle_stage,	FALSE
+legacy_excluded	docs/legacy/quality_control_module.R	10	parasite_stages	TRUE	# exist (e.g. parasite_stages, development_phase, life_cycle_stage,	FALSE
+legacy_excluded	docs/legacy/quality_control_module.R	10	life_cycle_stage	TRUE	# exist (e.g. parasite_stages, development_phase, life_cycle_stage,	FALSE
+legacy_excluded	docs/legacy/quality_control_module.R	11	hour_post_invasion	TRUE	# hour_post_invasion, geographic_location).	FALSE
+legacy_excluded	docs/legacy/quality_control_module.R	11	geographic_location	TRUE	# hour_post_invasion, geographic_location).	FALSE
+legacy_excluded	docs/legacy/quality_control_module.R	99	parasite_stages	FALSE	input$parasite_stages_qc,	FALSE
+legacy_excluded	docs/legacy/quality_control_module.R	101	development_phase	FALSE	input$development_phase_qc,	FALSE
+legacy_excluded	docs/legacy/quality_control_module.R	104	hour_post_invasion	FALSE	input$hour_post_invasion_qc,	FALSE
+legacy_excluded	docs/legacy/quality_control_module.R	112	parasite_stages	FALSE	parasite_stages = input$parasite_stages_qc,	FALSE
+legacy_excluded	docs/legacy/quality_control_module.R	114	development_phase	FALSE	development_phase = input$development_phase_qc,	FALSE
+legacy_excluded	docs/legacy/quality_control_module.R	117	hour_post_invasion	FALSE	hour_post_invasion = input$hour_post_invasion_qc,	FALSE
+legacy_excluded	docs/legacy/seurat_preprocessing.R	10	development_phase	TRUE	# exist (e.g. parasite_stages, development_phase, life_cycle_stage,	FALSE
+legacy_excluded	docs/legacy/seurat_preprocessing.R	10	parasite_stages	TRUE	# exist (e.g. parasite_stages, development_phase, life_cycle_stage,	FALSE
+legacy_excluded	docs/legacy/seurat_preprocessing.R	10	life_cycle_stage	TRUE	# exist (e.g. parasite_stages, development_phase, life_cycle_stage,	FALSE
+legacy_excluded	docs/legacy/seurat_preprocessing.R	11	hour_post_invasion	TRUE	# hour_post_invasion, geographic_location).	FALSE
+legacy_excluded	docs/legacy/seurat_preprocessing.R	11	geographic_location	TRUE	# hour_post_invasion, geographic_location).	FALSE

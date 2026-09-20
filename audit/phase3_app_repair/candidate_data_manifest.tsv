@@ -1,0 +1,6 @@
+file	resolved_path	size_bytes	sha256	used_by_app
+cleaned_dataset.rds	/home/baia/prj/plavisca/pre_process_data/data/candidate_export/cleaned_dataset.rds	19357522	30b61ccdad19ef52eb835bf4e644800b2151497d14066438bd926a717d3f37a0	TRUE
+normalize_df.rds	/home/baia/prj/plavisca/pre_process_data/data/candidate_export/normalize_df.rds	489254038	8a87841094655148422d157635e6ed50d4bb9dba7735798cc9e415ae069a8740	TRUE
+raw_df.rds	/home/baia/prj/plavisca/pre_process_data/data/candidate_export/raw_df.rds	109371235	15df4435d666cef1e3ec4d2d977f507a4415ecf3a8bd5d952199dda42e009cf8	TRUE
+scale_df.rds	/home/baia/prj/plavisca/pre_process_data/data/candidate_export/scale_df.rds	205718696	86d08ff3eea411c01437bc0f6ca461bd65184ebba032cab381adb700e7ea1cbf	FALSE
+data_source.csv	/home/baia/prj/plavisca/pre_process_data/data/data_source.csv	1892	cb1dca3ff9247634eda474dde693ce16382343cf5bd29e70a59c765c27bdaf98	TRUE

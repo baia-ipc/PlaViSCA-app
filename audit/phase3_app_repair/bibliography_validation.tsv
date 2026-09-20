@@ -1,0 +1,7 @@
+check	status	detail
+bibliography_no_duplicates	PASS	each study appears exactly once in the bibliography
+bibliography_covers_atlas	PASS	all 6 atlas studies have a bibliography record
+bibliography_no_extra_studies	PASS	bibliography contains no study absent from the atlas
+bibliography_cell_counts	PASS	per-study cell counts agree
+bibliography_pmid_consistency	WARN	data_source.csv carries no PMID column, so study_label is the only available join key; PMID consistency cannot be checked from this export (non-blocking, documented limitation)
+atlas_one_pmid_per_study	PASS	every study carries exactly one PMID in the atlas metadata

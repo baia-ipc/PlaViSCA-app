@@ -108,8 +108,57 @@ gene_links_multiple <- function(gene_ids, target = "") {
   }
 }
 
-# Function that builds the full Metadata tab
+# One filter widget, built entirely from config/data_columns.yml.
+#
+# The Shiny input ID is the *logical field key* (e.g. "broad_stage",
+# "detailed_stage", "idc_reference_class"), never a physical column name and
+# never the old ambiguous keys.
+create_filter_widget <- function(key, suffix = "", width_class = "col-md-3") {
+  help_text <- get_data_help(key)
+  opts <- list(
+    placeholder = "Select...",
+    dropdownParent = "body",
+    onInitialize = I('function() { this.setValue(""); }')
+  )
+  # Fields whose labels are rendered as HTML (e.g. italicised binomials)
+  if (get_data_column(key) %in% italicised_columns()) {
+    opts$render <- I(
+      '{
+        option: function(item, escape) { return "<div>" + item.label + "</div>"; },
+        item: function(item, escape) { return "<div>" + item.label + "</div>"; }
+      }'
+    )
+  }
+
+  div(
+    class = width_class,
+    selectizeInput(
+      inputId = paste0(key, suffix),
+      label = tags$span(
+        class = "settings-label",
+        get_data_label(key),
+        if (!is.null(help_text)) {
+          tags$span(
+            class = "filter-help-icon",
+            style = "cursor: help; margin-left: 4px; opacity: 0.65;",
+            `data-bs-toggle` = "tooltip",
+            `data-bs-placement` = "top",
+            title = help_text,
+            fontawesome::fa("circle-info", height = "11px")
+          )
+        }
+      ),
+      choices = c(""),
+      multiple = TRUE,
+      options = opts
+    )
+  )
+}
+
+# Builds the shared filter row used by every analysis tab. The set of filters
+# and their order come from config/data_columns.yml (`filter_fields:`).
 create_meta_filter_row <- function(suffix = "") {
+  keys <- filter_field_keys()
   card(
     class = "mb-3 shadow-sm settings-card-compact",
     card_header(
@@ -120,100 +169,16 @@ create_meta_filter_row <- function(suffix = "") {
     card_body(
       fluidRow(
         class = "meta-filter g-2", # g-2 for tighter gutters
-        div(
-          class = "col-md-2",
-          selectizeInput(
-            inputId = paste0("study_label", suffix),
-            label = tags$span("Study label", class = "settings-label"),
-            choices = c(""),
-            multiple = TRUE,
-            options = list(
-              placeholder = "Select...",
-              dropdownParent = "body",
-              onInitialize = I('function() { this.setValue(""); }')
-            )
-          )
-        ),
-        div(
-          class = "col-md-2",
-          selectizeInput(
-            inputId = paste0("development_phase", suffix),
-            label = tags$span("Development phase", class = "settings-label"),
-            choices = c(""),
-            multiple = TRUE,
-            options = list(
-              placeholder = "Select...",
-              dropdownParent = "body",
-              onInitialize = I('function() { this.setValue(""); }')
-            )
-          )
-        ),
-        div(
-          class = "col-md-2",
-          selectizeInput(
-            inputId = paste0("parasite_stages", suffix),
-            label = tags$span("Parasite stages", class = "settings-label"),
-            choices = c(""),
-            multiple = TRUE,
-            options = list(
-              placeholder = "Select...",
-              dropdownParent = "body",
-              onInitialize = I('function() { this.setValue(""); }')
-            )
-          )
-        ),
-        div(
-          class = "col-md-2",
-          selectizeInput(
-            inputId = paste0("host_species", suffix),
-            label = tags$span("Host species", class = "settings-label"),
-            choices = c(""),
-            multiple = TRUE,
-            options = list(
-              placeholder = "Select...",
-              dropdownParent = "body",
-              onInitialize = I('function() { this.setValue(""); }'),
-              render = I(
-                '{
-                  option: function(item, escape) {
-                    return "<div>" + item.label + "</div>";
-                  },
-                  item: function(item, escape) {
-                    return "<div>" + item.label + "</div>";
-                  }
-                }'
-              )
-            )
-          )
-        ),
-        div(
-          class = "col-md-2",
-          selectizeInput(
-            inputId = paste0("strain", suffix),
-            label = tags$span("Strain", class = "settings-label"),
-            choices = c(""),
-            multiple = TRUE,
-            options = list(
-              placeholder = "Select...",
-              dropdownParent = "body",
-              onInitialize = I('function() { this.setValue(""); }')
-            )
-          )
-        ),
-        div(
-          class = "col-md-2",
-          selectizeInput(
-            inputId = paste0("hour_post_invasion", suffix),
-            label = tags$span("HPI", class = "settings-label"),
-            choices = c(""),
-            multiple = TRUE,
-            options = list(
-              placeholder = "Select...",
-              dropdownParent = "body",
-              onInitialize = I('function() { this.setValue(""); }')
-            )
-          )
-        )
+        lapply(keys, function(k) create_filter_widget(k, suffix)),
+      ),
+      # Shown only when the broad/detailed life-cycle stage selection is
+      # logically impossible (e.g. an old bookmark), instead of silently
+      # returning zero rows.
+      div(
+        id = paste0("stage_compatibility_warning", suffix),
+        class = "alert alert-warning py-1 px-2 mb-0 mt-2 small",
+        style = "display: none;",
+        uiOutput(paste0("stage_compatibility_message", suffix), inline = TRUE)
       )
     )
   )
@@ -299,7 +264,7 @@ subBlock <- function(i) {
             paste0("group_exp_", i),
             tags$span("Group by", class = "small fw-semibold"),
             choices = group_choices,
-            selected = if (!is.null(group_choices) && length(group_choices) > 0) group_choices[1] else get_data_column("parasite_stages"),
+            selected = if (!is.null(group_choices) && length(group_choices) > 0) group_choices[1] else get_data_column("detailed_stage"),
             width = "100%"
           )
         ),

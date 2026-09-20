@@ -1,12 +1,11 @@
 # Helper function for creating safe cache keys
 # Helper functions for server-side operations
 
-# Standard set of metadata filter fields (see config/data_columns.yml) shared by
-# the Embeddings, Metadata, QC and Gene expression tabs.
-FILTER_FIELDS <- c(
-    "study_label", "host_species", "parasite_stages", "treatment",
-    "development_phase", "sample_type", "strain", "hour_post_invasion"
-)
+# Standard set of metadata filter fields shared by the Embeddings, Metadata,
+# QC and Gene expression tabs. The list itself lives in
+# config/data_columns.yml (`filter_fields:`) so there is exactly one
+# authoritative vocabulary - do not re-declare field names here.
+FILTER_FIELDS <- filter_field_keys()
 
 # Order numeric filter values by magnitude while preserving their original type.
 sort_numeric_choices <- function(values) {
@@ -119,20 +118,13 @@ filtered_gene_exp_cache_key <- function(input) {
         )
     }
 
-    make_cache_key(
-        "filtered_gene_exp",
-        get_field("study_label_gex"),
-        get_field("host_species_gex"),
-        get_field("parasite_stages_gex"),
-        get_field("treatment_gex"),
-        get_field("development_phase_gex"),
-        get_field("sample_type_gex"),
-        get_field("strain_gex"),
-        get_field("hour_post_invasion_gex"),
-        get_field("sequencer_gex"),
-        get_field("sc_technology_gex"),
-        get_field("data_type_exp"),
-        get_field("embedding")
+    do.call(
+        make_cache_key,
+        c(
+            list("filtered_gene_exp"),
+            lapply(paste0(FILTER_FIELDS, "_gex"), get_field),
+            list(get_field("data_type_exp"), get_field("embedding"))
+        )
     )
 }
 
@@ -224,24 +216,24 @@ analyze_data_diversity <- function(data, group_col) {
             total_cells <- nrow(data)
             message <- paste0(
                 "All ", format(total_cells, big.mark = ","), " cells have the same ",
-                gsub("_", " ", group_col), ": '", value, "'"
+                get_label_for_column(group_col), ": '", value, "'"
             )
 
             # Provide context-specific suggestions
-            if (group_col == get_data_column("parasite_stages")) {
-                suggestion <- "This is biologically correct - try grouping by development phase, host species, or sample type instead"
-            } else if (group_col == get_data_column("development_phase")) {
-                suggestion <- "This is expected when filtering by development phase - try parasite stages or host species grouping"
-            } else if (group_col == "host_species") {
-                suggestion <- "This filtered dataset contains data from only one host species - try sample_type or study_label grouping"
-            } else if (group_col == "sample_type") {
-                suggestion <- "This filtered dataset contains only one sample type - try host_species or strain grouping"
+            if (group_col == get_data_column("detailed_stage")) {
+                suggestion <- "This is biologically correct - try grouping by broad life-cycle stage, host species, or tissue/sample type instead"
+            } else if (group_col == get_data_column("broad_stage")) {
+                suggestion <- "This is expected when filtering by broad life-cycle stage - try the harmonized life-cycle stage or host species grouping"
+            } else if (group_col == get_data_column("host_species")) {
+                suggestion <- "This filtered dataset contains data from only one host species - try tissue/sample type or study label grouping"
+            } else if (group_col == get_data_column("tissue_or_sample_type")) {
+                suggestion <- "This filtered dataset contains only one tissue/sample type - try host species or parasite lineage grouping"
             } else {
                 suggestion <- "Try different grouping categories or adjust your filters to include more diverse data"
             }
         }
     } else {
-        message <- paste0("Found ", unique_count, " different ", gsub("_", " ", group_col), " categories")
+        message <- paste0("Found ", unique_count, " different ", get_label_for_column(group_col), " categories")
         suggestion <- ""
     }
 
@@ -255,25 +247,22 @@ analyze_data_diversity <- function(data, group_col) {
     ))
 }
 
-# Helper function to format species names with italics
+# Helper function to format species names with italics.
+#
+# Phase 3: no hardcoded species allow-list any more. Anything that looks like a
+# binomial ("Genus species") is italicised, and the configured missing label is
+# left alone, so a newly added host species does not silently lose its
+# italicisation (the old hardcoded list was a known cosmetic defect).
 format_species_name <- function(species_names) {
-    scientific_species <- c(
-        "Anopheles freeborni",
-        "Anopheles stephensi",
-        "Anopheles dirus",
-        "Saimiri boliviensis",
-        "Aotus nancymaae",
-        "Homo sapiens"
-    )
+    chr <- relabel_missing(species_names)
+    is_binomial <- grepl("^[A-Z][a-z]+ [a-z]+", chr) & chr != MISSING_VALUE_LABEL
+    ifelse(is_binomial, paste0("<i>", chr, "</i>"), chr)
+}
 
-    # Apply italic formatting to scientific names
-    formatted_names <- ifelse(
-        species_names %in% scientific_species,
-        paste0("<i>", species_names, "</i>"),
-        species_names
-    )
-
-    return(formatted_names)
+# The set of metadata (non-gene) columns the app works with, resolved from
+# config/data_columns.yml. Used to separate metadata from the gene matrix.
+app_metadata_columns <- function() {
+    unique(vapply(data_field_keys(), get_data_column, character(1), USE.NAMES = FALSE))
 }
 
 fun_filter_df <- function(data, selections) {
@@ -329,23 +318,9 @@ apply_secondary_filters <- function(data, inputs, keep_gene_matrix = TRUE, genes
             filter(n_feature_rna > 0 & n_count_rna > 0)
     }
 
-    # Select relevant columns
-    metadata_cols <- c(
-        "study_label",
-        "host_species",
-        get_data_column("development_phase"),
-        "treatment",
-        get_data_column("parasite_stages"),
-        "sample_type",
-        "geographic_location",
-        "sc_technology",
-        "sequencer",
-        "strain",
-        "day_post_infection",
-        "hour_post_invasion",
-        "n_count_rna",
-        "n_feature_rna"
-    )
+    # Select relevant columns. The list is derived from config/data_columns.yml
+    # so there is no second hardcoded metadata vocabulary in the app.
+    metadata_cols <- app_metadata_columns()
 
     # For gene expression data, keep all columns (metadata + gene expression)
     # For regular metadata, select only metadata columns
@@ -694,14 +669,28 @@ df_expi_nr <- function(id, input_list, gene_data, get_gene_id, full_data = NULL,
 colors <- RColorBrewer::brewer.pal(12, "Set3")
 
 # Generate metadata plot
-meta_plotly <- function(data, x_var, x_label, y_label, plt_type = "bar") {
+#
+# `show_missing = TRUE` keeps cells whose value is truly missing and displays
+# them under the configured missing label instead of silently dropping them.
+meta_plotly <- function(data, x_var, x_label, y_label, plt_type = "bar",
+                        show_missing = TRUE) {
     if (!x_var %in% colnames(data)) {
-        stop(paste("Column", x_var, "not found in data"))
+        stop(sprintf(
+            paste0(
+                "PlaViSca data-contract error: column '%s' is not present in ",
+                "the loaded data. This is a configuration/schema mismatch, not ",
+                "a user-input problem - check config/data_columns.yml."
+            ),
+            x_var
+        ), call. = FALSE)
     }
 
-    # Remove rows with missing values in the x_var column
-    data <- data %>%
-        filter(!is.na(.data[[x_var]]) & .data[[x_var]] != "")
+    if (show_missing) {
+        # Display-only relabelling: the underlying data is untouched.
+        data[[x_var]] <- relabel_missing(data[[x_var]])
+    } else {
+        data <- data[!is_missing_value(data[[x_var]]), , drop = FALSE]
+    }
 
     # Check if we have any data left after filtering
     if (nrow(data) == 0) {
@@ -723,26 +712,38 @@ meta_plotly <- function(data, x_var, x_label, y_label, plt_type = "bar") {
 
     data_summary <- data %>%
         group_by(.data[[x_var]]) %>%
-        summarise(count = n(), .groups = "drop") %>%
-        arrange(count)
+        summarise(count = n(), .groups = "drop")
 
-    # Format species names with italics if this is host_species column
-    if (x_var == "host_species") {
+    # Biological (config-driven) ordering where the field has one; otherwise
+    # numeric/alphabetical. Missing always sorts last.
+    ordered_levels <- order_column_values(
+        x_var, setdiff(data_summary[[x_var]], MISSING_VALUE_LABEL)
+    )
+    if (MISSING_VALUE_LABEL %in% data_summary[[x_var]]) {
+        ordered_levels <- c(ordered_levels, MISSING_VALUE_LABEL)
+    }
+    # plotly draws horizontal bars bottom-up, so reverse for top-down reading
+    ordered_levels <- rev(ordered_levels)
+    data_summary <- data_summary[match(ordered_levels, data_summary[[x_var]]), , drop = FALSE]
+    data_summary <- data_summary[!is.na(data_summary[[x_var]]), , drop = FALSE]
+
+    # Format species names with italics for configured scientific-name fields
+    if (x_var %in% italicised_columns()) {
         data_summary$formatted_labels <- format_species_name(data_summary[[x_var]])
     } else {
-        data_summary$formatted_labels <- data_summary[[x_var]]
+        data_summary$formatted_labels <- display_values(x_var, data_summary[[x_var]])
     }
+    data_summary$formatted_labels <- factor(
+        data_summary$formatted_labels,
+        levels = unique(data_summary$formatted_labels)
+    )
 
     data_summary[[x_var]] <- factor(
         data_summary[[x_var]],
         levels = data_summary[[x_var]]
     )
 
-    num_colors <- length(unique(data_summary[[x_var]]))
-    colors_vec <- RColorBrewer::brewer.pal(
-        n = max(3, num_colors),
-        name = "Set3"
-    )[1:num_colors]
+    colors_vec <- category_palette(levels(data_summary[[x_var]]), x_var)
 
     plot_ly(
         data_summary,
@@ -1099,11 +1100,14 @@ generate_data_summary <- function(data, filters_applied = NULL) {
 
     total_cells <- nrow(data)
 
-    # Key metadata columns to summarize
-    summary_cols <- c(
-        "study_label", "host_species", "sample_type",
-        get_data_column("development_phase"), get_data_column("parasite_stages"),
-        "strain", "geographic_location", "treatment"
+    # Key metadata columns to summarize (config-resolved, not hardcoded)
+    summary_cols <- vapply(
+        c(
+            "study_label", "host_species", "tissue_or_sample_type",
+            "broad_stage", "detailed_stage", "parasite_lineage_isolate",
+            "parasite_origin_location", "treatment"
+        ),
+        get_data_column, character(1)
     )
 
     available_cols <- intersect(summary_cols, colnames(data))
@@ -1115,8 +1119,7 @@ generate_data_summary <- function(data, filters_applied = NULL) {
         if (col %in% colnames(data)) {
             unique_vals <- unique(data[[col]][!is.na(data[[col]])])
             count <- length(unique_vals)
-            col_display <- gsub("_", " ", col)
-            col_display <- paste0(toupper(substring(col_display, 1, 1)), substring(col_display, 2))
+            col_display <- get_label_for_column(col)
 
             if (count == 0) {
                 summary_parts <- c(summary_parts, paste("•", col_display, ": No data"))

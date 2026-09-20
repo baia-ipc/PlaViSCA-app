@@ -51,68 +51,60 @@ is_categorical_data <- function(x) {
 }
 
 
-# Manual overrides for auto-assigned category colors that are hard to read
-# against a white background (e.g. Set3's pale yellow).
-CATEGORY_COLOR_OVERRIDES <- c(
-  "Female gametocyte" = "#DAA520"
-)
-
-# Colors for categorical data
-prepare_categorical_colors <- function(df, color) {
-  df[[color]] <- as.character(df[[color]])
-
-  # Create context-aware NA label
-  na_label <- if (color == "blood_stage") {
-    "NA (not in blood stage)"
-  } else {
-    "NA (missing)"
+# Deterministic colour vector for an ordered set of category levels.
+#
+# Explicit per-level colours configured in config/data_columns.yml (e.g. the
+# Male/Female gametocyte pair, which must be handled symmetrically) win over
+# the automatic palette; everything else is filled from the palette. The
+# configured missing label always gets the same neutral grey.
+category_palette <- function(levels_vec, column = NULL) {
+  levels_vec <- as.character(levels_vec)
+  n <- length(levels_vec)
+  if (n == 0) {
+    return(setNames(character(0), character(0)))
   }
 
-  df[[color]][is.na(df[[color]])] <- na_label
+  is_missing_level <- levels_vec == MISSING_VALUE_LABEL
+  n_real <- sum(!is_missing_level)
+  auto <- if (n_real > 0) assign_colors(n_real) else character(0)
+
+  out <- character(n)
+  out[is_missing_level] <- "#A9A9A94D"
+  out[!is_missing_level] <- auto
+  names(out) <- levels_vec
+
+  if (!is.null(column)) {
+    overrides <- get_column_colors(column)
+    hit <- intersect(names(out), names(overrides))
+    if (length(hit) > 0) out[hit] <- overrides[hit]
+  }
+  out
+}
+
+# Colors + biologically-ordered factor levels for a categorical colour column.
+#
+# Phase 3: the dead "blood_stage" special case is gone (there has never been a
+# column by that name), true NA is routed through the one generic
+# missing-value mechanism, and ordering comes from the configured biological
+# vocabulary rather than sort().
+prepare_categorical_colors <- function(df, color) {
+  # Display-only relabelling of missing values (true NA and, defensively, any
+  # residual literal "NA"/"None" string). The analytical data is untouched.
+  df[[color]] <- relabel_missing(df[[color]])
 
   unique_values <- unique(df[[color]])
+  has_missing <- MISSING_VALUE_LABEL %in% unique_values
+  actual_values <- setdiff(unique_values, MISSING_VALUE_LABEL)
 
-  has_na <- na_label %in% unique_values
-  if (has_na) {
-    actual_values <- unique_values[unique_values != na_label]
-  } else {
-    actual_values <- unique_values
-  }
+  sorted_values <- order_column_values(color, actual_values)
 
-  # Sort the actual values
-  if (length(actual_values) > 0) {
-    numeric_values <- suppressWarnings(as.numeric(actual_values))
-    if (all(!is.na(numeric_values))) {
-      sorted_values <- actual_values[order(numeric_values)]
-    } else {
-      sorted_values <- sort(actual_values)
-    }
-  } else {
-    sorted_values <- character(0)
-  }
-
-  final_levels <- if (has_na) {
-    c(na_label, sorted_values)
+  final_levels <- if (has_missing) {
+    c(MISSING_VALUE_LABEL, sorted_values)
   } else {
     sorted_values
   }
 
-  # Assign colors
-  num_actual_colors <- length(sorted_values)
-  palette <- if (num_actual_colors > 0) {
-    assign_colors(num_actual_colors)
-  } else {
-    character(0)
-  }
-
-  colors <- if (has_na) {
-    setNames(c("#A9A9A94D", palette), final_levels)
-  } else {
-    setNames(palette, final_levels)
-  }
-
-  overridden <- intersect(names(colors), names(CATEGORY_COLOR_OVERRIDES))
-  colors[overridden] <- CATEGORY_COLOR_OVERRIDES[overridden]
+  colors <- category_palette(final_levels, color)
 
   # Crucially, create a factor with the correctly ordered levels
   df[[color]] <- factor(df[[color]], levels = final_levels)
@@ -184,11 +176,18 @@ build_hover_text <- function(df, legend_title, display_color, x_vals = NULL, y_v
   # This reduces data sent to browser significantly
 
   # Build base text
+  stage_col <- get_data_column("detailed_stage")
+  stage_vals <- if (stage_col %in% colnames(df)) {
+    relabel_missing(df[[stage_col]])
+  } else {
+    MISSING_VALUE_LABEL
+  }
+
   base_text <- paste0(
-    "Cell: ", df$barcode,
+    "Cell: ", df[[get_data_column("barcode")]],
     "<br>", legend_title, ": ", display_color,
-    "<br>Study: ", df$study_label,
-    "<br>Stage: ", df$life_cycle_stage
+    "<br>", get_data_label("study_label"), ": ", df[[get_data_column("study_label")]],
+    "<br>", get_data_label("detailed_stage"), ": ", stage_vals
   )
 
   # Add coordinates only if they are numeric
@@ -222,7 +221,7 @@ plot_2d <- function(
   colors,
   is_dual_plot = FALSE
 ) {
-  display_color <- if (color == "host_species") {
+  display_color <- if (color %in% italicised_columns()) {
     format_species_name(selected_color)
   } else {
     selected_color
@@ -411,9 +410,26 @@ embedding_plot <- function(
   plot_dim = "2d",
   is_dual_plot = FALSE
 ) {
+  # A colour column that is not present is a data-contract problem, not user
+  # input: fall back to a configured field that is guaranteed to exist, and
+  # say so loudly rather than silently plotting something else.
   if (is.null(color) || is.na(color) || color == "" || !color %in% names(df)) {
-    color <- "sample_type"
-    warning("Invalid color column, using 'sample_type' as fallback")
+    fallback <- get_data_column("broad_stage")
+    if (!fallback %in% names(df)) {
+      stop(sprintf(
+        paste0(
+          "PlaViSca data-contract error: neither the requested colour column ",
+          "('%s') nor the configured fallback ('%s') exists in the plotting ",
+          "data. Check config/data_columns.yml against the loaded dataset."
+        ),
+        as.character(color), fallback
+      ), call. = FALSE)
+    }
+    warning(sprintf(
+      "Invalid colour column '%s'; falling back to '%s'.",
+      as.character(color), fallback
+    ))
+    color <- fallback
   }
 
   # Robust coordinate resolution: ensure selected axes belong to the current embedding type

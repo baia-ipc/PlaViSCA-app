@@ -87,6 +87,40 @@ columns, embedding column names like `umap_i_1`, `umap_i_2`, and gene
 expression columns). See `functions/build_plot_slim()` for details on expected
 columns.
 
+### Choosing a data directory
+
+All application data paths are resolved from the `PLAVISCA_DATA_DIR`
+environment variable, which defaults to `data`. To run the app against a
+different export (for example a release candidate produced by the
+`pre_process_data` pipeline) without copying anything:
+
+```bash
+PLAVISCA_DATA_DIR=/path/to/export R -e "shiny::runApp('.')"
+```
+
+The directory must contain `cleaned_dataset.rds`, `normalize_df.rds`,
+`raw_df.rds` and `data_source.csv`.
+
+### Data contract
+
+At startup the app validates the loaded dataset against
+`config/data_columns.yml` (cell count, expected studies, every configured
+field, cell-id uniqueness, broad/detailed life-cycle stage consistency,
+expression/metadata alignment, bibliography coverage, and more). If the data
+does not match, the app **stops with an explicit message** rather than
+starting in a degraded state. `config/data_columns.yml` is the single source
+of truth for metadata field names, labels, help text, biological ordering and
+colours - never hardcode a metadata column name elsewhere in the app.
+
+## Tests
+
+```bash
+PLAVISCA_DATA_DIR=/path/to/export Rscript tests/run_tests.R
+```
+
+Plain R scripts, no test framework required. Exit status is non-zero if any
+test fails. Optionally pass an output path to write a TSV of results.
+
 ## Features and navigation
 
 - Home: high-level overview and links to the manual and data sources.

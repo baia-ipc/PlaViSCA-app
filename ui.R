@@ -262,14 +262,8 @@ ui <- fluidPage(
                         selectizeInput(
                           "color",
                           NULL,
-                          choices = c(
-                            field_choices(c(
-                              "study_label", "development_phase", "parasite_stages",
-                              "treatment", "host_species"
-                            )),
-                            "Genes" = "genes"
-                          ),
-                          selected = get_data_column("development_phase"),
+                          choices = category_choices(),
+                          selected = get_data_column("broad_stage"),
                           width = "180px",
                           options = list(dropdownParent = "body")
                         )
@@ -369,14 +363,8 @@ ui <- fluidPage(
                             selectizeInput(
                               "color_first_comp",
                               tags$span("Color by", class = "small fw-semibold"),
-                              choices = c(
-                                field_choices(c(
-                                  "study_label", "development_phase", "parasite_stages",
-                                  "treatment", "host_species"
-                                )),
-                                "Genes" = "genes"
-                              ),
-                              selected = get_data_column("development_phase"), width = "100%",
+                              choices = category_choices(),
+                              selected = get_data_column("broad_stage"), width = "100%",
                               options = list(dropdownParent = "body")
                             )
                           ),
@@ -449,14 +437,8 @@ ui <- fluidPage(
                             selectizeInput(
                               "color_second",
                               tags$span("Color by", class = "small fw-semibold"),
-                              choices = c(
-                                field_choices(c(
-                                  "study_label", "development_phase", "parasite_stages",
-                                  "treatment", "host_species"
-                                )),
-                                "Genes" = "genes"
-                              ),
-                              selected = get_data_column("parasite_stages"), width = "100%",
+                              choices = category_choices(),
+                              selected = get_data_column("detailed_stage"), width = "100%",
                               options = list(dropdownParent = "body")
                             )
                           ),
@@ -606,6 +588,13 @@ ui <- fluidPage(
 
                 # Gene expression controls
                 create_plot_controls("data_type_exp", FALSE, "_exp"),
+
+                # Feature-availability caveat (Phase-2 documented limitation)
+                div(
+                  class = "alert alert-info py-2 px-3 mt-2 mb-0 small",
+                  fontawesome::fa("circle-info", height = "12px"),
+                  tags$span(class = "ms-1", app_note("gene_expression_coverage"))
+                ),
                 fluidRow(
                   id = "gene_exp_container",
                   class = "mt-3",
@@ -688,23 +677,71 @@ ui <- fluidPage(
                 id = "meta_section",
                 layout_column_wrap(
                   width = 1 / 3,
-                  card(card_header("Development Phase"), plotlyOutput("sample_plotly")),
                   card(
-                    card_header("Parasite Stages"),
-                    plotlyOutput("parasite_stages_plotly"),
+                    card_header(get_data_label("broad_stage")),
+                    plotlyOutput("broad_stage_plotly")
+                  ),
+                  card(
+                    card_header(get_data_label("detailed_stage")),
+                    plotlyOutput("detailed_stage_plotly"),
                     card_footer(
                       class = "text-muted small italic",
-                      "Note: All parasite stages are predicted by SingleR, except sporozoite which are confirmed by sample type."
+                      app_note("stage_prediction")
                     )
                   ),
-                  card(card_header("Host Species"), plotlyOutput("species_plotly"))
+                  card(card_header(get_data_label("host_species")), plotlyOutput("species_plotly"))
                 ),
                 layout_column_wrap(
                   width = 1 / 3,
                   class = "mt-3",
-                  card(card_header("Strain"), plotlyOutput("strain_plotly")),
-                  card(card_header("Treatment"), plotlyOutput("treatment_plotly")),
-                  card(card_header("Intra erythrocyte developement stage"), plotlyOutput("HPI_plotly"))
+                  card(
+                    card_header(get_data_label("parasite_lineage_isolate")),
+                    plotlyOutput("lineage_plotly")
+                  ),
+                  card(
+                    card_header(get_data_label("treatment")),
+                    plotlyOutput("treatment_plotly"),
+                    card_footer(
+                      class = "text-muted small italic",
+                      get_data_help("treatment")
+                    )
+                  ),
+                  card(
+                    card_header(get_data_label("idc_reference_class")),
+                    plotlyOutput("idc_reference_class_plotly"),
+                    card_footer(
+                      class = "text-muted small italic",
+                      get_data_help("idc_reference_class")
+                    )
+                  )
+                ),
+                layout_column_wrap(
+                  width = 1 / 3,
+                  class = "mt-3",
+                  card(
+                    card_header(get_data_label("parasite_origin_location")),
+                    plotlyOutput("origin_location_plotly"),
+                    card_footer(
+                      class = "text-muted small italic",
+                      get_data_help("parasite_origin_location")
+                    )
+                  ),
+                  card(
+                    card_header(get_data_label("pred_gametocyte_sex")),
+                    plotlyOutput("pred_gametocyte_sex_plotly"),
+                    card_footer(
+                      class = "text-muted small italic",
+                      get_data_help("pred_gametocyte_sex")
+                    )
+                  ),
+                  card(
+                    card_header(get_data_label("source_sex_annotation")),
+                    plotlyOutput("source_sex_annotation_plotly"),
+                    card_footer(
+                      class = "text-muted small italic",
+                      get_data_help("source_sex_annotation")
+                    )
+                  )
                 ),
                 card(
                   class = "mt-3",

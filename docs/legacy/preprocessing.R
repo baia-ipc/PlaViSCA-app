@@ -1,3 +1,22 @@
+# =============================================================================
+# HISTORICAL / LEGACY - NOT USED BY THE RUNNING APPLICATION
+# =============================================================================
+# This file was moved out of functions/ during the Phase-3 app repair
+# (2026-09, branch plavisca-app-production-repair). It is retained only as a
+# historical record.
+#
+# It is NOT sourced by global.R and is NOT executed by the app. It predates
+# the Phase-2 atlas schema and may reference metadata columns that no longer
+# exist (e.g. parasite_stages, development_phase, life_cycle_stage,
+# hour_post_invasion, geographic_location).
+#
+# The ONLY authoritative preprocessing implementation is the separate
+# pre_process_data repository. Do not update this file into a second
+# pipeline, and do not re-source it from the app.
+#
+# See audit/phase3_app_repair/REPORT.md for the rationale.
+# =============================================================================
+
 # This script is used to clean and manipulate data for pvsca project
 
 # load library

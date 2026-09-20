@@ -1,0 +1,41 @@
+logical_key	physical_column	label	role	required	present_in_mr_data	present_in_normalize_df	n_missing	n_distinct	is_filter	is_category	in_detail_table
+barcode	barcode	Cell ID	identity	TRUE	TRUE	TRUE	0	105963	FALSE	FALSE	FALSE
+study_label	study_label	Study label	filter	TRUE	TRUE	TRUE	0	6	TRUE	TRUE	TRUE
+study_pmid	study_pmid	PubMed ID	detail	TRUE	TRUE	TRUE	0	6	FALSE	FALSE	FALSE
+pub_year	pub_year	Publication year	detail	TRUE	TRUE	TRUE	0	3	FALSE	FALSE	FALSE
+n_count_rna	n_count_rna	RNA count	qc	TRUE	TRUE	TRUE	0	6867	FALSE	FALSE	TRUE
+n_feature_rna	n_feature_rna	Feature count	qc	TRUE	TRUE	TRUE	0	2600	FALSE	FALSE	TRUE
+broad_stage	parasite_broad_stage	Broad life-cycle stage	filter	TRUE	TRUE	TRUE	21	4	TRUE	TRUE	TRUE
+detailed_stage	harmonized_life_cycle_stage	Life-cycle stage (harmonized)	filter	TRUE	TRUE	TRUE	21	8	TRUE	TRUE	TRUE
+source_life_cycle_stage	source_life_cycle_stage	Life-cycle stage (author-reported)	detail	TRUE	TRUE	TRUE	91720	4	FALSE	FALSE	TRUE
+source_stage_provenance	source_stage_provenance	Stage annotation provenance	detail	TRUE	TRUE	TRUE	436	4	FALSE	FALSE	TRUE
+idc_reference_class	idc_reference_similarity_label	IDC reference-time class	filter	TRUE	TRUE	TRUE	15744	8	TRUE	FALSE	TRUE
+idc_heuristic_stage_bin	idc_heuristic_stage_bin	PlaViSca heuristic IDC stage	detail	TRUE	TRUE	TRUE	15744	5	FALSE	FALSE	TRUE
+idc_similarity_raw_label	idc_similarity_raw_label	IDC similarity (raw label)	detail	TRUE	TRUE	TRUE	15744	8	FALSE	FALSE	FALSE
+idc_similarity_score_delta	idc_similarity_score_delta	IDC similarity score delta	detail	TRUE	TRUE	TRUE	15744	89007	FALSE	FALSE	FALSE
+idc_similarity_pruned_flag	idc_similarity_pruned_flag	IDC similarity pruned	detail	TRUE	TRUE	TRUE	15744	2	FALSE	FALSE	FALSE
+pred_gametocyte_sex	pred_gametocyte_sex	Gametocyte sex (PlaViSca-inferred)	detail	TRUE	TRUE	TRUE	82274	3	FALSE	FALSE	TRUE
+source_sex_annotation	source_sex_annotation	Gametocyte sex (author-reported)	detail	TRUE	TRUE	TRUE	104431	3	FALSE	FALSE	TRUE
+source_pseudogroup	source_pseudogroup	Author pseudogroup	detail	TRUE	TRUE	TRUE	25939	5	FALSE	FALSE	TRUE
+host_species	host_species	Host species	filter	TRUE	TRUE	TRUE	0	6	TRUE	TRUE	TRUE
+tissue_or_sample_type	tissue_or_sample_type	Tissue / sample type	filter	TRUE	TRUE	TRUE	0	3	TRUE	TRUE	TRUE
+treatment	treatment	Treatment	filter	TRUE	TRUE	TRUE	0	6	TRUE	TRUE	TRUE
+parasite_lineage_isolate	parasite_lineage_isolate	Parasite lineage / isolate	filter	TRUE	TRUE	TRUE	6226	11	TRUE	TRUE	TRUE
+day_post_infection	day_post_infection	Day post infection	filter	TRUE	TRUE	TRUE	3294	19	FALSE	FALSE	TRUE
+parasite_origin_location	parasite_origin_location	Parasite origin location	filter	TRUE	TRUE	TRUE	3294	10	FALSE	TRUE	TRUE
+host_provenance	host_provenance	Host provenance	detail	TRUE	TRUE	TRUE	24445	3	FALSE	FALSE	FALSE
+experimental_site	experimental_site	Experimental site	detail	TRUE	TRUE	TRUE	2932	5	FALSE	FALSE	FALSE
+sequencing_site	sequencing_site	Sequencing site	detail	TRUE	TRUE	TRUE	96016	2	FALSE	FALSE	FALSE
+registry_location	registry_location	Registry location (ENA/GEO)	detail	TRUE	TRUE	TRUE	12879	4	FALSE	FALSE	FALSE
+sc_technology	sc_technology	Single-cell technology	filter	TRUE	TRUE	TRUE	0	3	FALSE	TRUE	TRUE
+sequencer	sequencer_registered	Sequencer (registered)	filter	TRUE	TRUE	TRUE	9766	5	FALSE	FALSE	TRUE
+sequencer_protocol_publication	sequencer_protocol_publication	Sequencer (publication)	detail	TRUE	TRUE	TRUE	22645	3	FALSE	FALSE	FALSE
+animal_id	animal_id	Animal ID	detail	TRUE	TRUE	TRUE	16173	18	FALSE	FALSE	TRUE
+donor_id	donor_id	Donor ID	detail	TRUE	TRUE	TRUE	104525	2	FALSE	FALSE	TRUE
+biological_replicate_id	biological_replicate_id	Biological replicate ID	filter	TRUE	TRUE	TRUE	0	22	FALSE	FALSE	TRUE
+biological_replicate_type	biological_replicate_type	Biological replicate type	detail	TRUE	TRUE	TRUE	0	2	FALSE	FALSE	TRUE
+library_id	library_id	Library ID	detail	TRUE	TRUE	TRUE	25939	25	FALSE	FALSE	FALSE
+source_of_counts	source_of_counts	Count source object	detail	TRUE	TRUE	TRUE	0	2	FALSE	FALSE	TRUE
+counting_pipeline	counting_pipeline	Counting pipeline	detail	TRUE	TRUE	TRUE	0	3	FALSE	FALSE	TRUE
+count_reference_version	count_reference_version	Count reference version	detail	TRUE	TRUE	TRUE	0	3	FALSE	FALSE	TRUE
+count_provenance_status	count_provenance_status	Count provenance status	detail	TRUE	TRUE	TRUE	0	3	FALSE	FALSE	TRUE
