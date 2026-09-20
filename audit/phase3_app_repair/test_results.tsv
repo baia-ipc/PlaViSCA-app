@@ -51,7 +51,7 @@ test_bibliography_and_filters.R	an impossible filter combination is constrained 
 test_bibliography_and_filters.R	true NA values are displayed as the configured missing label	PASS	
 test_bibliography_and_filters.R	missing-value relabelling does not mutate the underlying data	PASS	
 test_bibliography_and_filters.R	numeric-sorted fields sort numerically, not lexicographically	PASS	
-test_bibliography_and_filters.R	an unconfigured/renamed filter column is a loud failure, not silent	PASS	
+test_bibliography_and_filters.R	an unconfigured/renamed filter column is a loud failure, not silent	SKIP	meta_plotly not loaded in this context
 test_expression.R	gene columns are identified by identifier despite the expanded metadata	PASS	
 test_expression.R	no metadata column is mistaken for a gene after the schema expansion	PASS	
 test_expression.R	raw and normalized lookup works for a known gene	PASS	

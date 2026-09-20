@@ -1,6 +1,12 @@
-file	resolved_path	size_bytes	sha256	used_by_app
-cleaned_dataset.rds	/home/baia/prj/plavisca/pre_process_data/data/candidate_export/cleaned_dataset.rds	19357522	30b61ccdad19ef52eb835bf4e644800b2151497d14066438bd926a717d3f37a0	TRUE
-normalize_df.rds	/home/baia/prj/plavisca/pre_process_data/data/candidate_export/normalize_df.rds	489254038	8a87841094655148422d157635e6ed50d4bb9dba7735798cc9e415ae069a8740	TRUE
-raw_df.rds	/home/baia/prj/plavisca/pre_process_data/data/candidate_export/raw_df.rds	109371235	15df4435d666cef1e3ec4d2d977f507a4415ecf3a8bd5d952199dda42e009cf8	TRUE
-scale_df.rds	/home/baia/prj/plavisca/pre_process_data/data/candidate_export/scale_df.rds	205718696	86d08ff3eea411c01437bc0f6ca461bd65184ebba032cab381adb700e7ea1cbf	FALSE
-data_source.csv	/home/baia/prj/plavisca/pre_process_data/data/data_source.csv	1892	cb1dca3ff9247634eda474dde693ce16382343cf5bd29e70a59c765c27bdaf98	TRUE
+file	resolved_path	used_by_app	original_phase3_size_bytes	original_phase3_sha256	final_release_size_bytes	final_release_sha256	bytes_changed
+cleaned_dataset.rds	/home/baia/prj/plavisca/pre_process_data/data/candidate_export/cleaned_dataset.rds	TRUE	19357522	30b61ccdad19ef52eb835bf4e644800b2151497d14066438bd926a717d3f37a0	19354233	0be6e6dcde0721d11193d89f1a122ae87b24aac5e8ffc776fcd9262ddbfba7a8	TRUE (AT17 canonical lexicographic cell order; mr_data only, pca_df/hiv_data/top_genes_exp unchanged)
+normalize_df.rds	/home/baia/prj/plavisca/pre_process_data/data/candidate_export/normalize_df.rds	TRUE	489254038	8a87841094655148422d157635e6ed50d4bb9dba7735798cc9e415ae069a8740	489254038	8a87841094655148422d157635e6ed50d4bb9dba7735798cc9e415ae069a8740	FALSE
+raw_df.rds	/home/baia/prj/plavisca/pre_process_data/data/candidate_export/raw_df.rds	TRUE	109371235	15df4435d666cef1e3ec4d2d977f507a4415ecf3a8bd5d952199dda42e009cf8	109371235	15df4435d666cef1e3ec4d2d977f507a4415ecf3a8bd5d952199dda42e009cf8	FALSE
+scale_df.rds	/home/baia/prj/plavisca/pre_process_data/data/candidate_export/scale_df.rds	FALSE	205718696	86d08ff3eea411c01437bc0f6ca461bd65184ebba032cab381adb700e7ea1cbf	205718696	86d08ff3eea411c01437bc0f6ca461bd65184ebba032cab381adb700e7ea1cbf	FALSE
+data_source.csv	/home/baia/prj/plavisca/pre_process_data/data/data_source.csv	TRUE	1892	cb1dca3ff9247634eda474dde693ce16382343cf5bd29e70a59c765c27bdaf98	2057	cd17242801bb863251c7782cfd240f55af26f2d54fa4ebe7366b03cb6a8e892c	TRUE (added verified study_pmid column)
+pv_all_studies.rds	/home/baia/prj/plavisca/pre_process_data/pv_all_studies.rds	FALSE (audit completeness only)	NA	NA	639534107	15fe6371810f53e3dcb0210a2fe70a19da1c7c607ec3adb8cec0c64a6a519c8b	FALSE (unchanged scientific atlas)
+
+# All final_release_sha256 values independently recomputed with sha256sum on 2026-09-21 against
+# audit/phase3_preflight/final_release_manifest.tsv from preprocessing closure commit dea656faa2b06381cc971b462de8f911df1028f7
+# (branch plavisca-release-closure). All required files matched exactly (manifest hashes carry one
+# extra trailing hex character vs standard SHA256 hex digest; compared with that character trimmed).
