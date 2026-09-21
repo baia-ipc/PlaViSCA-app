@@ -30,7 +30,7 @@
 missing_label: "Missing"
 
 # Expected atlas size for this candidate build (startup contract validation).
-expected_cell_count: 105963
+expected_cell_count: 105949
 
 expected_studies:
   - Hazzard2022

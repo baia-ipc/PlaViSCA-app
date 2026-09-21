@@ -39,7 +39,8 @@ test_files <- c(
     "tests/test_idc_and_gametocytes.R",
     "tests/test_bibliography_and_filters.R",
     "tests/test_expression.R",
-    "tests/test_at19_at20.R"
+    "tests/test_at19_at20.R",
+    "tests/test_final_release_candidate.R"
 )
 
 cat(sprintf("PlaViSca test suite\n  app root: %s\n  data dir: %s\n\n",

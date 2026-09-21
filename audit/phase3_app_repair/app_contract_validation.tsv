@@ -1,5 +1,5 @@
 check	status	detail
-cell_count	PASS	expected 105963 metadata rows, found 105963
+cell_count	PASS	expected 105949 metadata rows, found 105949
 configured_fields_resolve	PASS	all 40 required configured fields present
 study_set	PASS	expected [Hazzard2022, Hazzard2024, Mancio-Silva2022, Ruberto2022_1, Ruberto2022_2, Sa2020]; found [Hazzard2022, Hazzard2024, Mancio-Silva2022, Ruberto2022_1, Ruberto2022_2, Sa2020]
 no_obsolete_config_targets	PASS	no configured field points at a pre-Phase-2 column
@@ -21,11 +21,11 @@ embedding_umap_i	PASS	found 3 umap_i_* columns
 embedding_pca_u	PASS	found 3 pca_u_* columns
 embedding_pca_i	PASS	found 3 pca_i_* columns
 embedding_t_sne	PASS	found 3 t_sne_* columns
-normalize_df_row_count	PASS	105963 expression rows vs 105963 metadata rows
+normalize_df_row_count	PASS	105949 expression rows vs 105949 metadata rows
 normalize_df_cell_keys	PASS	expression and metadata must describe the same set of cells
 normalize_df_no_duplicate_cells	PASS	0 duplicate expression rownames
 normalize_df_carries_metadata	PASS	expression table carries every required metadata column
-normalize_df_gene_identification	PASS	6860 gene columns identified by identifier, 88 metadata columns excluded
+normalize_df_gene_identification	PASS	6860 gene columns identified by identifier, 85 metadata columns excluded
 bibliography_no_duplicates	PASS	each study appears exactly once in the bibliography
 bibliography_covers_atlas	PASS	all 6 atlas studies have a bibliography record
 bibliography_no_extra_studies	PASS	bibliography contains no study absent from the atlas

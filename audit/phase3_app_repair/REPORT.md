@@ -1,19 +1,27 @@
 # PlaViSca Phase-3 App Repair — Audit Report
 
-**Status: FINAL APP RELEASE CANDIDATE** (updated 2026-09-21 — see section 26)
+**Status: FINAL APP RELEASE CANDIDATE — DEC01/DEC02 RESOLVED** (updated 2026-09-21 — see section 27)
 (not merged to `master`, not deployed — see *Handover* at the end)
 
-| Item | Value |
+Section 26 below documents an earlier pass against the `plavisca-release-closure`
+candidate (`dea656f`, 105,963 cells, AT14/DEC01-DEC02 still `PENDING_DECISION`).
+**That candidate is now superseded.** Section 27 documents validation against the
+authoritative, DEC01/DEC02-resolved final candidate (`12d2e440`, 105,949 cells,
+30/30 acceptance PASS, 0 PENDING) and is the current release verdict.
+
+| Item | Value (current, section 27) |
 |---|---|
 | App repo | `PlaViSca` |
 | App base commit | `020f9cbd651750ba92c037399fb84d3b17d389e8` (`master`, "simplify README more") |
 | App branch | `plavisca-app-production-repair` |
-| Preprocessing repo commit consumed (first pass) | `54c6b9581ff5268422ddffda42ce457bf09c5b55` ("Rebuild PlaViSca atlas with validated Ruberto counts", branch `plavisca-production-repair`) |
-| Preprocessing closure SHA (final, authoritative) | `dea656faa2b06381cc971b462de8f911df1028f7` (branch `plavisca-release-closure`) — see section 26 |
-| Candidate export path used for validation | `pre_process_data/data/candidate_export/` (+ `pre_process_data/data/data_source.csv`), reached through a symlink staging directory outside both repos |
-| Atlas size validated | 105,963 cells x 88 metadata fields x 6,860 genes, 6 studies |
-| Tests (final candidate) | 68 run / **67 passed** / 0 failed / 1 skipped (environment-only, see section 26) |
-| Startup contract checks (final candidate) | 33 run / **33 PASS** / 0 WARN / 0 FAIL |
+| Preprocessing repo commit consumed (superseded, first pass) | `54c6b9581ff5268422ddffda42ce457bf09c5b55` (branch `plavisca-production-repair`) |
+| Preprocessing closure SHA (superseded) | `dea656faa2b06381cc971b462de8f911df1028f7` (branch `plavisca-release-closure`, 105,963 cells) — see section 26 |
+| **Preprocessing final SHA (authoritative, current)** | **`12d2e44027439ab5c88007fe14711fa6c80a6d69`** (branch `plavisca-dec01-dec02-final`) — see section 27 |
+| Preprocessing acceptance (current) | **30 PASS / 0 FAIL / 0 PENDING** — "FINAL RELEASE DATA CANDIDATE — DEC01/DEC02 RESOLVED" |
+| Candidate export path used for validation | `pre_process_data_dec01_dec02_final/data/candidate_export/` (+ `.../data/data_source.csv`), reached through a symlink staging directory outside both repos |
+| Atlas size validated (current) | **105,949** cells x 85 metadata fields x 6,860 genes, 6 studies |
+| Tests (current final candidate) | 74 run / **74 passed** / 0 failed / 0 skipped — see section 27 |
+| Startup contract checks (current final candidate) | 33 run / **33 PASS** / 0 WARN / 0 FAIL |
 | AT19 | **PASS** |
 | AT20 | **PASS** |
 | Date | 2026-09-20 |
@@ -320,13 +328,269 @@ R 4.5.2; shiny 1.11.1, plotly 4.11.0, DT 0.34.0, dplyr 1.1.4, readr 2.1.5, yaml 
 
 See `final_candidate_validation.tsv` for the itemized check table.
 
+**Everything above this point in section 26 describes the release-closure candidate
+(`dea656f`, 105,963 cells, AT14/DEC01-DEC02 `PENDING_DECISION`). That candidate is
+historical and superseded by section 27.**
+
+## 27. FINAL validation against the DEC01/DEC02-resolved release candidate (2026-09-21)
+
+**Status: FINAL APP RELEASE CANDIDATE — DEC01/DEC02 RESOLVED.**
+
+**Preprocessing authority.** Repo `pre_process_data`, branch `plavisca-dec01-dec02-final`,
+commit `12d2e44027439ab5c88007fe14711fa6c80a6d69` (scientific rebuild commit
+`173431cfca8e19c716a96164ee2ea6053441855b`). Acceptance matrix
+`audit/phase3_preflight/acceptance_matrix_AT01_AT30.tsv`: **30/30 PASS, 0 FAIL,
+0 PENDING**. AT25 was resolved upstream as a validation-semantics defect (no
+scientific data file changed for that fix); AT25 is not reopened here. Authoritative
+manifest: `pre_process_data/audit/phase3_preflight/final_release_manifest.tsv`
+(independently re-checked against this manifest below, not just against the
+app-side `candidate_data_manifest.tsv`).
+
+**DEC01.** Exactly the 14 proven `.1` Mancio-Silva2022 duplicate representations
+listed in `pre_process_data/audit/mancio_silva2022/dec01_removed_duplicate_cells.tsv`
+are absent from the final candidate, and their 14 unsuffixed counterparts are
+present. Verified directly against `cleaned_dataset.rds` (not by re-deriving the ID
+list) in `tests/test_final_release_candidate.R` — PASS.
+
+**DEC02.** Both `D5Seq1_CCCCGATTGACG` and `D5Seq2_CCCCGATTGACG` are present, trace
+to 2 distinct `run_id` values (distinct sample provenance), and no
+duplicate/suspicion column exists anywhere in the app-facing metadata. Verified in
+`tests/test_final_release_candidate.R` — PASS.
+
+**Six-study membership and total.** Exact per the authoritative manifest and
+independently recomputed from `cleaned_dataset.rds$mr_data`:
+
+| Study | Cells |
+|---|---:|
+| Mancio-Silva2022 | 1,480 |
+| Sa2020 | 9,766 |
+| Hazzard2022 | 3,294 |
+| Hazzard2024 | 80,024 |
+| Ruberto2022_1 | 1,438 |
+| Ruberto2022_2 | 9,947 |
+| **Total** | **105,949** |
+
+**Hash verification (independently recomputed with `sha256sum`, not copied from any
+prior audit file).** All six required files match the task-authoritative and
+`final_release_manifest.tsv` values exactly:
+
+| File | SHA256 |
+|---|---|
+| `pv_all_studies.rds` (atlas) | `32068878fc92952e9be539befcc8ff2f42a6818716a912a55f5c45930cc830b9` |
+| `normalize_df.rds` | `e3afc56e52dc8eab940ac26777c17a9b27d19f680f7503bdbc373e1543c978f1` |
+| `raw_df.rds` | `0c01491b0628abd651513eee265b9faae8b10da57ac838c292beffd6612170f1` |
+| `scale_df.rds` | `a00f5a758fc09ee24193b993e673042f9d673ba1475f9378585891a7382fb505` |
+| `cleaned_dataset.rds` | `c1a04525424b7bad5bc723b8b9862ff71bebd16016d860a8ce6e652ce5117fed` |
+| `data_source.csv` (bibliography) | `e70f880575f84b070a97a53b6245afdedc7424e6ee7283efc146d11197492e09` |
+
+See the rebuilt `candidate_data_manifest.tsv` for the resolved paths and a note on
+the prior (now-superseded) hash set recorded during the release-closure pass.
+
+**Staging.** `PLAVISCA_DATA_DIR` was pointed at a symlink-only staging directory
+(`/tmp/plavisca_app_final.OpePL4`, outside the repo, not committed) whose targets
+resolve into a dedicated worktree of the preprocessing repo checked out at
+`plavisca-dec01-dec02-final`@`12d2e440`. No candidate binary or machine-specific
+symlink is committed to this repo; `data/*` remains gitignored as before.
+
+**App code/config changes required and made for this candidate:**
+- `config/data_columns.yml`: `expected_cell_count` updated `105963 → 105949` (only
+  place in active config carrying the total; searched the full active tree for
+  `105963`/`1494` — no other current-release reference found; `REPORT.md` section
+  26 above retains the old number, explicitly labeled historical).
+- `tests/run_tests.R`: registered the new `tests/test_final_release_candidate.R`
+  file in the suite.
+- `tests/test_final_release_candidate.R` (new): asserts the exact 105,949 total and
+  six per-study counts, DEC01 removal/retention, DEC02 retention with distinct
+  provenance and no suspicion column, the 7 paired missing-stage cells, the IDC/
+  gametocyte totals, and identical canonical cell-key order/uniqueness across all
+  four cell-indexed exports.
+- `tests/helper.R` and `functions/data_columns_config.R`: fixed a real ordering bug
+  — both files defined the `%||%` null-coalescing operator *after* using it at
+  module-load time. This is silently masked under R ≥ 4.4 (which has a base
+  `%||%`) but is a hard startup crash under this project's pinned runtime, R 4.3.3
+  (`could not find function "%||%"`, discovered while running the live Shiny
+  construction smoke test below — the app could not start at all under its own
+  designated R version before this fix). Fix: moved each `%||%` definition above
+  its first use; no behavioral change otherwise. (A third occurrence in
+  `functions/helpers_server.R` is inside a function body evaluated only after the
+  whole file is sourced, so it was not affected and was left as-is.)
+
+No other `functions/`, `global.R`, `server.R`, or `ui.R` change was needed or made;
+DEC01/DEC02 resolution required no new app logic because the app already resolves
+membership purely through keyed data, not positional or hardcoded ID assumptions.
+
+**Environment used for this validation.** Conda env `plavisca-r433`
+(`/home/baia/users/giorgio/software/mambaforge/envs/plavisca-r433`), R 4.3.3,
+platform `x86_64-conda-linux-gnu` — this exactly matches the platform tag of this
+repo's own `renv/library/R-4.3/x86_64-conda-linux-gnu` snapshot, i.e. it is the
+project's actual designated runtime (not an ad hoc substitute). The host system R
+(4.6.1, platform `x86_64-pc-linux-gnu`) lacks `dplyr`/`plotly`/`shiny`/`writexl`/`DT`
+entirely and cannot load renv's R-4.3 binary packages (ABI mismatch); it was used
+only for a first-pass sanity run. `R_LIBS_USER`/`R_LIBS` were explicitly unset
+before invoking `plavisca-r433`'s `Rscript`, because this account's personal
+`~/R-pkg` library (built for yet another R ABI) otherwise shadows the project's
+`renv` library and crashes package loading (`yaml.so: undefined symbol:
+R_ClosureBody`) — this is an account-level environment hazard, not a project
+defect; documented here as a reproducibility prerequisite.
+
+**Full test suite (independently rerun end-to-end after the fixes above, against
+the exact hash-verified final candidate):**
+
+```
+TOTAL: 74   PASS: 74   FAIL: 0   SKIP: 0
+```
+
+74/74, 0 FAIL, 0 SKIP — an improvement over the section-26 baseline (68 run/67
+pass/1 skip), because the `%||%` fix let `functions/helpers_server.R` load
+cleanly under the project's real R version, which in turn let the previously
+environment-skipped `meta_plotly`-dependent filter test actually run (and pass).
+See `test_results.tsv`.
+
+**Startup contract (re-run standalone via the live `global.R` load path, not just
+the test-suite's embedded copy):**
+
+```
+PlaViSca data contract: 33/33 checks passed against '/tmp/plavisca_app_final.OpePL4'.
+```
+
+33/33, 0 WARN, 0 FAIL. See `app_contract_validation.tsv` for the itemized table
+(cell count, six-study set, all 40 configured fields, unique/aligned cell keys, no
+obsolete config targets, stage-pairing, IDC/gametocyte blood-only constraints,
+embedding columns, expression-table alignment, and bibliography PMID
+consistency — the latter a hard PASS/FAIL gate, not a WARN).
+
+**AT19 / AT20:** both PASS, exercised as part of the 74/74 run
+(`tests/test_at19_at20.R`). AT20 confirms no live app code references
+`development_phase`, `parasite_stages`, obsolete `parasite_stage`/`life_cycle_stage`,
+`hour_post_invasion`, `geographic_location`, or `blood_stage`; the nine
+`docs/legacy/` files are excluded from the live-code scan by design and remain
+unsourced (re-verified below).
+
+**Cell-key / row-order alignment (AT17, app-side).** `cleaned_dataset.rds$mr_data`,
+`normalize_df.rds`, `raw_df.rds`, and `scale_df.rds` all have exactly 105,949 rows,
+an identical cell-key set, zero duplicate keys, and identical canonical
+lexicographic order — asserted directly in
+`tests/test_final_release_candidate.R` (not merely inspected) and independently
+confirmed by the standalone rerun above.
+
+**Missing-stage cells.** Exactly **7** cells (all Hazzard2024, all below the
+10-UMI inference gate) have `parasite_broad_stage` and `harmonized_life_cycle_stage`
+both NA together; no cell has only one of the two fields NA; no Mancio `.1`
+stage-missing row remains (the DEC01-removed rows are gone entirely). This is down
+from the 21-cell (7 Hazzard2024 + 14 Mancio `.1`) figure in the section-26 baseline
+precisely because DEC01 removed the 14 Mancio duplicate rows that were contributing
+to that count — expected and correct, not a new defect. `relabel_missing(NA)`
+still renders the configured "Missing" label. Filtering/ordering logic does not
+error on these rows (exercised by `test_lifecycle.R`/`test_bibliography_and_filters.R`
+in the same run).
+
+**IDC / gametocyte invariants (app-facing agreement with preprocessing totals):**
+IDC labeled = **90,219**; gametocyte calls = **22,795**; 0 non-blood cells carry
+either an IDC reference-time class or an inferred gametocyte sex (impossible
+lifecycle states = 0). Source-reported and PlaViSca-inferred gametocyte sex remain
+distinct, separately provenance-labeled columns; no scientific adjudication is
+invented. Asserted in `tests/test_final_release_candidate.R` and
+`app_contract_validation.tsv`.
+
+**Bibliography.** `data_source.csv` (final, hash-verified above) has exactly 6
+rows, one per atlas study, each with exactly one verified PMID, exact per-study
+cell-count agreement with the atlas, and exact PMID agreement — all as hard
+PASS/FAIL startup checks (`bibliography_no_duplicates`, `bibliography_covers_atlas`,
+`bibliography_no_extra_studies`, `bibliography_cell_counts`,
+`bibliography_pmid_consistency`, `atlas_one_pmid_per_study`), all PASS.
+
+**`sc_technology` (retained, reverified):** unchanged decision; still the field of
+full/near-full app-relevant coverage vs. the sparser `technology` column. No new
+evidence contradicts the prior decision.
+
+**`parasite_lineage_isolate` (retained, reverified):** unchanged decision for the
+same reason as `sc_technology`; still preferred over legacy `strain`.
+
+**Legacy relocation (`docs/legacy/`):** static/source re-check confirms none of the
+nine files are sourced and no live function dependency was introduced by any
+change in this pass (the only touched files are the four listed above, none of
+which reference `docs/legacy/`). Full historical re-investigation not repeated —
+reused the existing `legacy_relocation_review.tsv` evidence, which remains valid
+because nothing under `functions/`/`global.R`/`server.R`/`ui.R` changed except the
+`%||%` ordering fix.
+
+**Ruberto2022_1 feature-availability note:** reverified present verbatim in
+`config/data_columns.yml` (the v1 limitation note on the 2,089 PlaViSca features
+structurally unavailable from the author-processed matrix). No new UI machinery
+added.
+
+**Shiny smoke test — full construction, not partial.** Using the `plavisca-r433`
+environment above (which section 26 could not access), `global.R`, `ui.R`, and
+`server.R` were sourced and `shiny::shinyApp(ui, server)` was constructed
+end-to-end with zero errors:
+
+```
+PlaViSca data contract: 33/33 checks passed against '/tmp/plavisca_app_final.OpePL4'.
+GLOBAL_PASS
+UI_PASS
+SERVER_SOURCED_PASS
+SHINY_APP_CONSTRUCTION_PASS
+```
+
+No server was left running. See `shiny_smoke_test.log`.
+
+**`writexl` / Excel export — now fully tested, resolved.** `library(writexl)`
+loads cleanly in the project's designated R 4.3.3 environment, and a `write_xlsx()`
+smoke export of live candidate metadata produced a valid non-empty `.xlsx` file.
+The section-26 "writexl missing" and "renv::restore() fails on R 4.6.1" findings
+were an artifact of validating against the wrong (system) R interpreter, not a
+real package or code gap — the project's own pinned `renv` library for R 4.3.3
+already carries a working `writexl`. See `writexl_export_test.log`.
+
+**Remaining blockers:** none.
+
+**Remaining non-blocking / deployment notes:** deployment must use the
+`plavisca-r433` conda environment (R 4.3.3, `x86_64-conda-linux-gnu`) or an
+equivalent R 4.3.3 build matching `renv/library/R-4.3/x86_64-conda-linux-gnu`; the
+host system R (4.6.1) cannot load this project's compiled dependencies. Deploying
+accounts should ensure `R_LIBS_USER`/`R_LIBS` do not point at an incompatible
+personal library, for the reason documented above.
+
+**Final app release criteria — all met:**
+
+| Blocking condition | Result |
+|---|---|
+| Authoritative preprocessing commit (`12d2e440`) verified | PASS |
+| All six required hashes match | PASS |
+| Total = 105,949 | PASS |
+| Exact six study counts | PASS |
+| DEC01 verified | PASS |
+| DEC02 verified | PASS |
+| App tests, 0 FAIL | PASS (74/74) |
+| Startup contract, 0 FAIL | PASS (33/33, 0 WARN) |
+| AT19 | PASS |
+| AT20 | PASS |
+| Bibliography | PASS |
+| Cell-key/order alignment | PASS |
+| No newly introduced app regression | PASS (one pre-existing startup bug fixed, not introduced) |
+| No candidate binary committed | PASS |
+| No merge performed | confirmed |
+| No deployment performed | confirmed |
+
+**Designation: FINAL APP RELEASE CANDIDATE — DEC01/DEC02 RESOLVED.**
+
+See `final_candidate_validation.tsv` (rebuilt) and `candidate_data_manifest.tsv`
+(rebuilt) for the itemized, re-verifiable evidence backing this section.
+
 ## 24. Handover — requires project-lead review before merge/deployment
+
+**Superseded by section 27 (read that section first):** item 4 below (21 dual-NA
+cells) is now 7, entirely Hazzard2024, because DEC01 removed the 14 Mancio `.1`
+rows that made up the rest — not a new defect. Item 5 (`writexl`) is resolved:
+the earlier failure was validation against the wrong R interpreter, not a real
+package gap — see section 27's environment note. Deployment must use the
+`plavisca-r433` R 4.3.3 environment described there.
 
 1. **Not merged to `master`, not deployed.** Branch `plavisca-app-production-repair`.
 2. ~~Decide whether `sc_technology` (used) vs `technology` (sparse) and `parasite_lineage_isolate` (used) vs `strain` (sparse) are the intended app-visible fields~~ — **resolved in section 26**: both retained, confirmed correct against final data.
 3. ~~Add `study_pmid` to the bibliography export~~ — **done in preprocessing closure**; PMID consistency is now a hard startup-failure gate, not a warning.
-4. Confirm the 21 dual-NA stage cells are acceptable, or repair upstream — still present unchanged in the final candidate, see section 26.
-5. Run `renv::restore()` so `writexl` is installed before deployment — **still required**; now fails outright on this machine's R 4.6.1 (see section 26), needs a compatible R version.
+4. Confirm the 7 dual-NA stage cells (all Hazzard2024, all sub-10-UMI) are acceptable — see section 27; this is expected low-UMI-driven missingness, not an app defect.
+5. ~~Run `renv::restore()` so `writexl` is installed before deployment~~ — **resolved in section 27**: `writexl` already works in the project's own `plavisca-r433` R 4.3.3 environment; no `renv::restore()` needed, just the correct interpreter.
 6. Review the removal of the nine unreferenced module files to `docs/legacy/` — section 12; independently re-verified in section 26, no blocker.
 7. Several of the 88 metadata fields are not surfaced anywhere in the UI (`run_id`, `sample_type`, `host_id`, `host_sex`, `host_taxid`, `per_cell_parasite_genotype`, the Mancio-only verbatim `source_*` fields, the `dot1_*`/`d5_*` duplicate flags, `main_analysis_member`, `retained_by_plavisca_qc`, the `legacy_starsolo_*` fields, `seurat_clusters`, `infection_design`, `source_run_count_*`, `source_cell_id`, `reconstructed_barcode`, `count_source_rds_*`, `total_umi_count`, `near_empty_expression_flag`). Several are deliberately internal per `metadata_schema.tsv` (`app_visible = No`); confirm none of the remainder are wanted in v1.
 
@@ -335,13 +599,15 @@ See `final_candidate_validation.tsv` for the itemized check table.
 | File | Contents |
 |---|---|
 | `REPORT.md` | this document |
-| `app_contract_validation.tsv` | the 33 startup contract checks with status and detail |
-| `test_results.tsv` | all 68 tests with file, name, status |
-| `candidate_data_manifest.tsv` | resolved paths, sizes and SHA256 of every candidate artefact used |
+| `app_contract_validation.tsv` | the current 33 startup contract checks (final candidate, section 27) with status and detail |
+| `test_results.tsv` | the current 74 tests (final candidate, section 27) with file, name, status |
+| `candidate_data_manifest.tsv` | resolved paths, sizes and SHA256 of every candidate artefact used, current final candidate (section 27) plus the superseded section-26 hash set for reference |
 | `obsolete_schema_scan.tsv` | every occurrence of an obsolete schema token across live and legacy files, with an `at20_violation` flag (0 violations) |
 | `bibliography_validation.tsv` | the bibliography check results |
 | `bibliography_study_join.tsv` | the six-study join between atlas metadata and `data_source.csv` |
 | `field_mapping.tsv` | AT19 evidence: every configured field, its target column, presence in both tables, missingness and cardinality |
 | `stage_compatibility.tsv` | the detailed-to-broad mapping with per-stage verification against the candidate |
-| `final_candidate_validation.tsv` | final-release validation checklist against preprocessing closure SHA `dea656f` (section 26) |
-| `legacy_relocation_review.tsv` | independent second review of the nine `docs/legacy/` relocations (section 26) |
+| `final_candidate_validation.tsv` | current final-release validation checklist against preprocessing SHA `12d2e440` (section 27), with the superseded `dea656f`-era rows (section 26) kept and explicitly labeled historical |
+| `legacy_relocation_review.tsv` | independent second review of the nine `docs/legacy/` relocations (section 26; reused unchanged in section 27, see note there) |
+| `shiny_smoke_test.log` | full `global.R`/`ui.R`/`server.R`/`shinyApp()` construction, 0 errors (section 27) |
+| `writexl_export_test.log` | live `write_xlsx()` smoke export against final candidate metadata (section 27) |

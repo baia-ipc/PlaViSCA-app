@@ -15,6 +15,8 @@
 .data_columns_raw <- yaml::read_yaml(.data_columns_config_path())
 .data_columns_config <- .data_columns_raw$fields
 
+`%||%` <- function(a, b) if (is.null(a)) b else a
+
 # Display string used wherever a true R NA is shown to a user.
 MISSING_VALUE_LABEL <- .data_columns_raw$missing_label %||% "Missing"
 
@@ -22,8 +24,6 @@ MISSING_VALUE_LABEL <- .data_columns_raw$missing_label %||% "Missing"
 # Phase-2 export should contain none of these in app-visible fields; this is
 # defence in depth (D062/D068).
 LITERAL_MISSING_TOKENS <- c("NA", "N/A", "n/a", "NaN", "None", "none", "null", "NULL", "")
-
-`%||%` <- function(a, b) if (is.null(a)) b else a
 
 .config_field <- function(key) {
     field <- .data_columns_config[[key]]

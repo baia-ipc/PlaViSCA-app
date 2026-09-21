@@ -76,6 +76,8 @@ expect_empty_ <- function(x, msg) {
 
 # ---------------------------------------------------------------- app loading
 
+`%||%` <- function(a, b) if (is.null(a)) b else a
+
 APP_ROOT <- normalizePath(
     Sys.getenv("PLAVISCA_APP_ROOT", unset = file.path(dirname(sys.frame(1)$ofile %||% "."), "..")),
     mustWork = FALSE
@@ -83,8 +85,6 @@ APP_ROOT <- normalizePath(
 if (!file.exists(file.path(APP_ROOT, "config", "data_columns.yml"))) {
     APP_ROOT <- normalizePath(getwd(), mustWork = FALSE)
 }
-
-`%||%` <- function(a, b) if (is.null(a)) b else a
 
 load_app_config <- function() {
     old <- setwd(APP_ROOT)

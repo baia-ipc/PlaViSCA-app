@@ -51,7 +51,7 @@ test_bibliography_and_filters.R	an impossible filter combination is constrained 
 test_bibliography_and_filters.R	true NA values are displayed as the configured missing label	PASS	
 test_bibliography_and_filters.R	missing-value relabelling does not mutate the underlying data	PASS	
 test_bibliography_and_filters.R	numeric-sorted fields sort numerically, not lexicographically	PASS	
-test_bibliography_and_filters.R	an unconfigured/renamed filter column is a loud failure, not silent	SKIP	meta_plotly not loaded in this context
+test_bibliography_and_filters.R	an unconfigured/renamed filter column is a loud failure, not silent	PASS	
 test_expression.R	gene columns are identified by identifier despite the expanded metadata	PASS	
 test_expression.R	no metadata column is mistaken for a gene after the schema expansion	PASS	
 test_expression.R	raw and normalized lookup works for a known gene	PASS	
@@ -67,3 +67,9 @@ test_at19_at20.R	AT20: legacy files are documented as historical and are not sou
 test_at19_at20.R	AT20: global.R sources only files that exist	PASS	
 test_at19_at20.R	AT20: no absolute machine-specific path is hardcoded in app code	PASS	
 test_at19_at20.R	AT20: no hardcoded 'data/...' literal remains outside the path helper	PASS	
+test_final_release_candidate.R	final release count and six study counts are exact	PASS	
+test_final_release_candidate.R	DEC01 removes exactly the 14 duplicate representations and retains counterparts	PASS	
+test_final_release_candidate.R	DEC02 retains both distinct-source D5 cells without a suspicion field	PASS	
+test_final_release_candidate.R	exactly seven low-UMI Hazzard2024 cells have paired missing stages	PASS	
+test_final_release_candidate.R	final IDC and gametocyte totals preserve biological invariants	PASS	
+test_final_release_candidate.R	raw normalized scaled and cleaned tables have canonical identical keys	PASS	
