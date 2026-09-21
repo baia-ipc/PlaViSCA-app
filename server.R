@@ -54,14 +54,16 @@ server <- function(input, output, session) {
 
   # Reactive values to preserve UI state across mode changes
   ui_state <- reactiveValues(
-    stored_color = get_data_column("development_phase"),
+    stored_color = get_data_column("broad_stage"),
     stored_genes = NULL,
     stored_check = FALSE
   )
 
-  # Load publication data
+  # Bibliography / data-source table. Loaded and validated against the atlas
+  # at startup in global.R (see enforce_app_data_contract()); never re-read
+  # from a hardcoded path here.
   pub_data <- reactive({
-    readr::read_csv("data/data_source.csv", show_col_types = FALSE)
+    pub_data_table
   })
 
   observeEvent(filtered_gene_exp_data(), {
@@ -362,108 +364,63 @@ server <- function(input, output, session) {
     ignoreNULL = FALSE
   )
 
-  # Populate filter dropdowns when gene_data changes (once on load)
+  # Populate filter dropdowns when gene_data changes (once on load).
+  #
+  # Choices are derived entirely from config/data_columns.yml: for every
+  # configured filter field we resolve its physical column, order its values
+  # by the documented biological vocabulary, and surface true NA under the
+  # single configured missing label. A missing/renamed column is a
+  # data-contract failure and is reported, not silently swallowed.
   observeEvent(gene_data(), {
     req(gene_data()$data)
 
     filt_data <- gene_data()$data
-
-    # List of filter suffixes for all tabs
     filter_suffixes <- c("", "_gex", "_qc", "_meta")
+    contract_problems <- character(0)
 
-    # Use isolate to prevent reactive loop
-    tryCatch(
-      {
-        # Populate all filter instances (one for each tab)
-        for (suffix in filter_suffixes) {
-          updateSelectizeInput(
-            session,
-            paste0("study_label", suffix),
-            choices = unique(filt_data$study_label),
-            selected = isolate(input[[paste0("study_label", suffix)]]),
-            server = TRUE
-          )
-          updateSelectizeInput(
-            session,
-            paste0("sample_type", suffix),
-            choices = unique(filt_data$sample_type),
-            selected = isolate(input[[paste0("sample_type", suffix)]]),
-            server = TRUE
-          )
-          updateSelectizeInput(
-            session,
-            paste0("host_species", suffix),
-            choices = setNames(
-              unique(filt_data$host_species),
-              format_species_name(unique(filt_data$host_species))
-            ),
-            selected = isolate(input[[paste0("host_species", suffix)]]),
-            server = TRUE
-          )
-          updateSelectizeInput(
-            session,
-            paste0("parasite_stages", suffix),
-            choices = unique(filt_data[[get_data_column("parasite_stages")]]),
-            selected = isolate(input[[paste0("parasite_stages", suffix)]]),
-            server = TRUE
-          )
-          updateSelectizeInput(
-            session,
-            paste0("treatment", suffix),
-            choices = unique(filt_data$treatment),
-            selected = isolate(input[[paste0("treatment", suffix)]]),
-            server = TRUE
-          )
-          updateSelectizeInput(
-            session,
-            paste0("development_phase", suffix),
-            choices = unique(filt_data[[get_data_column("development_phase")]]),
-            selected = isolate(input[[paste0("development_phase", suffix)]]),
-            server = TRUE
-          )
-          updateSelectizeInput(
-            session,
-            paste0("strain", suffix),
-            choices = unique(filt_data$strain),
-            selected = isolate(input[[paste0("strain", suffix)]]),
-            server = TRUE
-          )
-          updateSelectizeInput(
-            session,
-            paste0("hour_post_invasion", suffix),
-            choices = sort_numeric_choices(filt_data$hour_post_invasion),
-            selected = isolate(input[[paste0("hour_post_invasion", suffix)]]),
-            server = TRUE
-          )
-          # updateSelectizeInput(
-          #   session,
-          #   paste0("sequencer", suffix),
-          #   choices = unique(filt_data$sequencer),
-          #   selected = isolate(input[[paste0("sequencer", suffix)]]),
-          #   server = TRUE
-          # )
-          # updateSelectizeInput(
-          #   session,
-          #   paste0("sc_technology", suffix),
-          #   choices = unique(filt_data$sc_technology),
-          #   selected = isolate(input[[paste0("sc_technology", suffix)]]),
-          #   server = TRUE
-          # )
-        }
-      },
-      error = function(e) {
-        # Silent error handling
+    for (key in filter_field_keys()) {
+      col <- get_data_column(key)
+      if (!col %in% colnames(filt_data)) {
+        contract_problems <- c(contract_problems, sprintf("%s -> %s", key, col))
+        next
       }
-    )
+      values <- order_column_values(col, filt_data[[col]])
+      choices <- setNames(as.list(values), display_values(col, values))
+      if (col %in% italicised_columns()) {
+        names(choices) <- format_species_name(values)
+      }
+
+      for (suffix in filter_suffixes) {
+        updateSelectizeInput(
+          session,
+          paste0(key, suffix),
+          choices = choices,
+          selected = isolate(input[[paste0(key, suffix)]]),
+          server = TRUE
+        )
+      }
+    }
+
+    if (length(contract_problems) > 0) {
+      showNotification(
+        paste0(
+          "Data-contract error: configured filter field(s) do not exist in ",
+          "the loaded data: ", paste(contract_problems, collapse = ", "),
+          ". Filters for these fields are unavailable - the displayed data is ",
+          "NOT filtered by them."
+        ),
+        type = "error", duration = NULL
+      )
+      warning(sprintf(
+        "PlaViSca filter population: missing configured columns: %s",
+        paste(contract_problems, collapse = ", ")
+      ))
+    }
   })
 
   # Sync filter values across all tabs
   # When a filter changes in any tab, update all other tabs to match
-  filter_names <- c(
-    "study_label", "sample_type", "host_species", "parasite_stages",
-    "treatment", "development_phase", "strain", "hour_post_invasion"
-    # "sequencer", "sc_technology"
-  )
+  filter_names <- filter_field_keys()
   filter_suffixes <- c("", "_gex", "_qc", "_meta")
 
   # Create observers for each filter to sync across tabs
@@ -498,6 +455,48 @@ server <- function(input, output, session) {
   })
 
 
+  # ---------------------------------------------------------------------------
+  # Broad / detailed life-cycle stage coupling
+  # ---------------------------------------------------------------------------
+  # Broad and detailed stage are NOT independent: every detailed stage maps to
+  # exactly one broad stage (config/data_columns.yml `stage_compatibility`).
+  # When one is selected we constrain the other's choices; when an impossible
+  # combination arrives anyway (e.g. an old bookmark or a restored session) we
+  # tell the user explicitly instead of silently returning zero rows.
+  lapply(filter_suffixes, function(sfx) {
+    broad_id <- paste0("broad_stage", sfx)
+    detailed_id <- paste0("detailed_stage", sfx)
+    warn_id <- paste0("stage_compatibility_warning", sfx)
+
+    # Constrain the detailed-stage choices to whatever the broad selection allows
+    observeEvent(input[[broad_id]],
+      {
+        available <- unique(mr_data[[get_data_column("detailed_stage")]])
+        allowed <- compatible_detailed_stages(input[[broad_id]], available)
+        keep <- intersect(isolate(input[[detailed_id]]), allowed)
+        updateSelectizeInput(
+          session, detailed_id,
+          choices = setNames(as.list(allowed), allowed),
+          selected = keep, server = TRUE
+        )
+      },
+      ignoreNULL = FALSE, ignoreInit = TRUE
+    )
+
+    # Report (never silently drop) an impossible combination
+    observe({
+      msg <- stage_selection_message(input[[broad_id]], input[[detailed_id]])
+      output[[paste0("stage_compatibility_message", sfx)]] <- renderUI({
+        if (is.null(msg)) NULL else tagList(fontawesome::fa("triangle-exclamation"), " ", msg)
+      })
+      if (is.null(msg)) {
+        shinyjs::hide(warn_id)
+      } else {
+        shinyjs::show(warn_id)
+      }
+    })
+  })
+
   # Separate reactive for filtered gene data (Embeddings tab)
   filtered_gene_data <- reactive({
     req(gene_data())
@@ -518,19 +517,14 @@ server <- function(input, output, session) {
       return(sessionData[[cache_key]])
     }
 
-    filtered_meta <- tryCatch(
-      {
-        apply_secondary_filters(
-          gene_data()$data,
-          current_inputs,
-          keep_gene_matrix = FALSE,
-          genes = if (!is.null(gene_data()$genes)) gene_data()$genes$gene else NULL
-        )
-      },
-      error = function(e) {
-        # Return unfiltered data if filtering fails
-        gene_data()$data
-      }
+    # NOTE: no silent fallback to unfiltered data here. If filtering fails it
+    # is a schema/data-contract problem, and quietly showing the *unfiltered*
+    # atlas as if the filters had been applied would be actively misleading.
+    filtered_meta <- apply_secondary_filters(
+      gene_data()$data,
+      current_inputs,
+      keep_gene_matrix = FALSE,
+      genes = if (!is.null(gene_data()$genes)) gene_data()$genes$gene else NULL
     )
 
     # Get row indices if available from the filtered metadata
@@ -621,50 +615,12 @@ server <- function(input, output, session) {
     global_loading = global_loading
   )
 
-  # Metadata filter
-  # choose columns for filter data
-  grouped_choices <- list(
-    development_phase = setNames(
-      paste0("development_phase__", unique(mr_data$development_phase)),
-      unique(mr_data$development_phase)
-    ),
-    # blood_stage = setNames(
-    #   paste0("blood_stage__", unique(mr_data$blood_stage)),
-    #   unique(mr_data$blood_stage)
-    # ),
-    parasite_stages = setNames(
-      paste0("parasite_stages__", unique(mr_data$parasite_stages)),
-      unique(mr_data$parasite_stages)
-    ),
-    study_label = setNames(
-      paste0("study_label__", unique(mr_data$study_label)),
-      unique(mr_data$study_label)
-    ),
-    geographic_location = setNames(
-      paste0("geolocation__", unique(mr_data$geographic_location)),
-      unique(mr_data$geographic_location)
-    ),
-    # sample_type = setNames(
-    #   paste0("sample_type__", unique(mr_data$sample_type)),
-    #   unique(mr_data$sample_type)
-    # ),
-    # sc_technology = setNames(
-    #   paste0("sc_technology__", unique(mr_data$sc_technology)),
-    #   unique(mr_data$sc_technology)
-    # ),
-    # sequencer = setNames(
-    #   paste0("sequencer__", unique(mr_data$sequencer)),
-    #   unique(mr_data$sequencer)
-    # ),
-    host_species = setNames(
-      paste0("host_species__", unique(mr_data$host_species)),
-      format_species_name(unique(mr_data$host_species))
-    ),
-    treatment = setNames(
-      paste0("treatment__", unique(mr_data$treatment)),
-      unique(mr_data$treatment)
-    )
-  )
+  # NOTE (Phase 3): the `grouped_choices` list that used to live here was dead
+  # code - it was never referenced by any UI element, and it hardcoded the
+  # non-existent physical columns mr_data$development_phase /
+  # mr_data$parasite_stages / mr_data$geographic_location (defect D063).
+  # Filter choices are now built from config/data_columns.yml in the
+  # gene_data() observer above.
 
   # Old apply_filter code removed - now using individual filter inputs
   user_interact <- reactiveVal(FALSE)
@@ -677,18 +633,9 @@ server <- function(input, output, session) {
 
 
   observeEvent(
-    list(
-      input$data_opt,
-      input$study_label_meta,
-      input$host_species_meta,
-      input$parasite_stages_meta,
-      input$treatment_meta,
-      input$development_phase_meta,
-      input$sample_type_meta,
-      input$strain_meta,
-      input$hour_post_invasion_meta
-      # input$sequencer_meta,
-      # input$sc_technology_meta
+    c(
+      list(input$data_opt),
+      lapply(paste0(filter_field_keys(), "_meta"), function(id) input[[id]])
     ),
     {
       current_inputs <- collect_filter_inputs(input, suffix = "_meta")
@@ -725,53 +672,32 @@ server <- function(input, output, session) {
 
       output$data_table <- renderDT(
         {
-          # Create metadata table with filtered columns and proper formatting
-          processed_data <- filt_data %>%
-            select(
-              -c(
-                starts_with("umap_"),
-                starts_with("pca_"),
-                starts_with("t_sne_"),
-                barcode,
-                geographic_location,
-                day_post_infection
-              )
-            ) %>%
-            rename_with(
-              ~ str_to_title(.),
-              .cols = any_of(c(
-                "study_label",
-                "sample_type",
-                "host_species",
-                "treatment",
-                "strain",
-                "hour_post_invasion",
-                "sequencer",
-                "sc_technology"
-              ))
-            ) %>%
-            rename(
-              nCount_RNA = n_count_rna,
-              nFeature_RNA = n_feature_rna,
-              Study_Label = Study_label,
-              Development_phase = !!sym(get_data_column("development_phase")),
-              Parasite_stages = !!sym(get_data_column("parasite_stages"))
-            ) %>%
-            arrange(Study_Label, desc(nCount_RNA)) %>%
-            select(
-              Study_Label,
-              Sample_type,
-              Host_species,
-              Strain,
-              Treatment,
-              Development_phase,
-              Parasite_stages,
-              Hour_post_invasion,
-              Sc_technology,
-              Sequencer,
-              nCount_RNA,
-              nFeature_RNA
-            )
+          # Metadata detail table. Column set, order and display labels all
+          # come from config/data_columns.yml (`detail_table_fields:`) - there
+          # is no second hardcoded field list here. True NA is shown under the
+          # single configured missing label; the underlying data is untouched.
+          detail_keys <- Filter(
+            function(k) get_data_column(k) %in% colnames(filt_data),
+            detail_table_field_keys()
+          )
+          detail_cols <- vapply(detail_keys, get_data_column, character(1))
+
+          processed_data <- filt_data[, detail_cols, drop = FALSE]
+          for (k in detail_keys) {
+            col <- get_data_column(k)
+            v <- processed_data[[col]]
+            if (is.character(v) || is.factor(v) || is.logical(v)) {
+              processed_data[[col]] <- relabel_missing(display_values(col, v))
+            }
+          }
+          names(processed_data) <- vapply(detail_keys, get_data_label, character(1))
+
+          sort_by <- get_data_label("study_label")
+          count_by <- get_data_label("n_count_rna")
+          processed_data <- processed_data[
+            order(processed_data[[sort_by]], -processed_data[[count_by]]), ,
+            drop = FALSE
+          ]
 
           DT::datatable(
             processed_data,
@@ -797,70 +723,43 @@ server <- function(input, output, session) {
         server = TRUE
       )
 
-      ## plot sample/development phase vs count
-      output$sample_plotly <- renderPlotly({
-        meta_plotly(filt_data, get_data_column("development_phase"), "Count", "Development phase", "bar")
-      })
-
-      ## plot species vs count
-      output$species_plotly <- renderPlotly({
-        meta_plotly(filt_data, "host_species", "Count", "Host species", "bar")
-      })
-
-      ## plot strain vs count
-      output$strain_plotly <- renderPlotly({
-        meta_plotly(filt_data, "strain", "Count", "Strain", "bar")
-      })
-
-      ## plot reproductive_form vs count
-      output$treatment_plotly <- renderPlotly({
-        meta_plotly(
-          filt_data,
-          "treatment",
-          "Count",
-          "Treatment",
-          "bar"
-        )
-      })
-
-      ## plot parasite stages vs count
-      output$parasite_stages_plotly <- renderPlotly({
-        meta_plotly(
-          filt_data,
-          get_data_column("parasite_stages"),
-          "Count",
-          "Parasite stages",
-          "bar"
-        )
-      })
-
-      ## plot hour post infection vs count
-      output$HPI_plotly <- renderPlotly({
-        meta_plotly(
-          filt_data,
-          "hour_post_invasion",
-          "Count",
-          "Intra erythrocyte developement stage",
-          "bar"
-        )
-      })
+      ## Metadata overview plots. Each output is bound to a logical config
+      ## field key; its axis title comes from get_data_label() and its level
+      ## ordering from the configured biological vocabulary.
+      meta_overview_plots <- list(
+        broad_stage_plotly = "broad_stage",
+        detailed_stage_plotly = "detailed_stage",
+        species_plotly = "host_species",
+        lineage_plotly = "parasite_lineage_isolate",
+        treatment_plotly = "treatment",
+        idc_reference_class_plotly = "idc_reference_class",
+        origin_location_plotly = "parasite_origin_location",
+        pred_gametocyte_sex_plotly = "pred_gametocyte_sex",
+        source_sex_annotation_plotly = "source_sex_annotation"
+      )
+      for (out_id in names(meta_overview_plots)) {
+        local({
+          oid <- out_id
+          key <- meta_overview_plots[[oid]]
+          output[[oid]] <- renderPlotly({
+            meta_plotly(
+              filt_data,
+              get_data_column(key),
+              "Count",
+              get_data_label(key),
+              "bar"
+            )
+          })
+        })
+      }
     }
   )
 
   # Quality control tabset
   observeEvent(
-    list(
-      input$data_opt,
-      input$study_label_qc,
-      input$host_species_qc,
-      input$parasite_stages_qc,
-      input$treatment_qc,
-      input$development_phase_qc,
-      input$sample_type_qc,
-      input$strain_qc,
-      input$hour_post_invasion_qc
-      # input$sequencer_qc,
-      # input$sc_technology_qc
+    c(
+      list(input$data_opt),
+      lapply(paste0(filter_field_keys(), "_qc"), function(id) input[[id]])
     ),
     {
       current_inputs <- collect_filter_inputs(input, suffix = "_qc")
@@ -903,7 +802,7 @@ server <- function(input, output, session) {
           filt_data,
           x = "study_label",
           y = "n_count_rna",
-          color = get_data_column("development_phase"),
+          color = get_data_column("broad_stage"),
           y_title = "RNA count",
           title = "RNA Count"
         )
@@ -915,7 +814,7 @@ server <- function(input, output, session) {
           filt_data,
           x = "study_label",
           y = "n_feature_rna",
-          color = get_data_column("development_phase"),
+          color = get_data_column("broad_stage"),
           y_title = "nFeature count",
           title = "Feature Count"
         )
@@ -1040,11 +939,11 @@ server <- function(input, output, session) {
         if (!is.null(current) && current %in% valid_group_choices) {
           return(current)
         }
-        if (get_data_column("parasite_stages") %in% valid_group_choices) {
-          return(get_data_column("parasite_stages"))
+        if (get_data_column("detailed_stage") %in% valid_group_choices) {
+          return(get_data_column("detailed_stage"))
         }
-        if (get_data_column("development_phase") %in% valid_group_choices) {
-          return(get_data_column("development_phase"))
+        if (get_data_column("broad_stage") %in% valid_group_choices) {
+          return(get_data_column("broad_stage"))
         }
         valid_group_choices[1]
       }
@@ -1095,16 +994,14 @@ server <- function(input, output, session) {
       input$group_exp_0,
       input$check_exp_0,
       get_current_data_type(),
-      input$study_label_gex,
-      input$host_species_gex,
-      input$parasite_stages_gex,
-      input$treatment_gex,
-      input$development_phase_gex,
-      input$sample_type_gex,
-      input$strain_gex,
-      input$hour_post_invasion_gex
-      # input$sequencer_gex,
-      # input$sc_technology_gex
+      paste(
+        vapply(
+          paste0(filter_field_keys(), "_gex"),
+          function(id) paste(input[[id]], collapse = "|"),
+          character(1)
+        ),
+        collapse = "__"
+      )
     )
 
     # Check cache first for instant gene switching
@@ -1736,7 +1633,7 @@ server <- function(input, output, session) {
     }
 
     # Determine which inputs to use based on comparison mode
-    color_val <- if (!is.null(input$color_first_comp)) input$color_first_comp else get_data_column("development_phase")
+    color_val <- if (!is.null(input$color_first_comp)) input$color_first_comp else get_data_column("broad_stage")
     genes_val <- if (!is.null(input$genes_n_first_comp)) input$genes_n_first_comp else ""
     check_val <- if (!is.null(input$check_first_comp)) input$check_first_comp else FALSE
 
@@ -1761,7 +1658,7 @@ server <- function(input, output, session) {
       req(input$xaxis, input$yaxis)
     }
 
-    color_val <- if (!is.null(input$color_second)) input$color_second else get_data_column("parasite_stages")
+    color_val <- if (!is.null(input$color_second)) input$color_second else get_data_column("detailed_stage")
     genes_val <- if (!is.null(input$genes_second)) input$genes_second else ""
     check_val <- if (!is.null(input$check_second)) input$check_second else FALSE
 
@@ -1783,19 +1680,18 @@ server <- function(input, output, session) {
   observe({
     req(comparison_mode())
 
-    color_map <- list(
-      study_label = "Study label",
-      parasite_stage = "Development Phase",
-      life_cycle_stage = "Parasite Stages",
-      strain = "Strain",
-      treatment = "Treatment",
-      sample_type = "Sample Type",
-      host_species = "Host Species",
-      genes = "Genes"
-    )
-
-    plot_a_label <- color_map[[input$color_first_comp]] %||% "Development Phase"
-    plot_b_label <- color_map[[input$color_second]] %||% "Parasite Stages"
+    # Labels resolve through the config layer (get_label_for_column); the old
+    # duplicate hardcoded map keyed by physical column name is gone (D064).
+    plot_a_label <- if (identical(input$color_first_comp, "genes")) {
+      "Genes"
+    } else {
+      get_label_for_column(input$color_first_comp %||% get_data_column("broad_stage"))
+    }
+    plot_b_label <- if (identical(input$color_second, "genes")) {
+      "Genes"
+    } else {
+      get_label_for_column(input$color_second %||% get_data_column("detailed_stage"))
+    }
 
     shinyjs::html("plot_a_subtitle", plot_a_label)
     shinyjs::html("plot_b_subtitle", plot_b_label)
@@ -1820,16 +1716,7 @@ server <- function(input, output, session) {
       input$data_type,
       input$check,
       input$check_all,
-      input$study_label,
-      input$host_species,
-      input$parasite_stages,
-      input$treatment,
-      input$development_phase,
-      input$sample_type,
-      input$strain,
-      input$hour_post_invasion,
-      input$sequencer,
-      input$sc_technology
+      lapply(filter_field_keys(), function(k) input[[k]])
     )
 
     # Set plot as not ready immediately when inputs change
@@ -1967,7 +1854,7 @@ server <- function(input, output, session) {
         # Handle empty or invalid gene inputs by falling back to sample_type
         if (is.null(gene_inputs) || length(gene_inputs) == 0 ||
           (length(gene_inputs) == 1 && (is.na(gene_inputs) || gene_inputs == ""))) {
-          color_column <- get_data_column("development_phase")
+          color_column <- get_data_column("broad_stage")
         } else {
           # For dual plot mode, use cached data to prevent interference between plots
           if (is_dual_plot && !is.null(data_source)) {
@@ -2258,24 +2145,13 @@ server <- function(input, output, session) {
     if (isTRUE(comparison_mode())) {
       req(input$color_second)
 
-      # Map color values to display names
-      color_names <- c(
-        "study_label" = "Study label",
-        "parasite_stage" = "Development phase",
-        # "blood_stage" = "Blood stage",
-        "life_cycle_stage" = "Parasite stages",
-        "strain" = "Strain",
-        "treatment" = "Treatment",
-        "sample_type" = "Sample type",
-        "host_species" = "Host species",
-        # "sequencer" = "Sequencer",
-        # "sc_technology" = "SC technology",
-        # "day_post_infection" = "DPI",
-        # "hour_post_invasion" = "HPI",
-        "genes" = "Genes"
-      )
-
-      second_label <- if (!is.null(color_names[input$color_second])) color_names[input$color_second] else "Unknown"
+      # Display name resolves through the config layer, not a second
+      # hardcoded label map (D064).
+      second_label <- if (identical(input$color_second, "genes")) {
+        "Genes"
+      } else {
+        get_label_for_column(input$color_second)
+      }
       runjs(paste0("$('#second_plot_label').text('Second Color: ", second_label, "');"))
     }
   })
@@ -2351,7 +2227,7 @@ server <- function(input, output, session) {
     req(comparison_mode())
 
     # Get current values with defaults
-    color_second <- if (!is.null(input$color_second)) input$color_second else "sample_type"
+    color_second <- if (!is.null(input$color_second)) input$color_second else get_data_column("detailed_stage")
     genes_second <- if (!is.null(input$genes_second)) input$genes_second else ""
     check_second <- if (!is.null(input$check_second)) input$check_second else FALSE
     # Use main plot axes, size and dimension for second plot
@@ -2607,8 +2483,8 @@ server <- function(input, output, session) {
         if (!is.null(resolved_gene_col) && resolved_gene_col %in% colnames(df_local)) {
           color_column <- resolved_gene_col
         } else {
-          # If gene resolution failed, default to parasite_stage instead of returning NULL
-          color_column <- get_data_column("development_phase")
+          # If gene resolution failed, fall back to the broad life-cycle stage
+          color_column <- get_data_column("broad_stage")
         }
       } else {
         color_column <- input$color
@@ -2616,7 +2492,7 @@ server <- function(input, output, session) {
 
       # Final safety check: ensure the resolved color column exists in df_local
       if (is.null(color_column) || is.na(color_column) || color_column == "" || !(color_column %in% colnames(df_local))) {
-        color_column <- get_data_column("development_phase")
+        color_column <- get_data_column("broad_stage")
       }
 
       # Determine proper legend title for gene expression
@@ -2930,16 +2806,7 @@ server <- function(input, output, session) {
                     "Gene ID(s)",
                     "Gene Name(s)",
                     "Group By",
-                    "Study Label",
-                    "Host Species",
-                    "Parasite stages",
-                    "Treatment",
-                    "Development phase",
-                    "Sample Type",
-                    "Strain",
-                    "Hour Post Invasion",
-                    "Sequencer",
-                    "SC Technology",
+                    vapply(filter_field_keys(), get_data_label, character(1)),
                     "Download Date"
                   ),
                   Value = c(
@@ -2948,16 +2815,11 @@ server <- function(input, output, session) {
                     gene_info$gene_id,
                     gene_info$gene_name,
                     as.character(cur_group),
-                    paste(isolate(input$study_label), collapse = ", "),
-                    paste(isolate(input$host_species), collapse = ", "),
-                    paste(isolate(input$parasite_stages), collapse = ", "),
-                    paste(isolate(input$treatment), collapse = ", "),
-                    paste(isolate(input$development_phase), collapse = ", "),
-                    paste(isolate(input$sample_type), collapse = ", "),
-                    paste(isolate(input$strain), collapse = ", "),
-                    paste(isolate(input$hour_post_invasion), collapse = ", "),
-                    paste(isolate(input$sequencer), collapse = ", "),
-                    paste(isolate(input$sc_technology), collapse = ", "),
+                    vapply(
+                      paste0(filter_field_keys(), "_gex"),
+                      function(id) paste(isolate(input[[id]]), collapse = ", "),
+                      character(1)
+                    ),
                     as.character(Sys.time())
                   ),
                   stringsAsFactors = FALSE
@@ -3086,16 +2948,7 @@ server <- function(input, output, session) {
                         "Gene ID(s)",
                         "Gene Name(s)",
                         "Group By",
-                        "Study Label",
-                        "Host Species",
-                        "Parasite stages",
-                        "Treatment",
-                        "Development phase",
-                        "Sample Type",
-                        "Strain",
-                        "Hour Post Invasion",
-                        "Sequencer",
-                        "SC Technology",
+                        vapply(filter_field_keys(), get_data_label, character(1)),
                         "Download Date"
                       ),
                       Value = c(
@@ -3104,16 +2957,11 @@ server <- function(input, output, session) {
                         gene_info$gene_id,
                         gene_info$gene_name,
                         as.character(cur_group),
-                        paste(isolate(input$study_label), collapse = ", "),
-                        paste(isolate(input$host_species), collapse = ", "),
-                        paste(isolate(input$parasite_stages), collapse = ", "),
-                        paste(isolate(input$treatment), collapse = ", "),
-                        paste(isolate(input$development_phase), collapse = ", "),
-                        paste(isolate(input$sample_type), collapse = ", "),
-                        paste(isolate(input$strain), collapse = ", "),
-                        paste(isolate(input$hour_post_invasion), collapse = ", "),
-                        paste(isolate(input$sequencer), collapse = ", "),
-                        paste(isolate(input$sc_technology), collapse = ", "),
+                        vapply(
+                          paste0(filter_field_keys(), "_gex"),
+                          function(id) paste(isolate(input[[id]]), collapse = ", "),
+                          character(1)
+                        ),
                         as.character(Sys.time())
                       ),
                       stringsAsFactors = FALSE
