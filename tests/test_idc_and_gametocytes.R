@@ -113,17 +113,30 @@ test_that_("both male and female inferred labels are supported symmetrically", {
     )
 })
 
-test_that_("no scientific adjudication is invented by the app", {
+test_that_("adjudicated stage is not a separate app field and mirrors the detailed stage", {
     m <- app_data("mr_data")
     expect_empty_(
         Filter(function(k) get_data_column(k) == "adjudicated_display_stage", data_field_keys()),
-        "adjudicated_display_stage must not be exposed as an app field (DEC07 unresolved)"
+        "adjudicated_display_stage duplicates the detailed stage and must not be exposed as a second app field"
     )
     if ("adjudicated_display_stage" %in% colnames(m)) {
+        det <- m[[get_data_column("detailed_stage")]]
+        adj <- m$adjudicated_display_stage
         expect_true_(
-            all(is.na(m$adjudicated_display_stage)),
-            "adjudicated_display_stage must remain entirely unpopulated"
+            identical(is.na(adj), is.na(det)) && all(adj[!is.na(adj)] == det[!is.na(det)]),
+            "adjudicated_display_stage must equal harmonized_life_cycle_stage (DEC07 resolved)"
         )
+    }
+})
+
+test_that_("both gametocyte labels reach the detailed stage with configured colours", {
+    m <- app_data("mr_data")
+    det <- m[[get_data_column("detailed_stage")]]
+    for (lab in c("Female gametocyte", "Male gametocyte")) {
+        expect_true_(sum(det == lab, na.rm = TRUE) > 0, sprintf("no cell has detailed stage '%s'", lab))
+        expect_true_(lab %in% get_field_vocabulary("detailed_stage"), sprintf("'%s' missing from detailed_stage vocabulary", lab))
+        expect_true_(lab %in% names(get_field_colors("detailed_stage")), sprintf("'%s' has no configured detailed_stage colour", lab))
+        expect_true_(identical(unname(stage_compatibility_map()[[lab]]), "Blood stage"), sprintf("'%s' must map to Blood stage", lab))
     }
 })
 

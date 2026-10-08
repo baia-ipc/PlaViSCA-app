@@ -250,10 +250,16 @@ validate_app_data_contract <- function(mr_data,
         sprintf("%d non-blood cells carry a PlaViSca-inferred gametocyte sex", gam_leak)
     )
     if ("adjudicated_display_stage" %in% cols) {
+        # DEC07 resolved: adjudicated_display_stage follows the same
+        # deterministic precedence as the detailed stage (source label >
+        # cluster gametocyte call > IDC bin), so it must equal it exactly.
+        adj <- mr_data$adjudicated_display_stage
+        det <- mr_data[[detailed_col]]
+        adj_mismatch <- sum(xor(is.na(adj), is.na(det)) | (!is.na(adj) & !is.na(det) & adj != det))
         add(
-            "adjudication_not_invented",
-            all(is.na(mr_data$adjudicated_display_stage)),
-            "adjudicated_display_stage is unresolved by design (DEC07) and must stay empty"
+            "adjudication_matches_detailed_stage",
+            adj_mismatch == 0,
+            sprintf("%d cells where adjudicated_display_stage differs from the detailed stage", adj_mismatch)
         )
     }
 

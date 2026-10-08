@@ -63,7 +63,12 @@ test_that_("final IDC and gametocyte totals preserve biological invariants", {
     idc <- m[[get_data_column("idc_reference_class")]]
     gam <- m[[get_data_column("pred_gametocyte_sex")]]
     expect_equal_(sum(!is.na(idc)), 90219L, "IDC labeled count")
-    expect_equal_(sum(!is.na(gam)), 22795L, "gametocyte call count")
+    # plavisca-v1-gametocytes-2026-10-08 (rRNA-free, refreshed integration
+    # features); the 2026-09-21 release had 22,795 calls.
+    expect_equal_(sum(!is.na(gam)), 23266L, "gametocyte call count")
+    det <- m[[get_data_column("detailed_stage")]]
+    expect_equal_(sum(det == "Female gametocyte", na.rm = TRUE), 22392L, "harmonized Female gametocyte count")
+    expect_equal_(sum(det == "Male gametocyte", na.rm = TRUE), 978L, "harmonized Male gametocyte count")
     expect_equal_(sum(m$parasite_broad_stage != "Blood stage" & !is.na(gam), na.rm = TRUE),
         0L, "non-blood gametocyte calls")
 })
