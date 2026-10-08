@@ -1,0 +1,98 @@
+- One or more packages recorded in the lockfile are not installed.
+- Use `renv::status()` for more details.
+PlaViSca test suite
+  app root: /home/baia/prj/plavisca/PlaViSca
+  data dir: /home/baia/prj/plavisca/deployments/data/releases/plavisca-v1-gametocytes-2026-10-08
+
+== test_data_contract.R
+  [PASS] candidate data directory resolves from PLAVISCA_DATA_DIR
+  [PASS] all four app data files are present
+  [PASS] cleaned_dataset.rds loads and has the expected cell count
+  [PASS] the atlas contains exactly the six expected studies
+  [PASS] every required configured field exists in the candidate data
+  [PASS] no configured field maps to an obsolete pre-Phase-2 column
+  [PASS] cell identifiers are unique and match the metadata rownames
+  [PASS] no literal 'NA'/'None' strings in app-visible categorical fields
+  [PASS] raw, normalized and metadata tables describe the same cells
+  [PASS] no duplicate cell ids in the expression tables
+  [PASS] full startup contract validation passes with no FAILs
+  [PASS] required embedding/reduction columns exist
+
+== test_lifecycle.R
+  [PASS] every observed detailed stage is in the configured vocabulary
+  [PASS] every observed broad stage is in the configured vocabulary
+  [PASS] every (detailed, broad) pair in the data matches the documented mapping
+  [PASS] broad and detailed stage are missing together, never one alone
+  [PASS] an impossible broad/detailed combination is reported, not silently empty
+  [PASS] a possible broad/detailed combination is accepted
+  [PASS] selecting a broad stage constrains the detailed choices correctly
+  [PASS] selecting a detailed stage preserves only compatible broad choices
+  [PASS] detailed stage ordering follows lifecycle progression, not the alphabet
+  [PASS] the configured ordering never invents a stage that is absent from the data
+  [PASS] source-defined sporozoites are classified as Sporozoite stage
+  [PASS] liver-stage cells never expose an inferred gametocyte sex
+  [PASS] non-blood cells have no IDC reference-time class
+
+== test_idc_and_gametocytes.R
+  [PASS] the obsolete hour_post_invasion field is not required by the app
+  [PASS] the IDC reference-similarity field is configured and present
+  [PASS] the IDC field is not labelled as measured hour-post-invasion
+  [PASS] IDC uncertainty companion fields are retained and configured
+  [PASS] the heuristic IDC bin is labelled as a PlaViSca heuristic
+  [PASS] no NA IDC values were manufactured
+  [PASS] inferred and author-reported gametocyte sex are distinct fields
+  [PASS] the two gametocyte fields are labelled with their provenance
+  [PASS] both male and female inferred labels are supported symmetrically
+  [PASS] adjudicated stage is not a separate app field and mirrors the detailed stage
+  [PASS] both gametocyte labels reach the detailed stage with configured colours
+  [PASS] source and inferred sex genuinely disagree for some cells (not collapsed)
+  [PASS] study_control and No_Treatment remain distinct categories
+  [PASS] missing treatment is never turned into a treatment category
+  [PASS] parasite geography uses parasite_origin_location, not the conflated field
+  [PASS] the other provenance concepts stay separate fields
+  [PASS] biological replicate identity is visible in the app
+
+== test_bibliography_and_filters.R
+  [PASS] the bibliography maps exactly onto the six atlas studies
+  [PASS] the bibliography has exactly six records, one per study
+  [PASS] bibliography per-study cell counts agree with the atlas
+  [PASS] each study carries exactly one PMID in the atlas
+  [PASS] a missing or extra bibliography study is detected, not ignored
+  [PASS] every configured filter field can populate non-empty choices
+  [PASS] a valid filter combination returns rows
+  [PASS] an impossible filter combination is constrained rather than silently empty
+  [PASS] true NA values are displayed as the configured missing label
+  [PASS] missing-value relabelling does not mutate the underlying data
+  [PASS] numeric-sorted fields sort numerically, not lexicographically
+  [PASS] an unconfigured/renamed filter column is a loud failure, not silent
+
+== test_expression.R
+  [PASS] gene columns are identified by identifier despite the expanded metadata
+  [PASS] no metadata column is mistaken for a gene after the schema expansion
+  [PASS] raw and normalized lookup works for a known gene
+  [PASS] row-index filtering preserves cell-key alignment
+  [PASS] top-gene / HVG tables cover all six studies
+  [PASS] the expression tables carry every required metadata column
+
+== test_at19_at20.R
+  [PASS] AT19: every configured field resolves to a real current-schema column
+  [PASS] AT19: every configured field also exists in the expression tables
+  [PASS] AT19: every field referenced by the filter/category/detail lists is configured
+  [PASS] AT20: no live app code references obsolete stage/HPI/geography columns
+  [PASS] AT20: no stale preprocessing generator remains under functions/
+  [PASS] AT20: legacy files are documented as historical and are not sourced
+  [PASS] AT20: global.R sources only files that exist
+  [PASS] AT20: no absolute machine-specific path is hardcoded in app code
+  [PASS] AT20: no hardcoded 'data/...' literal remains outside the path helper
+
+== test_final_release_candidate.R
+  [PASS] final release count and six study counts are exact
+  [PASS] DEC01 removes exactly the 14 duplicate representations and retains counterparts
+  [PASS] DEC02 retains both distinct-source D5 cells without a suspicion field
+  [PASS] exactly seven low-UMI Hazzard2024 cells have paired missing stages
+  [PASS] final IDC and gametocyte totals preserve biological invariants
+  [PASS] raw normalized scaled and cleaned tables have canonical identical keys
+
+-----------------------------------------------
+TOTAL: 75   PASS: 75   FAIL: 0   SKIP: 0
+Results written to audit/gametocyte_release/test_results.tsv
