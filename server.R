@@ -59,9 +59,8 @@ server <- function(input, output, session) {
     stored_check = FALSE
   )
 
-  # Bibliography / data-source table. Loaded and validated against the atlas
-  # at startup in global.R (see enforce_app_data_contract()); never re-read
-  # from a hardcoded path here.
+  # Bibliography / data-source table, loaded and checked against the data at
+  # startup in global.R (see stop_if_app_data_invalid()).
   pub_data <- reactive({
     pub_data_table
   })
@@ -369,19 +368,19 @@ server <- function(input, output, session) {
   # Choices are derived entirely from config/data_columns.yml: for every
   # configured filter field we resolve its physical column, order its values
   # by the documented biological vocabulary, and surface true NA under the
-  # single configured missing label. A missing/renamed column is a
-  # data-contract failure and is reported, not silently swallowed.
+  # single configured missing label. A configured column that is missing from
+  # the data is reported as an error, not silently skipped.
   observeEvent(gene_data(), {
     req(gene_data()$data)
 
     filt_data <- gene_data()$data
     filter_suffixes <- c("", "_gex", "_qc", "_meta")
-    contract_problems <- character(0)
+    missing_columns <- character(0)
 
     for (key in filter_field_keys()) {
       col <- get_data_column(key)
       if (!col %in% colnames(filt_data)) {
-        contract_problems <- c(contract_problems, sprintf("%s -> %s", key, col))
+        missing_columns <- c(missing_columns, sprintf("%s -> %s", key, col))
         next
       }
       values <- order_column_values(col, filt_data[[col]])
@@ -401,11 +400,11 @@ server <- function(input, output, session) {
       }
     }
 
-    if (length(contract_problems) > 0) {
+    if (length(missing_columns) > 0) {
       showNotification(
         paste0(
-          "Data-contract error: configured filter field(s) do not exist in ",
-          "the loaded data: ", paste(contract_problems, collapse = ", "),
+          "Data error: these filter fields are configured but missing from ",
+          "the loaded data: ", paste(missing_columns, collapse = ", "),
           ". Filters for these fields are unavailable - the displayed data is ",
           "NOT filtered by them."
         ),
@@ -413,7 +412,7 @@ server <- function(input, output, session) {
       )
       warning(sprintf(
         "PlaViSca filter population: missing configured columns: %s",
-        paste(contract_problems, collapse = ", ")
+        paste(missing_columns, collapse = ", ")
       ))
     }
   })
@@ -517,9 +516,9 @@ server <- function(input, output, session) {
       return(sessionData[[cache_key]])
     }
 
-    # NOTE: no silent fallback to unfiltered data here. If filtering fails it
-    # is a schema/data-contract problem, and quietly showing the *unfiltered*
-    # atlas as if the filters had been applied would be actively misleading.
+    # NOTE: no silent fallback to unfiltered data here. If filtering fails,
+    # data and configuration do not match, and quietly showing the *unfiltered*
+    # atlas as if the filters had been applied would be misleading.
     filtered_meta <- apply_secondary_filters(
       gene_data()$data,
       current_inputs,
@@ -615,18 +614,13 @@ server <- function(input, output, session) {
     global_loading = global_loading
   )
 
-  # NOTE (Phase 3): the `grouped_choices` list that used to live here was dead
-  # code - it was never referenced by any UI element, and it hardcoded the
-  # non-existent physical columns mr_data$development_phase /
-  # mr_data$parasite_stages / mr_data$geographic_location (defect D063).
-  # Filter choices are now built from config/data_columns.yml in the
-  # gene_data() observer above.
+  # Filter choices are built from config/data_columns.yml in the gene_data()
+  # observer above.
 
-  # Old apply_filter code removed - now using individual filter inputs
   user_interact <- reactiveVal(FALSE)
 
   # Reactive for base metadata (no filtering - just returns mr_data)
-  # Filtering is now done at the individual tab level using shared filter inputs
+  # Filtering is done at the individual tab level using shared filter inputs
   filtered_data <- reactive({
     mr_data
   })
@@ -934,7 +928,7 @@ server <- function(input, output, session) {
 
       if (length(valid_group_choices) == 0) valid_group_choices <- group_choices
 
-      # Smart default selection priority (Stage > Phase)
+      # Default grouping: detailed stage, then broad stage, then the first choice
       best_selection <- function(current) {
         if (!is.null(current) && current %in% valid_group_choices) {
           return(current)
@@ -1481,8 +1475,7 @@ server <- function(input, output, session) {
   )
 
   ## hide switch for tsne
-  # Removed: observeEvent for hiding tab_switch via JS
-  # Integration toggle now handled via conditionalPanel in ui.R
+  # The integration toggle is shown or hidden by a conditionalPanel in ui.R
 
 
   ## get x- and y- axis selections for 2D plots
@@ -1680,8 +1673,7 @@ server <- function(input, output, session) {
   observe({
     req(comparison_mode())
 
-    # Labels resolve through the config layer (get_label_for_column); the old
-    # duplicate hardcoded map keyed by physical column name is gone (D064).
+    # Labels come from config/data_columns.yml (get_label_for_column()).
     plot_a_label <- if (identical(input$color_first_comp, "genes")) {
       "Genes"
     } else {
@@ -2145,8 +2137,7 @@ server <- function(input, output, session) {
     if (isTRUE(comparison_mode())) {
       req(input$color_second)
 
-      # Display name resolves through the config layer, not a second
-      # hardcoded label map (D064).
+      # Display name comes from config/data_columns.yml.
       second_label <- if (identical(input$color_second, "genes")) {
         "Genes"
       } else {
@@ -2366,7 +2357,7 @@ server <- function(input, output, session) {
     )
   })
 
-  # Keep the original plot for backward compatibility
+  # Single embedding plot, shown when comparison mode is off
   output$all_plotly <- renderPlotly({
     # Only render when comparison is NOT enabled
     req(!isTRUE(comparison_mode()))

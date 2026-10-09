@@ -589,7 +589,7 @@ ui <- fluidPage(
                 # Gene expression controls
                 create_plot_controls("data_type_exp", FALSE, "_exp"),
 
-                # Feature-availability caveat (Phase-2 documented limitation)
+                # Note: gene coverage differs between studies
                 div(
                   class = "alert alert-info py-2 px-3 mt-2 mb-0 small",
                   fontawesome::fa("circle-info", height = "12px"),

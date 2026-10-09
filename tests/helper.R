@@ -90,7 +90,8 @@ load_app_config <- function() {
     old <- setwd(APP_ROOT)
     on.exit(setwd(old), add = TRUE)
     source(file.path(APP_ROOT, "functions", "data_columns_config.R"), local = FALSE)
-    source(file.path(APP_ROOT, "functions", "data_contract.R"), local = FALSE)
+    source(file.path(APP_ROOT, "functions", "data_paths.R"), local = FALSE)
+    source(file.path(APP_ROOT, "functions", "data_checks.R"), local = FALSE)
     invisible(TRUE)
 }
 

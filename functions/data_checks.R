@@ -1,44 +1,18 @@
-# Startup data-contract validation for the Phase-2 atlas export.
+# Startup checks: does the data match what the app expects?
 # =============================================================================
-# The app must fail loudly and early - never silently continue - when the data
-# it is pointed at does not match what the code expects. This module implements
-# the Phase-3 startup validator.
+# The app stops at startup, with a message saying what is wrong, when the data
+# in PLAVISCA_DATA_DIR does not match config/data_columns.yml (cell count,
+# studies, columns, life-cycle stages, expression tables, bibliography).
+# Starting anyway would show empty dropdowns or misleading plots.
 #
-# It is deliberately independent of Shiny so it can be exercised directly from
-# the test suite.
+# The checks do not depend on Shiny, so the tests can call them directly.
 # =============================================================================
 
-#' Resolve an application data file path from PLAVISCA_DATA_DIR.
-#'
-#' All application data paths are constructed from this single function so the
-#' app can be pointed at a candidate/staging export without editing any code
-#' and without any absolute path ever appearing in the source.
-app_data_dir <- function() {
-    Sys.getenv("PLAVISCA_DATA_DIR", unset = "data")
-}
-
-app_data_path <- function(filename) {
-    file.path(app_data_dir(), filename)
-}
-
-APP_DATA_FILES <- list(
-    cleaned_dataset = "cleaned_dataset.rds",
-    gene_annotation = "gene_annotation.rds",
-    norm_df = "normalize_df.rds",
-    raw_df = "raw_df.rds",
-    data_source = "data_source.csv"
-)
-
-#' Build the list of resolved data paths used by the app.
-app_data_paths <- function() {
-    lapply(APP_DATA_FILES, app_data_path)
-}
-
-.contract_row <- function(check, status, detail) {
+.check_row <- function(check, status, detail) {
     data.frame(check = check, status = status, detail = detail, stringsAsFactors = FALSE)
 }
 
-#' Validate the loaded atlas against the app's data contract.
+#' Check the loaded data against what the app expects.
 #'
 #' @param mr_data     cleaned_dataset.rds$mr_data
 #' @param expr_df     the normalized (or raw) wide table, metadata + genes
@@ -46,14 +20,14 @@ app_data_paths <- function() {
 #' @param expr_label  label used in messages for `expr_df`
 #' @return a data.frame of check/status/detail rows. Status is "PASS", "FAIL"
 #'         or "WARN".
-validate_app_data_contract <- function(mr_data,
-                                       expr_df = NULL,
-                                       bibliography = NULL,
-                                       expr_label = "normalize_df") {
+check_app_data <- function(mr_data,
+                           expr_df = NULL,
+                           bibliography = NULL,
+                           expr_label = "normalize_df") {
     rows <- list()
     add <- function(check, ok, detail, warn_only = FALSE) {
         status <- if (ok) "PASS" else if (warn_only) "WARN" else "FAIL"
-        rows[[length(rows) + 1]] <<- .contract_row(check, status, detail)
+        rows[[length(rows) + 1]] <<- .check_row(check, status, detail)
     }
 
     cols <- colnames(mr_data)
@@ -67,9 +41,9 @@ validate_app_data_contract <- function(mr_data,
     )
 
     # --- 2. every required configured field resolves --------------------------
-    # This runs before any check that dereferences a configured column, so
-    # incompatible (e.g. pre-Phase-2) data produces an actionable schema
-    # message rather than an obscure subsetting error deeper down.
+    # This runs before any check that reads a configured column, so data
+    # with different columns gives a clear message rather than an obscure
+    # subsetting error further down.
     config_problems <- validate_data_columns(mr_data, stop_on_error = FALSE)
     add(
         "configured_fields_resolve",
@@ -82,12 +56,13 @@ validate_app_data_contract <- function(mr_data,
     )
     if (length(config_problems) > 0) {
         add(
-            "schema_compatibility",
+            "columns_match",
             FALSE,
             paste(
-                "the loaded dataset does not carry the Phase-2 atlas schema this",
-                "version of the app requires; remaining checks were skipped.",
-                "Point PLAVISCA_DATA_DIR at a Phase-2 export."
+                "the loaded data does not have the columns listed in",
+                "config/data_columns.yml, so the remaining checks were skipped.",
+                "Point PLAVISCA_DATA_DIR at the app_data directory written by",
+                "the preprocessing pipeline."
             )
         )
         out <- do.call(rbind, rows)
@@ -108,30 +83,30 @@ validate_app_data_contract <- function(mr_data,
         )
     )
 
-    # --- 4. no configured field maps to an obsolete column --------------------
-    obsolete <- app_obsolete_columns()
-    obsolete_targets <- Filter(
-        function(k) get_data_column(k) %in% obsolete,
+    # --- 4. no configured field maps to an unsupported column ------------------
+    unsupported <- app_unsupported_columns()
+    unsupported_targets <- Filter(
+        function(k) get_data_column(k) %in% unsupported,
         data_field_keys()
     )
     add(
-        "no_obsolete_config_targets",
-        length(obsolete_targets) == 0,
-        if (length(obsolete_targets) == 0) {
-            "no configured field points at a pre-Phase-2 column"
+        "no_field_uses_unsupported_column",
+        length(unsupported_targets) == 0,
+        if (length(unsupported_targets) == 0) {
+            "no configured field points at an unsupported column"
         } else {
-            paste(obsolete_targets, collapse = ", ")
+            paste(unsupported_targets, collapse = ", ")
         }
     )
 
-    # --- 5. obsolete physical columns are not required -------------------------
-    present_obsolete <- intersect(obsolete, cols)
+    # --- 5. unsupported columns are not required ------------------------------
+    present_unsupported <- intersect(unsupported, cols)
     add(
-        "obsolete_columns_not_required",
-        length(intersect(present_obsolete, required_data_columns())) == 0,
+        "unsupported_columns_not_required",
+        length(intersect(present_unsupported, required_data_columns())) == 0,
         sprintf(
-            "obsolete columns still present in data (informational): [%s]",
-            paste(present_obsolete, collapse = ", ")
+            "unsupported columns present in the data, not used by the app: [%s]",
+            paste(present_unsupported, collapse = ", ")
         )
     )
 
@@ -223,7 +198,7 @@ validate_app_data_contract <- function(mr_data,
     add(
         "hour_post_invasion_not_required",
         !("hour_post_invasion" %in% required_data_columns()),
-        "the app must not require the obsolete hour_post_invasion column"
+        "the app must not require the hour_post_invasion column"
     )
     # IDC classification must only exist for blood-eligible cells
     tissue_col <- get_data_column("tissue_or_sample_type")
@@ -311,25 +286,25 @@ validate_app_data_contract <- function(mr_data,
 
 #' Identify the gene-expression columns of a wide expression table.
 #'
-#' Genes are identified by *identifier*, never by a positional column range:
-#' the Phase-2 metadata block grew from ~52 to 88 columns and any positional
-#' assumption would now silently treat metadata as genes.
+#' Genes are identified by their identifier (PVP01_ prefix), never by column
+#' position: the number of metadata columns can change, and a positional range
+#' would then silently treat metadata as genes.
 identify_gene_columns <- function(expr_df, mr_data = NULL, pattern = "^PVP01_") {
     cand <- grep(pattern, colnames(expr_df), value = TRUE, ignore.case = TRUE)
     meta_cols <- if (!is.null(mr_data)) colnames(mr_data) else character(0)
     setdiff(cand, meta_cols)
 }
 
-#' Validate that the atlas' studies and the bibliography table agree exactly.
+#' Check that the bibliography (data_source.csv) lists exactly the studies in
+#' the data, with matching cell counts and PMIDs.
 #'
-#' Closes the D056/D057/D067 defect family: the bibliography was previously a
-#' hand-maintained table with no join back to the metadata, so drift between
-#' the two was undetectable.
+#' The bibliography is a separate table from the cell metadata; without this
+#' check the two could disagree unnoticed.
 validate_bibliography <- function(mr_data, bibliography) {
     rows <- list()
     add <- function(check, ok, detail, warn_only = FALSE) {
         status <- if (ok) "PASS" else if (warn_only) "WARN" else "FAIL"
-        rows[[length(rows) + 1]] <<- .contract_row(check, status, detail)
+        rows[[length(rows) + 1]] <<- .check_row(check, status, detail)
     }
 
     study_col <- get_data_column("study_label")
@@ -426,7 +401,7 @@ validate_bibliography <- function(mr_data, bibliography) {
             paste(
                 "data_source.csv carries no PMID column, so study_label is the",
                 "only available join key; PMID consistency cannot be checked",
-                "from this export (non-blocking, documented limitation)"
+                "from these data (warning only)"
             ),
             warn_only = TRUE
         )
@@ -454,17 +429,17 @@ validate_bibliography <- function(mr_data, bibliography) {
     out
 }
 
-#' Run the contract validation and stop the app if anything failed.
+#' Run check_app_data() and stop the app if any check failed.
 #'
-#' @return the contract result data.frame (invisibly) on success.
-enforce_app_data_contract <- function(mr_data, expr_df = NULL, bibliography = NULL) {
-    result <- validate_app_data_contract(mr_data, expr_df, bibliography)
+#' @return the check results as a data.frame (invisibly) when all pass.
+stop_if_app_data_invalid <- function(mr_data, expr_df = NULL, bibliography = NULL) {
+    result <- check_app_data(mr_data, expr_df, bibliography)
     failures <- result[result$status == "FAIL", , drop = FALSE]
     warnings_ <- result[result$status == "WARN", , drop = FALSE]
 
     if (nrow(warnings_) > 0) {
         message(sprintf(
-            "PlaViSca data contract - %d warning(s):\n  - %s",
+            "PlaViSca data checks: %d warning(s):\n  - %s",
             nrow(warnings_),
             paste(sprintf("%s: %s", warnings_$check, warnings_$detail), collapse = "\n  - ")
         ))
@@ -472,8 +447,8 @@ enforce_app_data_contract <- function(mr_data, expr_df = NULL, bibliography = NU
     if (nrow(failures) > 0) {
         stop(sprintf(
             paste0(
-                "PlaViSca startup data-contract validation FAILED (%d check(s)).\n",
-                "The data in '%s' is not compatible with this version of the app.\n",
+                "PlaViSca cannot start: %d data check(s) failed.\n",
+                "The data in '%s' do not match config/data_columns.yml:\n",
                 "  - %s"
             ),
             nrow(failures), app_data_dir(),
@@ -481,7 +456,7 @@ enforce_app_data_contract <- function(mr_data, expr_df = NULL, bibliography = NU
         ), call. = FALSE)
     }
     message(sprintf(
-        "PlaViSca data contract: %d/%d checks passed against '%s'.",
+        "PlaViSca data checks: %d/%d passed for '%s'.",
         sum(result$status == "PASS"), nrow(result), app_data_dir()
     ))
     invisible(result)

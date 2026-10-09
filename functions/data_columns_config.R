@@ -21,8 +21,8 @@
 MISSING_VALUE_LABEL <- .data_columns_raw$missing_label %||% "Missing"
 
 # Strings that must never reach the UI as if they were real categories. The
-# Phase-2 export should contain none of these in app-visible fields; this is
-# defence in depth (D062/D068).
+# startup checks make sure app-visible fields contain none of them; they are
+# also relabelled on display as a safeguard.
 LITERAL_MISSING_TOKENS <- c("NA", "N/A", "n/a", "NaN", "None", "none", "null", "NULL", "")
 
 .config_field <- function(key) {
@@ -39,7 +39,7 @@ LITERAL_MISSING_TOKENS <- c("NA", "N/A", "n/a", "NaN", "None", "none", "null", "
 # --------------------------------------------------------------- basic lookups
 
 #' Physical data column for a logical field key,
-#' e.g. "broad_stage" -> "parasite_broad_stage".
+#' e.g. "detailed_stage" -> "stage".
 get_data_column <- function(key) {
     .config_field(key)$column
 }
@@ -124,7 +124,7 @@ field_is_numeric_sorted <- function(key) {
 
 app_expected_cell_count <- function() as.integer(.data_columns_raw$expected_cell_count)
 app_expected_studies <- function() as.character(.data_columns_raw$expected_studies)
-app_obsolete_columns <- function() as.character(.data_columns_raw$obsolete_columns)
+app_unsupported_columns <- function() as.character(.data_columns_raw$unsupported_columns)
 app_note <- function(name) {
     note <- .data_columns_raw$notes[[name]]
     if (is.null(note)) NULL else trimws(gsub("\\s+", " ", note))
@@ -317,10 +317,10 @@ stage_selection_message <- function(broad_selection, detailed_selection) {
 # ------------------------------------------------------------------ validation
 
 #' Checks that every *required* configured column exists in `df` and that no
-#' configured field points at a known-obsolete physical column.
+#' configured field points at an unsupported column.
 #'
-#' Unlike the pre-Phase-3 version this STOPS rather than warns: a schema
-#' mismatch must never degrade silently into empty dropdowns or wrong plots.
+#' Stops (rather than warns) by default: a column mismatch must never turn
+#' silently into empty dropdowns or wrong plots.
 validate_data_columns <- function(df, stop_on_error = TRUE) {
     problems <- character(0)
 
@@ -337,11 +337,11 @@ validate_data_columns <- function(df, stop_on_error = TRUE) {
         ))
     }
 
-    obsolete <- app_obsolete_columns()
-    bad <- Filter(function(key) get_data_column(key) %in% obsolete, names(.data_columns_config))
+    unsupported <- app_unsupported_columns()
+    bad <- Filter(function(key) get_data_column(key) %in% unsupported, names(.data_columns_config))
     if (length(bad) > 0) {
         problems <- c(problems, sprintf(
-            "field(s) still map to obsolete pre-Phase-2 columns: %s",
+            "field(s) map to unsupported columns: %s",
             paste(sprintf("%s -> %s", bad, vapply(bad, get_data_column, character(1))),
                 collapse = ", "
             )
@@ -350,7 +350,7 @@ validate_data_columns <- function(df, stop_on_error = TRUE) {
 
     if (length(problems) > 0 && stop_on_error) {
         stop(sprintf(
-            "PlaViSca data-contract failure in %s:\n  - %s",
+            "PlaViSca: the data do not match %s:\n  - %s",
             .data_columns_config_path(), paste(problems, collapse = "\n  - ")
         ), call. = FALSE)
     }

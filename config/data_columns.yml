@@ -24,9 +24,12 @@ expected_studies:
   - Ruberto2022_2
   - Sa2020
 
-# Column names of older data versions that must not be used any more (checked
-# at startup and by the tests).
-obsolete_columns:
+# Column names the app does not use. Their information is in the fields below
+# (development_phase, parasite_stage(s), life_cycle_stage, blood_stage:
+# broad_stage and detailed_stage; hour_post_invasion: idc_reference_class;
+# geographic_location: parasite_origin_location). Data files may contain them,
+# but no field may map to them (checked at startup and by the tests).
+unsupported_columns:
   - development_phase
   - parasite_stages
   - parasite_stage
@@ -314,11 +317,10 @@ vocabularies:
     - Schizont (Blood stage)
     - Merozoite
 
-# Deterministic detailed -> broad stage mapping. This is the app-side copy of
-# the version-controlled mapping table documented in metadata_schema.tsv
-# (parasite_broad_stage row) and is what the broad/detailed filter
-# compatibility logic is derived from. It is validated against the loaded
-# data at startup; if the data ever disagrees, the app fails loudly.
+# Detailed -> broad life-cycle stage mapping, the app's copy of
+# pre_process_data/metadata/stages.tsv. The broad/detailed stage filters use
+# it to offer only compatible choices. It is checked against the loaded data
+# at startup; if the data disagree, the app stops.
 stage_compatibility:
   Sporozoite: Sporozoite stage
   Hypnozoite: Liver stage

@@ -83,10 +83,8 @@ category_palette <- function(levels_vec, column = NULL) {
 
 # Colors + biologically-ordered factor levels for a categorical colour column.
 #
-# Phase 3: the dead "blood_stage" special case is gone (there has never been a
-# column by that name), true NA is routed through the one generic
-# missing-value mechanism, and ordering comes from the configured biological
-# vocabulary rather than sort().
+# True NA is shown under the configured missing label, and values are ordered
+# by the biological ordering in config/data_columns.yml rather than sort().
 prepare_categorical_colors <- function(df, color) {
   # Display-only relabelling of missing values (true NA and, defensively, any
   # residual literal "NA"/"None" string). The analytical data is untouched.
@@ -410,15 +408,16 @@ embedding_plot <- function(
   plot_dim = "2d",
   is_dual_plot = FALSE
 ) {
-  # A colour column that is not present is a data-contract problem, not user
-  # input: fall back to a configured field that is guaranteed to exist, and
-  # say so loudly rather than silently plotting something else.
+  # A colour column that is not present means data and configuration do not
+  # match (not a user-input problem): fall back to a configured field that
+  # always exists, and say so loudly rather than silently plotting something
+  # else.
   if (is.null(color) || is.na(color) || color == "" || !color %in% names(df)) {
     fallback <- get_data_column("broad_stage")
     if (!fallback %in% names(df)) {
       stop(sprintf(
         paste0(
-          "PlaViSca data-contract error: neither the requested colour column ",
+          "PlaViSca data error: neither the requested colour column ",
           "('%s') nor the configured fallback ('%s') exists in the plotting ",
           "data. Check config/data_columns.yml against the loaded dataset."
         ),

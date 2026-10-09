@@ -111,8 +111,7 @@ gene_links_multiple <- function(gene_ids, target = "") {
 # One filter widget, built entirely from config/data_columns.yml.
 #
 # The Shiny input ID is the *logical field key* (e.g. "broad_stage",
-# "detailed_stage", "idc_reference_class"), never a physical column name and
-# never the old ambiguous keys.
+# "detailed_stage", "idc_reference_class"), never a physical column name.
 create_filter_widget <- function(key, suffix = "", width_class = "col-md-3") {
   help_text <- get_data_help(key)
   opts <- list(

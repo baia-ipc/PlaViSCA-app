@@ -136,7 +136,7 @@ test_that_("an unconfigured/renamed filter column is a loud failure, not silent"
     }, error = function(e) conditionMessage(e))
     if (is.null(err)) fail("a missing plot column must raise an error")
     expect_true_(
-        grepl("data-contract", err, ignore.case = TRUE),
-        sprintf("the error must identify itself as a contract failure, got: %s", err)
+        grepl("data error", err, ignore.case = TRUE),
+        sprintf("the error must say it is a data error, got: %s", err)
     )
 })

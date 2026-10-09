@@ -11,8 +11,9 @@ suppressMessages(conflict_prefer("layout", "plotly"))
 # get_data_column()/get_data_label() and the vocabulary/ordering helpers.
 source("functions/data_columns_config.R")
 
-# Data-contract validation + data path resolution (PLAVISCA_DATA_DIR).
-source("functions/data_contract.R")
+# Data file paths (PLAVISCA_DATA_DIR) and the startup data checks.
+source("functions/data_paths.R")
+source("functions/data_checks.R")
 
 # Source helper functions
 source("functions/helpers_server.R")
@@ -34,7 +35,8 @@ if (length(missing_files) > 0) {
     paste0(
       "PlaViSca cannot start: the following data file(s) are missing from ",
       "PLAVISCA_DATA_DIR ('%s'):\n  - %s\n",
-      "Set PLAVISCA_DATA_DIR to a directory containing the Phase-2 atlas export."
+      "Set PLAVISCA_DATA_DIR to the app_data directory written by the ",
+      "preprocessing pipeline."
     ),
     app_data_dir(), paste(missing_files, collapse = "\n  - ")
   ), call. = FALSE)
@@ -54,19 +56,16 @@ rm(cleaned_data_list)
 # Bibliography / data-source table, validated against the atlas at startup.
 pub_data_table <- readr::read_csv(DATA_PATHS$data_source, show_col_types = FALSE)
 
-# Fail fast (hard stop, not a warning) if the data does not satisfy the app's
-# contract - a schema mismatch must never degrade into empty dropdowns or
-# misleading plots.
-APP_DATA_CONTRACT <- enforce_app_data_contract(
+# Stop (not just warn) if the data do not match what the app expects: a column
+# mismatch must never turn into empty dropdowns or misleading plots.
+APP_DATA_CHECKS <- stop_if_app_data_invalid(
   mr_data = mr_data,
   expr_df = norm_df,
   bibliography = pub_data_table
 )
 
 # Gene columns of the expression tables, identified by gene identifier rather
-# than by a positional column range (the metadata block grew from ~52 to 88
-# columns in Phase 2; any positional assumption would misread metadata as
-# genes).
+# than by column position (see identify_gene_columns()).
 GENE_COLUMNS <- identify_gene_columns(norm_df, mr_data)
 
 # Define embedding column variables based on the pre-loaded metadata

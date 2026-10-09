@@ -109,7 +109,7 @@ test_that_("AT20: no live app code references obsolete stage/HPI/geography colum
     hits <- scan_obsolete_schema()
     hits <- hits[!(
         (basename(hits$file) == "data_columns.yml") |
-            (basename(hits$file) == "data_contract.R") |
+            (basename(hits$file) == "data_checks.R") |
             (basename(hits$file) == "test_at19_at20.R")
     ), , drop = FALSE]
     expect_empty_(
@@ -148,7 +148,7 @@ test_that_("AT20: no absolute machine-specific path is hardcoded in app code", {
 test_that_("AT20: no hardcoded 'data/...' literal remains outside the path helper", {
     offenders <- character(0)
     for (f in live_app_files()) {
-        if (basename(f) == "data_contract.R") next
+        if (basename(f) == "data_paths.R") next
         lines <- readLines(f, warn = FALSE)
         lines <- lines[!startsWith(trimws(lines), "#")]
         hit <- grep('"data/[^"]+"', lines, value = TRUE)

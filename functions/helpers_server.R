@@ -249,10 +249,9 @@ analyze_data_diversity <- function(data, group_col) {
 
 # Helper function to format species names with italics.
 #
-# Phase 3: no hardcoded species allow-list any more. Anything that looks like a
-# binomial ("Genus species") is italicised, and the configured missing label is
-# left alone, so a newly added host species does not silently lose its
-# italicisation (the old hardcoded list was a known cosmetic defect).
+# Anything that looks like a binomial ("Genus species") is italicised and the
+# configured missing label is left alone, so a newly added host species is
+# italicised without editing a list of species.
 format_species_name <- function(species_names) {
     chr <- relabel_missing(species_names)
     is_binomial <- grepl("^[A-Z][a-z]+ [a-z]+", chr) & chr != MISSING_VALUE_LABEL
@@ -318,8 +317,7 @@ apply_secondary_filters <- function(data, inputs, keep_gene_matrix = TRUE, genes
             filter(n_feature_rna > 0 & n_count_rna > 0)
     }
 
-    # Select relevant columns. The list is derived from config/data_columns.yml
-    # so there is no second hardcoded metadata vocabulary in the app.
+    # Select relevant columns. The list comes from config/data_columns.yml.
     metadata_cols <- app_metadata_columns()
 
     # For gene expression data, keep all columns (metadata + gene expression)
@@ -677,9 +675,9 @@ meta_plotly <- function(data, x_var, x_label, y_label, plt_type = "bar",
     if (!x_var %in% colnames(data)) {
         stop(sprintf(
             paste0(
-                "PlaViSca data-contract error: column '%s' is not present in ",
-                "the loaded data. This is a configuration/schema mismatch, not ",
-                "a user-input problem - check config/data_columns.yml."
+                "PlaViSca data error: column '%s' is not present in the ",
+                "loaded data. The data do not match config/data_columns.yml; ",
+                "this is not caused by user input."
             ),
             x_var
         ), call. = FALSE)

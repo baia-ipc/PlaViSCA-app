@@ -36,7 +36,7 @@ test_that_("every required configured field exists in the candidate data", {
 })
 
 test_that_("no configured field maps to an obsolete pre-Phase-2 column", {
-    bad <- Filter(function(k) get_data_column(k) %in% app_obsolete_columns(), data_field_keys())
+    bad <- Filter(function(k) get_data_column(k) %in% app_unsupported_columns(), data_field_keys())
     expect_empty_(bad, "fields still pointing at obsolete columns")
 })
 
@@ -82,7 +82,7 @@ test_that_("full startup contract validation passes with no FAILs", {
     m <- app_data("mr_data")
     n <- app_data("norm_df")
     b <- app_data("bibliography")
-    res <- validate_app_data_contract(m, n, b)
+    res <- check_app_data(m, n, b)
     failures <- res[res$status == "FAIL", , drop = FALSE]
     expect_empty_(
         sprintf("%s: %s", failures$check, failures$detail),
