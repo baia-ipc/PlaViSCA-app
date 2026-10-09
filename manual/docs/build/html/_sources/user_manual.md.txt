@@ -176,7 +176,7 @@ The Data Sources section provides detailed documentation and attribution for the
 
 #### Data Processing Pipeline
 
-All six studies are processed by the [PlaViSca preprocessing pipeline](https://github.com/baia-ipc/PlaViSca_pre_processing): from the sequencing reads (STARsolo count matrices) or the authors' count matrices, through cell calling, normalisation, integration (Harmony), embeddings and life-cycle stage annotation, to the data files read by the app. Expression is available as raw counts and log-normalised values.
+All six studies are processed by the [PlaViSca preprocessing pipeline](https://github.com/baia-ipc/PlaViSca-meta-analysis): from the sequencing reads (STARsolo count matrices) or the authors' count matrices, through cell calling, normalisation, integration (Harmony), embeddings and life-cycle stage annotation, to the data files read by the app. Expression is available as raw counts and log-normalised values.
 
 To set up the app with these files, see the [Setup Guide](setup_guide.md).
 
@@ -213,7 +213,7 @@ PlaViSca is an open-source initiative, and we welcome contributions from the sci
 - Reporting bugs or issues
 - Collaborating on future development
 
-... are warmly encouraged to get in touch with the development team or open an issue on [GitHub](https://github.com/baia-ipc/PlaViSca).
+... are warmly encouraged to get in touch with the development team or open an issue on [GitHub](https://github.com/baia-ipc/PlaViSca-app).
 
 ## Best Practices
 
@@ -228,7 +228,7 @@ PlaViSca is an open-source initiative, and we welcome contributions from the sci
 For questions, issues, or suggestions, contact the PlaViSca development team:
 
 - **Emails**: ggonnella@pasteur-kh.org, anthony.ruberto@med.fsu.edu
-- **GitHub Issues**: [Report bugs or request features](https://github.com/baia-ipc/PlaViSca/issues)
+- **GitHub Issues**: [Report bugs or request features](https://github.com/baia-ipc/PlaViSca-app/issues)
 
 © 2025 BAIA Team, Institut Pasteur du Cambodge. All rights reserved.
 

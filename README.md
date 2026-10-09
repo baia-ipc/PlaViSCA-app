@@ -24,8 +24,8 @@ You need R 4.3 and git. The package versions are fixed with
 [renv](https://rstudio.github.io/renv/), which installs them for you:
 
 ```bash
-git clone https://github.com/baia-ipc/PlaViSca.git
-cd PlaViSca
+git clone https://github.com/baia-ipc/PlaViSca-app.git
+cd PlaViSca-app
 R -e 'renv::restore()'
 ```
 
@@ -36,7 +36,7 @@ The `.Rprofile` in this directory activates renv whenever R starts here.
 The app reads its data from the directory named by the `PLAVISCA_DATA_DIR`
 environment variable (default: `data/` inside the app directory). The data
 files are written by the
-[PlaViSca preprocessing pipeline](https://github.com/baia-ipc/PlaViSca_pre_processing)
+[PlaViSca preprocessing pipeline](https://github.com/baia-ipc/PlaViSca-meta-analysis)
 into the `results/app_data/` directory of a pipeline run.
 
 ```bash
@@ -122,7 +122,7 @@ tests/                            test suite (tests/run_tests.R)
 manual/                           user manual (Sphinx sources and HTML build)
 docs/                             developer documentation
 renv.lock, renv/                  R package versions
-PlaViSca.Rproj                    RStudio project
+PlaViSca-app.Rproj                RStudio project
 ```
 
 ## License

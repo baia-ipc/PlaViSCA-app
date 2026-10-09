@@ -2,7 +2,7 @@ Welcome to PlaViSca
 =====================
 
 .. image:: https://img.shields.io/badge/PlaViSca-black?style=flat&logo=github
-   :target: https://github.com/baia-ipc/PlaViSca
+   :target: https://github.com/baia-ipc/PlaViSca-app
 
 **PlaViSca** is a free, open-source, interactive R Shiny application designed for the analysis and visualization of single-cell RNA sequencing (scRNA-seq) data from *Plasmodium vivax*. It empowers researchers, especially those in the malaria research community, to explore and interpret complex datasets through an intuitive, code-free interface.
 

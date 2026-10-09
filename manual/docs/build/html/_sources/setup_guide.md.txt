@@ -29,8 +29,8 @@ PlaViSca is compatible with macOS, Windows, and Linux operating systems. Follow 
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/baia-ipc/PlaViSca.git
-cd PlaViSca
+git clone https://github.com/baia-ipc/PlaViSca-app.git
+cd PlaViSca-app
 ```
 
 This will create a directory named `PlaViSca` containing all application files.
@@ -66,7 +66,7 @@ PlaViSca reads its data from the directory named by the `PLAVISCA_DATA_DIR` envi
 | `gene_annotation.rds` | _P. vivax_ P01 gene identifiers, names and descriptions |
 | `data_source.csv` | Publication table for the Data Sources tab |
 
-These files are written by the [PlaViSca preprocessing pipeline](https://github.com/baia-ipc/PlaViSca_pre_processing) into the `results/app_data/` directory of a pipeline run. Point the app at them, for example:
+These files are written by the [PlaViSca preprocessing pipeline](https://github.com/baia-ipc/PlaViSca-meta-analysis) into the `results/app_data/` directory of a pipeline run. Point the app at them, for example:
 
 ```bash
 export PLAVISCA_DATA_DIR=/path/to/run/results/app_data
@@ -158,6 +158,6 @@ For questions, feedback, or collaboration inquiries, please contact the correspo
 
 PlaViSca is freely available under the Creative Commons Attribution 4.0 International license (CC BY 4.0). The authors maintain authority to update and improve the application. Developers and contributors are welcome to explore, modify, or extend the app by visiting the official GitHub repository:
 
-[GitHub Repository – PlaViSca](https://github.com/baia-ipc/PlaViSca)
+[GitHub Repository – PlaViSca](https://github.com/baia-ipc/PlaViSca-app)
 
 © 2025 BAIA Team, Institut Pasteur du Cambodge. All rights reserved.
