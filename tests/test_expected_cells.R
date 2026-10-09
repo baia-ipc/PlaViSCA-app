@@ -65,10 +65,10 @@ test_that_("IDC and gametocyte totals are exact and gametocytes are blood-stage 
     idc <- m[[get_data_column("idc_reference_class")]]
     gam <- m[[get_data_column("pred_gametocyte_sex")]]
     expect_equal_(sum(!is.na(idc)), 90219L, "IDC labeled count")
-    expect_equal_(sum(!is.na(gam)), 23266L, "gametocyte call count")
+    expect_equal_(sum(!is.na(gam)), 24166L, "gametocyte call count")
     det <- m[[get_data_column("detailed_stage")]]
-    expect_equal_(sum(det == "Female gametocyte", na.rm = TRUE), 22392L, "Female gametocyte count")
-    expect_equal_(sum(det == "Male gametocyte", na.rm = TRUE), 978L, "Male gametocyte count")
+    expect_equal_(sum(det == "Female gametocyte", na.rm = TRUE), 11391L, "Female gametocyte count")
+    expect_equal_(sum(det == "Male gametocyte", na.rm = TRUE), 2931L, "Male gametocyte count")
     expect_equal_(sum(m[[get_data_column("broad_stage")]] != "Blood stage" & !is.na(gam), na.rm = TRUE),
         0L, "non-blood gametocyte calls")
 })

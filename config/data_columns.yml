@@ -141,6 +141,15 @@ fields:
       Female or male gametocytes if the cell's cluster has high marker
       scores for that sex (computed by PlaViSca, blood cells with at least
       10 UMIs only).
+  gametocyte_state:
+    label: "Gametocyte state"
+    column: gametocyte_state
+    role: filter
+    required: true
+    help: >
+      State along the sexual branch, from the clusters of the blood-stage
+      cells: developing gametocyte (sex not yet called), early or late
+      female, early or late male.
   source_sex_annotation:
     label: "Gametocyte sex (authors)"
     column: author_sex
@@ -241,6 +250,7 @@ filter_fields:
   - study_label
   - broad_stage
   - detailed_stage
+  - gametocyte_state
   - host_species
   - tissue_or_sample_type
   - treatment
@@ -252,6 +262,7 @@ category_fields:
   - study_label
   - broad_stage
   - detailed_stage
+  - gametocyte_state
   - host_species
   - tissue_or_sample_type
   - treatment
@@ -273,6 +284,7 @@ detail_table_fields:
   - source_stage_provenance
   - idc_reference_class
   - idc_heuristic_stage_bin
+  - gametocyte_state
   - pred_gametocyte_sex
   - source_sex_annotation
   - source_pseudogroup
@@ -302,6 +314,7 @@ vocabularies:
     - Trophozoite
     - Schizont (Blood stage)
     - Merozoite
+    - Developing gametocyte
     - Male gametocyte
     - Female gametocyte
   pred_gametocyte_sex:
@@ -311,6 +324,12 @@ vocabularies:
   source_sex_annotation:
     - Male gametocyte
     - Female gametocyte
+  gametocyte_state:
+    - Developing gametocyte
+    - Early female
+    - Late female
+    - Early male
+    - Late male
   idc_heuristic_stage_bin:
     - Ring
     - Trophozoite
@@ -329,11 +348,18 @@ stage_compatibility:
   Trophozoite: Blood stage
   Schizont (Blood stage): Blood stage
   Merozoite: Blood stage
+  Developing gametocyte: Blood stage
   Male gametocyte: Blood stage
   Female gametocyte: Blood stage
 
 # Fixed colours for some values (the others use the automatic palette).
 colors:
+  gametocyte_state:
+    Developing gametocyte: "#D2B4DE"
+    Early female: "#8E44AD"
+    Late female: "#4A235A"
+    Early male: "#F5B041"
+    Late male: "#BA4A00"
   detailed_stage:
     Male gametocyte: "#1F78B4"
     Female gametocyte: "#DAA520"
