@@ -1,125 +1,130 @@
-# PlaViSCA — _Plasmodium vivax_  Single-Cell RNA-seq Meta-Analysis and Interactive Atlas
+# PlaViSca — _Plasmodium vivax_ single-cell atlas
 
-[![R](https://img.shields.io/badge/R-%3E%3D%204.0-blue?logo=r&logoColor=white)](https://www.r-project.org/)
-[![Shiny](https://img.shields.io/badge/Shiny-%3E%3D%201.7.0-brightgreen?logo=r&logoColor=white)](https://shiny.rstudio.com/)
-[![Version](https://img.shields.io/badge/version-0.1.0-orange.svg)](https://github.com/Sopheap15/PlaViSca/releases)
+[![R](https://img.shields.io/badge/R-4.3-blue?logo=r&logoColor=white)](https://www.r-project.org/)
+[![Shiny](https://img.shields.io/badge/Shiny-app-brightgreen?logo=r&logoColor=white)](https://shiny.posit.co/)
 
-PlaViSCA is an interactive R/Shiny application for exploring single-cell RNA-seq
-data from _Plasmodium vivax_.
+PlaViSca is an interactive R/Shiny application for exploring single-cell
+RNA-seq data of _Plasmodium vivax_. It brings together about 106,000 cells from
+six published studies (blood stages, liver stages and sporozoites) and lets
+you, without writing code:
 
-## Key features
+- explore the cells on PCA, UMAP and t-SNE plots (2D or 3D), coloured by
+  study, life-cycle stage, host, treatment or gene expression, and compare
+  two colourings side by side;
+- plot the expression of one or more genes per group, with links to PlasmoDB
+  and NCBI;
+- filter all views by study, life-cycle stage, host, tissue, treatment,
+  strain and reference time point;
+- look at quality-control plots, the per-cell metadata and the source
+  publications, and download data and plots.
 
-- Interactive 2D and 3D visualizations (Plotly-powered PCA / UMAP / t-SNE).
-- Per-cell metadata exploration (filter, subset, and download results).
-- Gene expression viewer with direct links to PlasmoDB and NCBI.
-- Export plots and metadata for downstream analysis.
+## Installation
 
-## Repository layout
-
-After cloning, the repository contains:
-
-```
-.
-├── app.R                   # Shiny app entry point (loads ui.R and server.R)
-├── global.R                # Shared setup (data loading, helpers)
-├── ui.R                    # User interface
-├── server.R                # Shiny server logic
-├── functions/              # Plotting/helpers and preprocessing scripts
-├── data/                   # Example and processed RDS files (not all data included)
-├── ref/                    # Reference data (e.g gene annotation)
-├── www/                    # Static assets (images, CSS, JS)
-├── manual/                 # Manual to setup and run the application
-└── README.md               # This file
-```
-
-## Getting started
-
-1. Clone the repository
+You need R 4.3 and git. The package versions are fixed with
+[renv](https://rstudio.github.io/renv/), which installs them for you:
 
 ```bash
-git clone https://github.com/Sopheap15/PlaViSca.git
+git clone https://github.com/baia-ipc/PlaViSca.git
 cd PlaViSca
+R -e 'renv::restore()'
 ```
 
-2. Install R dependencies
+The `.Rprofile` in this directory activates renv whenever R starts here.
 
-```r
-install.packages('renv')
-renv::restore()
-```
+## Quick start
 
-Manual (if you don't use renv):
-
-```r
-install.packages(c(
-  'shiny', 'shinyjs', 'shinycssloader', 'plotly', 'DT',
-  'RColorBrewer', 'tidyverse', 'later'
-))
-```
-
-### 3. Run the app
+The app reads its data from the directory named by the `PLAVISCA_DATA_DIR`
+environment variable (default: `data/` inside the app directory). The data
+files are written by the
+[PlaViSca preprocessing pipeline](https://github.com/baia-ipc/PlaViSca_pre_processing)
+into the `results/app_data/` directory of a pipeline run.
 
 ```bash
-chmod +x run_app.sh
-./run_app.sh
+PLAVISCA_DATA_DIR=/path/to/run/results/app_data ./run_app.sh
 ```
-Run `./run_app.sh --help` for options (host, port, etc.).
 
-Then open `http://<server-ip>:3838` in a browser.
+Then open <http://localhost:3838> in a browser. `./run_app.sh --help` lists
+the options (host, port, opening a browser). From R or RStudio, the same is:
+
+```r
+Sys.setenv(PLAVISCA_DATA_DIR = "/path/to/run/results/app_data")
+shiny::runApp(".", port = 3838)
+```
 
 ## Data
 
-The data files are made by the preprocessing pipeline
-([PlaViSca_pre_processing](https://github.com/baia-ipc/PlaViSca_pre_processing),
-stage `50_export_app`, folder `results/app_data/` of a run):
-
-- `cleaned_dataset.rds`: per-cell metadata and embeddings (`mr_data`), and
-  per-study PCA and variable-gene tables;
-- `normalize_df.rds`, `raw_df.rds`: metadata plus log-normalised expression
-  or counts;
-- `data_source.csv`: one row per study;
-- `gene_annotation.rds`: gene IDs, names and descriptions.
+| File | Content |
+|---|---|
+| `cleaned_dataset.rds` | per-cell metadata and embeddings (`mr_data`), per-study PCA and variable-gene tables |
+| `normalize_df.rds`, `raw_df.rds` | metadata plus log-normalised expression or raw counts |
+| `gene_annotation.rds` | gene identifiers, names and descriptions |
+| `data_source.csv` | one row per study: authors, title, journal, date, PMID, DOI, cell count |
 
 The per-cell columns are described in the pipeline's `metadata/columns.tsv`.
 
-### Choosing a data directory
+### Startup checks
 
-The app reads its data from the folder named by the `PLAVISCA_DATA_DIR`
-environment variable (default `data`):
+At startup the app checks that the data match what it expects, as set in
+`config/data_columns.yml`: the number of cells and the list of studies, that
+every configured column is present, that cell identifiers are unique, that
+broad and detailed life-cycle stages agree, that the expression tables
+describe the same cells as the metadata, and that `data_source.csv` lists
+exactly the studies in the data. If a check fails, the app stops with a
+message saying what is wrong, for example:
 
-```bash
-PLAVISCA_DATA_DIR=/path/to/app_data R -e "shiny::runApp('.')"
+```
+PlaViSca cannot start: 1 data check(s) failed.
+The data in '/path/to/app_data' do not match config/data_columns.yml:
+  - cell_count: expected 105949 metadata rows, found 98000
 ```
 
-### Data contract
+When the data change on purpose (for example a new study), update
+`config/data_columns.yml` together with them.
 
-At startup the app validates the loaded dataset against
-`config/data_columns.yml` (cell count, expected studies, every configured
-field, cell-id uniqueness, broad/detailed life-cycle stage consistency,
-expression/metadata alignment, bibliography coverage, and more). If the data
-does not match, the app **stops with an explicit message** rather than
-starting in a degraded state. `config/data_columns.yml` is the single source
-of truth for metadata field names, labels, help text, biological ordering and
-colours - never hardcode a metadata column name elsewhere in the app.
+## Configuration
+
+| File | What it sets |
+|---|---|
+| `config/data_columns.yml` | which data columns the app uses, their labels, help text, ordering and colours, and the expected cell count and studies |
+| `config/external_links.yml` | every external web address (PlasmoDB and NCBI gene pages, source code, front-end libraries) |
+| `config/team.yml` | team, organisations and contacts shown on the About page and in the footer |
 
 ## Tests
 
 ```bash
-PLAVISCA_DATA_DIR=/path/to/export Rscript tests/run_tests.R
+PLAVISCA_DATA_DIR=/path/to/run/results/app_data Rscript tests/run_tests.R
 ```
 
-Plain R scripts, no test framework required. Exit status is non-zero if any
-test fails. Optionally pass an output path to write a TSV of results.
+The tests are plain R scripts (no test framework needed). They check the
+data, the configuration and the app code; the exit status is non-zero if a
+test fails. Pass a file name to also write the results as a table:
+`Rscript tests/run_tests.R results.tsv`.
 
-## Features and navigation
+## Documentation
 
-- Home: high-level overview and links to the manual and data sources.
-- Explore Data: filter datasets, change color/symbol mapping, switch
-  between integrated/unintegrated embeddings, and toggle between 2D/3D.
-- Gene Expression: view per-gene expression across groups and download
-  results.
+- **User manual** — how to use each page of the app:
+  [manual/docs/source/user_manual.md](manual/docs/source/user_manual.md),
+  and the setup guide [manual/docs/source/setup_guide.md](manual/docs/source/setup_guide.md).
+  In the app, the *User manual* button opens the HTML version.
+- **Developer guide** — how the code is organised, how to add a data field,
+  run the tests and rebuild the manual: [docs/developer.md](docs/developer.md).
 
-## License & attribution
+## Repository layout
 
-This project is provided under the CC-BY 4.0 license (see `LICENSE`).
+```
+app.R, global.R, ui.R, server.R   Shiny entry point, startup, page, server logic
+run_app.sh                        start the app from the command line
+config/                           data columns, external links, team
+functions/                        helpers: data checks, filters, plots, ...
+ui/                               one file per page section and analysis tab
+www/                              images, CSS and JavaScript served to the browser
+tests/                            test suite (tests/run_tests.R)
+manual/                           user manual (Sphinx sources and HTML build)
+docs/                             developer documentation
+renv.lock, renv/                  R package versions
+```
 
+## License
+
+PlaViSca is released under the Creative Commons Attribution 4.0
+International license (CC BY 4.0); see [LICENSE](LICENSE).
