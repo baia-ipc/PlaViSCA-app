@@ -293,7 +293,6 @@ vocabularies:
     - Mosquito stage
   detailed_stage:
     - Sporozoite
-    - EEF
     - Hypnozoite
     - Schizont (Liver stage)
     - Ring
@@ -302,7 +301,6 @@ vocabularies:
     - Merozoite
     - Male gametocyte
     - Female gametocyte
-    - Asexual (unresolved stage)
   pred_gametocyte_sex:
     - Male gametocyte
     - Female gametocyte
@@ -323,7 +321,6 @@ vocabularies:
 # data at startup; if the data ever disagrees, the app fails loudly.
 stage_compatibility:
   Sporozoite: Sporozoite stage
-  EEF: Liver stage
   Hypnozoite: Liver stage
   Schizont (Liver stage): Liver stage
   Ring: Blood stage
@@ -332,7 +329,6 @@ stage_compatibility:
   Merozoite: Blood stage
   Male gametocyte: Blood stage
   Female gametocyte: Blood stage
-  Asexual (unresolved stage): Blood stage
 
 # Fixed colours for some values (the others use the automatic palette).
 colors:
