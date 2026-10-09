@@ -135,6 +135,7 @@ live_app_files <- function() {
     files <- c(
         file.path(APP_ROOT, c("app.R", "global.R", "ui.R", "server.R")),
         list.files(file.path(APP_ROOT, "functions"), pattern = "\\.R$", full.names = TRUE),
+        list.files(file.path(APP_ROOT, "ui"), pattern = "\\.R$", full.names = TRUE),
         list.files(file.path(APP_ROOT, "config"), pattern = "\\.ya?ml$", full.names = TRUE)
     )
     files[file.exists(files)]

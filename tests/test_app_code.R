@@ -1,5 +1,5 @@
 # Checks on the app source code (app.R, global.R, ui.R, server.R, functions/,
-# config/, www/script.js): no unsupported column names, no missing sourced
+# ui/, config/, www/script.js): no unsupported column names, no missing sourced
 # files, no hardcoded data paths or external URLs, valid site configuration.
 
 #' Scan app source files for the unsupported column names listed in
@@ -41,12 +41,12 @@ test_that_("functions/ holds no preprocessing scripts", {
     expect_empty_(offenders, "preprocessing scripts in the sourced functions/ directory")
 })
 
-test_that_("global.R sources only files that exist", {
-    global_txt <- readLines(file.path(APP_ROOT, "global.R"), warn = FALSE)
+test_that_("global.R and ui.R source only files that exist", {
+    global_txt <- unlist(lapply(file.path(APP_ROOT, c("global.R", "ui.R")), readLines, warn = FALSE))
     sourced <- regmatches(global_txt, regexpr('"[^"]+\\.R"', global_txt))
     sourced <- gsub('"', "", sourced)
     missing <- sourced[!file.exists(file.path(APP_ROOT, sourced))]
-    expect_empty_(missing, "global.R sources non-existent files")
+    expect_empty_(missing, "sourced files that do not exist")
 })
 
 test_that_("no absolute machine-specific path is hardcoded in app code", {
