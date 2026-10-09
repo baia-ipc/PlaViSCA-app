@@ -1,8 +1,8 @@
 # The team behind PlaViSca, shown on the About page and in the footer.
 # =============================================================================
 # Read with team_info() (functions/site_config.R). Members are shown in the
-# order listed here; affiliation and email are optional. Logos are files in
-# www/.
+# order listed here; affiliation and email are optional. Only the
+# corresponding authors have an email. Logos are files in www/.
 # =============================================================================
 
 team_name: "BAIA Team"
@@ -18,13 +18,10 @@ organizations:
 members:
   - name: "Sopheap Oeng"
     role: "bioinformatic system engineer"
-    email: "osopheap@pasteur-kh.org"
   - name: "Lionel Brice Feufack-Donfack"
     role: "postdoctoral researcher"
-    email: "ldonfack@pasteur-kh.org"
   - name: "Thomas Obadia"
     role: "senior scientist"
-    email: "tobadia@pasteur-kh.org"
   - name: "Anthony Ruberto"
     role: "Assistant Professor"
     affiliation: "Department of Biomedical Sciences, College of Medicine, Florida State University"
