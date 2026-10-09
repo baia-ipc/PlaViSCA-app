@@ -2214,38 +2214,6 @@ server <- function(input, output, session) {
     return(TRUE)
   }
 
-  second_plot_reactive <- reactive({
-    req(comparison_mode())
-
-    # Get current values with defaults
-    color_second <- if (!is.null(input$color_second)) input$color_second else get_data_column("detailed_stage")
-    genes_second <- if (!is.null(input$genes_second)) input$genes_second else ""
-    check_second <- if (!is.null(input$check_second)) input$check_second else FALSE
-    # Use main plot axes, size and dimension for second plot
-    xaxis_val <- if (!is.null(input$xaxis)) input$xaxis else "pc_1"
-    yaxis_val <- if (!is.null(input$yaxis)) input$yaxis else "pc_2"
-    size_val <- if (!is.null(input$size)) input$size else 4
-    plot_val <- if (!is.null(input$plot)) input$plot else "3d"
-
-    # For gene coloring, allow empty genes and let the plot function handle it
-    if (color_second == "genes") {
-      if (is.null(genes_second) || (length(genes_second) == 1 && genes_second == "")) {
-        genes_second <- ""
-      }
-    }
-
-    list(
-      color = color_second,
-      genes = genes_second,
-      check = check_second,
-      xaxis = xaxis_val,
-      yaxis = yaxis_val,
-      size = size_val,
-      plot = plot_val,
-      timestamp = Sys.time()
-    )
-  })
-
   # Observer for first plot gene links (during comparison)
   observe({
     req(comparison_mode(), input$color_first_comp == "genes", input$genes_n_first_comp)
