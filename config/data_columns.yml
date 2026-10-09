@@ -353,22 +353,47 @@ stage_compatibility:
   Female gametocyte: Blood stage
 
 # Fixed colours for some values (the others use the automatic palette).
+# Each life-cycle stage has one colour in every field that shows it. Blood
+# stages and gametocyte states match the gametocyte figure of the
+# preprocessing pipeline (R/40_annotate_stages.R); gametocytes follow the sex
+# expression modules of the P. falciparum atlas (developing: brown, female:
+# greens, male: blue-greys, early lighter than late).
 colors:
-  gametocyte_state:
-    Developing gametocyte: "#D2B4DE"
-    Early female: "#8E44AD"
-    Late female: "#4A235A"
-    Early male: "#F5B041"
-    Late male: "#BA4A00"
   detailed_stage:
-    Male gametocyte: "#1F78B4"
-    Female gametocyte: "#DAA520"
+    Sporozoite: "#CC6677"
+    Hypnozoite: "#882255"
+    Schizont (Liver stage): "#AA4499"
+    Ring: "#A9D18E"
+    Trophozoite: "#F4D35E"
+    Schizont (Blood stage): "#8EC5E8"
+    Merozoite: "#2E75B6"
+    Developing gametocyte: "#66454C"
+    Female gametocyte: "#4E6E59"
+    Male gametocyte: "#42517C"
+  gametocyte_state:
+    Developing gametocyte: "#66454C"
+    Early female: "#759F8B"
+    Late female: "#4E6E59"
+    Early male: "#7F88B3"
+    Late male: "#42517C"
+  source_life_cycle_stage:
+    Sporozoite: "#CC6677"
+    Hypnozoite: "#882255"
+    Schizont (Liver stage): "#AA4499"
+    Female gametocyte: "#4E6E59"
+    Male gametocyte: "#42517C"
+  idc_heuristic_stage_bin:
+    Ring: "#A9D18E"
+    Trophozoite: "#F4D35E"
+    Schizont (Blood stage): "#8EC5E8"
+    Merozoite: "#2E75B6"
   pred_gametocyte_sex:
-    Male gametocyte: "#1F78B4"
-    Female gametocyte: "#DAA520"
+    Developing gametocyte: "#66454C"
+    Female gametocyte: "#4E6E59"
+    Male gametocyte: "#42517C"
   source_sex_annotation:
-    Male gametocyte: "#1F78B4"
-    Female gametocyte: "#DAA520"
+    Female gametocyte: "#4E6E59"
+    Male gametocyte: "#42517C"
 
 # Human-readable display labels for otherwise machine-ish category values.
 value_labels:

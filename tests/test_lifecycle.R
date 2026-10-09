@@ -136,3 +136,13 @@ test_that_("non-blood cells have no IDC reference-time class", {
     leaked <- sum(non_blood & !is.na(m[[get_data_column("idc_reference_class")]]))
     expect_equal_(leaked, 0L, "non-blood cells carrying an IDC reference-time class")
 })
+
+test_that_("every life-cycle stage and gametocyte state has its own fixed colour", {
+    m <- app_data("mr_data")
+    for (key in c("detailed_stage", "gametocyte_state")) {
+        observed <- unique(na.omit(as.character(m[[get_data_column(key)]])))
+        cols <- get_field_colors(key)
+        expect_empty_(setdiff(observed, names(cols)), sprintf("%s values without a fixed colour", key))
+        expect_empty_(names(cols)[duplicated(tolower(cols))], sprintf("%s values sharing a colour", key))
+    }
+})
