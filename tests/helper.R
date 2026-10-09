@@ -1,10 +1,10 @@
 # Minimal test harness for the PlaViSca app.
 # =============================================================================
-# Deliberately dependency-free (no testthat): the deployment environments for
-# this app do not all carry a test framework, and the checks here are simple
-# assertions over the data contract. Run with tests/run_tests.R.
+# Deliberately dependency-free (no testthat): not every environment the app
+# runs in has a test framework, and the checks here are simple assertions
+# about the app code and data. Run with tests/run_tests.R.
 #
-# Candidate-data tests honour PLAVISCA_DATA_DIR exactly like the app does.
+# Data tests read PLAVISCA_DATA_DIR exactly like the app does.
 # =============================================================================
 
 .TEST_RESULTS <- new.env(parent = emptyenv())
@@ -97,7 +97,7 @@ load_app_config <- function() {
 
 .DATA_CACHE <- new.env(parent = emptyenv())
 
-#' Lazily load a candidate data object exactly once per test run.
+#' Load a data object once per test run.
 app_data <- function(which = c("mr_data", "norm_df", "raw_df", "bibliography")) {
     which <- match.arg(which)
     if (!is.null(.DATA_CACHE[[which]])) {
@@ -106,17 +106,17 @@ app_data <- function(which = c("mr_data", "norm_df", "raw_df", "bibliography")) 
     obj <- switch(which,
         mr_data = {
             p <- app_data_path("cleaned_dataset.rds")
-            if (!file.exists(p)) skip_test(sprintf("no candidate data at %s", p))
+            if (!file.exists(p)) skip_test(sprintf("no data at %s", p))
             readRDS(p)$mr_data
         },
         norm_df = {
             p <- app_data_path("normalize_df.rds")
-            if (!file.exists(p)) skip_test(sprintf("no candidate data at %s", p))
+            if (!file.exists(p)) skip_test(sprintf("no data at %s", p))
             readRDS(p)
         },
         raw_df = {
             p <- app_data_path("raw_df.rds")
-            if (!file.exists(p)) skip_test(sprintf("no candidate data at %s", p))
+            if (!file.exists(p)) skip_test(sprintf("no data at %s", p))
             readRDS(p)
         },
         bibliography = {

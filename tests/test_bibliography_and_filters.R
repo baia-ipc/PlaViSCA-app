@@ -126,7 +126,7 @@ test_that_("numeric-sorted fields sort numerically, not lexicographically", {
     expect_equal_(vals, c("6", "12", "32", "48"), "IDC class ordering")
 })
 
-test_that_("an unconfigured/renamed filter column is a loud failure, not silent", {
+test_that_("a filter column missing from the data raises an error", {
     m <- app_data("mr_data")[1:10, , drop = FALSE]
     err <- tryCatch({
         meta_plotly_exists <- exists("meta_plotly")

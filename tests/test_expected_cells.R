@@ -1,6 +1,7 @@
-# Final DEC01/DEC02 release-candidate membership and alignment invariants.
+# Exact cell membership and totals of the app data. Update these numbers
+# together with the data (and expected_cell_count in config/data_columns.yml).
 
-test_that_("final release count and six study counts are exact", {
+test_that_("total and per-study cell counts are exact", {
     m <- app_data("mr_data")
     expected <- c(
         "Mancio-Silva2022" = 1480L,
@@ -11,12 +12,13 @@ test_that_("final release count and six study counts are exact", {
         "Ruberto2022_2" = 9947L
     )
     observed <- table(as.character(m[[get_data_column("study_label")]]))
-    expect_equal_(nrow(m), 105949L, "final release cell count")
+    expect_equal_(nrow(m), 105949L, "total cell count")
     expect_equal_(as.integer(observed[names(expected)]), as.integer(expected),
-        "final per-study cell counts")
+        "per-study cell counts")
 })
 
-test_that_("DEC01 removes exactly the 14 duplicate representations and retains counterparts", {
+test_that_("the 14 duplicated Mancio-Silva2022 cell copies are removed, their partners kept", {
+    # See pre_process_data/metadata/mancio_silva2022_duplicate_cells.tsv.
     m <- app_data("mr_data")
     ids <- as.character(m[[get_data_column("barcode")]])
     removed <- c(
@@ -29,17 +31,17 @@ test_that_("DEC01 removes exactly the 14 duplicate representations and retains c
         "D14SEQ100_TCCGCGAGTAAG.1", "D4Seq1_GCTGAATTTCGG.1"
     )
     retained <- sub("\\.1$", "", removed)
-    expect_empty_(intersect(removed, ids), "DEC01 removal IDs still present")
-    expect_empty_(setdiff(retained, ids), "DEC01 retained counterparts absent")
+    expect_empty_(intersect(removed, ids), "duplicate copies still present")
+    expect_empty_(setdiff(retained, ids), "partner cells missing")
 })
 
-test_that_("DEC02 retains both distinct-source D5 cells without a suspicion field", {
+test_that_("both D5 cells with identical counts from different runs are kept, unflagged", {
     m <- app_data("mr_data")
     pair <- c("D5Seq1_CCCCGATTGACG", "D5Seq2_CCCCGATTGACG")
     rows <- m[match(pair, as.character(m[[get_data_column("barcode")]])), , drop = FALSE]
-    expect_true_(all(!is.na(rows[[get_data_column("barcode")]])), "DEC02 D5 cells must both exist")
+    expect_true_(all(!is.na(rows[[get_data_column("barcode")]])), "both D5 cells must exist")
     expect_equal_(length(unique(as.character(rows$run_id))), 2L,
-        "DEC02 cells must retain distinct source run sets")
+        "the two D5 cells must keep their distinct source runs")
     suspect_cols <- grep("duplic|suspic", colnames(m), ignore.case = TRUE, value = TRUE)
     expect_empty_(suspect_cols, "unexpected duplicate/suspicion columns in app-facing data")
 })
@@ -53,25 +55,25 @@ test_that_("exactly seven low-UMI Hazzard2024 cells have paired missing stages",
     expect_true_(all(m$study_label[broad] == "Hazzard2024"),
         "missing-stage cells must all be Hazzard2024")
     expect_true_(all(m$total_umi_count[broad] < 10),
-        "missing-stage cells must all be below the 10-UMI inference gate")
+        "missing-stage cells must all be below the 10-UMI minimum for stage inference")
     expect_equal_(relabel_missing(NA_character_), MISSING_VALUE_LABEL,
         "missing-stage display label")
 })
 
-test_that_("final IDC and gametocyte totals preserve biological invariants", {
+test_that_("IDC and gametocyte totals are exact and gametocytes are blood-stage only", {
     m <- app_data("mr_data")
     idc <- m[[get_data_column("idc_reference_class")]]
     gam <- m[[get_data_column("pred_gametocyte_sex")]]
     expect_equal_(sum(!is.na(idc)), 90219L, "IDC labeled count")
     expect_equal_(sum(!is.na(gam)), 23266L, "gametocyte call count")
     det <- m[[get_data_column("detailed_stage")]]
-    expect_equal_(sum(det == "Female gametocyte", na.rm = TRUE), 22392L, "harmonized Female gametocyte count")
-    expect_equal_(sum(det == "Male gametocyte", na.rm = TRUE), 978L, "harmonized Male gametocyte count")
+    expect_equal_(sum(det == "Female gametocyte", na.rm = TRUE), 22392L, "Female gametocyte count")
+    expect_equal_(sum(det == "Male gametocyte", na.rm = TRUE), 978L, "Male gametocyte count")
     expect_equal_(sum(m[[get_data_column("broad_stage")]] != "Blood stage" & !is.na(gam), na.rm = TRUE),
         0L, "non-blood gametocyte calls")
 })
 
-test_that_("raw normalized scaled and cleaned tables have canonical identical keys", {
+test_that_("metadata, raw and normalized tables have the same sorted cell keys", {
     m <- app_data("mr_data")
     n <- app_data("norm_df")
     r <- app_data("raw_df")

@@ -1,6 +1,6 @@
-# Data-contract tests: the candidate atlas loads and matches what the app expects.
+# The data in PLAVISCA_DATA_DIR load and match what the app expects.
 
-test_that_("candidate data directory resolves from PLAVISCA_DATA_DIR", {
+test_that_("the data directory resolves from PLAVISCA_DATA_DIR", {
     expect_true_(nzchar(app_data_dir()), "app_data_dir() must return a directory")
     expect_true_(
         dir.exists(app_data_dir()),
@@ -8,7 +8,7 @@ test_that_("candidate data directory resolves from PLAVISCA_DATA_DIR", {
     )
 })
 
-test_that_("all four app data files are present", {
+test_that_("all app data files are present", {
     for (f in unlist(APP_DATA_FILES)) {
         p <- app_data_path(f)
         expect_true_(file.exists(p), sprintf("missing data file: %s", p))
@@ -29,15 +29,15 @@ test_that_("the atlas contains exactly the six expected studies", {
     )
 })
 
-test_that_("every required configured field exists in the candidate data", {
+test_that_("every required configured field exists in the data", {
     m <- app_data("mr_data")
     problems <- validate_data_columns(m, stop_on_error = FALSE)
     expect_empty_(problems, "configured fields that do not resolve")
 })
 
-test_that_("no configured field maps to an obsolete pre-Phase-2 column", {
+test_that_("no configured field maps to an unsupported column", {
     bad <- Filter(function(k) get_data_column(k) %in% app_unsupported_columns(), data_field_keys())
-    expect_empty_(bad, "fields still pointing at obsolete columns")
+    expect_empty_(bad, "fields pointing at unsupported columns")
 })
 
 test_that_("cell identifiers are unique and match the metadata rownames", {
@@ -78,7 +78,7 @@ test_that_("no duplicate cell ids in the expression tables", {
     expect_empty_(rownames(n)[duplicated(rownames(n))], "duplicate expression rownames")
 })
 
-test_that_("full startup contract validation passes with no FAILs", {
+test_that_("all startup data checks pass", {
     m <- app_data("mr_data")
     n <- app_data("norm_df")
     b <- app_data("bibliography")
@@ -86,7 +86,7 @@ test_that_("full startup contract validation passes with no FAILs", {
     failures <- res[res$status == "FAIL", , drop = FALSE]
     expect_empty_(
         sprintf("%s: %s", failures$check, failures$detail),
-        "startup contract failures"
+        "failed startup data checks"
     )
 })
 

@@ -112,7 +112,7 @@ test_that_("source-defined sporozoites are classified as Sporozoite stage", {
     m <- app_data("mr_data")
     src <- get_data_column("source_life_cycle_stage")
     idx <- which(!is.na(m[[src]]) & m[[src]] == "Sporozoite")
-    if (length(idx) == 0) skip_test("no source-defined sporozoites in this candidate")
+    if (length(idx) == 0) skip_test("no source-defined sporozoites in these data")
     expect_setequal_(
         unique(m[[get_data_column("broad_stage")]][idx]), "Sporozoite stage",
         "source-defined sporozoites must be Sporozoite stage"

@@ -2,14 +2,14 @@
 
 # --------------------------------------------------------------------- IDC
 
-test_that_("the obsolete hour_post_invasion field is not required by the app", {
+test_that_("the hour_post_invasion column is not required by the app", {
     expect_true_(
         !("hour_post_invasion" %in% required_data_columns()),
         "hour_post_invasion must not be a required app column"
     )
     expect_empty_(
         Filter(function(k) get_data_column(k) == "hour_post_invasion", data_field_keys()),
-        "config fields still mapping to hour_post_invasion"
+        "config fields mapping to hour_post_invasion"
     )
 })
 
@@ -17,7 +17,7 @@ test_that_("the IDC reference-similarity field is configured and present", {
     m <- app_data("mr_data")
     col <- get_data_column("idc_reference_class")
     expect_equal_(col, "idc_timepoint", "configured IDC column")
-    expect_true_(col %in% colnames(m), "IDC column missing from the candidate data")
+    expect_true_(col %in% colnames(m), "IDC column missing from the data")
 })
 
 test_that_("the IDC field is not labelled as measured hour-post-invasion", {
@@ -43,7 +43,7 @@ test_that_("IDC uncertainty companion fields are retained and configured", {
     for (k in c("idc_similarity_score_delta")) {
         expect_true_(
             get_data_column(k) %in% colnames(m),
-            sprintf("uncertainty field %s missing from the candidate data", k)
+            sprintf("uncertainty field %s missing from the data", k)
         )
     }
 })
@@ -95,7 +95,7 @@ test_that_("both male and female inferred labels are supported symmetrically", {
     vals <- unique(na.omit(as.character(m[[get_data_column("pred_gametocyte_sex")]])))
     expect_true_(
         all(c("Male gametocyte", "Female gametocyte") %in% vals),
-        "the candidate must contain both inferred sexes"
+        "the data must contain both inferred sexes"
     )
     cols <- get_field_colors("pred_gametocyte_sex")
     expect_true_(
@@ -132,7 +132,7 @@ test_that_("source and inferred sex genuinely disagree for some cells (not colla
     pred <- m[[get_data_column("pred_gametocyte_sex")]]
     src <- m[[get_data_column("source_sex_annotation")]]
     both <- !is.na(pred) & !is.na(src)
-    if (sum(both) == 0) skip_test("no cells carry both annotations in this candidate")
+    if (sum(both) == 0) skip_test("no cells carry both annotations in these data")
     # The whole point of keeping them separate is that they are not identical.
     expect_true_(
         sum(pred[both] != src[both]) > 0,
@@ -167,12 +167,12 @@ test_that_("missing treatment is never turned into a treatment category", {
 
 # ----------------------------------------------------------------- geography
 
-test_that_("parasite geography uses parasite_origin_location, not the conflated field", {
+test_that_("parasite geography uses parasite_origin_location, not geographic_location", {
     expect_equal_(get_data_column("parasite_origin_location"), "parasite_origin_location",
         "primary geography column")
     expect_empty_(
         Filter(function(k) get_data_column(k) == "geographic_location", data_field_keys()),
-        "config fields still mapping to the conflated geographic_location"
+        "config fields mapping to geographic_location"
     )
 })
 
@@ -184,7 +184,7 @@ test_that_("biological replicate identity is visible in the app", {
     for (k in c("biological_replicate_id", "biological_replicate_type")) {
         expect_true_(
             get_data_column(k) %in% colnames(m),
-            sprintf("%s missing from the candidate data", k)
+            sprintf("%s missing from the data", k)
         )
         expect_true_(
             k %in% detail_table_field_keys(),

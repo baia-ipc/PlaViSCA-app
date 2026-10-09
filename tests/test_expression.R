@@ -1,6 +1,6 @@
 # Expression-table integrity tests.
 
-test_that_("gene columns are identified by identifier despite the expanded metadata", {
+test_that_("gene columns are identified by gene identifier", {
     m <- app_data("mr_data")
     n <- app_data("norm_df")
     genes <- identify_gene_columns(n, m)
@@ -12,7 +12,7 @@ test_that_("gene columns are identified by identifier despite the expanded metad
     )
 })
 
-test_that_("no metadata column is mistaken for a gene after the schema expansion", {
+test_that_("no metadata column is mistaken for a gene", {
     m <- app_data("mr_data")
     n <- app_data("norm_df")
     genes <- identify_gene_columns(n, m)
@@ -20,15 +20,9 @@ test_that_("no metadata column is mistaken for a gene after the schema expansion
         length(genes) + ncol(m), ncol(n),
         "gene columns + metadata columns must account for the whole table"
     )
-    # A positional assumption from the pre-Phase-2 schema (52 metadata columns)
-    # would now silently treat metadata as genes; assert it no longer holds.
-    expect_true_(
-        ncol(m) > 52,
-        "this candidate has the expanded Phase-2 metadata block"
-    )
-    expect_true_(
-        !(colnames(n)[53] %in% genes),
-        "column 53 is still metadata - positional gene identification would be wrong"
+    expect_setequal_(
+        setdiff(colnames(n), genes), colnames(m),
+        "the non-gene columns of normalize_df must be exactly the metadata columns"
     )
 })
 
@@ -76,7 +70,7 @@ test_that_("row-index filtering preserves cell-key alignment", {
 
 test_that_("variable-gene and PCA tables cover all six studies", {
     p <- app_data_path("cleaned_dataset.rds")
-    if (!file.exists(p)) skip_test("no candidate data")
+    if (!file.exists(p)) skip_test("no data")
     cd <- readRDS(p)
     for (nm in c("hiv_data", "pca_df")) {
         expect_true_(!is.null(cd[[nm]]), sprintf("%s must be present in cleaned_dataset.rds", nm))

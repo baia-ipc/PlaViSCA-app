@@ -3,8 +3,8 @@
 # =============================================================================
 #   Rscript tests/run_tests.R [output.tsv]
 #
-# Point it at candidate data with PLAVISCA_DATA_DIR, e.g.
-#   PLAVISCA_DATA_DIR=/path/to/candidate Rscript tests/run_tests.R
+# Point it at a data directory with PLAVISCA_DATA_DIR, e.g.
+#   PLAVISCA_DATA_DIR=/path/to/app_data Rscript --vanilla tests/run_tests.R
 #
 # Exit status is 1 if any test failed.
 # =============================================================================
@@ -34,13 +34,14 @@ suppressWarnings(try({
 }, silent = TRUE))
 
 test_files <- c(
-    "tests/test_data_contract.R",
+    "tests/test_data_checks.R",
+    "tests/test_config_fields.R",
     "tests/test_lifecycle.R",
     "tests/test_idc_and_gametocytes.R",
     "tests/test_bibliography_and_filters.R",
     "tests/test_expression.R",
-    "tests/test_at19_at20.R",
-    "tests/test_final_release_candidate.R"
+    "tests/test_app_code.R",
+    "tests/test_expected_cells.R"
 )
 
 cat(sprintf("PlaViSca test suite\n  app root: %s\n  data dir: %s\n\n",
