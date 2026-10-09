@@ -122,6 +122,7 @@ tests/                            test suite (tests/run_tests.R)
 manual/                           user manual (Sphinx sources and HTML build)
 docs/                             developer documentation
 renv.lock, renv/                  R package versions
+PlaViSca.Rproj                    RStudio project
 ```
 
 ## License
