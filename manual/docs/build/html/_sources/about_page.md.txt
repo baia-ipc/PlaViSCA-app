@@ -1,9 +1,0 @@
-# About Page
-![About page image](imgs/about_page.png)
-The About page provides background information on the development of the PlaViSca web application. It highlights the goals, design principles, and collaborative nature of the project.
-
-PlaViSca is an open-source initiative, and we welcome contributions from the scientific community. Researchers interested in integrating new datasets, improving existing features, or collaborating on future development are encouraged to get in touch.
-
-This section also introduces the development team, including contact details for inquiries and collaboration opportunities.
-
-Additionally, a link to the full source code is provided, allowing users to explore, use, or extend the application.

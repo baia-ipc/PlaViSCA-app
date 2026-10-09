@@ -1,6 +1,6 @@
 # Setup Guide
 
-This guide provides step-by-step instructions for installing and running PlaViSca locally. For online access, visit <a href="https://xxxx.com">PlaViSca Web Application</a>.
+This guide provides step-by-step instructions for installing and running PlaViSca locally.
 
 ## System Requirements
 
@@ -29,7 +29,7 @@ PlaViSca is compatible with macOS, Windows, and Linux operating systems. Follow 
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/Sopheap15/PlaViSca.git
+git clone https://github.com/baia-ipc/PlaViSca.git
 cd PlaViSca
 ```
 
@@ -50,28 +50,29 @@ This installs the exact package versions listed above. If you prefer a minimal i
 install.packages(c(
   "shiny", "shinyjs", "shinycssloaders", "plotly", "DT",
   "RColorBrewer", "tidyverse", "later", "memoise", "viridis",
-  "readr", "tibble", "bslib", "fontawesome", "conflicted"
+  "readr", "tibble", "bslib", "fontawesome", "conflicted", "writexl"
 ))
 ```
 
 ### 3. Prepare the Data
 
-PlaViSca expects the following preprocessed data files in the `data/` directory:
+PlaViSca reads its data from the directory named by the `PLAVISCA_DATA_DIR` environment variable (default: `data/` inside the app directory). This directory must contain:
 
 | File | Description |
 |---|---|
-| `normalize_df.rds` | Normalized expression + metadata + embeddings |
-| `raw_df.rds` | Raw counts + metadata + embeddings |
-| `cleaned_dataset.rds` | Metadata, per-study PCA std dev, and HVF data |
+| `cleaned_dataset.rds` | Per-cell metadata and embeddings, per-study PCA and variable-gene tables |
+| `normalize_df.rds` | Metadata plus log-normalised expression |
+| `raw_df.rds` | Metadata plus raw counts |
+| `gene_annotation.rds` | _P. vivax_ P01 gene identifiers, names and descriptions |
 | `data_source.csv` | Publication table for the Data Sources tab |
 
-And a reference annotation file in `ref/`:
+These files are written by the [PlaViSca preprocessing pipeline](https://github.com/baia-ipc/PlaViSca_pre_processing) into the `results/app_data/` directory of a pipeline run. Point the app at them, for example:
 
-| File | Description |
-|---|---|
-| `PvivaxP01_gff_data.rds` | _P. vivax_ P01 gene annotations (gene ID, name, description) |
+```bash
+export PLAVISCA_DATA_DIR=/path/to/run/results/app_data
+```
 
-If you need to generate these files from raw data, follow the preprocessing pipeline in the companion repository: [PlaViSca_pre_process](https://github.com/Sopheap15/PlaViSca_pre_process).
+At startup the app checks that the data match its configuration (cell count, studies, columns, life-cycle stages). If they do not, it stops with a message listing what is wrong.
 
 ### 4. Run the Application
 
@@ -133,41 +134,30 @@ hostname -I
 |---|---|
 | **Browser error on launch** (`'browser' must be a non-empty character string`) | R is trying to open a browser in a headless environment. Use `./run_app.sh` (browser disabled by default) or add `launch.browser = FALSE` to your `runApp()` call. |
 | **`renv::restore()` fails** | Run `R -e "renv::status()"` to identify missing packages. On Linux, you may need system libraries: `sudo apt-get install libcurl4-openssl-dev libssl-dev libxml2-dev` |
-| **Data not loading** | Verify that all required files are in `data/` and `ref/` with the exact names listed in Step 3. |
+| **App stops at startup with "data file(s) are missing"** | Set `PLAVISCA_DATA_DIR` to a directory containing the five files listed in Step 3. |
+| **App stops at startup with "data check(s) failed"** | The data do not match `config/data_columns.yml` (e.g. a different number of cells or studies). Use the data written by the matching version of the preprocessing pipeline, or update `config/data_columns.yml` (see the developer guide, `docs/developer.md`). |
 | **App is slow or crashes** | PlaViSca requires at least 16 GB RAM. Close other applications. The first load is slower due to data caching. |
 | **Browser display issues** | Clear the browser cache or try a different browser. Ensure JavaScript is enabled. |
 | **Package not found after `renv::restore()`** | Try `renv::repair()` followed by `renv::restore()` again. |
 
 For additional help, contact the development team or open a GitHub issue.
 
-## Development Team & Contact Information
+## Contact
 
-For questions, feedback, or collaboration inquiries, please contact:
-
-- **Sopheap Oeng**  
-  _Bioinformatic System Engineer, Institut Pasteur du Cambodge_  
-  [osopheap@pasteur-kh.org](mailto:osopheap@pasteur-kh.org)
-
-- **Lionel Brice Feufack-Donfack**  
-  _Postdoctoral Researcher, Malaria Research Unit, Institut Pasteur du Cambodge_  
-  [ldonfack@pasteur-kh.org](mailto:ldonfack@pasteur-kh.org)
-
-- **Thomas Obadia**  
-  _Senior Scientist, Institut Pasteur du Cambodge_  
-  [tobadia@pasteur-kh.org](mailto:tobadia@pasteur-kh.org)
-
-- **Anthony Ruberto**  
-  _Senior Scientist, Institut Pasteur du Cambodge_  
-  [aruberto02@gmail.com](mailto:aruberto02@gmail.com)
+For questions, feedback, or collaboration inquiries, please contact the corresponding authors:
 
 - **Giorgio Gonnella**  
   _Head, Bioinformatics and Artificial Intelligence Unit (BAIA), Institut Pasteur du Cambodge_  
   [ggonnella@pasteur-kh.org](mailto:ggonnella@pasteur-kh.org)
 
+- **Anthony Ruberto**  
+  _Assistant Professor, Department of Biomedical Sciences, College of Medicine, Florida State University_  
+  [anthony.ruberto@med.fsu.edu](mailto:anthony.ruberto@med.fsu.edu)
+
 ## Source Code
 
-PlaViSca is freely available under an open-source license. The authors maintain authority to update and improve the application. Developers and contributors are welcome to explore, modify, or extend the app by visiting the official GitHub repository:
+PlaViSca is freely available under the Creative Commons Attribution 4.0 International license (CC BY 4.0). The authors maintain authority to update and improve the application. Developers and contributors are welcome to explore, modify, or extend the app by visiting the official GitHub repository:
 
-[GitHub Repository – PlaViSca](https://github.com/Sopheap15/PlaViSca)
+[GitHub Repository – PlaViSca](https://github.com/baia-ipc/PlaViSca)
 
 © 2025 BAIA Team, Institut Pasteur du Cambodge. All rights reserved.

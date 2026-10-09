@@ -8,7 +8,7 @@ Welcome to PlaViSca, an interactive web application for exploring single-cell RN
 3. Compare multiple genes in the **Gene Expression** tab
 4. Download plots and data for external analysis
 
-**Data Integration**: PlaViSca processes data from five studies using standardized Nextflow pipelines. See the Data Processing Pipeline section for technical details.
+**Data Integration**: PlaViSca brings together about 106,000 cells from six published studies, processed with one preprocessing pipeline. See the Data Processing Pipeline section for details.
 
 ## Overview of PlaViSca Features
 
@@ -44,7 +44,7 @@ Detailed explanations of these modules' functionalities are provided in the foll
 
 **Footer**:
 
-The footer features a mosquito animation alongside interactive particle effects, enhancing the visual appeal of the website and making the interface more dynamic and engaging. Additionally, the footer includes the Institut Pasteur du Cambodge (IPC) and BAIA logos, along with a copyright notice: © 2025 BAIA Team. All rights reserved.
+The home page has an animated particle background. The footer shows the Institut Pasteur du Cambodge (IPC) and BAIA logos and the copyright notice.
 
 ## Analysis page
 
@@ -58,14 +58,18 @@ The Analysis page is designed to facilitate interactive exploration of both meta
 
 All tabs (except Data Sources) share a common **Filters** row at the top with the following fields:
 
-| Filter field       | Description                                      |
-|--------------------|--------------------------------------------------|
-| Study label        | Filter by study/dataset of origin                |
-| Development phase  | Filter by broad development phase                |
-| Parasite stages    | Filter by predicted parasite stage (SingleR)     |
-| Host species       | Filter by host organism                          |
-| Strain             | Filter by parasite strain                        |
-| HPI                | Filter by hours post invasion (intra-erythrocytic stage) |
+| Filter field | Description |
+|---|---|
+| Study label | Study the cell comes from |
+| Broad life-cycle stage | Blood, liver or sporozoite stage |
+| Life-cycle stage | Detailed stage (e.g. Ring, Trophozoite, Hypnozoite, Female gametocyte); only stages compatible with the selected broad stage are offered |
+| Host species | Host organism |
+| Host and tissue | Host blood, host liver or vector salivary gland |
+| Treatment | Drug treatment; "Study control" is the control arm of a drug experiment, "No treatment" means the study had no drug arm |
+| Parasite strain / isolate | Parasite strain or clinical isolate |
+| Most similar reference time point (h) | For blood-stage cells: the time point of a reference blood-stage time course (Zhu et al. 2016) whose expression is most similar to the cell. It is a similarity, not a measured time |
+
+Hover over the help icon next to a filter for its full description. Cells with a missing value are shown as "Missing".
 
 Filters apply with **OR logic within each field** and **AND logic between fields**, allowing precise subsetting of the dataset. All tabs stay synchronized with each other's filter selections.
 
@@ -88,7 +92,7 @@ The Embeddings tab offers dimensionality reduction and customizable visualizatio
 | Dimension    | 2D / 3D (default)                              |
 | X / Y axes   | Selectable when 2D mode is active              |
 
-**Color by**: Study label, Development phase, Parasite stages, Treatment, Host species, or Genes.
+**Color by**: Study label, Broad life-cycle stage, Life-cycle stage, Host species, Host and tissue, Treatment, Parasite strain / isolate, Parasite origin location, Single-cell technology, or Genes.
 
 **Compare Plots mode**: Click **Compare Plots** to display two independent plots (Plot A and Plot B) side-by-side, each with its own color selection and optional gene input.
 
@@ -108,7 +112,7 @@ The Gene Expression tab provides an interactive interface for exploring gene exp
 - **Data Type**: Choose Raw or Normalized expression data (Scaled data is currently disabled).
 - **Gene Search**: Toggle between Gene Name and Gene ID search using the switch in each panel.
 - **Gene Selection**: Select up to 10 genes per panel; multi-gene panels display the averaged expression.
-- **Group by**: Organize expression by Study label, Development phase, Parasite stages, Host species, or Treatment.
+- **Group by**: Organize expression by Study label, Broad life-cycle stage, Life-cycle stage, Host species, or Treatment.
 - **Violin Plots**: Each panel displays a Plotly violin plot with hover tooltips showing mean, SD, and cell count per group.
 - **Annotations**: Direct links to PlasmoDB and NCBI per gene (supports multiple tabs for multi-gene selections).
 - **Download**: Export per-panel expression data as an `.xlsx` file containing an Expression Data sheet and a Metadata sheet.
@@ -130,8 +134,8 @@ The Quality Control tab provides visualizations to assess the integrity of singl
 
 **Plots:**
 
-- **RNA Count distribution**: Violin plot of RNA counts per cell, grouped by study or development phase.
-- **Feature Count distribution**: Violin plot of feature (gene) counts per cell.
+- **RNA Count distribution**: Violin plot of RNA counts per cell, per study, coloured by broad life-cycle stage.
+- **Feature Count distribution**: Violin plot of feature (gene) counts per cell, per study, coloured by broad life-cycle stage.
 - **Elbow Plot**: PCA standard deviation per component, per study — used to determine the optimal number of PCs.
 - **Variable Genes**: Mean expression vs. standardized variance scatter plot, highlighting the top 15 highly variable features (HVF).
 
@@ -153,18 +157,11 @@ A short video demonstration of the Metadata tab **Video 3**. This video provides
 | Studies       | Number of distinct studies represented |
 | Host Species  | Number of distinct host species        |
 
-**Bar charts** (6 total):
+**Bar charts**, one per field: Broad life-cycle stage, Life-cycle stage, Host species, Parasite strain / isolate, Treatment, Most similar reference time point, Parasite origin location, Gametocyte call of the cluster, and Gametocyte sex (authors).
 
-| Chart                                | Field visualized          |
-|--------------------------------------|---------------------------|
-| Development Phase                    | development_phase         |
-| Parasite Stages                      | parasite_stages           |
-| Host Species                         | host_species              |
-| Strain                               | strain                    |
-| Treatment                            | treatment                 |
-| Intra erythrocyte development stage  | hour_post_invasion (HPI)  |
+> **Note:** Life-cycle stages combine the authors' labels with stages inferred by PlaViSca. The field "Source of the life-cycle stage" in the metadata table says which one a cell's stage comes from: the authors, the gametocyte call of the cell's cluster, or the most similar reference time point.
 
-> **Note:** All parasite stages are predicted by SingleR, except sporozoites which are confirmed by sample type.
+**Metadata table**: one row per cell with the study, host and tissue, strain and origin, treatment, life-cycle stage (and the authors' stage), reference time point, gametocyte calls, biological replicate, day post infection, technology, sequencer and counts.
 
 **Interactive Features:**
 - **Plotly Charts**: Hover for details. Use controls (zoom, pan, download) in the top-right corner.
@@ -179,14 +176,9 @@ The Data Sources section provides detailed documentation and attribution for the
 
 #### Data Processing Pipeline
 
-PlaViSca integrates data from five studies processed using Nextflow pipelines for downloading, alignment, and feature counting.
+All six studies are processed by the [PlaViSca preprocessing pipeline](https://github.com/baia-ipc/PlaViSca_pre_processing): from the sequencing reads (STARsolo count matrices) or the authors' count matrices, through cell calling, normalisation, integration (Harmony), embeddings and life-cycle stage annotation, to the data files read by the app. Expression is available as raw counts and log-normalised values.
 
-- **Download FASTQ Files**: Scripts in the [download_SRA GitHub repo](https://github.com/Sopheap15/download_SRA) download data from NCBI. Follow the `README.md` for instructions.
-- **Alignment and Feature Count**: Processed using STARsolo via Nextflow in the [sRNA_nextflow_starsolo GitHub repo](https://github.com/Sopheap15/sRNA_nextflow_starsolo).
-- **Pre-processing data**: The scripts for pre-processig data including integration and annotation are found here: [Pre_processing_data](https://git@github.com:Sopheap15/PlaViSca_pre_processing.git) 
-- **Data Formats**: Gene expression data is provided in normalized and raw formats. Metadata includes columns for study details, sample info, and biological annotations.
-
-For technical details on data preparation, refer to the Installation section.
+To set up the app with these files, see the [Setup Guide](setup_guide.md).
 
 ## About page
 
@@ -202,13 +194,15 @@ PlaViSca was developed to democratize access to single-cell RNA-seq data for _Pl
 
 ### Development Team
 
-| Name                        | Role                          | Email                          |
-|-----------------------------|-------------------------------|--------------------------------|
-| Sopheap Oeng                | Bioinformatic system engineer | osopheap@pasteur-kh.org        |
-| Lionel Brice Feufack-Donfack| Postdoctoral researcher       | ldonfack@pasteur-kh.org        |
-| Thomas Obadia               | Senior scientist              | tobadia@pasteur-kh.org         |
-| Anthony Ruberto             | Senior scientist              | aruberto02@gmail.com           |
-| Giorgio Gonnella            | Head, BAIA Unit               | ggonnella@pasteur-kh.org       |
+| Name | Role |
+|---|---|
+| Sopheap Oeng | Bioinformatic system engineer |
+| Lionel Brice Feufack-Donfack | Postdoctoral researcher |
+| Thomas Obadia | Senior scientist |
+| Anthony Ruberto | Assistant Professor, Department of Biomedical Sciences, College of Medicine, Florida State University |
+| Giorgio Gonnella | Head, BAIA Unit |
+
+The corresponding authors are Giorgio Gonnella (ggonnella@pasteur-kh.org) and Anthony Ruberto (anthony.ruberto@med.fsu.edu).
 
 ### Open-source and Collaboration
 
@@ -219,7 +213,7 @@ PlaViSca is an open-source initiative, and we welcome contributions from the sci
 - Reporting bugs or issues
 - Collaborating on future development
 
-... are warmly encouraged to get in touch with the development team or open an issue on [GitHub](https://github.com/Sopheap15/PlaViSca).
+... are warmly encouraged to get in touch with the development team or open an issue on [GitHub](https://github.com/baia-ipc/PlaViSca).
 
 ## Best Practices
 
@@ -233,8 +227,8 @@ PlaViSca is an open-source initiative, and we welcome contributions from the sci
 
 For questions, issues, or suggestions, contact the PlaViSca development team:
 
-- **Emails**: osopheap@pasteur-kh.org, ggonnella@pasteur-kh.org
-- **GitHub Issues**: [Report bugs or request features](https://github.com/Sopheap15/pvsca/issues)
+- **Emails**: ggonnella@pasteur-kh.org, anthony.ruberto@med.fsu.edu
+- **GitHub Issues**: [Report bugs or request features](https://github.com/baia-ipc/PlaViSca/issues)
 
 © 2025 BAIA Team, Institut Pasteur du Cambodge. All rights reserved.
 

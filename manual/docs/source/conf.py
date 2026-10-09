@@ -37,6 +37,4 @@ html_theme_options = {
     'navigation_depth': 3,
     # Keep the sidebar expanded instead of collapsing sections
     'collapse_navigation': False,
-    # Display the version selector if available
-    'display_version': True,
 }
