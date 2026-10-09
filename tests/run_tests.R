@@ -22,14 +22,18 @@ Sys.setenv(PLAVISCA_APP_ROOT = normalizePath(app_root))
 source("tests/helper.R")
 load_app_config()
 
-# helpers_server.R is needed by a couple of behavioural tests; it pulls in
-# dplyr/plotly, so load it best-effort and let dependent tests skip if absent.
+# The filter and plot helpers are needed by a couple of behavioural tests;
+# they pull in dplyr/plotly, so load them best-effort and let dependent tests
+# skip if absent.
 suppressWarnings(try({
     suppressPackageStartupMessages({
         library(dplyr)
         library(plotly)
     })
-    source("functions/helpers_server.R")
+    source("functions/filters.R")
+    source("functions/genes.R")
+    source("functions/gene_expression_data.R")
+    source("functions/plots_metadata_qc.R")
     source("functions/embedding_plots.R")
 }, silent = TRUE))
 

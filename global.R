@@ -15,10 +15,20 @@ source("functions/data_columns_config.R")
 source("functions/data_paths.R")
 source("functions/data_checks.R")
 
-# Source helper functions
-source("functions/helpers_server.R")
-source("functions/helpers_UI.R")
+# Server-side helpers (no Shiny reactivity, except tab_sync.R)
+source("functions/filters.R")
+source("functions/genes.R")
+source("functions/gene_expression_data.R")
+source("functions/data_summary.R")
+source("functions/tab_sync.R")
+
+# Plots
+source("functions/plots_metadata_qc.R")
+source("functions/plots_gene_expression.R")
 source("functions/embedding_plots.R")
+
+# UI building blocks
+source("functions/helpers_UI.R")
 
 # Define a function for memoized data loading.
 load_data <- memoise(function(file_path) {
