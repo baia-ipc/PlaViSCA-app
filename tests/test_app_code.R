@@ -1,6 +1,6 @@
 # Checks on the app source code (app.R, global.R, ui.R, server.R, functions/,
-# config/): no unsupported column names, no missing sourced files, no
-# hardcoded data paths.
+# config/, www/script.js): no unsupported column names, no missing sourced
+# files, no hardcoded data paths or external URLs, valid site configuration.
 
 #' Scan app source files for the unsupported column names listed in
 #' config/data_columns.yml. Names are matched as whole identifiers, so e.g.
@@ -72,4 +72,38 @@ test_that_("data file paths are built only in functions/data_paths.R", {
         if (length(hit) > 0) offenders <- c(offenders, sprintf("%s: %s", basename(f), hit))
     }
     expect_empty_(offenders, "hardcoded data/ paths outside app_data_path()")
+})
+
+test_that_("external URLs are written only in config/external_links.yml and config/team.yml", {
+    files <- c(live_app_files(), file.path(APP_ROOT, "www", "script.js"))
+    files <- files[file.exists(files) & basename(dirname(files)) != "config"]
+    offenders <- character(0)
+    for (f in files) {
+        lines <- readLines(f, warn = FALSE)
+        code <- !grepl("^\\s*(#|//)", lines)
+        hit <- which(code & grepl("https?://", lines))
+        if (length(hit) > 0) {
+            offenders <- c(offenders, sprintf("%s:%d %s", basename(f), hit, trimws(lines[hit])))
+        }
+    }
+    expect_empty_(offenders, "hardcoded external URLs")
+})
+
+test_that_("external links and team information are complete", {
+    expect_equal_(
+        external_link("plasmodb_gene", c("PVP01_A", "PVP01_B")),
+        c("https://plasmodb.org/plasmo/app/record/gene/PVP01_A",
+          "https://plasmodb.org/plasmo/app/record/gene/PVP01_B"),
+        "gene link template"
+    )
+    team <- team_info()
+    expect_true_(nzchar(team$team_name %||% ""), "team.yml needs team_name")
+    expect_true_(length(team$members) > 0, "team.yml lists no members")
+    incomplete <- Filter(function(m) is.null(m$name) || is.null(m$role), team$members)
+    expect_empty_(vapply(incomplete, function(m) m$name %||% "?", character(1)),
+        "team members without name or role")
+    no_logo <- Filter(function(o) is.null(o$logo) || !file.exists(file.path(APP_ROOT, "www", o$logo)),
+        team$organizations)
+    expect_empty_(vapply(no_logo, function(o) o$name %||% "?", character(1)),
+        "organizations whose logo is missing from www/")
 })

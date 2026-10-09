@@ -11,6 +11,9 @@ suppressMessages(conflict_prefer("layout", "plotly"))
 # get_data_column()/get_data_label() and the vocabulary/ordering helpers.
 source("functions/data_columns_config.R")
 
+# External links and team information (config/external_links.yml, team.yml).
+source("functions/site_config.R")
+
 # Data file paths (PLAVISCA_DATA_DIR) and the startup data checks.
 source("functions/data_paths.R")
 source("functions/data_checks.R")

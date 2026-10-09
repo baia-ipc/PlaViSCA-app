@@ -13,15 +13,15 @@ ui <- fluidPage(
     tags$script(src = "script.js"),
     tags$link(
       rel = "stylesheet",
-      href = "https://code.jquery.com/ui/1.13.2/themes/smoothness/jquery-ui.css"
+      href = external_link("jquery_ui_css")
     ),
-    tags$link(rel = "preconnect", href = "https://fonts.googleapis.com"),
-    tags$link(rel = "preconnect", href = "https://fonts.gstatic.com"),
+    tags$link(rel = "preconnect", href = external_link("google_fonts")),
+    tags$link(rel = "preconnect", href = external_link("google_fonts_static")),
     tags$link(
-      href = "https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap",
+      href = external_link("roboto_font_css"),
       rel = "stylesheet"
     ),
-    tags$script(src = "https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"),
+    tags$script(src = external_link("jquery_ui_js")),
     tags$script(src = "particles.min.js"),
     tags$script(src = "particles-config.js")
   ),
@@ -815,39 +815,7 @@ ui <- fluidPage(
           div(
             class = "about-section-condensed mb-5",
             h3(class = "minimal-section-header", "Development Team"),
-            div(
-              class = "team-grid-professional",
-              div(
-                class = "team-card-prof accent-teal",
-                h5("Sopheap Oeng", class = "team-name-prof"),
-                span("bioinformatic system engineer", class = "team-role-prof"),
-                a(href = "mailto:osopheap@pasteur-kh.org", class = "team-email-prof", fontawesome::fa("envelope"), " osopheap@pasteur-kh.org")
-              ),
-              div(
-                class = "team-card-prof accent-blue",
-                h5("Lionel Brice Feufack-Donfack", class = "team-name-prof"),
-                span("postdoctoral researcher", class = "team-role-prof"),
-                a(href = "mailto:ldonfack@pasteur-kh.org", class = "team-email-prof", fontawesome::fa("envelope"), " ldonfack@pasteur-kh.org")
-              ),
-              div(
-                class = "team-card-prof accent-green",
-                h5("Thomas Obadia", class = "team-name-prof"),
-                span("senior scientist", class = "team-role-prof"),
-                a(href = "mailto:tobadia@pasteur-kh.org", class = "team-email-prof", fontawesome::fa("envelope"), " tobadia@pasteur-kh.org")
-              ),
-              div(
-                class = "team-card-prof accent-purple",
-                h5("Anthony Ruberto", class = "team-name-prof"),
-                span("senior scientist", class = "team-role-prof"),
-                a(href = "mailto:aruberto02@gmail.com", class = "team-email-prof", fontawesome::fa("envelope"), " aruberto02@gmail.com")
-              ),
-              div(
-                class = "team-card-prof accent-orange",
-                h5("Giorgio Gonnella", class = "team-name-prof"),
-                span("Head, BAIA Unit", class = "team-role-prof"),
-                a(href = "mailto:ggonnella@pasteur-kh.org", class = "team-email-prof", fontawesome::fa("envelope"), " ggonnella@pasteur-kh.org")
-              )
-            )
+            create_team_cards()
           ),
 
           # Collaboration & Open Science Section
@@ -878,7 +846,7 @@ ui <- fluidPage(
             div(
               class = "github-footer-minimal",
               a(
-                href = "https://github.com/Sopheap15/PlaViSca",
+                href = external_link("source_code"),
                 target = "_blank",
                 class = "github-link-beautiful",
                 fontawesome::fa("github"), " Explore Source Code on GitHub"
@@ -895,16 +863,8 @@ ui <- fluidPage(
     condition = "input.home || (!input.analysis && !input.about)", # Show footer only on home page
     div(
       class = "footer",
-      div(
-        class = "logo-container",
-        a(
-          href = "https://www.pasteur-kh.org/",
-          target = "_blank",
-          img(src = "ipc_logo.png", alt = "IPC Logo", class = "logo")
-        ),
-        img(src = "baia_logo.png", class = "logo")
-      ),
-      p(class = "copyright", "© 2025 BAIA Team. All rights reserved.")
+      create_footer_logos(),
+      p(class = "copyright", footer_copyright())
     )
   )
 )

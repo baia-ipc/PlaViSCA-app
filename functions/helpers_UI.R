@@ -20,8 +20,8 @@ navigate_tabset <- function(session, menu_id, tab_name = NULL) {
 
 # Generate PlasmoDB and NCBI links
 gene_links <- function(gene_id, target = "") {
-  plasmo_url <- paste0("https://plasmodb.org/plasmo/app/record/gene/", gene_id)
-  ncbi_url <- paste0("https://www.ncbi.nlm.nih.gov/protein/", gene_id)
+  plasmo_url <- external_link("plasmodb_gene", gene_id)
+  ncbi_url <- external_link("ncbi_protein", gene_id)
 
   plasmo_selector <- if (target == "") "[id^=plasmo_link]" else paste0("#", target)
   ncbi_selector <- if (target == "") "[id^=ncbi_link]" else paste0("#", gsub("plasmo", "ncbi", target))
@@ -58,8 +58,8 @@ gene_links_multiple <- function(gene_ids, target = "") {
     gene_links(gene_ids[1], target)
   } else {
     # Multiple genes - create JavaScript to open multiple tabs
-    plasmo_urls <- paste0("https://plasmodb.org/plasmo/app/record/gene/", gene_ids)
-    ncbi_urls <- paste0("https://www.ncbi.nlm.nih.gov/protein/", gene_ids)
+    plasmo_urls <- external_link("plasmodb_gene", gene_ids)
+    ncbi_urls <- external_link("ncbi_protein", gene_ids)
 
     # Update the first gene's links in the UI
     gene_links(gene_ids[1], target)
@@ -333,4 +333,42 @@ newBlock <- function(new_count, counter, choice_exp, dynamicBlock, session) {
       server = TRUE
     )
   })
+}
+
+# ------------------------------------------------------------ team and footer
+
+# Colour accents of the team cards (classes in www/style.css), used in turn.
+TEAM_CARD_ACCENTS <- c("accent-teal", "accent-blue", "accent-green", "accent-purple", "accent-orange")
+
+# One card per team member in config/team.yml, in the listed order.
+create_team_cards <- function(members = team_info()$members) {
+  cards <- lapply(seq_along(members), function(i) {
+    m <- members[[i]]
+    accent <- TEAM_CARD_ACCENTS[(i - 1) %% length(TEAM_CARD_ACCENTS) + 1]
+    div(
+      class = paste("team-card-prof", accent),
+      h5(m$name, class = "team-name-prof"),
+      span(m$role, class = "team-role-prof"),
+      if (!is.null(m$affiliation)) span(m$affiliation, class = "team-affiliation-prof"),
+      if (!is.null(m$email)) {
+        a(href = paste0("mailto:", m$email), class = "team-email-prof", fontawesome::fa("envelope"), paste0(" ", m$email))
+      }
+    )
+  })
+  div(class = "team-grid-professional", cards)
+}
+
+# Logos of the organizations in config/team.yml, linked to their website
+# when one is given.
+create_footer_logos <- function(organizations = team_info()$organizations) {
+  logos <- lapply(organizations, function(org) {
+    logo <- img(src = org$logo, alt = org$name, class = "logo")
+    if (is.null(org$url)) logo else a(href = org$url, target = "_blank", logo)
+  })
+  div(class = "logo-container", logos)
+}
+
+# Copyright line of the footer, from config/team.yml.
+footer_copyright <- function(team = team_info()) {
+  sprintf("© %s %s. All rights reserved.", team$copyright_year, team$team_name)
 }

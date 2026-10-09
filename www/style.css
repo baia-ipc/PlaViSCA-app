@@ -1303,6 +1303,13 @@ table.dataTable thead th {
   letter-spacing: 0.3px;
 }
 
+.team-affiliation-prof {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--secondary-color);
+  margin-top: 2px;
+}
+
 .team-email-prof {
   display: flex;
   align-items: center;

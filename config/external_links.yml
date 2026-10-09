@@ -1,0 +1,21 @@
+# External web addresses used by the app.
+# =============================================================================
+# Every http(s) address the app links to or loads is listed here and read
+# with external_link() (functions/site_config.R); no URL is written anywhere
+# else in the app code. In gene link templates, {id} is replaced by a gene
+# identifier (e.g. PVP01_0000000).
+# =============================================================================
+
+# Gene pages, opened from the gene expression and embedding views.
+plasmodb_gene: "https://plasmodb.org/plasmo/app/record/gene/{id}"
+ncbi_protein: "https://www.ncbi.nlm.nih.gov/protein/{id}"
+
+# Source code of the app (About page).
+source_code: "https://github.com/Sopheap15/PlaViSca"
+
+# Front-end libraries and fonts loaded by the browser.
+jquery_ui_css: "https://code.jquery.com/ui/1.13.2/themes/smoothness/jquery-ui.css"
+jquery_ui_js: "https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"
+google_fonts: "https://fonts.googleapis.com"
+google_fonts_static: "https://fonts.gstatic.com"
+roboto_font_css: "https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap"
