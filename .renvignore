@@ -1,16 +1,8 @@
-# Exclude pre-processing pipeline — has its own separate repo and pixi environment
-pre_process_data/
-
-# Exclude Sphinx documentation build and source
+# Sphinx sources and build of the user manual
 manual/
 
-# Exclude pre-processing scripts inside functions/ that are not sourced by the app
-functions/preprocessing.R
-functions/seurat_preprocessing.R
-functions/UTF-8Pv_singleR_script.Rmd
-
-# Exclude renv's own cache/infrastructure
+# renv's own cache/infrastructure
 renv/
 
-# Exclude hidden/system files
+# Hidden/system files
 .git/

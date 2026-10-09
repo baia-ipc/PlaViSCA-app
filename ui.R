@@ -11,7 +11,6 @@ ui <- fluidPage(
     useShinyjs(),
     includeCSS("www/style.css"),
     tags$script(src = "script.js"),
-    tags$script(src = "jquery.rwdImageMaps.min.js"),
     tags$link(
       rel = "stylesheet",
       href = "https://code.jquery.com/ui/1.13.2/themes/smoothness/jquery-ui.css"
