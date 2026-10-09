@@ -124,26 +124,6 @@ test_that_("AT20: no stale preprocessing generator remains under functions/", {
     expect_empty_(offenders, "preprocessing scripts still living in the sourced functions/ directory")
 })
 
-test_that_("AT20: legacy files are documented as historical and are not sourced", {
-    legacy_dir <- file.path(APP_ROOT, "docs", "legacy")
-    if (!dir.exists(legacy_dir)) skip_test("no docs/legacy directory")
-    legacy <- list.files(legacy_dir, pattern = "\\.R$", full.names = TRUE)
-    expect_true_(length(legacy) > 0, "expected legacy files to have been moved")
-    for (f in legacy) {
-        head_txt <- paste(readLines(f, n = 20, warn = FALSE), collapse = "\n")
-        expect_true_(
-            grepl("HISTORICAL", head_txt) && grepl("NOT USED", head_txt),
-            sprintf("%s must carry the historical/not-used header", basename(f))
-        )
-    }
-    global_txt <- readLines(file.path(APP_ROOT, "global.R"), warn = FALSE)
-    sourced <- grep("^\\s*source\\(", global_txt, value = TRUE)
-    expect_empty_(
-        grep("docs/legacy", sourced, value = TRUE),
-        "global.R must not source anything from docs/legacy"
-    )
-})
-
 test_that_("AT20: global.R sources only files that exist", {
     global_txt <- readLines(file.path(APP_ROOT, "global.R"), warn = FALSE)
     sourced <- regmatches(global_txt, regexpr('"[^"]+\\.R"', global_txt))

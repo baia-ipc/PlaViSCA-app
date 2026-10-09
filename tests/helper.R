@@ -128,9 +128,7 @@ app_data <- function(which = c("mr_data", "norm_df", "raw_df", "bibliography")) 
     obj
 }
 
-#' Live app source files - the ones that actually run. docs/legacy/ is
-#' explicitly excluded: those files are documented historical artefacts and
-#' are not sourced by global.R.
+#' Live app source files - the ones that actually run.
 live_app_files <- function() {
     files <- c(
         file.path(APP_ROOT, c("app.R", "global.R", "ui.R", "server.R")),

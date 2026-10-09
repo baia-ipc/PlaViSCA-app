@@ -19,12 +19,6 @@ source("functions/helpers_server.R")
 source("functions/helpers_UI.R")
 source("functions/embedding_plots.R")
 
-# NOTE (Phase 3): the former functions/*_module.R files were duplicate,
-# never-called implementations of logic that server.R defines locally, and
-# several of them still referenced pre-Phase-2 metadata columns. They have
-# been moved to docs/legacy/ and are no longer sourced. See
-# audit/phase3_app_repair/REPORT.md.
-
 # Define a function for memoized data loading.
 load_data <- memoise(function(file_path) {
   readRDS(file_path)
