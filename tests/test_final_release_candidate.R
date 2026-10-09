@@ -63,13 +63,11 @@ test_that_("final IDC and gametocyte totals preserve biological invariants", {
     idc <- m[[get_data_column("idc_reference_class")]]
     gam <- m[[get_data_column("pred_gametocyte_sex")]]
     expect_equal_(sum(!is.na(idc)), 90219L, "IDC labeled count")
-    # plavisca-v1-gametocytes-2026-10-08 (rRNA-free, refreshed integration
-    # features); the 2026-09-21 release had 22,795 calls.
     expect_equal_(sum(!is.na(gam)), 23266L, "gametocyte call count")
     det <- m[[get_data_column("detailed_stage")]]
     expect_equal_(sum(det == "Female gametocyte", na.rm = TRUE), 22392L, "harmonized Female gametocyte count")
     expect_equal_(sum(det == "Male gametocyte", na.rm = TRUE), 978L, "harmonized Male gametocyte count")
-    expect_equal_(sum(m$parasite_broad_stage != "Blood stage" & !is.na(gam), na.rm = TRUE),
+    expect_equal_(sum(m[[get_data_column("broad_stage")]] != "Blood stage" & !is.na(gam), na.rm = TRUE),
         0L, "non-blood gametocyte calls")
 })
 
@@ -77,16 +75,13 @@ test_that_("raw normalized scaled and cleaned tables have canonical identical ke
     m <- app_data("mr_data")
     n <- app_data("norm_df")
     r <- app_data("raw_df")
-    scale_path <- app_data_path("scale_df.rds")
-    expect_true_(file.exists(scale_path), "scale_df.rds missing from final candidate staging")
-    s <- readRDS(scale_path)
-    keys <- list(rownames(m), rownames(n), rownames(r), rownames(s))
+    keys <- list(rownames(m), rownames(n), rownames(r))
     expect_true_(all(vapply(keys, length, integer(1)) == 105949L),
-        "all four tables must have 105949 rows")
+        "all three tables must have 105949 rows")
     expect_true_(all(vapply(keys, function(x) !anyDuplicated(x), logical(1))),
-        "all four tables must have unique keys")
+        "all three tables must have unique keys")
     expect_true_(all(vapply(keys[-1], identical, logical(1), keys[[1]])),
-        "all four tables must have identical key order")
+        "all three tables must have identical key order")
     expect_true_(identical(keys[[1]], sort(keys[[1]])),
         "cell-key order must be canonical lexicographic order")
 })

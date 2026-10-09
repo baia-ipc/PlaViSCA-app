@@ -1,35 +1,19 @@
-# PlaViSca app data-column configuration - SINGLE SOURCE OF TRUTH
+# PlaViSca app: which data columns the app uses.
 # =============================================================================
-# Maps the logical metadata fields used throughout the app UI/server to the
-# physical column names of the Phase-2 atlas export
-# (cleaned_dataset.rds$mr_data, normalize_df.rds, raw_df.rds).
+# Maps the field names used in ui.R, server.R and functions/ to the columns of
+# the data files (cleaned_dataset.rds$mr_data, normalize_df.rds, raw_df.rds)
+# written by the preprocessing pipeline (stage 50; the columns are described
+# in pre_process_data/metadata/columns.tsv).
 #
-# Authoritative upstream schema:
-#   pre_process_data/audit/shared_pipeline/metadata_schema.tsv
-#   pre_process_data/audit/shared_pipeline/app_data_contract.tsv
-#
-# RULES
-#   * Every metadata column referenced by ui.R / server.R / functions/*.R as a
-#     filter, "Color by", "Group by" or detail field MUST be declared here and
-#     resolved through get_data_column() / get_data_label(). Never hardcode a
-#     physical column name anywhere else in the app.
-#   * Logical keys are deliberately unambiguous. The historical keys
-#     `development_phase` (which mapped to the *singular* physical column
-#     `parasite_stage`) and `parasite_stages` (which mapped to
-#     `life_cycle_stage`) were an inverted naming trap (D063) and are gone.
-#     They are replaced by `broad_stage` -> parasite_broad_stage and
-#     `detailed_stage` -> harmonized_life_cycle_stage.
-#   * `hour_post_invasion` is gone. The Phase-2 field is
-#     idc_reference_similarity_label, a SingleR expression-similarity class,
-#     NOT a measured hour post invasion (D058).
-#   * `geographic_location` is gone; parasite_origin_location is the primary
-#     app-visible parasite geography concept (D006/D031/D040).
+# Every metadata column used as a filter, "Color by", "Group by" or detail
+# field is declared here and read through get_data_column() /
+# get_data_label(); column names are not written anywhere else in the app.
 # =============================================================================
 
 # Display string used wherever a true R NA must be shown to a user.
 missing_label: "Missing"
 
-# Expected atlas size for this candidate build (startup contract validation).
+# Number of cells in the data (checked at startup).
 expected_cell_count: 105949
 
 expected_studies:
@@ -40,8 +24,8 @@ expected_studies:
   - Ruberto2022_2
   - Sa2020
 
-# Physical columns that must NOT appear as a configured target any more. The
-# startup validator and the AT20 static scan both use this list.
+# Column names of older data versions that must not be used any more (checked
+# at startup and by the tests).
 obsolete_columns:
   - development_phase
   - parasite_stages
@@ -68,11 +52,6 @@ fields:
     column: study_pmid
     role: detail
     required: true
-  pub_year:
-    label: "Publication year"
-    column: pub_year
-    role: detail
-    required: true
   n_count_rna:
     label: "RNA count"
     column: n_count_rna
@@ -87,105 +66,91 @@ fields:
   # ----------------------------------------------------------- life cycle
   broad_stage:
     label: "Broad life-cycle stage"
-    column: parasite_broad_stage
+    column: broad_stage
     role: filter
     required: true
     help: >
-      Deterministic broad grouping derived from the harmonized life-cycle
-      stage. Broad and detailed stage are never independent: every detailed
-      stage maps to exactly one broad stage.
+      Blood, liver or sporozoite stage. Each life-cycle stage belongs to
+      exactly one broad stage.
   detailed_stage:
-    label: "Life-cycle stage (harmonized)"
-    column: harmonized_life_cycle_stage
+    label: "Life-cycle stage"
+    column: stage
     role: filter
     required: true
     help: >
-      PlaViSca harmonized life-cycle stage. Produced by a documented
-      precedence rule combining author-supplied stage labels, the PlaViSca
-      heuristic IDC bin and cluster-derived calls. See the "Stage annotation
-      provenance" field for which mechanism produced a given cell's value.
+      The stage given by the authors where they give one; otherwise the
+      gametocyte call of the cell's cluster; otherwise the stage of the most
+      similar reference time point. "Source of the life-cycle stage" says
+      which one was used.
   source_life_cycle_stage:
-    label: "Life-cycle stage (author-reported)"
-    column: source_life_cycle_stage
+    label: "Life-cycle stage (authors)"
+    column: author_stage
     role: detail
     required: true
     help: >
-      Verbatim stage label as deposited by the original authors. Never
-      overwritten by PlaViSca inference.
+      Stage assigned by the authors of the study (Sa2020 gametocytes, liver
+      forms, sporozoite samples).
   source_stage_provenance:
-    label: "Stage annotation provenance"
-    column: source_stage_provenance
+    label: "Source of the life-cycle stage"
+    column: stage_source
     role: detail
     required: true
     help: >
-      Which mechanism determined the harmonized life-cycle stage for this
-      cell (source_selection_defined, source_state_defined, singleR_inferred
-      or cluster_inferred).
+      author (stage given by the authors), gametocyte_markers (gametocyte
+      call of the cluster) or idc_reference (most similar reference time
+      point).
 
   # ------------------------------------------------- IDC reference-time class
   idc_reference_class:
-    label: "IDC reference-time class"
-    column: idc_reference_similarity_label
+    label: "Most similar reference time point (h)"
+    column: idc_timepoint
     role: filter
     required: true
     numeric_sort: true
     help: >
-      SingleR expression-similarity classification against reference
-      intra-erythrocytic development cycle (IDC) timepoints; this is not a
-      measured hour-post-invasion value. Only blood-stage-eligible cells
-      carry a value; all other cells are Missing by design.
+      Time point of the reference blood-stage time course (Zhu et al. 2016)
+      whose expression is most similar to the cell (SingleR). It is a
+      similarity, not a measured age. Only blood cells with at least 10 UMIs
+      have a value.
   idc_heuristic_stage_bin:
-    label: "PlaViSca heuristic IDC stage"
-    column: idc_heuristic_stage_bin
+    label: "Stage of the reference time point"
+    column: idc_stage
     role: detail
     required: true
     help: >
-      PlaViSca-defined binning of the IDC reference-time class into
-      Ring/Trophozoite/Schizont/Merozoite. These cutoffs are defined by
-      PlaViSca and were not established by the reference publication.
-  idc_similarity_raw_label:
-    label: "IDC similarity (raw label)"
-    column: idc_similarity_raw_label
-    role: detail
-    required: true
-    help: "Unpruned SingleR label, retained for uncertainty inspection."
+      Stage assigned to the reference time point: 6-12 h ring, 24 h
+      trophozoite, 32-42 h schizont, 48 h late schizont/merozoite. This
+      assignment is defined by PlaViSca, not by the reference publication.
   idc_similarity_score_delta:
-    label: "IDC similarity score delta"
-    column: idc_similarity_score_delta
+    label: "Reference similarity delta"
+    column: idc_delta
     role: detail
     required: true
     help: "SingleR delta.next: margin between the best and next-best class."
-  idc_similarity_pruned_flag:
-    label: "IDC similarity pruned"
-    column: idc_similarity_pruned_flag
-    role: detail
-    required: true
-    help: "TRUE where SingleR pruned the label as low confidence."
 
   # ------------------------------------------------- gametocyte provenance
   pred_gametocyte_sex:
-    label: "Gametocyte sex (PlaViSca-inferred)"
-    column: pred_gametocyte_sex
+    label: "Gametocyte call of the cluster"
+    column: cluster_gametocyte_call
     role: detail
     required: true
     help: >
-      Cluster/module-score classification computed by PlaViSca for
-      blood-stage-eligible cells only. This is an inferred call, NOT an
-      author annotation.
+      Female or male gametocytes if the cell's cluster has high marker
+      scores for that sex (computed by PlaViSca, blood cells with at least
+      10 UMIs only).
   source_sex_annotation:
-    label: "Gametocyte sex (author-reported)"
-    column: source_sex_annotation
+    label: "Gametocyte sex (authors)"
+    column: author_sex
     role: detail
     required: true
     help: >
-      Sex annotation as published by the original authors. Stored separately
-      from the PlaViSca-inferred call and never merged with it.
+      Gametocyte sex given by the authors (Sa2020).
   source_pseudogroup:
-    label: "Author pseudogroup"
-    column: source_pseudogroup
+    label: "Sexual/asexual group (authors)"
+    column: author_pseudogroup
     role: detail
     required: true
-    help: "Verbatim author-assigned pseudogroup (e.g. Sexual, GroupA)."
+    help: "Hazzard2024: the authors' group of the cell (Sexual, GroupA, ...)."
 
   # ---------------------------------------------------------------- sample
   host_species:
@@ -194,28 +159,25 @@ fields:
     role: filter
     required: true
   tissue_or_sample_type:
-    label: "Tissue / sample type"
-    column: tissue_or_sample_type
+    label: "Host and tissue"
+    column: tissue
     role: filter
     required: true
     help: >
-      Canonical tissue vocabulary shared by the preprocessing pipeline; this
-      is the field that gates which cells are eligible for blood-cycle
-      inference.
+      Host blood, Host liver or Vector salivary gland. Only blood cells are
+      used to infer blood stages and gametocytes.
   treatment:
     label: "Treatment"
     column: treatment
     role: filter
     required: true
     help: >
-      Four-state vocabulary. "Study control" is a designed experimental
-      control or vehicle arm; "No treatment" means the source documents a
-      genuinely untreated arm with no control condition. They are not
-      interchangeable. Named compounds are shown verbatim, and a missing
-      value means treatment information was not recorded.
+      "Study control" is the control arm of a drug experiment; "No treatment"
+      means the study had no drug arm. Drug names are shown as given by the
+      authors.
   parasite_lineage_isolate:
-    label: "Parasite lineage / isolate"
-    column: parasite_lineage_isolate
+    label: "Parasite strain / isolate"
+    column: strain
     role: filter
     required: true
   day_post_infection:
@@ -232,32 +194,8 @@ fields:
     role: filter
     required: true
     help: >
-      Curated geographic origin of the parasite material, taken from the
-      publication text. Distinct from where the experiment was performed,
-      where sequencing happened, and from the registry's own geo_loc_name.
-  host_provenance:
-    label: "Host provenance"
-    column: host_provenance
-    role: detail
-    required: true
-  experimental_site:
-    label: "Experimental site"
-    column: experimental_site
-    role: detail
-    required: true
-  sequencing_site:
-    label: "Sequencing site"
-    column: sequencing_site
-    role: detail
-    required: true
-  registry_location:
-    label: "Registry location (ENA/GEO)"
-    column: registry_location
-    role: detail
-    required: true
-    help: >
-      Verbatim registry geo_loc_name text. This is a submission artifact and
-      must not be read as biological provenance.
+      Geographic origin of the parasite strain or isolate, from the
+      publication.
 
   # -------------------------------------------------------------- technical
   sc_technology:
@@ -266,68 +204,32 @@ fields:
     role: filter
     required: true
   sequencer:
-    label: "Sequencer (registered)"
-    column: sequencer_registered
+    label: "Sequencer"
+    column: sequencer
     role: filter
     required: true
     help: >
-      Instrument as registered with ENA/GEO. Where the publication states a
-      different instrument, both are retained rather than silently resolved.
-  sequencer_protocol_publication:
-    label: "Sequencer (publication)"
-    column: sequencer_protocol_publication
-    role: detail
-    required: true
+      Sequencing instrument registered for the run in ENA/SRA.
 
   # ------------------------------------------------ biological replicate
-  animal_id:
-    label: "Animal ID"
-    column: animal_id
-    role: detail
-    required: true
-  donor_id:
-    label: "Donor ID"
-    column: donor_id
-    role: detail
-    required: true
   biological_replicate_id:
-    label: "Biological replicate ID"
-    column: biological_replicate_id
+    label: "Biological replicate"
+    column: replicate_id
     role: filter
     required: true
     help: >
-      The grouping identifier that defines statistical independence for this
-      study. See "Biological replicate type" for what it represents.
+      Independent biological replicate (an animal or an infection, see
+      "Replicate type").
   biological_replicate_type:
-    label: "Biological replicate type"
-    column: biological_replicate_type
-    role: detail
-    required: true
-  library_id:
-    label: "Library ID"
-    column: library_id
+    label: "Replicate type"
+    column: replicate_type
     role: detail
     required: true
 
   # ------------------------------------------------- count provenance (QC)
   source_of_counts:
-    label: "Count source object"
-    column: source_of_counts
-    role: detail
-    required: true
-  counting_pipeline:
-    label: "Counting pipeline"
-    column: counting_pipeline
-    role: detail
-    required: true
-  count_reference_version:
-    label: "Count reference version"
-    column: count_reference_version
-    role: detail
-    required: true
-  count_provenance_status:
-    label: "Count provenance status"
-    column: count_provenance_status
+    label: "Count source"
+    column: count_source
     role: detail
     required: true
 
@@ -371,17 +273,12 @@ detail_table_fields:
   - pred_gametocyte_sex
   - source_sex_annotation
   - source_pseudogroup
-  - animal_id
-  - donor_id
   - biological_replicate_id
   - biological_replicate_type
   - day_post_infection
   - sc_technology
   - sequencer
   - source_of_counts
-  - counting_pipeline
-  - count_reference_version
-  - count_provenance_status
   - n_count_rna
   - n_feature_rna
 
@@ -437,9 +334,7 @@ stage_compatibility:
   Female gametocyte: Blood stage
   Asexual (unresolved stage): Blood stage
 
-# Explicit colours for levels that must not be left to the automatic palette
-# (Male and Female gametocyte are handled symmetrically; the old app had a
-# hardcoded override for Female only).
+# Fixed colours for some values (the others use the automatic palette).
 colors:
   detailed_stage:
     Male gametocyte: "#1F78B4"
@@ -470,6 +365,6 @@ notes:
     zero. A displayed zero therefore does not necessarily mean the gene was
     assayed and not detected in every study.
   stage_prediction: >
-    Harmonized life-cycle stages combine author-supplied labels with PlaViSca
-    inference. Use the "Stage annotation provenance" field to see which
-    mechanism produced a given cell's stage.
+    Life-cycle stages combine the authors' labels with stages inferred by
+    PlaViSca. The field "Source of the life-cycle stage" says which one a
+    cell's stage comes from.

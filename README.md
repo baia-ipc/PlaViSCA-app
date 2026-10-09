@@ -69,37 +69,27 @@ Then open `http://<server-ip>:3838` in a browser.
 
 ## Data
 
-The app expects preprocessed data stored under `data/`. The repository includes
-examples and processed RDS snapshots used for development. The preprocessing
-pipeline is available in `functions/preprocessing.R` — it flattens a Seurat
-object and produces the RDS files that the app reads.
+The data files are made by the preprocessing pipeline
+([PlaViSca_pre_processing](https://github.com/baia-ipc/PlaViSca_pre_processing),
+stage `50_export_app`, folder `results/app_data/` of a run):
 
-Typical files in `data/` (examples):
+- `cleaned_dataset.rds`: per-cell metadata and embeddings (`mr_data`), and
+  per-study PCA and variable-gene tables;
+- `normalize_df.rds`, `raw_df.rds`: metadata plus log-normalised expression
+  or counts;
+- `data_source.csv`: one row per study;
+- `gene_annotation.rds`: gene IDs, names and descriptions.
 
-- `cleaned_dataset.rds`
-- `data_source.csv`
-- `normalize_df.rds`
-- `raw_df.rds`
-- `PvivaxP01_gff_data.rds` (reference GFF)
-
-If you use your own data, ensure it follows the same structure (metadata
-columns, embedding column names like `umap_i_1`, `umap_i_2`, and gene
-expression columns). See `functions/build_plot_slim()` for details on expected
-columns.
+The per-cell columns are described in the pipeline's `metadata/columns.tsv`.
 
 ### Choosing a data directory
 
-All application data paths are resolved from the `PLAVISCA_DATA_DIR`
-environment variable, which defaults to `data`. To run the app against a
-different export (for example a release candidate produced by the
-`pre_process_data` pipeline) without copying anything:
+The app reads its data from the folder named by the `PLAVISCA_DATA_DIR`
+environment variable (default `data`):
 
 ```bash
-PLAVISCA_DATA_DIR=/path/to/export R -e "shiny::runApp('.')"
+PLAVISCA_DATA_DIR=/path/to/app_data R -e "shiny::runApp('.')"
 ```
-
-The directory must contain `cleaned_dataset.rds`, `normalize_df.rds`,
-`raw_df.rds` and `data_source.csv`.
 
 ### Data contract
 

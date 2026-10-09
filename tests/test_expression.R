@@ -74,11 +74,11 @@ test_that_("row-index filtering preserves cell-key alignment", {
         "barcode column and rownames must stay aligned after subsetting")
 })
 
-test_that_("top-gene / HVG tables cover all six studies", {
+test_that_("variable-gene and PCA tables cover all six studies", {
     p <- app_data_path("cleaned_dataset.rds")
     if (!file.exists(p)) skip_test("no candidate data")
     cd <- readRDS(p)
-    for (nm in c("hiv_data", "top_genes_exp", "pca_df")) {
+    for (nm in c("hiv_data", "pca_df")) {
         expect_true_(!is.null(cd[[nm]]), sprintf("%s must be present in cleaned_dataset.rds", nm))
         expect_setequal_(
             unique(as.character(cd[[nm]]$study)), app_expected_studies(),

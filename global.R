@@ -46,7 +46,7 @@ if (length(missing_files) > 0) {
   ), call. = FALSE)
 }
 
-gff_data <- readRDS("ref/PvivaxP01_gff_data.rds")
+gff_data <- readRDS(DATA_PATHS$gene_annotation)
 
 # Pre-load the most commonly used data (normalized data and metadata)
 norm_df <- readRDS(DATA_PATHS$norm_df)

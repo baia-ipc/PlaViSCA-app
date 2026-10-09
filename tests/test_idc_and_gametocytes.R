@@ -16,7 +16,7 @@ test_that_("the obsolete hour_post_invasion field is not required by the app", {
 test_that_("the IDC reference-similarity field is configured and present", {
     m <- app_data("mr_data")
     col <- get_data_column("idc_reference_class")
-    expect_equal_(col, "idc_reference_similarity_label", "configured IDC column")
+    expect_equal_(col, "idc_timepoint", "configured IDC column")
     expect_true_(col %in% colnames(m), "IDC column missing from the candidate data")
 })
 
@@ -29,7 +29,7 @@ test_that_("the IDC field is not labelled as measured hour-post-invasion", {
     help <- get_data_help("idc_reference_class")
     expect_true_(!is.null(help) && nzchar(help), "IDC field must carry explanatory help text")
     expect_true_(
-        grepl("not a measured hour-post-invasion", help, fixed = TRUE),
+        grepl("not a measured age", help, fixed = TRUE),
         "IDC help text must explicitly disclaim measured hour-post-invasion semantics"
     )
     expect_true_(
@@ -40,8 +40,7 @@ test_that_("the IDC field is not labelled as measured hour-post-invasion", {
 
 test_that_("IDC uncertainty companion fields are retained and configured", {
     m <- app_data("mr_data")
-    for (k in c("idc_similarity_raw_label", "idc_similarity_score_delta",
-        "idc_similarity_pruned_flag")) {
+    for (k in c("idc_similarity_score_delta")) {
         expect_true_(
             get_data_column(k) %in% colnames(m),
             sprintf("uncertainty field %s missing from the candidate data", k)
@@ -49,15 +48,11 @@ test_that_("IDC uncertainty companion fields are retained and configured", {
     }
 })
 
-test_that_("the heuristic IDC bin is labelled as a PlaViSca heuristic", {
-    label <- get_data_label("idc_heuristic_stage_bin")
+test_that_("the stage of the reference time point is attributed to PlaViSca", {
+    help <- get_data_help("idc_heuristic_stage_bin")
     expect_true_(
-        grepl("heuristic", label, ignore.case = TRUE),
-        sprintf("label '%s' must say it is a heuristic", label)
-    )
-    expect_true_(
-        grepl("PlaViSca", label, fixed = TRUE),
-        sprintf("label '%s' must attribute the binning to PlaViSca", label)
+        !is.null(help) && grepl("defined by PlaViSca", help, fixed = TRUE),
+        "the help text must say that the time point stages are a PlaViSca choice"
     )
 })
 
@@ -86,8 +81,8 @@ test_that_("inferred and author-reported gametocyte sex are distinct fields", {
 
 test_that_("the two gametocyte fields are labelled with their provenance", {
     expect_true_(
-        grepl("inferred", get_data_label("pred_gametocyte_sex"), ignore.case = TRUE),
-        "the inferred field's label must say it is inferred"
+        grepl("cluster", get_data_label("pred_gametocyte_sex"), ignore.case = TRUE),
+        "the inferred field's label must say it is a cluster call"
     )
     expect_true_(
         grepl("author", get_data_label("source_sex_annotation"), ignore.case = TRUE),
@@ -119,14 +114,6 @@ test_that_("adjudicated stage is not a separate app field and mirrors the detail
         Filter(function(k) get_data_column(k) == "adjudicated_display_stage", data_field_keys()),
         "adjudicated_display_stage duplicates the detailed stage and must not be exposed as a second app field"
     )
-    if ("adjudicated_display_stage" %in% colnames(m)) {
-        det <- m[[get_data_column("detailed_stage")]]
-        adj <- m$adjudicated_display_stage
-        expect_true_(
-            identical(is.na(adj), is.na(det)) && all(adj[!is.na(adj)] == det[!is.na(det)]),
-            "adjudicated_display_stage must equal harmonized_life_cycle_stage (DEC07 resolved)"
-        )
-    }
 })
 
 test_that_("both gametocyte labels reach the detailed stage with configured colours", {
@@ -189,24 +176,12 @@ test_that_("parasite geography uses parasite_origin_location, not the conflated 
     )
 })
 
-test_that_("the other provenance concepts stay separate fields", {
-    m <- app_data("mr_data")
-    for (k in c("host_provenance", "experimental_site", "sequencing_site", "registry_location")) {
-        expect_true_(
-            get_data_column(k) %in% colnames(m),
-            sprintf("%s must remain available as a distinct field", k)
-        )
-    }
-    cols <- vapply(c("parasite_origin_location", "host_provenance", "experimental_site",
-        "sequencing_site", "registry_location"), get_data_column, character(1))
-    expect_equal_(length(unique(cols)), 5L, "the five geography concepts must not be collapsed")
-})
 
 # ------------------------------------------------------- biological replicate
 
 test_that_("biological replicate identity is visible in the app", {
     m <- app_data("mr_data")
-    for (k in c("animal_id", "donor_id", "biological_replicate_id", "biological_replicate_type")) {
+    for (k in c("biological_replicate_id", "biological_replicate_type")) {
         expect_true_(
             get_data_column(k) %in% colnames(m),
             sprintf("%s missing from the candidate data", k)
