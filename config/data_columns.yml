@@ -407,12 +407,6 @@ italicised_fields:
 
 # Free-text notes rendered in the UI next to specific views.
 notes:
-  gene_expression_coverage: >
-    Feature coverage differs between studies. Ruberto2022_1 was quantified
-    against an older PlasmoDB-51 reference, so 2,089 of PlaViSca's features
-    are not available from that study's author matrix and are recorded as
-    zero. A displayed zero therefore does not necessarily mean the gene was
-    assayed and not detected in every study.
   stage_prediction: >
     Life-cycle stages combine the authors' labels with stages inferred by
     PlaViSca. The field "Source of the life-cycle stage" says which one a
