@@ -18,7 +18,7 @@ test_that_("total and per-study cell counts are exact", {
 })
 
 test_that_("the 14 duplicated Mancio-Silva2022 cell copies are removed, their partners kept", {
-    # See pre_process_data/metadata/mancio_silva2022_duplicate_cells.tsv.
+    # See PlaViSca-meta-analysis/metadata/mancio_silva2022_duplicate_cells.tsv.
     m <- app_data("mr_data")
     ids <- as.character(m[[get_data_column("barcode")]])
     removed <- c(

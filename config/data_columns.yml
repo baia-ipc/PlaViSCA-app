@@ -3,7 +3,7 @@
 # Maps the field names used in ui.R, server.R and functions/ to the columns of
 # the data files (cleaned_dataset.rds$mr_data, normalize_df.rds, raw_df.rds)
 # written by the preprocessing pipeline (stage 50; the columns are described
-# in pre_process_data/metadata/columns.tsv).
+# in PlaViSca-meta-analysis/metadata/columns.tsv).
 #
 # Every metadata column used as a filter, "Color by", "Group by" or detail
 # field is declared here and read through get_data_column() /
@@ -337,7 +337,7 @@ vocabularies:
     - Merozoite
 
 # Detailed -> broad life-cycle stage mapping, the app's copy of
-# pre_process_data/metadata/stages.tsv. The broad/detailed stage filters use
+# PlaViSca-meta-analysis/metadata/stages.tsv. The broad/detailed stage filters use
 # it to offer only compatible choices. It is checked against the loaded data
 # at startup; if the data disagree, the app stops.
 stage_compatibility:
