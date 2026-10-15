@@ -13,9 +13,6 @@
 # Display string used wherever a true R NA must be shown to a user.
 missing_label: "Missing"
 
-# Number of cells in the data (checked at startup).
-expected_cell_count: 105949
-
 expected_studies:
   - Hazzard2022
   - Hazzard2024

@@ -122,7 +122,6 @@ field_is_numeric_sorted <- function(key) {
     isTRUE(.config_field(key)$numeric_sort)
 }
 
-app_expected_cell_count <- function() as.integer(.data_columns_raw$expected_cell_count)
 app_expected_studies <- function() as.character(.data_columns_raw$expected_studies)
 app_unsupported_columns <- function() as.character(.data_columns_raw$unsupported_columns)
 app_note <- function(name) {

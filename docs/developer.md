@@ -69,7 +69,7 @@ Further blocks say where each field is used (`filter_fields`,
 `category_fields` for "Color by"/"Group by", `detail_table_fields`), and
 give biological orderings (`vocabularies`), fixed colours (`colors`),
 display labels for coded values (`value_labels`), the detailed → broad stage
-mapping (`stage_compatibility`) and the expected cell count and studies.
+mapping (`stage_compatibility`) and the expected studies.
 
 ### Tutorial: show a new metadata column
 
@@ -104,11 +104,10 @@ column are built from the configuration.
 
 1. Run the preprocessing pipeline and point `PLAVISCA_DATA_DIR` at its
    `results/app_data/`.
-2. Start the app or run the tests. If the cell count, studies or columns
-   changed, the startup checks say which.
-3. Update `expected_cell_count`, `expected_studies` and any changed fields in
-   `config/data_columns.yml`, and the exact numbers in
-   `tests/test_expected_cells.R`.
+2. Start the app or run the tests. If the studies or columns changed, the
+   startup checks say which.
+3. Update `expected_studies` and any changed fields in
+   `config/data_columns.yml`.
 
 ## Tests
 
@@ -128,7 +127,6 @@ PLAVISCA_DATA_DIR=/path/to/app_data Rscript tests/run_tests.R
 | `test_bibliography_and_filters.R` | `data_source.csv` agrees with the data; filter behaviour |
 | `test_expression.R` | gene columns, expression lookup, alignment of the tables |
 | `test_app_code.R` | the code rules listed above |
-| `test_expected_cells.R` | exact cell counts and membership of the current data |
 
 To add a test, add a `test_that_("what it checks", { ... })` block to the
 file of that topic, or a new `tests/test_<topic>.R` listed in

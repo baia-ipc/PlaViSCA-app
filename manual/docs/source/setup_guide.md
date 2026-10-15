@@ -72,7 +72,7 @@ These files are written by the [PlaViSca preprocessing pipeline](https://github.
 export PLAVISCA_DATA_DIR=/path/to/run/results/app_data
 ```
 
-At startup the app checks that the data match its configuration (cell count, studies, columns, life-cycle stages). If they do not, it stops with a message listing what is wrong.
+At startup the app checks that the data match its configuration (studies, columns, life-cycle stages). If they do not, it stops with a message listing what is wrong.
 
 ### 4. Run the Application
 

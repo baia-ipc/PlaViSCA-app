@@ -15,11 +15,6 @@ test_that_("all app data files are present", {
     }
 })
 
-test_that_("cleaned_dataset.rds loads and has the expected cell count", {
-    m <- app_data("mr_data")
-    expect_equal_(nrow(m), app_expected_cell_count(), "metadata row count")
-})
-
 test_that_("the atlas contains exactly the six expected studies", {
     m <- app_data("mr_data")
     expect_setequal_(

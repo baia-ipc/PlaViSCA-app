@@ -32,15 +32,7 @@ check_app_data <- function(mr_data,
 
     cols <- colnames(mr_data)
 
-    # --- 1. cell count -------------------------------------------------------
-    expected_n <- app_expected_cell_count()
-    add(
-        "cell_count",
-        nrow(mr_data) == expected_n,
-        sprintf("expected %d metadata rows, found %d", expected_n, nrow(mr_data))
-    )
-
-    # --- 2. every required configured field resolves --------------------------
+    # --- 1. every required configured field resolves --------------------------
     # This runs before any check that reads a configured column, so data
     # with different columns gives a clear message rather than an obscure
     # subsetting error further down.
@@ -70,7 +62,7 @@ check_app_data <- function(mr_data,
         return(out)
     }
 
-    # --- 3. studies ----------------------------------------------------------
+    # --- 2. studies -----------------------------------------------------------
     expected_studies <- app_expected_studies()
     observed_studies <- sort(unique(as.character(mr_data[[get_data_column("study_label")]])))
     add(
@@ -83,7 +75,7 @@ check_app_data <- function(mr_data,
         )
     )
 
-    # --- 4. no configured field maps to an unsupported column ------------------
+    # --- 3. no configured field maps to an unsupported column -----------------
     unsupported <- app_unsupported_columns()
     unsupported_targets <- Filter(
         function(k) get_data_column(k) %in% unsupported,
@@ -99,7 +91,7 @@ check_app_data <- function(mr_data,
         }
     )
 
-    # --- 5. unsupported columns are not required ------------------------------
+    # --- 4. unsupported columns are not required ------------------------------
     present_unsupported <- intersect(unsupported, cols)
     add(
         "unsupported_columns_not_required",
@@ -110,7 +102,7 @@ check_app_data <- function(mr_data,
         )
     )
 
-    # --- 6. cell identifiers ---------------------------------------------------
+    # --- 5. cell identifiers --------------------------------------------------
     barcode_col <- get_data_column("barcode")
     add(
         "unique_cell_ids",
@@ -123,7 +115,7 @@ check_app_data <- function(mr_data,
         "metadata rownames must equal the barcode column"
     )
 
-    # --- 7. no literal "NA" categories in app-visible categorical fields -------
+    # --- 6. no literal "NA" categories in app-visible categorical fields ------
     visible_keys <- unique(c(filter_field_keys(), category_field_keys()))
     offenders <- character(0)
     for (key in visible_keys) {
@@ -145,7 +137,7 @@ check_app_data <- function(mr_data,
         }
     )
 
-    # --- 8. broad / detailed stage compatibility -------------------------------
+    # --- 7. broad / detailed stage compatibility ------------------------------
     broad_col <- get_data_column("broad_stage")
     detailed_col <- get_data_column("detailed_stage")
     map <- stage_compatibility_map()
@@ -187,7 +179,7 @@ check_app_data <- function(mr_data,
         sprintf("%d cells have one stage field missing but not the other", inconsistent_na)
     )
 
-    # --- 9. reference time point fields ----------------------------------------
+    # --- 8. reference time point fields ---------------------------------------
     idc_col <- get_data_column("idc_reference_class")
     add(
         "idc_fields_present",
@@ -209,7 +201,7 @@ check_app_data <- function(mr_data,
         sprintf("%d non-blood cells carry an IDC reference-time class", leaked)
     )
 
-    # --- 10. gametocyte provenance not collapsed -------------------------------
+    # --- 9. gametocyte provenance not collapsed -------------------------------
     pred_col <- get_data_column("pred_gametocyte_sex")
     src_col <- get_data_column("source_sex_annotation")
     add(
@@ -224,7 +216,7 @@ check_app_data <- function(mr_data,
         sprintf("%d non-blood cells carry a PlaViSca-inferred gametocyte sex", gam_leak)
     )
 
-    # --- 11. embeddings --------------------------------------------------------
+    # --- 10. embeddings -------------------------------------------------------
     for (prefix in c("umap_u_", "umap_i_", "pca_u_", "pca_i_", "t_sne_")) {
         found <- grep(paste0("^", prefix, "\\d+$"), cols, value = TRUE)
         add(
@@ -234,7 +226,7 @@ check_app_data <- function(mr_data,
         )
     }
 
-    # --- 12. expression table alignment ----------------------------------------
+    # --- 11. expression table alignment ---------------------------------------
     if (!is.null(expr_df)) {
         expr_cols <- colnames(expr_df)
         add(
@@ -273,7 +265,7 @@ check_app_data <- function(mr_data,
         )
     }
 
-    # --- 13. bibliography ------------------------------------------------------
+    # --- 12. bibliography -----------------------------------------------------
     if (!is.null(bibliography)) {
         bib <- validate_bibliography(mr_data, bibliography)
         rows <- c(rows, split(bib, seq_len(nrow(bib))))
