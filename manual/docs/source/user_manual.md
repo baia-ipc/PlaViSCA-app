@@ -81,7 +81,7 @@ The **Filters** box starts folded: click its title bar to unfold it, and again t
 
 The Embeddings tab offers dimensionality reduction and customizable visualization of single-cell data **Video 1**. Key capabilities:
 
-**Plot Settings:**
+**Plot Settings:** the settings sit in a panel left of the plot, folded by default: click the cog button to open it, and the arrow at its edge to fold it again.
 
 | Setting      | Options                                        |
 |--------------|------------------------------------------------|

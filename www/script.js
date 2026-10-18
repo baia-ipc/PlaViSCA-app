@@ -490,3 +490,14 @@ $(document).on('shiny:inputchanged', function (event) {
     setTimeout(updateFilterCounts, 0);
   }
 });
+
+// Folding a bslib sidebar changes the width of the plots next to it: let
+// plotly and other widgets resize once the sidebar has finished moving.
+$(document).on('bslib.sidebar', function () {
+  setTimeout(function () { window.dispatchEvent(new Event('resize')); }, 400);
+});
+
+// The fold button of the plot settings sidebar says what it opens.
+$(function () {
+  $('.embedding-layout .collapse-toggle').attr('title', 'Plot settings');
+});

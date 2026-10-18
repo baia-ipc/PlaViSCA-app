@@ -510,6 +510,63 @@ body {
   transform: rotate(-90deg);
 }
 
+/* Plot settings sidebar of the Embeddings tab (bslib layout_sidebar) */
+.embedding-layout {
+  --bslib-sidebar-bg: rgba(255, 255, 255, 0.6);
+  --bslib-sidebar-fg: #2c3e50;
+  background: transparent !important;
+  overflow: visible;
+}
+
+.embedding-layout .bslib-sidebar-layout > .sidebar {
+  border-radius: 12px;
+  border: 1px solid #e1e4e8;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+/* Folded: the toggle button shows a cog instead of the chevron */
+.embedding-layout .bslib-sidebar-layout.sidebar-collapsed > .collapse-toggle {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background-color: var(--primary-color);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.embedding-layout .bslib-sidebar-layout.sidebar-collapsed > .collapse-toggle .collapse-icon {
+  display: none;
+}
+
+.embedding-layout .bslib-sidebar-layout.sidebar-collapsed > .collapse-toggle::before {
+  font-family: "Font Awesome 6 Free";
+  font-weight: 900;
+  content: "\f013";
+  font-size: 16px;
+}
+
+.embedding-layout .bslib-sidebar-layout.sidebar-collapsed > .main {
+  padding-left: 44px !important;
+}
+
+.plot-settings-sidebar .sidebar-title {
+  color: var(--primary-color);
+  font-size: 0.9rem;
+  font-weight: 700;
+  margin-bottom: 0;
+}
+
+.plot-settings-sidebar .shiny-input-container {
+  margin-bottom: 0 !important;
+  width: 100%;
+}
+
+.plot-settings-sidebar .control-label {
+  margin-bottom: 1px !important;
+}
+
 /* Vertical Space Optimization for Settings */
 .settings-card-compact .card-header {
   padding: 4px 12px !important;
