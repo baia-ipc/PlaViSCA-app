@@ -203,7 +203,10 @@ plot_settings_layout <- function(controls, ...) {
     class = "plot-settings-layout",
     layout_sidebar(
       sidebar = sidebar(
-        title = tags$span(fontawesome::fa("cog", height = "14px"), " Plot settings"),
+        title = div(
+          class = "plot-settings-title",
+          fontawesome::fa("cog", height = "14px"), " Plot settings"
+        ),
         class = "plot-settings-sidebar",
         width = 240,
         open = "closed",

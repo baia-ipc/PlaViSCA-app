@@ -431,11 +431,35 @@ body {
   padding-left: 40px !important;
 }
 
-.plot-settings-sidebar .sidebar-title {
-  color: var(--primary-color);
+/* Open: the title is a teal bar at the top, like Filters and Visualization,
+   with the fold arrow on its right */
+.plot-settings-layout .bslib-sidebar-layout > .sidebar > .sidebar-content {
+  padding-top: 0 !important;
+}
+
+.plot-settings-sidebar .plot-settings-title {
+  margin: 0 -24px 4px;
+  padding: 0 12px;
+  height: 33px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #fff;
   font-size: 0.9rem;
   font-weight: 700;
-  margin-bottom: 0;
+  background-color: #008080;
+  background-image: linear-gradient(120deg, #008080 0%, #006666 100%);
+  border-radius: 12px 12px 0 0;
+}
+
+.plot-settings-sidebar .plot-settings-title svg {
+  margin: 0 !important;
+}
+
+.plot-settings-layout .bslib-sidebar-layout:not(.sidebar-collapsed) > .collapse-toggle {
+  top: 1px !important;
+  height: 31px;
+  color: #fff;
 }
 
 .plot-settings-sidebar .shiny-input-container {
