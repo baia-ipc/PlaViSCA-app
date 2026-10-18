@@ -50,17 +50,13 @@ The **Filters** box starts folded: click its title bar to unfold it, and again t
 
 ### Embeddings
 
-<iframe width="100%" height="360" src="https://www.youtube.com/embed/gcubjXeIxUY" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-
-**Video 1**: Embedding tab functionality
-
 ![Figure 2: Embeddings tab, with the plot settings open and cells colored by life-cycle stage](imgs/embeddings.png)
 **Figure 2**: Embeddings tab, with the plot settings open and cells colored by life-cycle stage
 
 ![Figure 3: Compare Plots mode: the same embedding colored by broad life-cycle stage and by study](imgs/embeddings_compare.png)
 **Figure 3**: Compare Plots mode: the same embedding colored by broad life-cycle stage and by study
 
-The Embeddings tab offers dimensionality reduction and customizable visualization of single-cell data **Video 1**. Key capabilities:
+The Embeddings tab offers dimensionality reduction and customizable visualization of single-cell data (**Figures 2 and 3**). Key capabilities:
 
 **Plot Settings:** the settings sit in a panel left of the plot, folded by default: click the cog button to open it, and the arrow at its edge to fold it again. The Gene expression tab has the same panel, and the panel is open or folded on both tabs at once.
 
@@ -85,14 +81,10 @@ The Embeddings tab offers dimensionality reduction and customizable visualizatio
 
 ### Gene Expression
 
-<iframe width="100%" height="360" src="https://www.youtube.com/embed/desA2cp3UCk" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-
-**Video 2**: Gene expression tab functionality
-
 ![Figure 4: Gene expression tab](imgs/gene_expression.png)
 **Figure 4**: Gene expression tab
 
-The Gene Expression tab provides an interactive interface for exploring gene expression across various biological conditions **Video 2**. Key features:
+The Gene Expression tab provides an interactive interface for exploring gene expression across various biological conditions (**Figure 4**). Key features:
 
 - **Flexible Plot Management**: Add or remove plot panels dynamically (panels display in a 2-column layout). Each panel has its own gene selection and grouping.
 - **Data Type**: Choose Raw or Normalized expression data (Scaled data is currently disabled).
@@ -105,14 +97,10 @@ The Gene Expression tab provides an interactive interface for exploring gene exp
 
 ### Plots
 
-<iframe width="100%" height="360" src="https://www.youtube.com/embed/ul_ulDxMQZk" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-
-**Video 3:** Metadata filtration
-
 ![Figure 5: Plots tab](imgs/plots.png)
 **Figure 5**: Plots tab
 
-A short video demonstration of the metadata views **Video 3**. This video provides an overview of how to filter datasets by biological and experimental attributes. Applying filters dynamically updates both plots and tables, enabling users to focus on relevant data subsets for further analysis.
+The Plots tab shows how the selected cells are distributed over the metadata fields (**Figure 5**). Changing the filters updates the value boxes and all charts.
 
 **Summary value boxes:**
 
@@ -174,10 +162,6 @@ All six studies are processed by the [PlaViSca preprocessing pipeline](https://g
 To set up the app with these files, see the [Setup Guide](setup_guide.md).
 
 ### About
-
-<iframe width="100%" height="360" src="https://www.youtube.com/embed/VHDa3zuTNTw" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-
-**Video 4:** About
 
 The **About** tab starts with a short welcome text, then gives information on the PlaViSca project, including its development background, team members, and how to get involved. It highlights the collaborative efforts behind creating a tool for malaria research.
 
