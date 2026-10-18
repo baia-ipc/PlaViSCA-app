@@ -457,3 +457,15 @@ $(document).ready(function () {
 });
 
 
+
+// Foldable settings cards (Filters, Plot settings): clicking a card's title
+// bar folds or unfolds every card of the same group, on all tabs at once.
+$(document).on('click', '.foldable-card-header', function () {
+  const group = $(this).attr('data-fold-group');
+  const open = $(this).attr('aria-expanded') !== 'true';
+  $('.foldable-card-header[data-fold-group="' + group + '"]').attr('aria-expanded', open);
+  $('.foldable-card-body[data-fold-group="' + group + '"]')
+    .toggleClass('show', open)
+    // let Shiny recheck the visibility of outputs inside the cards
+    .trigger(open ? 'shown' : 'hidden');
+});

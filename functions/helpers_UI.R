@@ -155,8 +155,11 @@ create_filter_widget <- function(key, suffix = "", width_class = "col-md-3") {
 }
 
 # Settings card (filters, plot settings) whose body folds away when the
-# header is clicked. `id` names the foldable body and must be unique per page.
-foldable_settings_card <- function(id, icon, title, ..., class = "mb-2") {
+# header is clicked. Cards with the same `group` fold and unfold together on
+# every tab (www/script.js); `folded` is the starting state. `footer` stays
+# visible when the card is folded.
+foldable_settings_card <- function(group, icon, title, ..., folded = FALSE,
+                                   footer = NULL, class = "mb-2") {
   card(
     class = paste(class, "shadow-sm settings-card-compact foldable-card"),
     # Keep the foldable div a direct child of the card (no extra card body)
@@ -164,16 +167,19 @@ foldable_settings_card <- function(id, icon, title, ..., class = "mb-2") {
     card_header(
       class = "bg-primary text-white py-1 foldable-card-header",
       role = "button",
-      `data-bs-toggle` = "collapse",
-      `data-bs-target` = paste0("#", id),
-      `aria-expanded` = "true",
-      `aria-controls` = id,
+      `data-fold-group` = group,
+      `aria-expanded` = tolower(!folded),
       title = "Click to show or hide",
       fontawesome::fa(icon, height = "14px"),
       tags$span(title, class = "fw-bold", style = "font-size: 0.9rem;"),
       tags$span(class = "foldable-card-chevron", fontawesome::fa("chevron-down", height = "12px"))
     ),
-    div(id = id, class = "collapse show", ...)
+    div(
+      class = if (folded) "collapse foldable-card-body" else "collapse show foldable-card-body",
+      `data-fold-group` = group,
+      ...
+    ),
+    footer
   )
 }
 
@@ -182,25 +188,27 @@ foldable_settings_card <- function(id, icon, title, ..., class = "mb-2") {
 create_meta_filter_row <- function(suffix = "") {
   keys <- filter_field_keys()
   foldable_settings_card(
-    id = paste0("filters_body", suffix),
+    group = "filters",
     icon = "filter",
     title = "Filters",
+    folded = TRUE,
     class = "mb-3",
     card_body(
       fluidRow(
         # Five filters per row on wide screens, fewer on narrow ones
         class = "meta-filter g-2 row-cols-1 row-cols-sm-2 row-cols-lg-5",
         lapply(keys, function(k) create_filter_widget(k, suffix, "col")),
-      ),
-      # Shown only when the broad/detailed life-cycle stage selection is
-      # logically impossible (e.g. an old bookmark), instead of silently
-      # returning zero rows.
-      div(
-        id = paste0("stage_compatibility_warning", suffix),
-        class = "alert alert-warning py-1 px-2 mb-0 mt-2 small",
-        style = "display: none;",
-        uiOutput(paste0("stage_compatibility_message", suffix), inline = TRUE)
       )
+    ),
+    # Shown only when the broad/detailed life-cycle stage selection is
+    # logically impossible (e.g. an old bookmark), instead of silently
+    # returning zero rows. Kept outside the foldable body so it is seen
+    # even when the filters are folded.
+    footer = div(
+      id = paste0("stage_compatibility_warning", suffix),
+      class = "alert alert-warning py-1 px-2 m-2 small",
+      style = "display: none;",
+      uiOutput(paste0("stage_compatibility_message", suffix), inline = TRUE)
     )
   )
 }
@@ -211,7 +219,7 @@ create_plot_controls <- function(data_type_id = "data_type", include_size_dim = 
   plot_id <- paste0("plot", suffix)
 
   foldable_settings_card(
-    id = paste0("plot_settings_body", suffix),
+    group = "plot_settings",
     icon = "cog",
     title = "Plot settings",
     card_body(

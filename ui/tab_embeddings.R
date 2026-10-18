@@ -9,7 +9,7 @@ ui_tab_embeddings <- function() {
 
     # Control Row (Fixed duplication and alignment)
     foldable_settings_card(
-      id = "plot_settings_body",
+      group = "plot_settings",
       icon = "cog",
       title = "Plot settings",
       card_body(
