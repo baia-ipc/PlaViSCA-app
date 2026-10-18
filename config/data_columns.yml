@@ -124,7 +124,7 @@ fields:
     help: >
       Time point of the reference blood-stage time course (Zhu et al. 2016)
       whose expression is most similar to the cell (SingleR). It is a
-      similarity, not a measured age. Only blood cells with at least 10 UMIs
+      similarity, not a measured age. Only blood cells with at least 20 UMIs
       have a value.
   idc_heuristic_stage_bin:
     label: "Stage of the reference time point"
@@ -132,7 +132,8 @@ fields:
     role: detail
     required: true
     help: >
-      Stage assigned to the reference time point: 6-12 h ring, 24 h
+      Stage assigned to the reference time point: 6-12 h ring/early
+      trophozoite, 24 h
       trophozoite, 32-42 h schizont, 48 h late schizont/merozoite. This
       assignment is defined by PlaViSca, not by the reference publication.
   idc_similarity_score_delta:
@@ -388,53 +389,82 @@ stage_compatibility:
   Female gametocyte: Blood stage
 
 # Fixed colours for some values (the others use the automatic palette).
-# Each life-cycle stage has one colour in every field that shows it. Blood
-# stages and gametocyte states match the gametocyte figure of the
-# preprocessing pipeline (R/40_annotate_stages.R); gametocytes follow the sex
-# expression modules of the P. falciparum atlas (developing: brown, female:
-# greens, male: blue-greys, early lighter than late).
+# Each study and each life-cycle stage has one colour in every field that
+# shows it, the same as in the manuscript figures (PlaViSca-meta-analysis,
+# R/lib/plots.R): the asexual blood cycle from yellow to dark red,
+# gametocytes in pale blue, green and blue (early lighter than late), liver
+# stages in lilac and purple, sporozoites in dark teal. Every pair of stage
+# colours stays distinguishable with protanopia and deuteranopia. Studies
+# use the Okabe-Ito colours.
 colors:
+  study_label:
+    Sa2020: "#0072B2"
+    Hazzard2022: "#E69F00"
+    Hazzard2024: "#56B4E9"
+    Ruberto2022_1: "#CC79A7"
+    Mancio-Silva2022: "#009E73"
+    Ruberto2022_2: "#D55E00"
+  broad_stage:
+    Blood stage: "#BB4400"
+    Liver stage: "#773388"
+    Sporozoite stage: "#114444"
   detailed_stage:
-    Sporozoite: "#CC6677"
-    Hypnozoite: "#882255"
-    Schizont (Liver stage): "#AA4499"
-    Ring/Early trophozoite: "#A9D18E"
-    Trophozoite: "#F4D35E"
-    Schizont (Blood stage): "#8EC5E8"
-    Merozoite: "#E07B39"
-    Developing gametocyte: "#66454C"
-    Female gametocyte: "#4E6E59"
-    Male gametocyte: "#42517C"
+    Sporozoite: "#114444"
+    Hypnozoite: "#CC88DD"
+    Schizont (Liver stage): "#773388"
+    Ring/Early trophozoite: "#DDDD55"
+    Trophozoite: "#EE8844"
+    Schizont (Blood stage): "#BB4400"
+    Merozoite: "#771100"
+    Developing gametocyte: "#AACCDD"
+    Female gametocyte: "#118866"
+    Male gametocyte: "#3377CC"
   gametocyte_state:
-    Developing gametocyte: "#66454C"
-    Early female: "#759F8B"
-    Late female: "#4E6E59"
-    Early male: "#7F88B3"
-    Late male: "#42517C"
+    Developing gametocyte: "#AACCDD"
+    Early female: "#00BB99"
+    Late female: "#226655"
+    Early male: "#3399EE"
+    Late male: "#114499"
   source_life_cycle_stage:
-    Sporozoite: "#CC6677"
-    Hypnozoite: "#882255"
-    Schizont (Liver stage): "#AA4499"
-    Female gametocyte: "#4E6E59"
-    Male gametocyte: "#42517C"
+    Sporozoite: "#114444"
+    Hypnozoite: "#CC88DD"
+    Schizont (Liver stage): "#773388"
+    Female gametocyte: "#118866"
+    Male gametocyte: "#3377CC"
   idc_heuristic_stage_bin:
-    Ring/Early trophozoite: "#A9D18E"
-    Trophozoite: "#F4D35E"
-    Schizont (Blood stage): "#8EC5E8"
-    Merozoite: "#E07B39"
+    Ring/Early trophozoite: "#DDDD55"
+    Trophozoite: "#EE8844"
+    Schizont (Blood stage): "#BB4400"
+    Merozoite: "#771100"
   pred_gametocyte_sex:
-    Developing gametocyte: "#66454C"
-    Female gametocyte: "#4E6E59"
-    Male gametocyte: "#42517C"
+    Developing gametocyte: "#AACCDD"
+    Female gametocyte: "#118866"
+    Male gametocyte: "#3377CC"
   source_sex_annotation:
-    Female gametocyte: "#4E6E59"
-    Male gametocyte: "#42517C"
+    Female gametocyte: "#118866"
+    Male gametocyte: "#3377CC"
 
 # Human-readable display labels for otherwise machine-ish category values.
 value_labels:
   treatment:
     study_control: "Study control"
     No_Treatment: "No treatment"
+  # stage names as in the manuscript
+  detailed_stage:
+    Ring/Early trophozoite: "Ring/early trophozoite"
+    Schizont (Blood stage): "Blood schizont"
+    Merozoite: "Late schizont/merozoite"
+    Schizont (Liver stage): "Liver schizont"
+  source_life_cycle_stage:
+    Ring/Early trophozoite: "Ring/early trophozoite"
+    Schizont (Blood stage): "Blood schizont"
+    Merozoite: "Late schizont/merozoite"
+    Schizont (Liver stage): "Liver schizont"
+  idc_heuristic_stage_bin:
+    Ring/Early trophozoite: "Ring/early trophozoite"
+    Schizont (Blood stage): "Blood schizont"
+    Merozoite: "Late schizont/merozoite"
+    Schizont (Liver stage): "Liver schizont"
 
 # Fields whose values are scientific names and should be italicised in the UI.
 italicised_fields:

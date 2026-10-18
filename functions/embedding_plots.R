@@ -105,8 +105,11 @@ prepare_categorical_colors <- function(df, color) {
 
   colors <- category_palette(final_levels, color)
 
-  # Crucially, create a factor with the correctly ordered levels
-  df[[color]] <- factor(df[[color]], levels = final_levels)
+  # legend and hover show the display names of the values (e.g. "Blood
+  # schizont"); colours are configured for the values themselves
+  display_levels <- display_values(color, final_levels)
+  names(colors) <- display_levels
+  df[[color]] <- factor(display_values(color, as.character(df[[color]])), levels = display_levels)
 
   return(list(df = df, colors = colors))
 }

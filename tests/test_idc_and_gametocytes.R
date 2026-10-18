@@ -180,6 +180,17 @@ test_that_("gametocyte state has its own missing label; other fields keep the gl
     expect_equal_(unname(prep$colors[["No gametocyte"]]), "#A9A9A94D", "missing level colour")
 })
 
+test_that_("embedding legends show stage display names with the stage colours", {
+    if (!exists("prepare_categorical_colors")) skip_test("plot helpers not loaded")
+    stage_col <- get_data_column("detailed_stage")
+    df <- data.frame(x = c("Merozoite", "Sporozoite"), stringsAsFactors = FALSE)
+    names(df) <- stage_col
+    prep <- prepare_categorical_colors(df, stage_col)
+    expect_true_("Late schizont/merozoite" %in% levels(prep$df[[stage_col]]), "display name in the legend")
+    expect_equal_(unname(prep$colors[["Late schizont/merozoite"]]), unname(get_field_colors("detailed_stage")[["Merozoite"]]),
+        "colour of the stage kept under its display name")
+})
+
 test_that_("every gametocyte has a gametocyte state", {
     m <- app_data("mr_data")
     stage <- as.character(m[[get_data_column("detailed_stage")]])
