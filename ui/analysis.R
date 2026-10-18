@@ -10,7 +10,8 @@ ui_analysis_section <- function() {
       div(
         class = "analysis-content-wrapper",
         div(
-          class = "analysis-content w-100",
+          # filters-folded: the Filters cards are folded (www/script.js)
+          class = "analysis-content w-100 filters-folded",
           style = "overflow: visible; position: relative; z-index: 1;",
           tabsetPanel(
             id = "tabset",

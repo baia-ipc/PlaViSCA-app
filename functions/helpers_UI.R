@@ -174,7 +174,9 @@ create_meta_filter_row <- function(suffix = "") {
     icon = "filter",
     title = "Filters",
     folded = TRUE,
-    class = "mb-3",
+    # folded, the card becomes a button above the plot settings cog
+    # (www/style.css, .filters-folded)
+    class = "mb-3 filter-card",
     card_body(
       fluidRow(
         # Five filters per row on wide screens, fewer on narrow ones

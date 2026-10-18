@@ -446,10 +446,16 @@ $(document).on('click', '.foldable-card-header', function () {
     .toggleClass('show', open)
     // let Shiny recheck the visibility of outputs inside the cards
     .trigger(open ? 'shown' : 'hidden');
+  if (group === 'filters') {
+    // folded, the Filters card is a button left of the content (style.css)
+    $('.analysis-content').toggleClass('filters-folded', !open);
+    window.dispatchEvent(new Event('resize'));
+  }
 });
 
 // Number of active filters in the title of each Filters card, e.g.
-// "Filters (2)"; nothing when no filter is set.
+// "Filters (2)", or on the folded Filters button; nothing when no filter is
+// set.
 function updateFilterCounts() {
   $('.foldable-card').has('.meta-filter').each(function () {
     let n = 0;
@@ -457,7 +463,8 @@ function updateFilterCounts() {
       const v = $(this).val();
       if (Array.isArray(v) ? v.filter(x => x !== '').length > 0 : !!v) n++;
     });
-    $(this).find('.foldable-card-count').text(n > 0 ? '(' + n + ')' : '');
+    // brackets are added in the CSS, around the number in the unfolded title
+    $(this).find('.foldable-card-count').text(n > 0 ? n : '');
   });
 }
 

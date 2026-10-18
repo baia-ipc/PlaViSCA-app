@@ -1204,3 +1204,99 @@ table.dataTable thead th {
   border-radius: 12px;
   background: #fff;
 }
+
+/* Folded Filters: a button in the left column, at the top of the tab, above
+   the plot settings cog; the content moves up next to it. Unfolded, the
+   Filters card spans the tab above the content. */
+.filters-folded .tab-pane:has(> .filter-card) {
+  position: relative;
+}
+
+.filters-folded .tab-pane:has(> .filter-card):not(:has(.plot-settings-layout)) {
+  padding-left: 40px;
+}
+
+.filters-folded .filter-card {
+  position: absolute !important;
+  top: 0;
+  left: 0;
+  width: 32px;
+  height: 33px;
+  margin: 0 !important;
+  z-index: 5;
+  border-radius: 8px !important;
+  overflow: visible !important;
+}
+
+.filters-folded .filter-card > .foldable-card-header {
+  position: relative;
+  height: 33px;
+  padding: 0 !important;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px !important;
+}
+
+.filters-folded .filter-card > .foldable-card-header > span:not(.foldable-card-count) {
+  display: none !important;
+}
+
+.filters-folded .filter-card > .foldable-card-header > svg {
+  margin: 0 !important;
+}
+
+/* number of active filters: "Filters (2)" in the title, a badge on the
+   folded button */
+.foldable-card-count:not(:empty)::before {
+  content: "(";
+}
+
+.foldable-card-count:not(:empty)::after {
+  content: ")";
+}
+
+.filters-folded .filter-card .foldable-card-count::before,
+.filters-folded .filter-card .foldable-card-count::after {
+  content: none;
+}
+
+.filters-folded .filter-card .foldable-card-count:not(:empty) {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 3px;
+  border-radius: 8px;
+  background: #fff;
+  color: var(--primary-color);
+  border: 1px solid var(--primary-color);
+  font-size: 0.65rem !important;
+  line-height: 14px;
+  text-align: center;
+}
+
+/* the impossible-stage warning stays readable next to the button */
+.filters-folded .filter-card .alert {
+  position: absolute;
+  left: 40px;
+  top: 0;
+  width: max-content;
+  max-width: 60vw;
+  z-index: 6;
+}
+
+/* with plot settings: the cog goes below the Filters button */
+.filters-folded .plot-settings-layout {
+  margin-left: 40px;
+}
+
+.filters-folded .plot-settings-layout .bslib-sidebar-layout.sidebar-collapsed > .collapse-toggle {
+  left: -40px !important;
+  top: 39px !important;
+}
+
+.filters-folded .plot-settings-layout .bslib-sidebar-layout.sidebar-collapsed > .main {
+  padding-left: 0 !important;
+}

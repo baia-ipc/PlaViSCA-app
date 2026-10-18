@@ -43,7 +43,7 @@ Hover over the help icon next to a filter for its full description. Cells with a
 
 Filters apply with **OR logic within each field** and **AND logic between fields**, allowing precise subsetting of the dataset. All tabs stay synchronized with each other's filter selections.
 
-The **Filters** box starts folded: click its title bar to unfold it, and again to fold it. Its title shows how many filters are set, e.g. **Filters (2)**. The **Plot settings** box folds the same way. Folding is shared by all tabs: folding the Filters on one tab folds them on every tab.
+The **Filters** start folded, as a button with a funnel at the top left of the tab (above the cog of the plot settings). Click it to unfold the Filters above the plots, and click their title bar to fold them again. The number of filters set is shown on the button, or in the title, e.g. **Filters (2)**. Folding is shared by all tabs: folding the Filters on one tab folds them on every tab.
 
 ![Figure 1: the Filters box, unfolded](imgs/filters.png)
 **Figure 1**: the Filters box, unfolded
