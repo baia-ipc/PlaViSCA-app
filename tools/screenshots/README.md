@@ -27,7 +27,17 @@ PLAVISCA_DATA_DIR=/path/to/app_data \
 
 or use an app that is already running (`--url`, default
 `http://127.0.0.1:3939`). `--only embeddings filters` takes only the named
-shots. The manual set (`manual.yml`) takes about five minutes, mostly waiting
+shots, and `--out-dir DIR` saves them under DIR instead of the app
+directory.
+
+Shot lists: `manual.yml` (images of the user manual) and `manuscript.yml`
+(figures of the manuscript, at print resolution):
+
+```bash
+PLAVISCA_DATA_DIR=/path/to/app_data \
+  tools/screenshots/.venv/bin/python tools/screenshots/take_screenshots.py \
+  tools/screenshots/manuscript.yml --start-app --out-dir /path/to/manuscript/figures
+``` The manual set (`manual.yml`) takes about five minutes, mostly waiting
 for the 3D embeddings to draw. After refreshing the manual images, rebuild the
 manual (see "The user manual" in `docs/developer.md`).
 

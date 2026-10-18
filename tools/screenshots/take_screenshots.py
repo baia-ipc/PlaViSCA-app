@@ -3,17 +3,20 @@
 
 Usage:
   take_screenshots.py <shot_list.yml> [--url URL] [--start-app] [--only NAME...]
+                      [--out-dir DIR]
 
 Options:
   --url URL       Address of a running app [default: http://127.0.0.1:3939]
   --start-app     Start the app with run_app.sh on the port of --url, and stop it
                   at the end. PLAVISCA_DATA_DIR must be set.
   --only NAME...  Take only the named shots.
+  --out-dir DIR   Save the screenshots under DIR instead of the app directory.
 
 The shot list (YAML) gives the browser window size, the waits, and one entry
 per screenshot: the tab to open, the steps to perform on it, what to capture
 and where to save it. See README.md and manual.yml.
-Output paths are relative to the app directory (the parent of tools/).
+Output paths are relative to the app directory (the parent of tools/), or to
+--out-dir.
 """
 
 import argparse
@@ -99,7 +102,7 @@ def wait_until_drawn(page, timeout):
         timeout=timeout * 1000, polling=500)
 
 
-def take_shot(page, shot, settings):
+def take_shot(page, shot, settings, out_dir):
     """Open the shot's tab, perform its steps and save the screenshot."""
     if "tab" in shot:
         page.click(f"#tabset a[data-value='{shot['tab']}']")
@@ -108,7 +111,7 @@ def take_shot(page, shot, settings):
         run_step(page, step, settings)
     time.sleep(shot.get("settle", settings["settle"]))
     wait_until_drawn(page, settings["draw_timeout"])
-    out = APP_DIR / shot["output"]
+    out = out_dir / shot["output"]
     out.parent.mkdir(parents=True, exist_ok=True)
     if "element" in shot:
         page.locator(shot["element"]).first.screenshot(path=out)
@@ -123,6 +126,7 @@ def main():
     parser.add_argument("--url", default="http://127.0.0.1:3939")
     parser.add_argument("--start-app", action="store_true")
     parser.add_argument("--only", nargs="+")
+    parser.add_argument("--out-dir", type=Path, default=APP_DIR)
     args = parser.parse_args()
 
     spec = yaml.safe_load(Path(args.shot_list).read_text())
@@ -146,7 +150,7 @@ def main():
                 page.goto(args.url)
                 page.wait_for_selector("#tabset", timeout=settings["start_timeout"] * 1000)
                 time.sleep(settings["settle"])
-                take_shot(page, shot, settings)
+                take_shot(page, shot, settings, args.out_dir.resolve())
                 page.close()
             browser.close()
     finally:

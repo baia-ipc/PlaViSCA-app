@@ -1,0 +1,27 @@
+# Screenshots of the app for the manuscript figures.
+# Run from the app directory, saving next to the manuscript:
+#   PLAVISCA_DATA_DIR=/path/to/app_data tools/screenshots/.venv/bin/python \
+#     tools/screenshots/take_screenshots.py tools/screenshots/manuscript.yml \
+#     --start-app --out-dir /path/to/manuscript/figures
+
+settings:
+  width: 1500
+  height: 950
+  scale: 3           # print resolution: about 600 dpi at 7.5 in wide
+  settle: 3
+
+shots:
+  # Fig 5: side-by-side coloring of the integrated 2D UMAP, harmonized stage
+  # (Plot A) and study (Plot B)
+  - name: fig5_side_by_side
+    tab: Embeddings
+    steps:
+      - click: ".tab-pane.active .plot-settings-layout .collapse-toggle"
+      - click: "input[name='plot'][value='2d']"
+      - drawn: true
+      - click: "#enable_comparison"
+      - drawn: true
+      - select: {id: color_first_comp, value: stage}
+      - select: {id: color_second, value: study_label}
+    element: "#comparison_plots_panel"
+    output: fig5_side_by_side.png
