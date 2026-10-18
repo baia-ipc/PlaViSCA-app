@@ -2,7 +2,7 @@
 # and contact.
 
 ui_tab_about <- function() {
-  contact <- team_info()$contact
+  contacts <- team_info()$contacts
   citation <- team_info()$citation
   n_cells <- format(nrow(mr_data), big.mark = ",")
   n_genes <- format(length(GENE_COLUMNS), big.mark = ",")
@@ -47,14 +47,16 @@ ui_tab_about <- function() {
         htmltools::htmlEscape(citation$status)
       ))),
       h3("Contact"),
-      # one HTML string, so that no space is added around the name and link
-      p(HTML(sprintf(
-        '<strong>%s</strong>, %s, %s (<a href="mailto:%s">%s</a>).',
-        htmltools::htmlEscape(contact$name), htmltools::htmlEscape(contact$role),
-        htmltools::htmlEscape(contact$affiliation), htmltools::htmlEscape(contact$email),
-        htmltools::htmlEscape(contact$email)
-      ))),
-      p("Please get in touch if you would like a further dataset to be integrated.")
+      # one HTML string per contact, so that no space is added around the
+      # name and link; the topics may contain <em>
+      lapply(contacts, function(contact) {
+        p(HTML(sprintf(
+          '<strong>%s</strong>, %s, %s (<a href="mailto:%s">%s</a>), for questions related to %s.',
+          htmltools::htmlEscape(contact$name), htmltools::htmlEscape(contact$role),
+          htmltools::htmlEscape(contact$affiliation), htmltools::htmlEscape(contact$email),
+          htmltools::htmlEscape(contact$email), contact$topics
+        )))
+      })
     )
   )
 }

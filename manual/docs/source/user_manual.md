@@ -177,6 +177,9 @@ The **About** tab describes what PlaViSca contains and how the data were process
 
 ## Contact
 
-For questions, bug reports or suggestions, or if you would like a further dataset to be integrated, contact Giorgio Gonnella, Head of Bioinformatics and AI Applications, Institut Pasteur du Cambodge ([ggonnella@pasteur-kh.org](mailto:ggonnella@pasteur-kh.org)), or open an issue on [GitHub](https://github.com/baia-ipc/PlaViSca-app/issues).
+- **Giorgio Gonnella**, Head of Bioinformatics and AI Applications, Institut Pasteur du Cambodge ([ggonnella@pasteur-kh.org](mailto:ggonnella@pasteur-kh.org)), for questions related to the implementation of the software, its features, the meta-analysis and the integration of new datasets.
+- **Anthony Ruberto**, Assistant Professor, Department of Biomedical Sciences, College of Medicine, Florida State University ([anthony.ruberto@med.fsu.edu](mailto:anthony.ruberto@med.fsu.edu)), for questions related to the meta-analysis, his datasets included in this work in particular, or general questions related to single-cell transcriptomics of _P. vivax_ parasites.
+
+Bug reports and suggestions can also be filed as an issue on [GitHub](https://github.com/baia-ipc/PlaViSca-app/issues).
 
 PlaViSca is a research tool for exploring published data; verify results independently before drawing conclusions.

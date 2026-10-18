@@ -1,5 +1,5 @@
-# Organizations (logos in the top bar), the contact person and the citation
-# of the PlaViSca study (About tab).
+# Organizations (logos in the top bar), the contacts and the citation of the
+# PlaViSca study (About tab).
 # =============================================================================
 # Read with team_info() (functions/site_config.R). Logos are files in www/.
 # =============================================================================
@@ -11,11 +11,18 @@ organizations:
   - name: "BAIA Unit"
     logo: "baia_logo.png"
 
-contact:
-  name: "Giorgio Gonnella"
-  role: "Head of Bioinformatics and AI Applications"
-  affiliation: "Institut Pasteur du Cambodge"
-  email: "ggonnella@pasteur-kh.org"
+# Contacts, each with the questions to address to them (may contain <em>).
+contacts:
+  - name: "Giorgio Gonnella"
+    role: "Head of Bioinformatics and AI Applications"
+    affiliation: "Institut Pasteur du Cambodge"
+    email: "ggonnella@pasteur-kh.org"
+    topics: "the implementation of the software, its features, the meta-analysis and the integration of new datasets"
+  - name: "Anthony Ruberto"
+    role: "Assistant Professor"
+    affiliation: "Department of Biomedical Sciences, College of Medicine, Florida State University"
+    email: "anthony.ruberto@med.fsu.edu"
+    topics: "the meta-analysis, his datasets included in this work in particular, or general questions related to single-cell transcriptomics of <em>P. vivax</em> parasites"
 
 # The title may contain <em> for italics.
 citation:
