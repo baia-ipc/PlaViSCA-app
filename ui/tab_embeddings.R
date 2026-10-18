@@ -49,7 +49,7 @@ ui_tab_embeddings <- function() {
         ),
         card_body(
           fillable = FALSE,
-          padding = 8,
+          padding = c(2, 8, 8, 8),
 
           # Single plot
           div(
