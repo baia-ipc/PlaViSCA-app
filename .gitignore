@@ -9,3 +9,4 @@ data/*
 # Sphinx cache of the user manual build
 manual/docs/build/doctrees/
 manual/docs/build/html/.buildinfo
+__pycache__/
