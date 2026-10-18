@@ -7,16 +7,16 @@ ui_tab_gene_expression <- function() {
     # Shared filter row
     create_meta_filter_row("_gex"),
 
-    # Gene expression controls
-    create_plot_controls("data_type_exp", FALSE, "_exp"),
-
-    fluidRow(
-      id = "gene_exp_container",
-      class = "mt-3",
-      column(
-        width = 6,
-        id = "dynamic_col_0",
-        subBlock(0)
+    # Plot settings in a sidebar left of the gene panels
+    plot_settings_layout(
+      data_type_control("data_type_exp"),
+      fluidRow(
+        id = "gene_exp_container",
+        column(
+          width = 6,
+          id = "dynamic_col_0",
+          subBlock(0)
+        )
       )
     )
   )

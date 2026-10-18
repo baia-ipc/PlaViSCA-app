@@ -7,21 +7,9 @@ ui_tab_embeddings <- function() {
     # Shared filter row
     create_meta_filter_row(""),
 
-    # Plot settings in a sidebar left of the plots. It starts folded, showing
-    # only a cog button, and unfolds sideways when the cog is clicked.
-    div(
-      class = "embedding-layout",
-      layout_sidebar(
-      sidebar = sidebar(
-        title = tags$span(fontawesome::fa("cog", height = "14px"), " Plot settings"),
-        class = "plot-settings-sidebar",
-        width = 240,
-        open = "closed",
-        embedding_settings_controls()
-      ),
-      border = FALSE,
-      fillable = FALSE,
-      padding = c(0, 0, 0, 12),
+    # Plot settings in a sidebar left of the plots
+    plot_settings_layout(
+      embedding_settings_controls(),
 
       # Single plot
       div(
@@ -76,23 +64,13 @@ ui_tab_embeddings <- function() {
         )
       )
     )
-    )
   )
 }
 
 # Controls of the plot settings sidebar, one below the other.
 embedding_settings_controls <- function() {
   tagList(
-    tags$div(
-      title = "Select raw or normalized expression data",
-      radioButtons(
-        "data_type",
-        tags$span("Data type", class = "settings-label"),
-        choices = list("Raw" = "raw", "Normalized" = "normalize"),
-        selected = "normalize",
-        inline = TRUE
-      )
-    ),
+    data_type_control("data_type"),
     conditionalPanel(
       condition = "input.embedding != 'tsne'",
       div(

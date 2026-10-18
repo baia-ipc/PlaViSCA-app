@@ -493,11 +493,35 @@ $(document).on('shiny:inputchanged', function (event) {
 
 // Folding a bslib sidebar changes the width of the plots next to it: let
 // plotly and other widgets resize once the sidebar has finished moving.
-$(document).on('bslib.sidebar', function () {
+// (native listener: jQuery would read "bslib.sidebar" as a namespaced event)
+document.addEventListener('bslib.sidebar', function () {
   setTimeout(function () { window.dispatchEvent(new Event('resize')); }, 400);
 });
 
-// The fold button of the plot settings sidebar says what it opens.
+// The fold button of the plot settings sidebars says what it opens.
 $(function () {
-  $('.embedding-layout .collapse-toggle').attr('title', 'Plot settings');
+  $('.plot-settings-layout .collapse-toggle').attr('title', 'Plot settings');
+});
+
+// Plot settings sidebars are open or folded together on all tabs. A sidebar
+// on a hidden tab cannot be animated, so each one is brought in line with
+// the last choice when its tab is shown.
+let plotSettingsOpen = false;
+
+document.addEventListener('bslib.sidebar', function (event) {
+  const layout = $(event.target).closest('.plot-settings-layout');
+  if (layout.length && layout.is(':visible')) {
+    plotSettingsOpen = event.detail.open;
+  }
+});
+
+$(document).on('shown.bs.tab', function (event) {
+  // jQuery also passes the plain "shown" events of Shiny and bslib here
+  if (event.namespace !== 'bs.tab' || !window.bslib || !window.bslib.Sidebar) return;
+  $('.plot-settings-layout .bslib-sidebar-layout:visible:not(.transitioning)').each(function () {
+    const sidebar = window.bslib.Sidebar.getInstance(this);
+    if (sidebar && sidebar.isClosed === plotSettingsOpen) {
+      sidebar.toggle(plotSettingsOpen ? 'open' : 'close');
+    }
+  });
 });

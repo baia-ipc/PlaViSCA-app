@@ -215,44 +215,38 @@ create_meta_filter_row <- function(suffix = "") {
   )
 }
 
-# Create a box for plot controls (data type, point size, dimension)
-create_plot_controls <- function(data_type_id = "data_type", include_size_dim = TRUE, suffix = "") {
-  size_id <- paste0("size", suffix)
-  plot_id <- paste0("plot", suffix)
+# Plots with their "Plot settings" in a sidebar on the left. The sidebar
+# starts folded, showing only a cog button, and unfolds sideways; its open or
+# folded state is shared by all tabs (www/script.js). `...` is the main area.
+plot_settings_layout <- function(controls, ...) {
+  div(
+    class = "plot-settings-layout",
+    layout_sidebar(
+      sidebar = sidebar(
+        title = tags$span(fontawesome::fa("cog", height = "14px"), " Plot settings"),
+        class = "plot-settings-sidebar",
+        width = 240,
+        open = "closed",
+        controls
+      ),
+      border = FALSE,
+      fillable = FALSE,
+      padding = c(0, 0, 0, 12),
+      ...
+    )
+  )
+}
 
-  foldable_settings_card(
-    group = "plot_settings",
-    icon = "cog",
-    title = "Plot settings",
-    card_body(
-      layout_column_wrap(
-        width = 1/3,
-        radioButtons(
-          data_type_id,
-          tags$span("Data type", class = "settings-label"),
-          choices = list("Raw" = "raw", "Normalized" = "normalize"),
-          selected = "normalize",
-          inline = TRUE
-        ),
-        if (include_size_dim) {
-          tagList(
-            radioButtons(
-              size_id,
-              tags$span("Point size", class = "settings-label"),
-              choices = list("S" = 2, "M" = 4, "L" = 6),
-              selected = 4,
-              inline = TRUE
-            ),
-            radioButtons(
-              plot_id,
-              tags$span("Dimension", class = "settings-label"),
-              choices = list("2D" = "2d", "3D" = "3d"),
-              selected = "3d",
-              inline = TRUE
-            )
-          )
-        }
-      )
+# Raw / normalized data choice of a plot settings sidebar.
+data_type_control <- function(id) {
+  tags$div(
+    title = "Select raw or normalized expression data",
+    radioButtons(
+      id,
+      tags$span("Data type", class = "settings-label"),
+      choices = list("Raw" = "raw", "Normalized" = "normalize"),
+      selected = "normalize",
+      inline = TRUE
     )
   )
 }

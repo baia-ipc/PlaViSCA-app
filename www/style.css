@@ -510,22 +510,22 @@ body {
   transform: rotate(-90deg);
 }
 
-/* Plot settings sidebar of the Embeddings tab (bslib layout_sidebar) */
-.embedding-layout {
-  --bslib-sidebar-bg: rgba(255, 255, 255, 0.6);
+/* Plot settings sidebar left of the plots (bslib layout_sidebar) */
+.plot-settings-layout {
+  --bslib-sidebar-bg: rgba(255, 255, 255, 0.9);
   --bslib-sidebar-fg: #2c3e50;
   background: transparent !important;
   overflow: visible;
 }
 
-.embedding-layout .bslib-sidebar-layout > .sidebar {
+.plot-settings-layout .bslib-sidebar-layout > .sidebar {
   border-radius: 12px;
   border: 1px solid #e1e4e8;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 /* Folded: the toggle button shows a cog instead of the chevron */
-.embedding-layout .bslib-sidebar-layout.sidebar-collapsed > .collapse-toggle {
+.plot-settings-layout .bslib-sidebar-layout.sidebar-collapsed > .collapse-toggle {
   width: 32px;
   height: 32px;
   border-radius: 8px;
@@ -536,18 +536,21 @@ body {
   justify-content: center;
 }
 
-.embedding-layout .bslib-sidebar-layout.sidebar-collapsed > .collapse-toggle .collapse-icon {
-  display: none;
+/* Hidden by transparency, not display: none, because bslib finishes
+   opening the sidebar when the icon's rotation ends */
+.plot-settings-layout .bslib-sidebar-layout.sidebar-collapsed > .collapse-toggle .collapse-icon {
+  position: absolute;
+  opacity: 0;
 }
 
-.embedding-layout .bslib-sidebar-layout.sidebar-collapsed > .collapse-toggle::before {
+.plot-settings-layout .bslib-sidebar-layout.sidebar-collapsed > .collapse-toggle::before {
   font-family: "Font Awesome 6 Free";
   font-weight: 900;
   content: "\f013";
   font-size: 16px;
 }
 
-.embedding-layout .bslib-sidebar-layout.sidebar-collapsed > .main {
+.plot-settings-layout .bslib-sidebar-layout.sidebar-collapsed > .main {
   padding-left: 44px !important;
 }
 
