@@ -536,3 +536,50 @@ $(document).on('plotly_relayout plotly_relayouting', '#first_plotly, #second_plo
   linkingViews = true;
   Plotly.relayout(other, update).finally(function () { linkingViews = false; });
 });
+
+// Embedding plots: a double-click or right-click on a cell opens its details
+// (server.R, input$embedding_cell_open); a single click does not. Plotly has
+// no right-click event, so the cell under the mouse is remembered from the
+// hover events.
+const embeddingPlots = '#all_plotly, #first_plotly, #second_plotly';
+let hoveredCellKey = null;
+
+$(document).on('plotly_hover', embeddingPlots, function (event, data) {
+  const pt = data && data.points && data.points[0];
+  if (!pt) return;
+  let key = pt.key;
+  if (key === undefined && pt.data && pt.data.key) key = pt.data.key[pt.pointNumber];
+  hoveredCellKey = key === undefined ? null : key;
+});
+
+$(document).on('plotly_unhover', embeddingPlots, function () {
+  hoveredCellKey = null;
+});
+
+function openCellDetails(key) {
+  Shiny.setInputValue('embedding_cell_open', { key: key, at: Date.now() }, { priority: 'event' });
+}
+
+// Plotly handles the mouse itself, so the browser's dblclick event does not
+// reach the page: a double click is two Plotly clicks on the same cell
+let lastCellClick = { key: null, time: 0 };
+$(document).on('plotly_click', embeddingPlots, function (event, data) {
+  const pt = data && data.points && data.points[0];
+  if (!pt) return;
+  let key = pt.key;
+  if (key === undefined && pt.data && pt.data.key) key = pt.data.key[pt.pointNumber];
+  if (key === undefined) return;
+  const now = Date.now();
+  if (lastCellClick.key === key && now - lastCellClick.time < 400) {
+    lastCellClick = { key: null, time: 0 };
+    openCellDetails(key);
+  } else {
+    lastCellClick = { key: key, time: now };
+  }
+});
+
+$(document).on('contextmenu', embeddingPlots, function (event) {
+  if (hoveredCellKey === null) return;
+  event.preventDefault();
+  openCellDetails(hoveredCellKey);
+});

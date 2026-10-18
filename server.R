@@ -1940,6 +1940,8 @@ server <- function(input, output, session) {
         config(
           displaylogo = FALSE,
           scrollZoom = TRUE,
+          # double-click opens the cell details (www/script.js), not a zoom reset
+          doubleClick = FALSE,
           modeBarButtonsToRemove = c(),
           displayModeBar = TRUE,
           toImageButtonOptions = list(
@@ -2370,6 +2372,8 @@ server <- function(input, output, session) {
         config(
           displaylogo = FALSE,
           scrollZoom = TRUE,
+          # double-click opens the cell details (www/script.js), not a zoom reset
+          doubleClick = FALSE,
           modeBarButtonsToRemove = c(),
           displayModeBar = TRUE,
           toImageButtonOptions = list(
@@ -2392,10 +2396,11 @@ server <- function(input, output, session) {
   })
   outputOptions(output, "plot_loading_state", suspendWhenHidden = FALSE)
 
-  ## click event: after plot is ready
+  ## Cell details: opened by a double-click or right-click on a cell of an
+  ## embedding plot (input$embedding_cell_open, set in www/script.js)
   click_event <- reactive({
     req(embplot())
-    ed <- event_data("plotly_click", source = "embedding")
+    ed <- input$embedding_cell_open
     if (is.null(ed) || is.null(ed$key)) {
       return(NULL)
     }
