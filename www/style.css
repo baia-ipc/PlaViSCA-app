@@ -234,7 +234,7 @@ body {
 /* Analysis Content Transparency */
 .analysis-content {
   width: 100%;
-  padding: 15px;
+  padding: 8px;
   overflow: visible;
   background-color: transparent !important;
   position: relative;
