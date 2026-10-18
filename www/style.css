@@ -818,6 +818,33 @@ table.dataTable thead th {
   color: var(--primary-color);
 }
 
+/* the title bar forces its children visible; let conditionalPanel hide this */
+.card-header.visualization-header .link-views[style*="display: none"] {
+  display: none !important;
+}
+
+/* Linked / Unlinked toggle: filled while linked, outlined while not */
+.visualization-header #link_views {
+  padding: 1px 12px;
+  font-size: 0.8rem;
+  color: #fff;
+  border: 1px solid #fff;
+  background: transparent;
+}
+
+.visualization-header #link_views.linked {
+  color: var(--primary-color);
+  background: #fff;
+}
+
+.visualization-header #link_views .when-unlinked,
+.visualization-header #link_views.linked .when-linked {
+  display: inline !important;
+}
+
+.visualization-header #link_views .when-linked,
+.visualization-header #link_views.linked .when-unlinked {
+  display: none !important;
 .about {
   background-color: var(--white);
   padding: 40px;

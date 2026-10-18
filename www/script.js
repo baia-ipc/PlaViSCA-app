@@ -503,3 +503,36 @@ $(document).on('shown.bs.tab', function (event) {
     }
   });
 });
+
+// Compare Plots: while the views are linked, rotating, zooming or panning one
+// plot applies the same camera (3D) or axis ranges (2D) to the other.
+const linkedPlotIds = ['first_plotly', 'second_plotly'];
+let linkingViews = false;
+
+function linkedViewUpdate(data) {
+  const update = {};
+  for (const key in data) {
+    if (/^(scene\.camera|scene\.aspectratio|xaxis\.|yaxis\.)/.test(key)) {
+      update[key] = data[key];
+    }
+  }
+  return update;
+}
+
+// the Linked / Unlinked button in the Visualization bar
+let viewsLinked = true;
+$(document).on('click', '#link_views', function () {
+  viewsLinked = !viewsLinked;
+  $(this).toggleClass('linked', viewsLinked).attr('aria-pressed', viewsLinked);
+});
+
+$(document).on('plotly_relayout plotly_relayouting', '#first_plotly, #second_plotly', function (event, data) {
+  if (linkingViews || !viewsLinked || !data) return;
+  const update = linkedViewUpdate(data);
+  if (Object.keys(update).length === 0) return;
+  const otherId = linkedPlotIds.find(id => id !== this.id);
+  const other = document.getElementById(otherId);
+  if (!other || !other.layout) return;
+  linkingViews = true;
+  Plotly.relayout(other, update).finally(function () { linkingViews = false; });
+});

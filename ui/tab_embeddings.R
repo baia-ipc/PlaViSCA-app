@@ -21,6 +21,21 @@ ui_tab_embeddings <- function() {
           tags$span("Visualization", class = "fw-bold", style = "font-size: 0.9rem;"),
           div(
             class = "visualization-actions",
+            # Compare Plots only: rotating or zooming one plot moves the other
+            # (www/script.js)
+            conditionalPanel(
+              condition = "input.comparison_active",
+              class = "link-views",
+              tags$button(
+                id = "link_views",
+                type = "button",
+                class = "btn btn-sm rounded-pill fw-bold linked",
+                `aria-pressed` = "true",
+                title = "Click to rotate, zoom and pan the two plots together or separately",
+                tags$span(class = "when-linked", fontawesome::fa("link"), " Linked"),
+                tags$span(class = "when-unlinked", fontawesome::fa("link-slash"), " Unlinked")
+              )
+            ),
             actionButton(
               "enable_comparison",
               tagList(fontawesome::fa("columns"), " Compare Plots"),
