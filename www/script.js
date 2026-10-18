@@ -591,30 +591,50 @@ $(document).on('contextmenu', embeddingPlots, function (event) {
   openCellDetails(hoveredCellKey);
 });
 
-// Every plot gets a "Download plot as SVG" button next to the PNG one. In
-// WebGL plots (the embeddings) the points stay a bitmap inside the SVG; the
-// axes, labels and legend are vector graphics. The R plotly package sends its
-// own list of extra buttons with each plot, so the button is appended to that
-// list whenever a plot is drawn.
-const svgDownloadButton = {
-  name: 'downloadSvg',
-  title: 'Download plot as SVG',
-  icon: null, // set once Plotly is loaded
-  click: function (gd) {
-    Plotly.downloadImage(gd, { format: 'svg', filename: gd.id || 'plot' });
+// Every plot gets a "Download plot as SVG" button right next to the PNG one:
+// plotly's own PNG button is replaced by an equivalent one, so that the two
+// sit together in one group of the toolbar. The PNG keeps each plot's
+// download settings (toImageButtonOptions: file name, size, scale). In WebGL
+// plots (the embeddings) the points stay a bitmap inside the SVG; the axes,
+// labels and legend are vector graphics. The R plotly package sends its own
+// list of extra buttons with each plot, so the buttons are added to that list
+// whenever a plot is drawn.
+function downloadOptions(gd, format) {
+  const opts = Object.assign({ filename: gd.id || 'plot' }, gd._context.toImageButtonOptions);
+  opts.format = format;
+  if (format === 'svg') delete opts.scale;
+  return opts;
+}
+
+const downloadButtons = [
+  {
+    name: 'downloadPng',
+    title: 'Download plot as PNG',
+    icon: null, // set once Plotly is loaded
+    click: function (gd) { Plotly.downloadImage(gd, downloadOptions(gd, 'png')); }
+  },
+  {
+    name: 'downloadSvg',
+    title: 'Download plot as SVG',
+    icon: null,
+    click: function (gd) { Plotly.downloadImage(gd, downloadOptions(gd, 'svg')); }
   }
-};
+];
 
 function withSvgButton(config) {
   const out = Object.assign({}, config);
-  const buttons = (out.modeBarButtonsToAdd || []).slice();
-  if (!buttons.some(b => b && b.name === svgDownloadButton.name)) buttons.push(svgDownloadButton);
-  out.modeBarButtonsToAdd = buttons;
+  const added = (out.modeBarButtonsToAdd || []).slice();
+  if (!added.some(b => b && b.name === 'downloadSvg')) added.push(...downloadButtons);
+  out.modeBarButtonsToAdd = added;
+  const removed = [].concat(out.modeBarButtonsToRemove || []);
+  if (!removed.includes('toImage')) removed.push('toImage');
+  out.modeBarButtonsToRemove = removed;
   return out;
 }
 
 function addSvgButtonToPlotly(plotly) {
-  svgDownloadButton.icon = plotly.Icons.disk;
+  downloadButtons[0].icon = plotly.Icons.camera;
+  downloadButtons[1].icon = plotly.Icons.disk;
   ['newPlot', 'react'].forEach(function (fn) {
     const original = plotly[fn];
     plotly[fn] = function (gd, data, layout, config) {
