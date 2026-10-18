@@ -73,6 +73,8 @@ Hover over the help icon next to a filter for its full description. Cells with a
 
 Filters apply with **OR logic within each field** and **AND logic between fields**, allowing precise subsetting of the dataset. All tabs stay synchronized with each other's filter selections.
 
+Click the title bar of the **Filters** or **Plot settings** box to fold it away and leave more room for the plots; click it again to unfold it.
+
 ### Embeddings
 
 <iframe width="100%" height="360" src="https://www.youtube.com/embed/gcubjXeIxUY" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
@@ -94,7 +96,7 @@ The Embeddings tab offers dimensionality reduction and customizable visualizatio
 
 **Color by**: Study label, Broad life-cycle stage, Life-cycle stage, Host species, Host and tissue, Treatment, Parasite strain / isolate, Parasite origin location, Single-cell technology, or Genes.
 
-**Compare Plots mode**: Click **Compare Plots** to display two independent plots (Plot A and Plot B) side-by-side, each with its own color selection and optional gene input.
+**Compare Plots mode**: Click **Compare Plots** to display two independent plots (Plot A and Plot B) side-by-side, each with its own **Color by** selector in its title bar; a gene input appears above a plot when it is colored by genes.
 
 **Interactive Cell Selection**: Click any cell to open a modal dialog showing a per-cell gene expression table (gene ID, gene name, expression value, description). The table is filterable and exportable as CSV.
 

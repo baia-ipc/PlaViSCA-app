@@ -1669,26 +1669,6 @@ server <- function(input, output, session) {
     )
   })
 
-  # Update plot subtitles based on selected color option
-  observe({
-    req(comparison_mode())
-
-    # Labels come from config/data_columns.yml (get_label_for_column()).
-    plot_a_label <- if (identical(input$color_first_comp, "genes")) {
-      "Genes"
-    } else {
-      get_label_for_column(input$color_first_comp %||% get_data_column("broad_stage"))
-    }
-    plot_b_label <- if (identical(input$color_second, "genes")) {
-      "Genes"
-    } else {
-      get_label_for_column(input$color_second %||% get_data_column("detailed_stage"))
-    }
-
-    shinyjs::html("plot_a_subtitle", plot_a_label)
-    shinyjs::html("plot_b_subtitle", plot_b_label)
-  })
-
   # Add debouncing for plot updates
   plot_update_trigger <- reactiveVal(0)
   plot_ready <- reactiveVal(TRUE)
@@ -2128,22 +2108,6 @@ server <- function(input, output, session) {
       shinyjs::show("genes_single_panel")
     } else {
       shinyjs::hide("genes_single_panel")
-    }
-  })
-
-  # Separate observer for second plot color
-  observe({
-    # Only update second plot label if comparison is enabled
-    if (isTRUE(comparison_mode())) {
-      req(input$color_second)
-
-      # Display name comes from config/data_columns.yml.
-      second_label <- if (identical(input$color_second, "genes")) {
-        "Genes"
-      } else {
-        get_label_for_column(input$color_second)
-      }
-      runjs(paste0("$('#second_plot_label').text('Second Color: ", second_label, "');"))
     }
   })
 

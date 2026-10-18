@@ -514,6 +514,21 @@ body {
   border-color: #198754;
 }
 
+/* Foldable settings cards: clickable header, chevron turns when folded */
+.foldable-card-header {
+  cursor: pointer;
+  user-select: none;
+}
+
+.foldable-card-chevron {
+  float: right;
+  transition: transform 0.2s ease;
+}
+
+.foldable-card-header[aria-expanded="false"] .foldable-card-chevron {
+  transform: rotate(-90deg);
+}
+
 /* Vertical Space Optimization for Settings */
 .settings-card-compact .card-header {
   padding: 4px 12px !important;
@@ -865,16 +880,6 @@ table.dataTable thead th {
 }
 
 /* Gene Expression Specific Styles */
-.gene-expression-section {
-  padding: 10px 20px;
-  /* Reduced from 30px */
-  background-color: var(--background-color);
-  border-radius: 12px;
-  box-shadow: var(--shadow);
-  margin-top: 10px;
-  /* Reduced from 20px */
-}
-
 .gene-expression-header {
   color: var(--primary-color);
   margin-bottom: 25px;
@@ -1106,9 +1111,37 @@ table.dataTable thead th {
   border-bottom: 2px solid rgba(40, 167, 69, 0.3) !important;
 }
 
-.comparison-card-header .badge {
-  font-size: 0.7rem;
-  font-weight: 500;
+/* Discreet "Color by" selector in the comparison plot title bars */
+.comparison-card-header > div,
+.comparison-card-header .header-color-by {
+  display: flex !important;
+}
+
+.comparison-card-header .selectize-control {
+  display: block !important;
+}
+
+.header-color-by-label {
+  font-size: 0.75rem;
+  color: #6c757d;
+}
+
+.header-color-by .shiny-input-container {
+  margin-bottom: 0 !important;
+}
+
+.header-color-by .selectize-input {
+  min-height: 0 !important;
+  padding: 1px 22px 1px 6px !important;
+  font-size: 0.75rem;
+  border-color: transparent;
+  background: transparent !important;
+}
+
+.header-color-by .selectize-input:hover,
+.header-color-by .selectize-input.focus {
+  border-color: #ced4da !important;
+  background: #fff !important;
 }
 
 /* Responsive adjustments for comparison mode */

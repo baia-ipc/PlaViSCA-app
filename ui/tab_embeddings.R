@@ -8,13 +8,10 @@ ui_tab_embeddings <- function() {
     create_meta_filter_row(""),
 
     # Control Row (Fixed duplication and alignment)
-    card(
-      class = "mb-2 shadow-sm settings-card-compact",
-      card_header(
-        class = "bg-primary text-white py-1",
-        fontawesome::fa("cog", height = "14px"),
-        tags$span("Plot settings", class = "fw-bold", style = "font-size: 0.9rem;")
-      ),
+    foldable_settings_card(
+      id = "plot_settings_body",
+      icon = "cog",
+      title = "Plot settings",
       card_body(
         fluidRow(
           class = "g-1 align-items-end mb-n2",
@@ -206,160 +203,21 @@ ui_tab_embeddings <- function() {
           )
         ),
 
-        # Comparison Plot Controls
+        # Gene selectors for the comparison plots, shown under each plot's
+        # side only when that plot is coloured by genes. The "Color by"
+        # selectors themselves sit in the plot title bars.
         div(
           id = "comparison_controls_panel",
-          class = "mt-2 comparison-controls",
           style = "display: none;",
           layout_column_wrap(
             width = 1 / 2,
-            # Plot A Section
-            div(
-              class = "comparison-plot-section plot-a-section",
-              fluidRow(
-                class = "g-1 align-items-end",
-                column(
-                  width = 4,
-                  selectizeInput(
-                    "color_first_comp",
-                    tags$span("Color by", class = "small fw-semibold"),
-                    choices = category_choices(),
-                    selected = get_data_column("broad_stage"), width = "100%",
-                    options = list(dropdownParent = "body")
-                  )
-                ),
-                conditionalPanel(
-                  condition = "input.color_first_comp == 'genes'",
-                  column(
-                    width = 6,
-                    div(
-                      class = "gene-select-wrapper",
-                      style = "position: relative;",
-                      tags$label(
-                        class = "control-label d-flex align-items-center gap-2",
-                        tags$span(textOutput("genes_label_first_comp", inline = TRUE), class = "settings-label"),
-                        div(
-                          class = "comparison-toggle-container-a",
-                          title = "Click to switch ID and name",
-                          `data-bs-toggle` = "tooltip",
-                          `data-bs-placement` = "top",
-                          bslib::input_switch("check_first_comp", label = NULL, value = FALSE)
-                        )
-                      ),
-                      selectizeInput(
-                        "genes_n_first_comp",
-                        label = NULL,
-                        choices = "", multiple = TRUE,
-                        options = list(placeholder = "Search genes...", maxItems = 10, dropdownParent = "body"),
-                        width = "100%"
-                      )
-                    )
-                  )
-                ),
-                conditionalPanel(
-                  condition = "input.color_first_comp == 'genes'",
-                  column(
-                    width = 2,
-                    div(
-                      class = "links-row",
-                      tags$a(
-                        id = "plasmo_link_a",
-                        href = "#",
-                        target = "_blank",
-                        class = "btn btn-outline-primary btn-sm gene-link-btn",
-                        `data-bs-toggle` = "tooltip",
-                        `data-bs-placement` = "top",
-                        title = "PlasmoDB",
-                        tags$i(class = "fas fa-external-link-alt")
-                      ),
-                      tags$a(
-                        id = "ncbi_link_a",
-                        href = "#",
-                        target = "_blank",
-                        class = "btn btn-outline-primary btn-sm gene-link-btn",
-                        `data-bs-toggle` = "tooltip",
-                        `data-bs-placement` = "top",
-                        title = "NCBI",
-                        tags$i(class = "fas fa-dna")
-                      )
-                    )
-                  )
-                )
-              )
+            comparison_gene_panel("a", "color_first_comp", "genes_label_first_comp",
+              "check_first_comp", "genes_n_first_comp", "plasmo_link_a", "ncbi_link_a",
+              btn_class = "btn-outline-primary"
             ),
-            # Plot B Section
-            div(
-              class = "comparison-plot-section plot-b-section",
-              fluidRow(
-                class = "g-1 align-items-end",
-                column(
-                  width = 4,
-                  selectizeInput(
-                    "color_second",
-                    tags$span("Color by", class = "small fw-semibold"),
-                    choices = category_choices(),
-                    selected = get_data_column("detailed_stage"), width = "100%",
-                    options = list(dropdownParent = "body")
-                  )
-                ),
-                conditionalPanel(
-                  condition = "input.color_second == 'genes'",
-                  column(
-                    width = 6,
-                    div(
-                      class = "gene-select-wrapper",
-                      style = "position: relative;",
-                      tags$label(
-                        class = "control-label d-flex align-items-center gap-2",
-                        tags$span(textOutput("genes_label_second", inline = TRUE), class = "settings-label"),
-                        div(
-                          class = "comparison-toggle-container-b",
-                          title = "Click to switch ID and name",
-                          `data-bs-toggle` = "tooltip",
-                          `data-bs-placement` = "top",
-                          bslib::input_switch("check_second", label = NULL, value = FALSE)
-                        )
-                      ),
-                      selectizeInput(
-                        "genes_second",
-                        label = NULL,
-                        choices = "", multiple = TRUE,
-                        options = list(placeholder = "Search genes...", maxItems = 10, dropdownParent = "body"),
-                        width = "100%"
-                      )
-                    )
-                  )
-                ),
-                conditionalPanel(
-                  condition = "input.color_second == 'genes'",
-                  column(
-                    width = 2,
-                    div(
-                      class = "links-row",
-                      tags$a(
-                        id = "plasmo_link_b",
-                        href = "#",
-                        target = "_blank",
-                        class = "btn btn-outline-success btn-sm gene-link-btn",
-                        `data-bs-toggle` = "tooltip",
-                        `data-bs-placement` = "top",
-                        title = "PlasmoDB",
-                        tags$i(class = "fas fa-external-link-alt")
-                      ),
-                      tags$a(
-                        id = "ncbi_link_b",
-                        href = "#",
-                        target = "_blank",
-                        class = "btn btn-outline-success btn-sm gene-link-btn",
-                        `data-bs-toggle` = "tooltip",
-                        `data-bs-placement` = "top",
-                        title = "NCBI",
-                        tags$i(class = "fas fa-dna")
-                      )
-                    )
-                  )
-                )
-              )
+            comparison_gene_panel("b", "color_second", "genes_label_second",
+              "check_second", "genes_second", "plasmo_link_b", "ncbi_link_b",
+              btn_class = "btn-outline-success"
             )
           )
         )
@@ -391,47 +249,107 @@ ui_tab_embeddings <- function() {
       style = "display: none;",
       layout_column_wrap(
         width = 1 / 2,
-        height = "600px", # Increased height
+        height = "600px",
         heights_equal = "all",
-        card(
-          full_screen = TRUE,
-          class = "comparison-card plot-a-card",
-          card_header(
-            class = "comparison-card-header py-1",
-            div(
-              class = "align-items-center gap-2",
-              fontawesome::fa("circle", fill = "#007bff", height = "12px"),
-              tags$span("Plot A", class = "fw-semibold small"),
-              tags$span(id = "plot_a_subtitle", class = "badge bg-light text-primary border small ms-2")
-            )
-          ),
-          withSpinner(
-            type = 6,
-            size = 0.4,
-            color = "#007bff",
-            plotlyOutput("first_plotly", height = "100%")
-          )
+        comparison_plot_card("a", "Plot A", "#007bff", "color_first_comp",
+          get_data_column("broad_stage"), "first_plotly"
         ),
-        card(
-          full_screen = TRUE,
-          class = "comparison-card plot-b-card",
-          card_header(
-            class = "comparison-card-header py-1",
+        comparison_plot_card("b", "Plot B", "#28a745", "color_second",
+          get_data_column("detailed_stage"), "second_plotly"
+        )
+      )
+    )
+  )
+}
+
+# Gene selector (with ID/name switch and PlasmoDB/NCBI links) for one
+# comparison plot; visible only while that plot is coloured by genes.
+comparison_gene_panel <- function(side, color_id, label_id, check_id, genes_id,
+                                  plasmo_id, ncbi_id, btn_class) {
+  conditionalPanel(
+    condition = sprintf("input.%s == 'genes'", color_id),
+    class = sprintf("mt-2 comparison-controls comparison-plot-section plot-%s-section", side),
+    fluidRow(
+      class = "g-1 align-items-end",
+      column(
+        width = 10,
+        div(
+          class = "gene-select-wrapper",
+          style = "position: relative;",
+          tags$label(
+            class = "control-label d-flex align-items-center gap-2",
+            tags$span(textOutput(label_id, inline = TRUE), class = "settings-label"),
             div(
-              class = "align-items-center gap-2",
-              fontawesome::fa("circle", fill = "#28a745", height = "12px"),
-              tags$span("Plot B", class = "fw-semibold small"),
-              tags$span(id = "plot_b_subtitle", class = "badge bg-light text-success border small ms-2")
+              class = sprintf("comparison-toggle-container-%s", side),
+              title = "Click to switch ID and name",
+              `data-bs-toggle` = "tooltip",
+              `data-bs-placement` = "top",
+              bslib::input_switch(check_id, label = NULL, value = FALSE)
             )
           ),
-          withSpinner(
-            type = 6,
-            size = 0.4,
-            color = "#28a745",
-            plotlyOutput("second_plotly", height = "100%")
+          selectizeInput(
+            genes_id,
+            label = NULL,
+            choices = "", multiple = TRUE,
+            options = list(placeholder = "Search genes...", maxItems = 10, dropdownParent = "body"),
+            width = "100%"
+          )
+        )
+      ),
+      column(
+        width = 2,
+        div(
+          class = "links-row",
+          tags$a(
+            id = plasmo_id, href = "#", target = "_blank",
+            class = paste("btn btn-sm gene-link-btn", btn_class),
+            `data-bs-toggle` = "tooltip", `data-bs-placement` = "top",
+            title = "PlasmoDB",
+            tags$i(class = "fas fa-external-link-alt")
+          ),
+          tags$a(
+            id = ncbi_id, href = "#", target = "_blank",
+            class = paste("btn btn-sm gene-link-btn", btn_class),
+            `data-bs-toggle` = "tooltip", `data-bs-placement` = "top",
+            title = "NCBI",
+            tags$i(class = "fas fa-dna")
           )
         )
       )
+    )
+  )
+}
+
+# One comparison plot card; its "Color by" selector sits in the title bar.
+comparison_plot_card <- function(side, title, colour, color_id, selected, plot_id) {
+  card(
+    full_screen = TRUE,
+    class = sprintf("comparison-card plot-%s-card", side),
+    card_header(
+      class = "comparison-card-header py-1",
+      div(
+        class = "d-flex align-items-center gap-2",
+        fontawesome::fa("circle", fill = colour, height = "12px"),
+        tags$span(title, class = "fw-semibold small"),
+        div(
+          class = "ms-auto d-flex align-items-center gap-1 header-color-by",
+          tags$span("Color by", class = "header-color-by-label"),
+          selectizeInput(
+            color_id,
+            NULL,
+            choices = category_choices(),
+            selected = selected,
+            width = "170px",
+            options = list(dropdownParent = "body")
+          )
+        )
+      )
+    ),
+    withSpinner(
+      type = 6,
+      size = 0.4,
+      color = colour,
+      plotlyOutput(plot_id, height = "100%")
     )
   )
 }

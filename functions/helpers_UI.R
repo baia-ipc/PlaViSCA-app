@@ -154,21 +154,43 @@ create_filter_widget <- function(key, suffix = "", width_class = "col-md-3") {
   )
 }
 
+# Settings card (filters, plot settings) whose body folds away when the
+# header is clicked. `id` names the foldable body and must be unique per page.
+foldable_settings_card <- function(id, icon, title, ..., class = "mb-2") {
+  card(
+    class = paste(class, "shadow-sm settings-card-compact foldable-card"),
+    # Keep the foldable div a direct child of the card (no extra card body)
+    wrapper = NULL,
+    card_header(
+      class = "bg-primary text-white py-1 foldable-card-header",
+      role = "button",
+      `data-bs-toggle` = "collapse",
+      `data-bs-target` = paste0("#", id),
+      `aria-expanded` = "true",
+      `aria-controls` = id,
+      title = "Click to show or hide",
+      fontawesome::fa(icon, height = "14px"),
+      tags$span(title, class = "fw-bold", style = "font-size: 0.9rem;"),
+      tags$span(class = "foldable-card-chevron", fontawesome::fa("chevron-down", height = "12px"))
+    ),
+    div(id = id, class = "collapse show", ...)
+  )
+}
+
 # Builds the shared filter row used by every analysis tab. The set of filters
 # and their order come from config/data_columns.yml (`filter_fields:`).
 create_meta_filter_row <- function(suffix = "") {
   keys <- filter_field_keys()
-  card(
-    class = "mb-3 shadow-sm settings-card-compact",
-    card_header(
-      class = "bg-primary text-white py-1",
-      fontawesome::fa("filter", height = "14px"),
-      tags$span("Filters", class = "fw-bold", style = "font-size: 0.9rem;")
-    ),
+  foldable_settings_card(
+    id = paste0("filters_body", suffix),
+    icon = "filter",
+    title = "Filters",
+    class = "mb-3",
     card_body(
       fluidRow(
-        class = "meta-filter g-2", # g-2 for tighter gutters
-        lapply(keys, function(k) create_filter_widget(k, suffix)),
+        # Five filters per row on wide screens, fewer on narrow ones
+        class = "meta-filter g-2 row-cols-1 row-cols-sm-2 row-cols-lg-5",
+        lapply(keys, function(k) create_filter_widget(k, suffix, "col")),
       ),
       # Shown only when the broad/detailed life-cycle stage selection is
       # logically impossible (e.g. an old bookmark), instead of silently
@@ -188,13 +210,10 @@ create_plot_controls <- function(data_type_id = "data_type", include_size_dim = 
   size_id <- paste0("size", suffix)
   plot_id <- paste0("plot", suffix)
 
-  card(
-    class = "mb-2 shadow-sm settings-card-compact",
-    card_header(
-      class = "bg-primary text-white py-1",
-      fontawesome::fa("cog", height = "14px"),
-      tags$span("Plot settings", class = "fw-bold", style = "font-size: 0.9rem;")
-    ),
+  foldable_settings_card(
+    id = paste0("plot_settings_body", suffix),
+    icon = "cog",
+    title = "Plot settings",
     card_body(
       layout_column_wrap(
         width = 1/3,

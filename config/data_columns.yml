@@ -363,7 +363,7 @@ colors:
     Ring/Early trophozoite: "#A9D18E"
     Trophozoite: "#F4D35E"
     Schizont (Blood stage): "#8EC5E8"
-    Merozoite: "#2E75B6"
+    Merozoite: "#E07B39"
     Developing gametocyte: "#66454C"
     Female gametocyte: "#4E6E59"
     Male gametocyte: "#42517C"
@@ -383,7 +383,7 @@ colors:
     Ring/Early trophozoite: "#A9D18E"
     Trophozoite: "#F4D35E"
     Schizont (Blood stage): "#8EC5E8"
-    Merozoite: "#2E75B6"
+    Merozoite: "#E07B39"
   pred_gametocyte_sex:
     Developing gametocyte: "#66454C"
     Female gametocyte: "#4E6E59"
