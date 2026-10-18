@@ -33,6 +33,13 @@ body {
   z-index: 1000;
 }
 
+/* Title and subtitle on one line */
+.menu-title {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+}
+
 .menu-title h1 {
   margin: 0;
   font-size: 32px;
