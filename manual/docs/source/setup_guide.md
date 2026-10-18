@@ -33,7 +33,7 @@ git clone https://github.com/baia-ipc/PlaViSca-app.git
 cd PlaViSca-app
 ```
 
-This will create a directory named `PlaViSca` containing all application files.
+This will create a directory named `PlaViSca-app` containing all application files.
 
 ### 2. Install Dependencies
 
@@ -53,6 +53,37 @@ install.packages(c(
   "readr", "tibble", "bslib", "fontawesome", "conflicted", "writexl"
 ))
 ```
+
+#### Notes for macOS
+
+`renv` installs ready-built packages where it can, and compiles the others
+from source. Compiling needs Apple's command line tools:
+
+```bash
+xcode-select --install
+```
+
+The packages `openssl`, `curl` and `xml2` link to system libraries, and two
+common setups make them fail to build or load:
+
+- **conda or mamba on the `PATH`.** Their copies of these libraries get
+  picked up, and the installed package then fails to load with
+  `Library not loaded: @rpath/...`. Run `conda deactivate` (repeat until no
+  environment is active), or remove conda from the `PATH` in that terminal,
+  before `renv::restore()`.
+- **Homebrew's OpenSSL 4.** The `openssl` package version used here builds
+  against OpenSSL 3 (errors such as `incomplete definition of type
+  'const ASN1_BIT_STRING'`). Install OpenSSL 3 and point the build at it:
+
+  ```bash
+  brew install openssl@3
+  export PKG_CONFIG_PATH="$(brew --prefix openssl@3)/lib/pkgconfig"
+  R -e 'renv::restore()'
+  ```
+
+`renv::restore()` installs all packages or none: after fixing a failed
+package, run it again. Any R 4.3.x works; with a version other than 4.3.3,
+R prints harmless warnings that packages were built under another version.
 
 ### 3. Prepare the Data
 
@@ -104,7 +135,7 @@ Then open a browser and go to: `http://localhost:3838` (or replace `localhost` w
 
 #### Option B: Using RStudio (Desktop)
 
-1. Open RStudio and set the working directory to the `PlaViSca` project folder.
+1. Open RStudio and set the working directory to the `PlaViSca-app` project folder.
 2. Open `app.R` in the editor.
 3. Click the **Run App** button in the top-right corner of the editor pane.
 
@@ -133,7 +164,7 @@ hostname -I
 | Problem | Solution |
 |---|---|
 | **Browser error on launch** (`'browser' must be a non-empty character string`) | R is trying to open a browser in a headless environment. Use `./run_app.sh` (browser disabled by default) or add `launch.browser = FALSE` to your `runApp()` call. |
-| **`renv::restore()` fails** | Run `R -e "renv::status()"` to identify missing packages. On Linux, you may need system libraries: `sudo apt-get install libcurl4-openssl-dev libssl-dev libxml2-dev` |
+| **`renv::restore()` fails** | Run `R -e "renv::status()"` to identify missing packages. On Linux, you may need system libraries: `sudo apt-get install libcurl4-openssl-dev libssl-dev libxml2-dev`. On macOS, see *Notes for macOS* in Step 2. |
 | **App stops at startup with "data file(s) are missing"** | Set `PLAVISCA_DATA_DIR` to a directory containing the five files listed in Step 3. |
 | **App stops at startup with "data check(s) failed"** | The data do not match `config/data_columns.yml` (e.g. a different number of cells or studies). Use the data written by the matching version of the preprocessing pipeline, or update `config/data_columns.yml` (see the developer guide, `docs/developer.md`). |
 | **App is slow or crashes** | PlaViSca requires at least 16 GB RAM. Close other applications. The first load is slower due to data caching. |

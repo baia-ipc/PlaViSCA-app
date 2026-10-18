@@ -139,7 +139,7 @@
 <span class="nb">cd</span><span class="w"> </span>PlaViSca-app
 </pre></div>
 </div>
-<p>This will create a directory named <code class="docutils literal notranslate"><span class="pre">PlaViSca</span></code> containing all application files.</p>
+<p>This will create a directory named <code class="docutils literal notranslate"><span class="pre">PlaViSca-app</span></code> containing all application files.</p>
 </section>
 <section id="install-dependencies">
 <h3>2. Install Dependencies<a class="headerlink" href="#install-dependencies" title="Link to this heading"></a></h3>
@@ -156,6 +156,34 @@
 <span class="p">))</span>
 </pre></div>
 </div>
+<section id="notes-for-macos">
+<h4>Notes for macOS<a class="headerlink" href="#notes-for-macos" title="Link to this heading"></a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">renv</span></code> installs ready-built packages where it can, and compiles the others
+from source. Compiling needs Apple’s command line tools:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>xcode-select<span class="w"> </span>--install
+</pre></div>
+</div>
+<p>The packages <code class="docutils literal notranslate"><span class="pre">openssl</span></code>, <code class="docutils literal notranslate"><span class="pre">curl</span></code> and <code class="docutils literal notranslate"><span class="pre">xml2</span></code> link to system libraries, and two
+common setups make them fail to build or load:</p>
+<ul>
+<li><p><strong>conda or mamba on the <code class="docutils literal notranslate"><span class="pre">PATH</span></code>.</strong> Their copies of these libraries get
+picked up, and the installed package then fails to load with
+<code class="docutils literal notranslate"><span class="pre">Library</span> <span class="pre">not</span> <span class="pre">loaded:</span> <span class="pre">&#64;rpath/...</span></code>. Run <code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">deactivate</span></code> (repeat until no
+environment is active), or remove conda from the <code class="docutils literal notranslate"><span class="pre">PATH</span></code> in that terminal,
+before <code class="docutils literal notranslate"><span class="pre">renv::restore()</span></code>.</p></li>
+<li><p><strong>Homebrew’s OpenSSL 4.</strong> The <code class="docutils literal notranslate"><span class="pre">openssl</span></code> package version used here builds
+against OpenSSL 3 (errors such as <code class="docutils literal notranslate"><span class="pre">incomplete</span> <span class="pre">definition</span> <span class="pre">of</span> <span class="pre">type</span> <span class="pre">'const</span> <span class="pre">ASN1_BIT_STRING'</span></code>). Install OpenSSL 3 and point the build at it:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>brew<span class="w"> </span>install<span class="w"> </span>openssl@3
+<span class="nb">export</span><span class="w"> </span><span class="nv">PKG_CONFIG_PATH</span><span class="o">=</span><span class="s2">"</span><span class="k">$(</span>brew<span class="w"> </span>--prefix<span class="w"> </span>openssl@3<span class="k">)</span><span class="s2">/lib/pkgconfig"</span>
+R<span class="w"> </span>-e<span class="w"> </span><span class="s1">'renv::restore()'</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p><code class="docutils literal notranslate"><span class="pre">renv::restore()</span></code> installs all packages or none: after fixing a failed
+package, run it again. Any R 4.3.x works; with a version other than 4.3.3,
+R prints harmless warnings that packages were built under another version.</p>
+</section>
 </section>
 <section id="prepare-the-data">
 <h3>3. Prepare the Data<a class="headerlink" href="#prepare-the-data" title="Link to this heading"></a></h3>
@@ -188,7 +216,7 @@
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span><span class="w"> </span><span class="nv">PLAVISCA_DATA_DIR</span><span class="o">=</span>/path/to/run/results/app_data
 </pre></div>
 </div>
-<p>At startup the app checks that the data match its configuration (cell count, studies, columns, life-cycle stages). If they do not, it stops with a message listing what is wrong.</p>
+<p>At startup the app checks that the data match its configuration (studies, columns, life-cycle stages). If they do not, it stops with a message listing what is wrong.</p>
 </section>
 <section id="run-the-application">
 <h3>4. Run the Application<a class="headerlink" href="#run-the-application" title="Link to this heading"></a></h3>
@@ -235,7 +263,7 @@
 <section id="option-b-using-rstudio-desktop">
 <h4>Option B: Using RStudio (Desktop)<a class="headerlink" href="#option-b-using-rstudio-desktop" title="Link to this heading"></a></h4>
 <ol class="arabic simple">
-<li><p>Open RStudio and set the working directory to the <code class="docutils literal notranslate"><span class="pre">PlaViSca</span></code> project folder.</p></li>
+<li><p>Open RStudio and set the working directory to the <code class="docutils literal notranslate"><span class="pre">PlaViSca-app</span></code> project folder.</p></li>
 <li><p>Open <code class="docutils literal notranslate"><span class="pre">app.R</span></code> in the editor.</p></li>
 <li><p>Click the <strong>Run App</strong> button in the top-right corner of the editor pane.</p></li>
 </ol>
@@ -270,7 +298,7 @@
 <td><p>R is trying to open a browser in a headless environment. Use <code class="docutils literal notranslate"><span class="pre">./run_app.sh</span></code> (browser disabled by default) or add <code class="docutils literal notranslate"><span class="pre">launch.browser</span> <span class="pre">=</span> <span class="pre">FALSE</span></code> to your <code class="docutils literal notranslate"><span class="pre">runApp()</span></code> call.</p></td>
 </tr>
 <tr class="row-odd"><td><p><strong><code class="docutils literal notranslate"><span class="pre">renv::restore()</span></code> fails</strong></p></td>
-<td><p>Run <code class="docutils literal notranslate"><span class="pre">R</span> <span class="pre">-e</span> <span class="pre">&quot;renv::status()&quot;</span></code> to identify missing packages. On Linux, you may need system libraries: <code class="docutils literal notranslate"><span class="pre">sudo</span> <span class="pre">apt-get</span> <span class="pre">install</span> <span class="pre">libcurl4-openssl-dev</span> <span class="pre">libssl-dev</span> <span class="pre">libxml2-dev</span></code></p></td>
+<td><p>Run <code class="docutils literal notranslate"><span class="pre">R</span> <span class="pre">-e</span> <span class="pre">&quot;renv::status()&quot;</span></code> to identify missing packages. On Linux, you may need system libraries: <code class="docutils literal notranslate"><span class="pre">sudo</span> <span class="pre">apt-get</span> <span class="pre">install</span> <span class="pre">libcurl4-openssl-dev</span> <span class="pre">libssl-dev</span> <span class="pre">libxml2-dev</span></code>. On macOS, see <em>Notes for macOS</em> in Step 2.</p></td>
 </tr>
 <tr class="row-even"><td><p><strong>App stops at startup with “data file(s) are missing”</strong></p></td>
 <td><p>Set <code class="docutils literal notranslate"><span class="pre">PLAVISCA_DATA_DIR</span></code> to a directory containing the five files listed in Step 3.</p></td>
