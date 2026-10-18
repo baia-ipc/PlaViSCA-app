@@ -92,10 +92,10 @@ fields:
     role: filter
     required: true
     help: >
-      The stage given by the authors where they give one; otherwise the
-      gametocyte call of the cell's cluster; otherwise the stage of the most
-      similar reference time point. "Source of the life-cycle stage" says
-      which one was used.
+      For host-blood cells, the gametocyte call of the cell's cluster,
+      otherwise the stage of the most similar reference time point; for the
+      other cells (sporozoites, liver stages), the stage given by the
+      authors. "Source of the life-cycle stage" says which one was used.
   source_life_cycle_stage:
     label: "Life-cycle stage (authors)"
     column: author_stage
@@ -439,10 +439,3 @@ value_labels:
 # Fields whose values are scientific names and should be italicised in the UI.
 italicised_fields:
   - host_species
-
-# Free-text notes rendered in the UI next to specific views.
-notes:
-  stage_prediction: >
-    Life-cycle stages combine the authors' labels with stages inferred by
-    PlaViSca. The field "Source of the life-cycle stage" says which one a
-    cell's stage comes from.

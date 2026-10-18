@@ -126,10 +126,6 @@ field_is_numeric_sorted <- function(key) {
 
 app_expected_studies <- function() as.character(.data_columns_raw$expected_studies)
 app_unsupported_columns <- function() as.character(.data_columns_raw$unsupported_columns)
-app_note <- function(name) {
-    note <- .data_columns_raw$notes[[name]]
-    if (is.null(note)) NULL else trimws(gsub("\\s+", " ", note))
-}
 
 # --------------------------------------------------------------- vocabularies
 

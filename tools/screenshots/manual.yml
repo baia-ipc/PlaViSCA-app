@@ -38,6 +38,13 @@ shots:
 
   - name: plots
     tab: Plots
+    # the example of the manual: life-cycle stages of each study, in %
+    steps:
+      - drawn: true
+      - select: {id: plot_builder-split_by, value: detailed_stage}
+      - drawn: true
+      - select: {id: plot_builder-type, value: stacked}
+      - click: "input[name='plot_builder-show_as'][value='percent']"
     output: manual/docs/source/imgs/plots.png
 
   - name: data_table
