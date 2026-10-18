@@ -1942,7 +1942,9 @@ server <- function(input, output, session) {
           scrollZoom = TRUE,
           # double-click opens the cell details (www/script.js), not a zoom reset
           doubleClick = FALSE,
-          modeBarButtonsToRemove = c(),
+          # no camera is ever saved, so "last save" would equal the default
+          # a list, so that it reaches plotly.js as an array
+          modeBarButtonsToRemove = list("resetCameraLastSave3d"),
           displayModeBar = TRUE,
           toImageButtonOptions = list(
             format = "png",
@@ -2374,7 +2376,9 @@ server <- function(input, output, session) {
           scrollZoom = TRUE,
           # double-click opens the cell details (www/script.js), not a zoom reset
           doubleClick = FALSE,
-          modeBarButtonsToRemove = c(),
+          # no camera is ever saved, so "last save" would equal the default
+          # a list, so that it reaches plotly.js as an array
+          modeBarButtonsToRemove = list("resetCameraLastSave3d"),
           displayModeBar = TRUE,
           toImageButtonOptions = list(
             format = "png",
