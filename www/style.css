@@ -1315,3 +1315,51 @@ table.dataTable thead th {
 .filters-folded .plot-settings-layout .bslib-sidebar-layout.sidebar-collapsed > .main {
   padding-left: 0 !important;
 }
+
+/* Filter name with the "exclude" switch on the right; with the switch on,
+   the selected values are shown struck through in red (they are left out) */
+/* the boxes of a row stay aligned when a long name wraps */
+.filter-widget {
+  display: flex;
+  flex-direction: column;
+}
+
+.filter-widget > .shiny-input-container {
+  margin-top: auto;
+}
+
+.filter-widget .filter-head {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.filter-widget .filter-head .control-label {
+  margin-bottom: 1px;
+}
+
+.filter-widget .filter-exclude {
+  margin: 0 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 0.7rem;
+  color: #6c757d;
+  cursor: pointer;
+  user-select: none;
+}
+
+.filter-widget .filter-exclude input {
+  margin: 0;
+}
+
+.filter-widget:has(.filter-exclude input:checked) .filter-exclude {
+  color: #b02a37;
+  font-weight: 700;
+}
+
+.filter-widget:has(.filter-exclude input:checked) .selectize-input .item {
+  color: #b02a37 !important;
+  background: #f8d7da !important;
+  text-decoration: line-through;
+}

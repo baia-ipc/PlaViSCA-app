@@ -343,16 +343,25 @@ server <- function(input, output, session) {
   # When one is selected we constrain the other's choices; when an impossible
   # combination arrives anyway (e.g. an old bookmark or a restored session) we
   # tell the user explicitly instead of silently returning zero rows.
+  # With a filter's "exclude" switch on, its effective selection is the
+  # other values (filter_effective_values()).
+  all_broad <- unique(as.character(mr_data[[get_data_column("broad_stage")]]))
+  all_detailed <- unique(as.character(mr_data[[get_data_column("detailed_stage")]]))
   lapply(filter_suffixes, function(sfx) {
     broad_id <- paste0("broad_stage", sfx)
     detailed_id <- paste0("detailed_stage", sfx)
+    broad_exclude_id <- filter_exclude_id("broad_stage", sfx)
+    detailed_exclude_id <- filter_exclude_id("detailed_stage", sfx)
     warn_id <- paste0("stage_compatibility_warning", sfx)
+    effective_broad <- function() {
+      filter_effective_values(input[[broad_id]], input[[broad_exclude_id]], all_broad)
+    }
 
     # Constrain the detailed-stage choices to whatever the broad selection allows
-    observeEvent(input[[broad_id]],
+    observeEvent(list(input[[broad_id]], input[[broad_exclude_id]]),
       {
         available <- unique(mr_data[[get_data_column("detailed_stage")]])
-        allowed <- compatible_detailed_stages(input[[broad_id]], available)
+        allowed <- compatible_detailed_stages(effective_broad(), available)
         keep <- intersect(isolate(input[[detailed_id]]), allowed)
         updateSelectizeInput(
           session, detailed_id,
@@ -365,7 +374,10 @@ server <- function(input, output, session) {
 
     # Report (never silently drop) an impossible combination
     observe({
-      msg <- stage_selection_message(input[[broad_id]], input[[detailed_id]])
+      msg <- stage_selection_message(
+        effective_broad(),
+        filter_effective_values(input[[detailed_id]], input[[detailed_exclude_id]], all_detailed)
+      )
       output[[paste0("stage_compatibility_message", sfx)]] <- renderUI({
         if (is.null(msg)) NULL else tagList(fontawesome::fa("triangle-exclamation"), " ", msg)
       })
@@ -388,7 +400,8 @@ server <- function(input, output, session) {
     cache_key <- make_cache_key(
       "filtered_gene_data",
       get_current_data_type(),
-      current_inputs
+      current_inputs,
+      list(exclude = attr(current_inputs, "exclude"))
     )
 
     # Check cache first to avoid reprocessing

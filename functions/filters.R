@@ -18,15 +18,41 @@ sort_numeric_choices <- function(values) {
     values[order(is.na(numeric_values), numeric_values, as.character(values), na.last = TRUE)]
 }
 
+# Input ID of the "exclude" switch of a filter.
+filter_exclude_id <- function(key, suffix = "") paste0(key, "_exclude", suffix)
+
 # Collects the current filter widget selections into a named list keyed by the
 # actual data column names (via get_data_column()), suitable for
 # apply_secondary_filters()/fun_filter_df(). `suffix` selects which tab's set
 # of widgets to read (e.g. "_meta", "_table", "_qc", "_gex", or "" for Embeddings).
+# The attribute "exclude" names the columns whose filter has its "exclude"
+# switch on: their selected values are left out instead of kept.
 collect_filter_inputs <- function(input, suffix = "") {
-    setNames(
+    columns <- vapply(FILTER_FIELDS, get_data_column, character(1))
+    out <- setNames(
         lapply(FILTER_FIELDS, function(field) input[[paste0(field, suffix)]]),
-        vapply(FILTER_FIELDS, get_data_column, character(1))
+        columns
     )
+    excluded <- vapply(FILTER_FIELDS, function(field) {
+        isTRUE(input[[filter_exclude_id(field, suffix)]])
+    }, logical(1))
+    attr(out, "exclude") <- unname(columns[excluded])
+    out
+}
+
+# TRUE for the values a filter keeps: those selected or, with the filter's
+# "exclude" switch on, those not selected. An empty selection keeps all.
+filter_keeps <- function(x, selected, exclude = FALSE) {
+    if (length(selected) == 0) return(rep(TRUE, length(x)))
+    if (exclude) !(x %in% selected) else x %in% selected
+}
+
+# The values a filter lets through, out of `all_values`: NULL (no
+# constraint) for an empty selection, else the selection or, excluding, the
+# other values.
+filter_effective_values <- function(selected, exclude, all_values) {
+    if (length(selected) == 0) return(NULL)
+    if (isTRUE(exclude)) setdiff(all_values, selected) else selected
 }
 
 # Helper function to format species names with italics.
@@ -127,10 +153,11 @@ apply_secondary_filters <- function(data, inputs, keep_gene_matrix = TRUE, genes
 
 
     # Dynamically apply filters for each non-empty input (on the filtered view)
+    excluded <- attr(inputs, "exclude")
     for (col in names(inputs)) {
         values <- inputs[[col]]
         if (!is.null(values) && length(values) > 0 && col %in% names(filtered)) {
-            filtered <- filtered %>% filter(.data[[col]] %in% values)
+            filtered <- filtered[filter_keeps(filtered[[col]], values, col %in% excluded), , drop = FALSE]
         }
     }
 
@@ -149,7 +176,7 @@ apply_secondary_filters <- function(data, inputs, keep_gene_matrix = TRUE, genes
             for (col in names(inputs)) {
                 values <- inputs[[col]]
                 if (!is.null(values) && length(values) > 0 && col %in% names(original)) {
-                    keep_rows <- keep_rows & (original[[col]] %in% values)
+                    keep_rows <- keep_rows & filter_keeps(original[[col]], values, col %in% excluded)
                 }
             }
         }

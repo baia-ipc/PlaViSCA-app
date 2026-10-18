@@ -139,3 +139,31 @@ test_that_("a filter column missing from the data raises an error", {
         sprintf("the error must say it is a data error, got: %s", err)
     )
 })
+
+test_that_("an excluding filter keeps the cells without the selected values", {
+    if (!exists("apply_secondary_filters")) skip_test("filters not loaded in this context")
+    m <- app_data("mr_data")
+    col <- get_data_column("study_label")
+    dropped <- "Hazzard2024"
+    inputs <- setNames(list(dropped), col)
+    attr(inputs, "exclude") <- col
+    out <- apply_secondary_filters(m, inputs)
+    expect_true_(!dropped %in% out[[col]], "the excluded study must be gone")
+    expect_equal_(nrow(out), sum(m[[col]] != dropped & m$n_feature_rna > 0 & m$n_count_rna > 0),
+        "all the other cells must be kept")
+    expect_equal_(length(attr(out, "row_idx")), nrow(out), "row indices follow the exclusion")
+    attr(inputs, "exclude") <- character(0)
+    kept <- apply_secondary_filters(m, inputs)
+    expect_true_(all(kept[[col]] == dropped), "without exclude the selection is kept")
+})
+
+test_that_("an excluding stage filter constrains the other stage filter", {
+    all_broad <- unique(as.character(app_data("mr_data")[[get_data_column("broad_stage")]]))
+    effective <- filter_effective_values("Blood stage", TRUE, all_broad)
+    expect_true_(!"Blood stage" %in% effective && length(effective) > 0, "exclude gives the other broad stages")
+    detailed <- compatible_detailed_stages(effective)
+    map <- stage_compatibility_map()
+    expect_true_(!any(map[detailed] == "Blood stage"), "no blood stage is offered when blood is excluded")
+    expect_true_(is.null(filter_effective_values(character(0), TRUE, all_broad)),
+        "an empty selection is no constraint, also when excluding")
+})

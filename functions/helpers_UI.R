@@ -109,24 +109,41 @@ create_filter_widget <- function(key, suffix = "", width_class = "col-md-3") {
     )
   }
 
+  id <- paste0(key, suffix)
   div(
-    class = width_class,
-    selectizeInput(
-      inputId = paste0(key, suffix),
-      label = tags$span(
-        class = "settings-label",
-        get_data_label(key),
-        if (!is.null(help_text)) {
-          tags$span(
-            class = "filter-help-icon",
-            style = "cursor: help; margin-left: 4px; opacity: 0.65;",
-            `data-bs-toggle` = "tooltip",
-            `data-bs-placement` = "top",
-            title = help_text,
-            fontawesome::fa("circle-info", height = "11px")
-          )
-        }
+    class = paste(width_class, "filter-widget"),
+    # name of the filter, and its "exclude" switch: when on, the selected
+    # values are left out instead of kept (functions/filters.R)
+    div(
+      class = "filter-head",
+      tags$label(
+        `for` = id,
+        class = "control-label",
+        tags$span(
+          class = "settings-label",
+          get_data_label(key),
+          if (!is.null(help_text)) {
+            tags$span(
+              class = "filter-help-icon",
+              style = "cursor: help; margin-left: 4px; opacity: 0.65;",
+              `data-bs-toggle` = "tooltip",
+              `data-bs-placement` = "top",
+              title = help_text,
+              fontawesome::fa("circle-info", height = "11px")
+            )
+          }
+        )
       ),
+      tags$label(
+        class = "filter-exclude",
+        title = "Leave out the cells with the selected values, instead of keeping them",
+        tags$input(type = "checkbox", id = filter_exclude_id(key, suffix)),
+        "exclude"
+      )
+    ),
+    selectizeInput(
+      inputId = id,
+      label = NULL,
       choices = c(""),
       multiple = TRUE,
       options = opts

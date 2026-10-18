@@ -3,6 +3,7 @@
 # Every tab with filters has its own copy of the filter inputs (the input ID
 # is the field key plus the tab's suffix, e.g. "study_label_qc"). One filter
 # state is kept on the server:
+#   - the state holds each filter's selection and its "exclude" switch;
 #   - only the copy on the tab being viewed writes to it, so that no value
 #     travels back from another tab and overwrites a newer one;
 #   - a tab takes the shared state when it is opened, so that the hidden tabs
@@ -34,18 +35,28 @@ shared_filters_server <- function(input, session, filter_choices) {
     if (is.na(sfx)) NULL else unname(sfx)
   })
 
-  # the copy on the tab being viewed writes to the shared state
+  # the copy on the tab being viewed writes to the shared state: the
+  # selection (state[[key]]) and the "exclude" switch (state[[exclude_id]])
   for (key in filter_field_keys()) {
     for (sfx in FILTER_TAB_SUFFIXES) {
       local({
         k <- key
         s <- sfx
         id <- paste0(k, s)
+        exclude_id <- filter_exclude_id(k, s)
         observeEvent(input[[id]],
           {
             if (identical(isolate(active_suffix()), s)) state[[k]] <- input[[id]]
           },
           ignoreNULL = FALSE,
+          ignoreInit = TRUE
+        )
+        observeEvent(input[[exclude_id]],
+          {
+            if (identical(isolate(active_suffix()), s)) {
+              state[[filter_exclude_id(k)]] <- isTRUE(input[[exclude_id]])
+            }
+          },
           ignoreInit = TRUE
         )
       })
@@ -57,6 +68,11 @@ shared_filters_server <- function(input, session, filter_choices) {
     sfx <- active_suffix()
     req(!is.null(sfx))
     for (key in filter_field_keys()) {
+      exclude_id <- filter_exclude_id(key, sfx)
+      wanted_exclude <- isTRUE(isolate(state[[filter_exclude_id(key)]]))
+      if (!identical(isTRUE(isolate(input[[exclude_id]])), wanted_exclude)) {
+        updateCheckboxInput(session, exclude_id, value = wanted_exclude)
+      }
       id <- paste0(key, sfx)
       wanted <- isolate(state[[key]]) %||% character(0)
       current <- isolate(input[[id]]) %||% character(0)
