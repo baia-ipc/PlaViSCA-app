@@ -22,6 +22,5 @@ ui <- fluidPage(
   ui_menu_bar(),
   ui_home_section(),
   ui_analysis_section(),
-  ui_about_section(),
-  ui_footer()
+  ui_about_section()
 )

@@ -42,9 +42,7 @@ The menu bar provides consistent branding and navigation across the entire appli
 
 Detailed explanations of these modules' functionalities are provided in the following sections.
 
-**Footer**:
-
-The home page has an animated particle background. The footer shows the Institut Pasteur du Cambodge (IPC) and BAIA logos and the copyright notice.
+The menu bar at the top of every page shows the Institut Pasteur du Cambodge (IPC) and BAIA logos. The home page has an animated particle background.
 
 ## Analysis page
 

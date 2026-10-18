@@ -362,7 +362,7 @@ newBlock <- function(new_count, counter, choice_exp, dynamicBlock, session) {
   })
 }
 
-# ------------------------------------------------------------ team and footer
+# ------------------------------------------------------- team and logos
 
 # Colour accents of the team cards (classes in www/style.css), used in turn.
 TEAM_CARD_ACCENTS <- c("accent-teal", "accent-blue", "accent-green", "accent-purple", "accent-orange")
@@ -386,16 +386,11 @@ create_team_cards <- function(members = team_info()$members) {
 }
 
 # Logos of the organizations in config/team.yml, linked to their website
-# when one is given.
-create_footer_logos <- function(organizations = team_info()$organizations) {
+# when one is given. Shown at the right end of the menu bar.
+create_org_logos <- function(organizations = team_info()$organizations) {
   logos <- lapply(organizations, function(org) {
     logo <- img(src = org$logo, alt = org$name, class = "logo")
     if (is.null(org$url)) logo else a(href = org$url, target = "_blank", logo)
   })
   div(class = "logo-container", logos)
-}
-
-# Copyright line of the footer, from config/team.yml.
-footer_copyright <- function(team = team_info()) {
-  sprintf("© %s %s. All rights reserved.", team$copyright_year, team$team_name)
 }

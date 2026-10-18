@@ -1,4 +1,4 @@
-# Parts of the page shown on every section: <head>, menu bar and footer.
+# Parts of the page shown on every section: <head> and menu bar.
 
 # Stylesheets, scripts and fonts loaded in the page <head>.
 ui_head <- function() {
@@ -22,7 +22,7 @@ ui_head <- function() {
   )
 }
 
-# Top menu bar: title and Home / Analysis / About links.
+# Top menu bar: title, Home / Analysis / About links and organization logos.
 ui_menu_bar <- function() {
   div(
     class = "menu-bar",
@@ -48,18 +48,7 @@ ui_menu_bar <- function() {
         label = tagList(icon("info-circle"), " About"),
         class = "menu-link"
       )
-    )
-  )
-}
-
-# Footer with organization logos, shown on the home page only.
-ui_footer <- function() {
-  conditionalPanel(
-    condition = "input.home || (!input.analysis && !input.about)", # Show footer only on home page
-    div(
-      class = "footer",
-      create_footer_logos(),
-      p(class = "copyright", footer_copyright())
-    )
+    ),
+    create_org_logos()
   )
 }

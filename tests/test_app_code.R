@@ -97,7 +97,6 @@ test_that_("external links and team information are complete", {
         "gene link template"
     )
     team <- team_info()
-    expect_true_(nzchar(team$team_name %||% ""), "team.yml needs team_name")
     expect_true_(length(team$members) > 0, "team.yml lists no members")
     incomplete <- Filter(function(m) is.null(m$name) || is.null(m$role), team$members)
     expect_empty_(vapply(incomplete, function(m) m$name %||% "?", character(1)),

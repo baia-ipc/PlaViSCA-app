@@ -87,7 +87,7 @@ When the data change on purpose (for example a new study), update
 |---|---|
 | `config/data_columns.yml` | which data columns the app uses, their labels, help text, ordering and colours, and the expected studies |
 | `config/external_links.yml` | every external web address (PlasmoDB and NCBI gene pages, source code, front-end libraries) |
-| `config/team.yml` | team, organisations and contacts shown on the About page and in the footer |
+| `config/team.yml` | team, organisations and contacts shown on the About page and in the menu bar |
 
 ## Tests
 

@@ -84,7 +84,7 @@ server <- function(input, output, session) {
     $('.menu-link').removeClass('active');
     $('#home').addClass('active');
 
-    // Initialize particles for home page footer
+    // Initialize particles for the home page background
     setTimeout(function() {
       if (typeof initHomeParticles === 'function') {
         initHomeParticles();

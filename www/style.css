@@ -17,8 +17,6 @@ body {
   color: var(--text-color);
   margin: 0;
   padding: 0;
-  padding-bottom: 60px;
-  /* Adjusted space for the fixed footer */
 }
 
 /* Menu Bar Styles */
@@ -51,6 +49,7 @@ body {
 
 .menu-items {
   display: flex;
+  margin-left: auto;
   gap: 30px;
   /* Increased gap */
 }
@@ -76,6 +75,26 @@ body {
   color: var(--white);
 }
 
+/* Organization logos at the right end of the menu bar */
+.menu-bar .logo-container {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-left: 30px;
+  padding-left: 30px;
+  border-left: 1px solid #ddd;
+}
+
+.menu-bar .logo {
+  height: 40px;
+}
+
+@media (max-width: 992px) {
+  .menu-bar .logo-container {
+    display: none;
+  }
+}
+
 /* Home Section Styles */
 .home-section {
   display: flex;
@@ -85,8 +104,8 @@ body {
   background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
   position: relative;
   overflow: hidden;
-  min-height: calc(100vh - 160px);
-  /* Adjusted based on menu and footer height */
+  min-height: calc(100vh - 100px);
+  /* Full window height minus the menu bar */
 }
 
 #particles-js-home {
@@ -175,44 +194,6 @@ body {
   width: 60px;
   height: 60px;
   margin-bottom: 15px;
-}
-
-/* Footer */
-.footer {
-  background-color: transparent;
-  color: #666;
-  /* Subtle gray for copyright text */
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  padding: 15px 0;
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 40px;
-  z-index: 999;
-  border: none;
-}
-
-.footer .logo-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 30px;
-  margin-bottom: 0;
-}
-
-.footer .logo {
-  height: 40px;
-  /* Adjusted logo size */
-  filter: none;
-  /* Removed filter */
-}
-
-.copyright {
-  font-size: 11px;
-  margin: 0;
 }
 
 /* Analysis & About Sections */
