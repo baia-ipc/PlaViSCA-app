@@ -367,8 +367,7 @@ server <- function(input, output, session) {
   #
   # Choices are derived entirely from config/data_columns.yml: for every
   # configured filter field we resolve its physical column, order its values
-  # by the documented biological vocabulary, and surface true NA under the
-  # single configured missing label. A configured column that is missing from
+  # by the documented biological vocabulary. A configured column that is missing from
   # the data is reported as an error, not silently skipped.
   observeEvent(gene_data(), {
     req(gene_data()$data)
@@ -669,7 +668,7 @@ server <- function(input, output, session) {
           # Metadata detail table. Column set, order and display labels all
           # come from config/data_columns.yml (`detail_table_fields:`) - there
           # is no second hardcoded field list here. True NA is shown under the
-          # single configured missing label; the underlying data is untouched.
+          # field's missing label; the underlying data is untouched.
           detail_keys <- Filter(
             function(k) get_data_column(k) %in% colnames(filt_data),
             detail_table_field_keys()
@@ -681,7 +680,7 @@ server <- function(input, output, session) {
             col <- get_data_column(k)
             v <- processed_data[[col]]
             if (is.character(v) || is.factor(v) || is.logical(v)) {
-              processed_data[[col]] <- relabel_missing(display_values(col, v))
+              processed_data[[col]] <- relabel_missing(display_values(col, v), missing_label_for(col))
             }
           }
           names(processed_data) <- vapply(detail_keys, get_data_label, character(1))

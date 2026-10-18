@@ -32,11 +32,12 @@ collect_filter_inputs <- function(input, suffix = "") {
 # Helper function to format species names with italics.
 #
 # Anything that looks like a binomial ("Genus species") is italicised and the
-# configured missing label is left alone, so a newly added host species is
+# missing label of the column is left alone, so a newly added host species is
 # italicised without editing a list of species.
-format_species_name <- function(species_names) {
-    chr <- relabel_missing(species_names)
-    is_binomial <- grepl("^[A-Z][a-z]+ [a-z]+", chr) & chr != MISSING_VALUE_LABEL
+format_species_name <- function(species_names, column = NULL) {
+    missing_label <- missing_label_for(column)
+    chr <- relabel_missing(species_names, missing_label)
+    is_binomial <- grepl("^[A-Z][a-z]+ [a-z]+", chr) & chr != missing_label
     ifelse(is_binomial, paste0("<i>", chr, "</i>"), chr)
 }
 

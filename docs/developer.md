@@ -65,6 +65,10 @@ fields:
       Blood, liver or sporozoite stage.
 ```
 
+Missing values are shown as the global `missing_label` ("Missing"), listed
+last and coloured grey. A field can name them itself with its own
+`missing_label:`; for example, `gametocyte_state` shows "No gametocyte".
+
 Further blocks say where each field is used (`filter_fields`,
 `category_fields` for "Color by"/"Group by", `detail_table_fields`), and
 give biological orderings (`vocabularies`), fixed colours (`colors`),

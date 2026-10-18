@@ -69,7 +69,7 @@ All tabs (except Data Sources) share a common **Filters** row at the top with th
 | Parasite strain / isolate | Parasite strain or clinical isolate |
 | Most similar reference time point (h) | For blood-stage cells: the time point of a reference blood-stage time course (Zhu et al. 2016) whose expression is most similar to the cell. It is a similarity, not a measured time |
 
-Hover over the help icon next to a filter for its full description. Cells with a missing value are shown as "Missing".
+Hover over the help icon next to a filter for its full description. Cells with a missing value are shown as "Missing"; for the gametocyte state, cells that are not gametocytes are shown as "No gametocyte".
 
 Filters apply with **OR logic within each field** and **AND logic between fields**, allowing precise subsetting of the dataset. All tabs stay synchronized with each other's filter selections.
 
@@ -161,7 +161,7 @@ A short video demonstration of the Metadata tab **Video 3**. This video provides
 
 **Bar charts**, one per field: Broad life-cycle stage, Life-cycle stage, Host species, Parasite strain / isolate, Treatment, Most similar reference time point, Parasite origin location, Gametocyte call of the cluster, and Gametocyte sex (authors).
 
-> **Note:** Life-cycle stages combine the authors' labels with stages inferred by PlaViSca. The field "Source of the life-cycle stage" in the metadata table says which one a cell's stage comes from: the authors, the gametocyte call of the cell's cluster, or the most similar reference time point.
+> **Note:** Blood-stage cells get the life-cycle stage inferred by PlaViSca: the gametocyte call of the cell's cluster, otherwise the most similar reference time point. Sporozoites and liver stages, which PlaViSca does not classify, keep the authors' labels. The field "Source of the life-cycle stage" in the metadata table says which one a cell's stage comes from. The authors' gametocyte labels remain available for comparison ("Gametocyte sex (authors)").
 
 **Metadata table**: one row per cell with the study, host and tissue, strain and origin, treatment, life-cycle stage (and the authors' stage), reference time point, gametocyte calls, biological replicate, day post infection, technology, sequencer and counts.
 

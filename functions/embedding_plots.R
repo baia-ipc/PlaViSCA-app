@@ -56,7 +56,7 @@ is_categorical_data <- function(x) {
 # Explicit per-level colours configured in config/data_columns.yml (e.g. the
 # Male/Female gametocyte pair, which must be handled symmetrically) win over
 # the automatic palette; everything else is filled from the palette. The
-# configured missing label always gets the same neutral grey.
+# missing label of the column always gets the same neutral grey.
 category_palette <- function(levels_vec, column = NULL) {
   levels_vec <- as.character(levels_vec)
   n <- length(levels_vec)
@@ -64,7 +64,7 @@ category_palette <- function(levels_vec, column = NULL) {
     return(setNames(character(0), character(0)))
   }
 
-  is_missing_level <- levels_vec == MISSING_VALUE_LABEL
+  is_missing_level <- levels_vec == missing_label_for(column)
   n_real <- sum(!is_missing_level)
   auto <- if (n_real > 0) assign_colors(n_real) else character(0)
 
@@ -83,21 +83,22 @@ category_palette <- function(levels_vec, column = NULL) {
 
 # Colors + biologically-ordered factor levels for a categorical colour column.
 #
-# True NA is shown under the configured missing label, and values are ordered
+# True NA is shown under the missing label of the column, and values are ordered
 # by the biological ordering in config/data_columns.yml rather than sort().
 prepare_categorical_colors <- function(df, color) {
   # Display-only relabelling of missing values (true NA and, defensively, any
   # residual literal "NA"/"None" string). The analytical data is untouched.
-  df[[color]] <- relabel_missing(df[[color]])
+  missing_label <- missing_label_for(color)
+  df[[color]] <- relabel_missing(df[[color]], missing_label)
 
   unique_values <- unique(df[[color]])
-  has_missing <- MISSING_VALUE_LABEL %in% unique_values
-  actual_values <- setdiff(unique_values, MISSING_VALUE_LABEL)
+  has_missing <- missing_label %in% unique_values
+  actual_values <- setdiff(unique_values, missing_label)
 
   sorted_values <- order_column_values(color, actual_values)
 
   final_levels <- if (has_missing) {
-    c(MISSING_VALUE_LABEL, sorted_values)
+    c(missing_label, sorted_values)
   } else {
     sorted_values
   }
@@ -176,9 +177,9 @@ build_hover_text <- function(df, legend_title, display_color, x_vals = NULL, y_v
   # Build base text
   stage_col <- get_data_column("detailed_stage")
   stage_vals <- if (stage_col %in% colnames(df)) {
-    relabel_missing(df[[stage_col]])
+    relabel_missing(df[[stage_col]], missing_label_for(stage_col))
   } else {
-    MISSING_VALUE_LABEL
+    missing_label_for(stage_col)
   }
 
   base_text <- paste0(
@@ -220,7 +221,7 @@ plot_2d <- function(
   is_dual_plot = FALSE
 ) {
   display_color <- if (color %in% italicised_columns()) {
-    format_species_name(selected_color)
+    format_species_name(selected_color, color)
   } else {
     selected_color
   }
@@ -319,7 +320,7 @@ plot_3d <- function(
   display_color <- if (
     !is.null(color) && !is.na(color) && color == "host_species"
   ) {
-    format_species_name(selected_color)
+    format_species_name(selected_color, color)
   } else {
     selected_color
   }
@@ -464,6 +465,8 @@ embedding_plot <- function(
     prep <- prepare_categorical_colors(df, color)
     df <- prep$df
     colors <- prep$colors
+    # hover text shows the missing label of the column, not NA
+    selected_color <- as.character(df[[color]])
   } else {
     colors <- NULL
   }

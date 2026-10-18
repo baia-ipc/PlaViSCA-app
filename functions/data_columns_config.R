@@ -17,7 +17,8 @@
 
 `%||%` <- function(a, b) if (is.null(a)) b else a
 
-# Display string used wherever a true R NA is shown to a user.
+# Display string used wherever a true R NA is shown to a user, unless the
+# field sets its own `missing_label:` (see missing_label_for()).
 MISSING_VALUE_LABEL <- .data_columns_raw$missing_label %||% "Missing"
 
 # Strings that must never reach the UI as if they were real categories. The
@@ -219,10 +220,22 @@ italicised_columns <- function() {
 
 # ------------------------------------------------------- missing-value display
 
+#' Display string for the missing values of a physical column: the field's
+#' own `missing_label:` (e.g. "No gametocyte" for the gametocyte state), else
+#' the global missing label. NULL or an unconfigured column (e.g. a gene id)
+#' gets the global label.
+missing_label_for <- function(column = NULL) {
+    key <- if (is.null(column)) NULL else key_for_column(column)
+    if (is.null(key)) {
+        return(MISSING_VALUE_LABEL)
+    }
+    .config_field(key)$missing_label %||% MISSING_VALUE_LABEL
+}
+
 #' Generic missing-value display helper. Converts true NA (and, defensively,
-#' any residual literal "NA"/"None"/"" string) into the configured missing
-#' label. Intended for display/labelling paths only - never call this on data
-#' that is about to be used analytically.
+#' any residual literal "NA"/"None"/"" string) into the missing label of the
+#' column (missing_label_for()). Intended for display/labelling paths only -
+#' never call this on data that is about to be used analytically.
 relabel_missing <- function(x, label = MISSING_VALUE_LABEL) {
     out <- as.character(x)
     out[is.na(out) | out %in% LITERAL_MISSING_TOKENS] <- label

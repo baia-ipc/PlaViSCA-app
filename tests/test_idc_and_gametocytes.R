@@ -165,6 +165,30 @@ test_that_("missing treatment is never turned into a treatment category", {
         "relabel_missing must only touch missing values")
 })
 
+test_that_("gametocyte state has its own missing label; other fields keep the global one", {
+    state_col <- get_data_column("gametocyte_state")
+    expect_equal_(missing_label_for(state_col), "No gametocyte", "gametocyte state missing label")
+    expect_equal_(missing_label_for(get_data_column("treatment")), MISSING_VALUE_LABEL, "treatment missing label")
+    expect_equal_(missing_label_for(NULL), MISSING_VALUE_LABEL, "missing label without a column")
+    expect_equal_(missing_label_for("PVP01_0000000"), MISSING_VALUE_LABEL, "missing label of an unconfigured column")
+    if (!exists("prepare_categorical_colors")) skip_test("plot helpers not loaded")
+    prep <- prepare_categorical_colors(
+        data.frame(gametocyte_state = c("Late male", NA, "Early female"), stringsAsFactors = FALSE),
+        state_col
+    )
+    expect_equal_(levels(prep$df[[state_col]])[1], "No gametocyte", "missing level of the colour legend")
+    expect_equal_(unname(prep$colors[["No gametocyte"]]), "#A9A9A94D", "missing level colour")
+})
+
+test_that_("every gametocyte has a gametocyte state", {
+    m <- app_data("mr_data")
+    stage <- as.character(m[[get_data_column("detailed_stage")]])
+    state <- m[[get_data_column("gametocyte_state")]]
+    gametocyte <- stage %in% c("Developing gametocyte", "Female gametocyte", "Male gametocyte")
+    expect_true_(sum(gametocyte) > 0, "no gametocytes in the data")
+    expect_equal_(sum(is.na(state[gametocyte])), 0L, "gametocytes without a gametocyte state")
+})
+
 # ----------------------------------------------------------------- geography
 
 test_that_("parasite geography uses parasite_origin_location, not geographic_location", {

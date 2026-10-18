@@ -22,7 +22,7 @@ meta_plotly <- function(data, x_var, x_label, y_label, plt_type = "bar",
 
     if (show_missing) {
         # Display-only relabelling: the underlying data is untouched.
-        data[[x_var]] <- relabel_missing(data[[x_var]])
+        data[[x_var]] <- relabel_missing(data[[x_var]], missing_label_for(x_var))
     } else {
         data <- data[!is_missing_value(data[[x_var]]), , drop = FALSE]
     }
@@ -51,11 +51,12 @@ meta_plotly <- function(data, x_var, x_label, y_label, plt_type = "bar",
 
     # Biological (config-driven) ordering where the field has one; otherwise
     # numeric/alphabetical. Missing always sorts last.
+    missing_label <- missing_label_for(x_var)
     ordered_levels <- order_column_values(
-        x_var, setdiff(data_summary[[x_var]], MISSING_VALUE_LABEL)
+        x_var, setdiff(data_summary[[x_var]], missing_label)
     )
-    if (MISSING_VALUE_LABEL %in% data_summary[[x_var]]) {
-        ordered_levels <- c(ordered_levels, MISSING_VALUE_LABEL)
+    if (missing_label %in% data_summary[[x_var]]) {
+        ordered_levels <- c(ordered_levels, missing_label)
     }
     # plotly draws horizontal bars bottom-up, so reverse for top-down reading
     ordered_levels <- rev(ordered_levels)
@@ -64,7 +65,7 @@ meta_plotly <- function(data, x_var, x_label, y_label, plt_type = "bar",
 
     # Format species names with italics for configured scientific-name fields
     if (x_var %in% italicised_columns()) {
-        data_summary$formatted_labels <- format_species_name(data_summary[[x_var]])
+        data_summary$formatted_labels <- format_species_name(data_summary[[x_var]], x_var)
     } else {
         data_summary$formatted_labels <- display_values(x_var, data_summary[[x_var]])
     }

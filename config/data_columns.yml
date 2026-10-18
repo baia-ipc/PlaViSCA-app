@@ -10,7 +10,8 @@
 # get_data_label(); column names are not written anywhere else in the app.
 # =============================================================================
 
-# Display string used wherever a true R NA must be shown to a user.
+# Display string used wherever a true R NA must be shown to a user. A field
+# can set its own with `missing_label:` (e.g. gametocyte_state below).
 missing_label: "Missing"
 
 expected_studies:
@@ -143,6 +144,7 @@ fields:
     column: gametocyte_state
     role: filter
     required: true
+    missing_label: "No gametocyte"
     help: >
       State along the sexual branch, from the clusters of the blood-stage
       cells: developing gametocyte (sex not yet called), early or late
