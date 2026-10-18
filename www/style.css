@@ -682,11 +682,26 @@ table.dataTable thead th {
   transition: background-position 0.15s ease-in-out;
 }
 
-/* Value box styling */
+/* Value box styling: compact, as high as their text */
 .bslib-value-box {
   border-radius: 12px !important;
   overflow: hidden;
-  height: 100px !important;
+  height: auto !important;
+  min-height: 0 !important;
+}
+
+.bslib-value-box > .card-body {
+  padding: 0 !important;
+}
+
+.bslib-value-box .value-box-area,
+.bslib-value-box .value-box-showcase {
+  padding: 4px 16px !important;
+}
+
+.bslib-value-box .value-box-title,
+.bslib-value-box .value-box-value {
+  margin: 0 !important;
 }
 
 .bslib-value-box .value-box-value {
