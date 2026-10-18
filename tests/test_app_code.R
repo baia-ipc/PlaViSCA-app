@@ -55,6 +55,20 @@ test_that_("every app R file parses", {
     expect_empty_(basename(broken), "R files with syntax errors")
 })
 
+test_that_("global.R and ui.R build the page", {
+    if (!file.exists(app_data_path("cleaned_dataset.rds"))) {
+        skip_test(sprintf("no data at %s", app_data_path("cleaned_dataset.rds")))
+    }
+    # in a separate R process, as when the app starts: global.R loads the data
+    # and the packages, ui.R builds the page from them
+    script <- "suppressMessages({library(shiny); source('global.R'); source('ui.R')}); invisible(as.character(ui))"
+    out <- suppressWarnings(system2(file.path(R.home("bin"), "Rscript"), c("-e", shQuote(script)),
+        stdout = TRUE, stderr = TRUE))
+    status <- attr(out, "status")
+    expect_true_(is.null(status) || status == 0,
+        paste("building the page failed:", paste(tail(out, 5), collapse = " | ")))
+})
+
 test_that_("no absolute machine-specific path is hardcoded in app code", {
     offenders <- character(0)
     for (f in live_app_files()) {
