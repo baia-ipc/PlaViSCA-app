@@ -280,11 +280,12 @@ server <- function(input, output, session) {
   # configured filter field we resolve its physical column, order its values
   # by the documented biological vocabulary. A configured column that is missing from
   # the data is reported as an error, not silently skipped.
+  filter_choices <- reactiveValues()
   observeEvent(gene_data(), {
     req(gene_data()$data)
 
     filt_data <- gene_data()$data
-    filter_suffixes <- c("", "_gex", "_qc", "_meta", "_table")
+    filter_suffixes <- unname(FILTER_TAB_SUFFIXES)
     missing_columns <- character(0)
 
     for (key in filter_field_keys()) {
@@ -298,6 +299,7 @@ server <- function(input, output, session) {
       if (col %in% italicised_columns()) {
         names(choices) <- format_species_name(values)
       }
+      filter_choices[[key]] <- choices
 
       for (suffix in filter_suffixes) {
         updateSelectizeInput(
@@ -327,42 +329,11 @@ server <- function(input, output, session) {
     }
   })
 
-  # Sync filter values across all tabs
-  # When a filter changes in any tab, update all other tabs to match
-  filter_names <- filter_field_keys()
-  filter_suffixes <- c("", "_gex", "_qc", "_meta", "_table")
-
-  # Create observers for each filter to sync across tabs
-  lapply(filter_names, function(filter_name) {
-    lapply(filter_suffixes, function(source_suffix) {
-      input_id <- paste0(filter_name, source_suffix)
-
-      observeEvent(input[[input_id]],
-        {
-          new_value <- input[[input_id]]
-
-          # Update all other instances of this filter
-          for (target_suffix in filter_suffixes) {
-            if (target_suffix != source_suffix) {
-              target_id <- paste0(filter_name, target_suffix)
-
-              # Only update if value is different to avoid loops
-              if (!identical(input[[target_id]], new_value)) {
-                updateSelectizeInput(
-                  session,
-                  target_id,
-                  selected = new_value
-                )
-              }
-            }
-          }
-        },
-        ignoreNULL = FALSE,
-        ignoreInit = TRUE
-      )
-    })
-  })
-
+  # Filters shared by the tabs (server/shared_filters.R): one state, taken
+  # by a tab when it is opened; tab_filters[[tab]]() gives the tab's filter
+  # values, debounced.
+  tab_filters <- shared_filters_server(input, session, filter_choices)
+  filter_suffixes <- unname(FILTER_TAB_SUFFIXES)
 
   # ---------------------------------------------------------------------------
   # Broad / detailed life-cycle stage coupling
@@ -410,9 +381,8 @@ server <- function(input, output, session) {
   filtered_gene_data <- reactive({
     req(gene_data())
 
-    # Collect individual filter inputs (no suffix for Embeddings tab)
-    # Empty selections mean "no filter" - show all data
-    current_inputs <- collect_filter_inputs(input)
+    # Filters of the Embeddings tab; empty selections mean "no filter"
+    current_inputs <- tab_filters[["Embeddings"]]()
 
     # Create cache key for filtered gene data
     cache_key <- make_cache_key(
@@ -537,16 +507,15 @@ server <- function(input, output, session) {
 
 
   # Plots tab: number boxes and the plot builder (server/tab_plots.R)
-  plots_tab_server(input, output, filtered_data)
+  plots_tab_server(input, output, filtered_data, tab_filters[["Plots"]])
 
   # Data table tabset: one row per cell, filtered by the Data table filters
   observeEvent(
     c(
-      list(input$data_opt),
-      lapply(paste0(filter_field_keys(), "_table"), function(id) input[[id]])
+      list(input$data_opt, tab_filters[["Data table"]]())
     ),
     {
-      current_inputs <- collect_filter_inputs(input, suffix = "_table")
+      current_inputs <- tab_filters[["Data table"]]()
 
       filt_data <- apply_secondary_filters(filtered_data(), current_inputs)
 
@@ -609,11 +578,10 @@ server <- function(input, output, session) {
   # QC Plots tabset
   observeEvent(
     c(
-      list(input$data_opt),
-      lapply(paste0(filter_field_keys(), "_qc"), function(id) input[[id]])
+      list(input$data_opt, tab_filters[["QC Plots"]]())
     ),
     {
-      current_inputs <- collect_filter_inputs(input, suffix = "_qc")
+      current_inputs <- tab_filters[["QC Plots"]]()
 
       filt_data <- apply_secondary_filters(filtered_data(), current_inputs)
 
@@ -732,7 +700,7 @@ server <- function(input, output, session) {
   filtered_gene_exp_data <- reactive({
     req(gene_data()) # Use raw gene_data() instead of filtered_gene_data()
 
-    current_inputs <- collect_filter_inputs(input, suffix = "_gex")
+    current_inputs <- tab_filters[["Gene expression"]]()
 
     tryCatch(
       {

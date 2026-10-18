@@ -38,6 +38,7 @@ source("functions/helpers_UI.R")
 source("functions/plot_builder.R")
 
 # Server code of the tabs that have their own file (called from server.R)
+source("server/shared_filters.R")
 source("server/tab_plots.R")
 
 # Define a function for memoized data loading.

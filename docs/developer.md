@@ -38,7 +38,7 @@ the app, see the [README](../README.md); for using it, see the
 | `functions/plot_builder.R` | the plot builder of the Plots tab (a Shiny module: `plot_builder_ui()`, `plot_builder_server()`) |
 | `functions/data_summary.R`, `tab_sync.R` | selection summaries; keeping tabs in sync, cache keys |
 | `functions/helpers_UI.R` | UI building blocks: filter rows, gene links, team cards |
-| `server/` | server code of the tabs that have their own file (`tab_plots.R`) |
+| `server/` | server code with its own file: the filters shared by the tabs (`shared_filters.R`) and the Plots tab (`tab_plots.R`) |
 | `ui/` | the top bar (`page_frame.R`), the tab set (`analysis.R`) and one file per tab (`tab_*.R`, `about.R`) |
 | `www/` | `style.css`, `script.js` and images served to the browser |
 | `tests/` | test suite, see [Tests](#tests) |

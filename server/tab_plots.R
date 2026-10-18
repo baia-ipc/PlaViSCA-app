@@ -1,9 +1,10 @@
 # Server code of the Plots tab: the number boxes and the plot builder, for the
-# cells selected by the tab's filters (inputs with the suffix "_meta").
+# cells selected by the tab's filters (`filters`, a reactive with the filter
+# values, from shared_filters_server()).
 
-plots_tab_server <- function(input, output, all_cells) {
+plots_tab_server <- function(input, output, all_cells, filters) {
   cells <- reactive({
-    apply_secondary_filters(all_cells(), collect_filter_inputs(input, suffix = "_meta"))
+    apply_secondary_filters(all_cells(), filters())
   })
 
   output$total_cells_meta <- renderUI({
