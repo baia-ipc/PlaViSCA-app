@@ -23,6 +23,7 @@ source("functions/filters.R")
 source("functions/genes.R")
 source("functions/gene_expression_data.R")
 source("functions/data_summary.R")
+source("functions/data_sources_table.R")
 source("functions/tab_sync.R")
 
 # Plots

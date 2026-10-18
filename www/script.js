@@ -287,32 +287,10 @@ function cleanupResources() {
 
 
 $(document).ready(function () {
-  //  Cache frequently used selectors
-  const $homeSection = $("#home_section");
-  const $analysisSection = $("#analysis_section");
-  const $aboutSection = $("#about_section");
-  const $hamburger = $('.hamburger');
-  const $menuItems = $('.menu-items');
-
-  // Show/hide initial sections
-  $homeSection.show();
-  $analysisSection.hide();
-  $aboutSection.hide();
-
-  // Initialize particles for home page
-  // The initParticles function is defined in particles-config.js
-  $(document).ready(function () {
-    if (typeof initParticles === 'function') {
-      initParticles('particles-js-home');
-    } else {
-      console.error("initParticles function not found.");
-    }
-  });
-
-  // Use cached selector and single event handler  
-  $hamburger.on('click', function () {
-    $menuItems.toggleClass('active');
-  });
+  // Background particles of the page (particles-config.js)
+  if (typeof initParticles === 'function') {
+    initParticles('particles-js-analysis');
+  }
 
   // Cache input selectors for performance
   const $inputs = $('input[type="checkbox"], input[type="radio"]');

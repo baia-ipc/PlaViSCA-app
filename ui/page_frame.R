@@ -22,7 +22,7 @@ ui_head <- function() {
   )
 }
 
-# Top menu bar: title, Home / Analysis / About links and organization logos.
+# Top bar: title and organization logos.
 ui_menu_bar <- function() {
   div(
     class = "menu-bar",
@@ -30,24 +30,6 @@ ui_menu_bar <- function() {
       class = "menu-title",
       h1("PlaViSca"),
       span(tags$i("Plasmodium vivax"), " Single Cell Analysis Platform")
-    ),
-    div(
-      class = "menu-items",
-      actionLink(
-        "home",
-        label = tagList(icon("home"), " Home"),
-        class = "menu-link active"
-      ),
-      actionLink(
-        "analysis",
-        label = tagList(icon("table"), " Analysis"),
-        class = "menu-link"
-      ),
-      actionLink(
-        "about",
-        label = tagList(icon("info-circle"), " About"),
-        class = "menu-link"
-      )
     ),
     create_org_logos()
   )

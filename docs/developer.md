@@ -13,7 +13,7 @@ the app, see the [README](../README.md); for using it, see the
    (`stop_if_app_data_invalid()` in `functions/data_checks.R`). If a check
    fails the app stops here, with a message listing the failed checks.
 2. **`ui.R`** — sources `ui/` and assembles the page from one function per
-   section (`ui_home_section()`, `ui_analysis_section()`, ...).
+   section (`ui_menu_bar()`, `ui_analysis_section()`).
 3. **`server.R`** — all server logic in one `server()` function, organised in
    commented sections: navigation, data loading and caching, filters, one
    section per analysis tab, embedding plots and comparison mode, cell

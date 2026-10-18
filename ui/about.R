@@ -1,20 +1,26 @@
-# About section: introduction, capabilities, team (config/team.yml) and
-# collaboration.
+# About tab: welcome text, introduction, capabilities, team
+# (config/team.yml) and collaboration.
 
-# About section.
-ui_about_section <- function() {
-  div(
-    id = "about_section",
-    style = "display: none;",
-    class = "about-section",
+ui_tab_about <- function() {
+  tabPanel(
+    tagList(fontawesome::fa("circle-info"), " About"),
+    value = "About",
     div(
       class = "about-container",
-      # Hero Section
       div(
         class = "about-page-wrapper",
-        div(id = "particles-js-about", class = "particles-js-full"),
         div(
           class = "about-content-minimal",
+          # Welcome
+          div(
+            class = "about-section-condensed mb-5",
+            h2("Welcome to PlaViSca", class = "minimal-section-header"),
+            p(
+              "An interactive platform for the analysis and visualization of single-cell RNA sequencing (scRNA-seq) data from ",
+              em("P. vivax"),
+              ". Explore metadata, gene expression, and various parasite life cycle stages through interactive tables and 2D/3D visualizations."
+            )
+          ),
           # Introduction
           div(
             class = "text-center mb-5",

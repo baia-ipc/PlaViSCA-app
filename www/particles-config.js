@@ -50,9 +50,3 @@ function initParticles(targetId) {
     console.error("particlesJS not loaded.");
   }
 }
-
-
-$(document).ready(function () {
-  initParticles('particles-js-home');
-  initParticles('particles-js-about');
-});

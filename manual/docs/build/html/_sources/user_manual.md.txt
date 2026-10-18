@@ -12,41 +12,7 @@ Welcome to PlaViSca, an interactive web application for exploring single-cell RN
 
 ## Overview of PlaViSca Features
 
-PlaViSca consists of three main sections: **Home page**, **Analysis page**, and **About page**. Each section is designed to offer an intuitive, code-free platform for exploring single-cell RNA-seq data from _Plasmodium vivax_.
-
-## Home page
-
-![Figure 1: PlaViSca home page](imgs/home_page.png)
-**Figure 1**: PlaViSca home page
-
-The Home page acts as the central landing point for users see **Figure 1**. It provides a concise overview of the application's purpose and offers direct access to its core functionalities.
-
-**Menu bar**:
-
-The menu bar provides consistent branding and navigation across the entire application. It is fixed at the top of the interface, ensuring it remains visible and accessible on all pages for easy navigation.
-
-- Center: Shows the application name, PlaViSca, prominently, along with the subtitle _Plasmodium vivax_ Single Cell Analysis Platform.
-- Right side: Contains the main menu items — **Home**, **Analysis**, and **About** — which allow users to navigate between different pages of the application.
-
-**Content**:
-
-- The left section of the Home page contains a brief text outlining the goals and motivation behind the development of PlaViSca. It introduces the app as an interactive, code-free platform for exploring single-cell RNA-seq data from _P. vivax_, targeting researchers and public health professionals.
-- The right section displays a grid of interactive icons, each linking to a specific part of the application. These icons act as shortcuts, enabling users to quickly access key modules:
-
-  - **Metadata**: Charts of the cells by study, stage, host and other metadata (Plots tab).
-  - **Embedding**: Access the Embeddings visualization tab.
-  - **QC plots**: Assess data quality metrics.
-  - **Data Sources**: View dataset references and sources.
-  - **Gene Expression**: Visualize gene expression patterns.
-  - **User Manual**: Open this documentation in the Manual tab.
-
-Detailed explanations of these modules' functionalities are provided in the following sections.
-
-The menu bar at the top of every page shows the Institut Pasteur du Cambodge (IPC) and BAIA logos. The home page has an animated particle background.
-
-## Analysis page
-
-The Analysis page is designed to facilitate interactive exploration of both metadata and gene expression data. The page is organized into tabs, each focusing on a distinct aspect of data analysis:
+PlaViSca is a single page: a top bar with the application name and the Institut Pasteur du Cambodge (IPC) and BAIA logos, and below it a row of tabs, each focusing on one aspect of the data:
 
 - **Embeddings**
 - **Gene Expression**
@@ -55,7 +21,10 @@ The Analysis page is designed to facilitate interactive exploration of both meta
 - **QC Plots**
 - **Data Sources**
 - **Manual**: this manual
+- **About**: the project, its team and how to get involved
 - **Code (app)** and **Code (analysis)**: open the source code of the app and of the analysis pipeline on GitHub, in a new browser tab
+
+The app opens on the Embeddings tab, over an animated particle background.
 
 All data tabs (Embeddings, Gene Expression, Plots, Data table, QC Plots) share a common **Filters** row at the top with the following fields:
 
@@ -96,6 +65,8 @@ The Embeddings tab offers dimensionality reduction and customizable visualizatio
 | X / Y axes   | Selectable when 2D mode is active              |
 
 **Color by**: Study label, Broad life-cycle stage, Life-cycle stage, Host species, Host and tissue, Treatment, Parasite strain / isolate, Parasite origin location, Single-cell technology, or Genes.
+
+**Visualization bar**: the title bar of the plot holds the **Compare Plots** and **Download Data** buttons.
 
 **Compare Plots mode**: Click **Compare Plots** to display two independent plots (Plot A and Plot B) side-by-side, each with its own **Color by** selector in its title bar; a gene input appears above a plot when it is colored by genes.
 
@@ -184,19 +155,19 @@ All six studies are processed by the [PlaViSca preprocessing pipeline](https://g
 
 To set up the app with these files, see the [Setup Guide](setup_guide.md).
 
-## About page
+### About
 
 <iframe width="100%" height="360" src="https://www.youtube.com/embed/VHDa3zuTNTw" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
 **Video 4:** About
 
-The **About**  video page provides comprehensive information on the PlaViSca project, including its development background, team members, and how to get involved. It highlights the collaborative efforts behind creating a tool for malaria research.
+The **About** tab starts with a short welcome text, then gives information on the PlaViSca project, including its development background, team members, and how to get involved. It highlights the collaborative efforts behind creating a tool for malaria research.
 
-### Project Background
+#### Project Background
 
 PlaViSca was developed to democratize access to single-cell RNA-seq data for _Plasmodium vivax_, enabling researchers worldwide to explore parasite biology without coding expertise.
 
-### Development Team
+#### Development Team
 
 | Name | Role |
 |---|---|
@@ -208,7 +179,7 @@ PlaViSca was developed to democratize access to single-cell RNA-seq data for _Pl
 
 The corresponding authors are Giorgio Gonnella (ggonnella@pasteur-kh.org) and Anthony Ruberto (anthony.ruberto@med.fsu.edu).
 
-### Open-source and Collaboration
+#### Open-source and Collaboration
 
 PlaViSca is an open-source initiative, and we welcome contributions from the scientific community. Researchers interested in:
 

@@ -1,23 +1,3 @@
-# Navigate tabsetpanel
-navigate_tabset <- function(session, menu_id, tab_name = NULL) {
-  shinyjs::hide("home_section")
-  shinyjs::hide("about_section")
-  shinyjs::show("analysis_section")
-
-  js_code <- sprintf(
-    "
-    $('.menu-link').removeClass('active');
-    $('#%s').addClass('active');
-  ",
-    menu_id
-  )
-  shinyjs::runjs(js_code)
-
-  if (!is.null(tab_name)) {
-    updateTabsetPanel(session, inputId = "tabset", selected = tab_name)
-  }
-}
-
 # Generate PlasmoDB and NCBI links
 gene_links <- function(gene_id, target = "") {
   plasmo_url <- external_link("plasmodb_gene", gene_id)

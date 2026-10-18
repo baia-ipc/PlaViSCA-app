@@ -73,94 +73,6 @@ server <- function(input, output, session) {
       silent = TRUE
     )
   })
-  # Navigate home and data section
-  observeEvent(input$home, {
-    shinyjs::hide("analysis_section")
-    shinyjs::hide("about_section")
-    shinyjs::show("home_section")
-
-    shinyjs::runjs(
-      "
-    $('.menu-link').removeClass('active');
-    $('#home').addClass('active');
-
-    // Initialize particles for the home page background
-    setTimeout(function() {
-      if (typeof initHomeParticles === 'function') {
-        initHomeParticles();
-      } else if (typeof initParticles === 'function') {
-        initParticles('particles-js-home');
-      }
-    }, 300);
-  "
-    )
-  })
-
-  observeEvent(
-    list(input$about, input$contribute_link, input$about_link),
-    {
-      shinyjs::hide("home_section")
-      shinyjs::hide("analysis_section")
-      shinyjs::show("about_section")
-
-      runjs("initParticles('colab-particles');")
-      runjs("initParticles('particles-js-about');")
-
-      shinyjs::runjs(
-        "
-      $('.menu-link').removeClass('active');
-      $('#about').addClass('active');
-      "
-      )
-    },
-    ignoreInit = TRUE
-  )
-
-  observeEvent(input$analysis, {
-    shinyjs::hide("home_section")
-    shinyjs::hide("about_section")
-    shinyjs::show("analysis_section")
-
-    shinyjs::runjs(
-      "
-    $('.menu-link').removeClass('active');
-    $('#analysis').addClass('active');
-
-    // Initialize particles for analysis page with slightly longer delay for full rendering
-    setTimeout(function() {
-      if (typeof initParticles === 'function') {
-        initParticles('particles-js-analysis');
-      }
-    }, 500);
-  "
-    )
-  })
-
-  # Navigation between main sections
-  observeEvent(input$metadata_link, {
-    navigate_tabset(session, "analysis", "Plots")
-  })
-
-  observeEvent(input$analysis_link, {
-    navigate_tabset(session, "analysis", "Embeddings")
-  })
-
-  observeEvent(input$qc_link, {
-    navigate_tabset(session, "analysis", "QC Plots")
-  })
-
-  observeEvent(input$sources_link, {
-    navigate_tabset(session, "analysis", "Data sources")
-  })
-
-  observeEvent(input$gene_exp_link, {
-    navigate_tabset(session, "analysis", "Gene expression")
-  })
-
-  observeEvent(input$usermanual_link, {
-    navigate_tabset(session, "analysis", "Manual")
-  })
-
   # Synchronize plot controls (data type, size, dimension) across tabs
   observeEvent(input$tabset, {
     syncing_tabs(TRUE)
@@ -862,14 +774,16 @@ server <- function(input, output, session) {
     if (input$tabset == "Data sources") {
       output$data_source <- renderDT({
         DT::datatable(
-          pub_data(),
+          format_data_sources(pub_data()),
           escape = FALSE,
           options = list(
             pageLength = 10,
             scrollX = TRUE,
-            autoWidth = FALSE,
+            autoWidth = TRUE,
+            # Authors and Title get most of the width
             columnDefs = list(
-              list(width = "500px", targets = 4, className = "dt-left")
+              list(width = "25%", targets = 2, className = "dt-left"),
+              list(width = "35%", targets = 3, className = "dt-left")
             )
           ),
           selection = "single",

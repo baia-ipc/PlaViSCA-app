@@ -11,55 +11,82 @@ ui_tab_embeddings <- function() {
     plot_settings_layout(
       embedding_settings_controls(),
 
-      # Single plot
-      div(
-        id = "single_plot_panel",
-        card(
-          full_screen = TRUE,
-          height = "650px",
-          card_header("Visualization"),
-          withSpinner(
-            type = 6,
-            size = 0.5,
-            color = "#3498db",
-            plotlyOutput("all_plotly", height = "100%")
+      # Visualization: a title bar with the plot actions over the single plot
+      # or, in comparison mode, the two comparison plots
+      card(
+        class = "visualization-card shadow-sm",
+        card_header(
+          class = "bg-primary text-white py-1 visualization-header",
+          fontawesome::fa("chart-area", height = "14px"),
+          tags$span("Visualization", class = "fw-bold", style = "font-size: 0.9rem;"),
+          div(
+            class = "visualization-actions",
+            actionButton(
+              "enable_comparison",
+              tagList(fontawesome::fa("columns"), " Compare Plots"),
+              class = "btn-outline-primary rounded-pill btn-sm fw-bold"
+            ),
+            downloadButton(
+              "download_data", " Download Data",
+              class = "btn-light rounded-pill btn-sm fw-bold"
+            )
           )
-        )
-      ),
+        ),
+        card_body(
+          fillable = FALSE,
+          padding = 8,
 
-      # Gene selectors for the comparison plots, shown above each plot only
-      # when that plot is coloured by genes. The "Color by" selectors
-      # themselves sit in the plot title bars.
-      div(
-        id = "comparison_controls_panel",
-        style = "display: none;",
-        layout_column_wrap(
-          width = 1 / 2,
-          comparison_gene_panel("a", "color_first_comp", "genes_label_first_comp",
-            "check_first_comp", "genes_n_first_comp", "plasmo_link_a", "ncbi_link_a",
-            btn_class = "btn-outline-primary"
+          # Single plot
+          div(
+            id = "single_plot_panel",
+            card(
+              full_screen = TRUE,
+              height = "650px",
+              class = "mb-0",
+              withSpinner(
+                type = 6,
+                size = 0.5,
+                color = "#3498db",
+                plotlyOutput("all_plotly", height = "100%")
+              )
+            )
           ),
-          comparison_gene_panel("b", "color_second", "genes_label_second",
-            "check_second", "genes_second", "plasmo_link_b", "ncbi_link_b",
-            btn_class = "btn-outline-success"
-          )
-        )
-      ),
 
-      # Comparison plots
-      div(
-        id = "comparison_plots_panel",
-        class = "comparison-plots-container mt-2",
-        style = "display: none;",
-        layout_column_wrap(
-          width = 1 / 2,
-          height = "600px",
-          heights_equal = "all",
-          comparison_plot_card("a", "Plot A", "#007bff", "color_first_comp",
-            get_data_column("broad_stage"), "first_plotly"
+          # Gene selectors for the comparison plots, shown above each plot only
+          # when that plot is coloured by genes. The "Color by" selectors
+          # themselves sit in the plot title bars.
+          div(
+            id = "comparison_controls_panel",
+            style = "display: none;",
+            layout_column_wrap(
+              width = 1 / 2,
+              comparison_gene_panel("a", "color_first_comp", "genes_label_first_comp",
+                "check_first_comp", "genes_n_first_comp", "plasmo_link_a", "ncbi_link_a",
+                btn_class = "btn-outline-primary"
+              ),
+              comparison_gene_panel("b", "color_second", "genes_label_second",
+                "check_second", "genes_second", "plasmo_link_b", "ncbi_link_b",
+                btn_class = "btn-outline-success"
+              )
+            )
           ),
-          comparison_plot_card("b", "Plot B", "#28a745", "color_second",
-            get_data_column("detailed_stage"), "second_plotly"
+
+          # Comparison plots
+          div(
+            id = "comparison_plots_panel",
+            class = "comparison-plots-container mt-2",
+            style = "display: none;",
+            layout_column_wrap(
+              width = 1 / 2,
+              height = "600px",
+              heights_equal = "all",
+              comparison_plot_card("a", "Plot A", "#007bff", "color_first_comp",
+                get_data_column("broad_stage"), "first_plotly"
+              ),
+              comparison_plot_card("b", "Plot B", "#28a745", "color_second",
+                get_data_column("detailed_stage"), "second_plotly"
+              )
+            )
           )
         )
       )
@@ -188,18 +215,6 @@ embedding_settings_controls <- function() {
           title = "NCBI",
           tags$i(class = "fas fa-dna")
         )
-      )
-    ),
-    div(
-      class = "d-grid gap-2 mt-2",
-      actionButton(
-        "enable_comparison",
-        tagList(fontawesome::fa("columns"), " Compare Plots"),
-        class = "btn-outline-primary shadow-sm rounded-pill btn-sm fw-bold"
-      ),
-      downloadButton(
-        "download_data", " Download Data",
-        class = "btn-success shadow-sm rounded-pill btn-sm fw-bold"
       )
     )
   )

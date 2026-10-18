@@ -1,9 +1,8 @@
-# Analysis section: the tab set holding the analysis tabs (ui/tab_*.R).
+# Analysis section: the tab set holding all tabs (ui/tab_*.R, ui/about.R).
 
 ui_analysis_section <- function() {
   div(
     id = "analysis_section",
-    style = "display: none;",
     div(id = "particles-js-analysis", class = "particles-js-full"),
     div(
       class = "analysis-dashboard",
@@ -23,6 +22,7 @@ ui_analysis_section <- function() {
             ui_tab_qc(),
             ui_tab_data_sources(),
             ui_tab_manual(),
+            ui_tab_about(),
             code_link_tab("Code (app)", "source_code"),
             code_link_tab("Code (analysis)", "analysis_source_code")
           )

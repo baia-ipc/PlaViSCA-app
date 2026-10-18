@@ -49,6 +49,12 @@ test_that_("global.R and ui.R source only files that exist", {
     expect_empty_(missing, "sourced files that do not exist")
 })
 
+test_that_("every app R file parses", {
+    files <- grep("\\.R$", live_app_files(), value = TRUE)
+    broken <- Filter(function(f) inherits(try(parse(f), silent = TRUE), "try-error"), files)
+    expect_empty_(basename(broken), "R files with syntax errors")
+})
+
 test_that_("no absolute machine-specific path is hardcoded in app code", {
     offenders <- character(0)
     for (f in live_app_files()) {
