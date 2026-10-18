@@ -653,7 +653,7 @@ server <- function(input, output, session) {
             options = list(
               pageLength = 10,
               scrollX = TRUE,
-              dom = "frtipB",
+              dom = "lfrtipB",
               buttons = list(
                 list(
                   extend = "csv",
