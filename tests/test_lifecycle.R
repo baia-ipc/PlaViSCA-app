@@ -39,10 +39,10 @@ test_that_("broad and detailed stage are missing together, never one alone", {
 
 test_that_("an impossible broad/detailed combination is reported, not silently empty", {
     expect_true_(
-        !stage_selection_is_possible("Liver stage", "Ring"),
-        "Liver stage + Ring must be flagged as impossible"
+        !stage_selection_is_possible("Liver stage", "Ring/Early trophozoite"),
+        "Liver stage + Ring/Early trophozoite must be flagged as impossible"
     )
-    msg <- stage_selection_message("Liver stage", "Ring")
+    msg <- stage_selection_message("Liver stage", "Ring/Early trophozoite")
     expect_true_(!is.null(msg) && nzchar(msg), "an explanatory message must be produced")
 })
 
@@ -52,11 +52,11 @@ test_that_("a possible broad/detailed combination is accepted", {
         "Liver stage + Hypnozoite must be accepted"
     )
     expect_true_(
-        is.null(stage_selection_message("Blood stage", c("Ring", "Trophozoite"))),
+        is.null(stage_selection_message("Blood stage", c("Ring/Early trophozoite", "Trophozoite"))),
         "a valid combination must produce no warning"
     )
     expect_true_(
-        stage_selection_is_possible(NULL, "Ring"),
+        stage_selection_is_possible(NULL, "Ring/Early trophozoite"),
         "an empty broad selection means no constraint"
     )
 })
@@ -67,7 +67,7 @@ test_that_("selecting a broad stage constrains the detailed choices correctly", 
     liver <- compatible_detailed_stages("Liver stage", available)
     expect_true_(length(liver) > 0, "Liver stage must have compatible detailed stages")
     expect_empty_(
-        intersect(liver, c("Ring", "Trophozoite", "Schizont (Blood stage)", "Merozoite")),
+        intersect(liver, c("Ring/Early trophozoite", "Trophozoite", "Schizont (Blood stage)", "Merozoite")),
         "blood-only stages offered under Liver stage"
     )
     expect_true_(
@@ -87,7 +87,7 @@ test_that_("detailed stage ordering follows lifecycle progression, not the alpha
     m <- app_data("mr_data")
     ordered <- order_field_values("detailed_stage", m[[get_data_column("detailed_stage")]])
     pos <- function(x) match(x, ordered)
-    present <- intersect(c("Sporozoite", "Hypnozoite", "Ring", "Trophozoite",
+    present <- intersect(c("Sporozoite", "Hypnozoite", "Ring/Early trophozoite", "Trophozoite",
         "Schizont (Blood stage)", "Merozoite"), ordered)
     if (length(present) >= 2) {
         expect_true_(
@@ -96,7 +96,7 @@ test_that_("detailed stage ordering follows lifecycle progression, not the alpha
         )
     }
     expect_true_(
-        pos("Sporozoite") < pos("Ring"),
+        pos("Sporozoite") < pos("Ring/Early trophozoite"),
         "Sporozoite must precede blood asexual stages"
     )
 })

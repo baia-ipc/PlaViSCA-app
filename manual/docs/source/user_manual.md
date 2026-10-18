@@ -62,7 +62,7 @@ All tabs (except Data Sources) share a common **Filters** row at the top with th
 |---|---|
 | Study label | Study the cell comes from |
 | Broad life-cycle stage | Blood, liver or sporozoite stage |
-| Life-cycle stage | Detailed stage (e.g. Ring, Trophozoite, Hypnozoite, Female gametocyte); only stages compatible with the selected broad stage are offered |
+| Life-cycle stage | Detailed stage (e.g. Ring/Early trophozoite, Trophozoite, Hypnozoite, Female gametocyte); only stages compatible with the selected broad stage are offered |
 | Host species | Host organism |
 | Host and tissue | Host blood, host liver or vector salivary gland |
 | Treatment | Drug treatment; "Study control" is the control arm of a drug experiment, "No treatment" means the study had no drug arm |

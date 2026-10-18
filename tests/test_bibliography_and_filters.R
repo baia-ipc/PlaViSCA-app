@@ -82,21 +82,21 @@ test_that_("a valid filter combination returns rows", {
     m <- app_data("mr_data")
     sel <- list()
     sel[[get_data_column("broad_stage")]] <- "Blood stage"
-    sel[[get_data_column("detailed_stage")]] <- "Ring"
+    sel[[get_data_column("detailed_stage")]] <- "Ring/Early trophozoite"
     keep <- rep(TRUE, nrow(m))
     for (col in names(sel)) keep <- keep & m[[col]] %in% sel[[col]]
-    expect_true_(sum(keep) > 0, "Blood stage + Ring must return rows")
+    expect_true_(sum(keep) > 0, "Blood stage + Ring/Early trophozoite must return rows")
 })
 
 test_that_("an impossible filter combination is constrained rather than silently empty", {
     available <- unique(app_data("mr_data")[[get_data_column("detailed_stage")]])
     allowed <- compatible_detailed_stages("Sporozoite stage", available)
     expect_true_(
-        !("Ring" %in% allowed),
-        "Ring must not be offered when Sporozoite stage is selected"
+        !("Ring/Early trophozoite" %in% allowed),
+        "Ring/Early trophozoite must not be offered when Sporozoite stage is selected"
     )
     expect_true_(
-        !is.null(stage_selection_message("Sporozoite stage", "Ring")),
+        !is.null(stage_selection_message("Sporozoite stage", "Ring/Early trophozoite")),
         "an impossible combination must produce an explicit message"
     )
 })
