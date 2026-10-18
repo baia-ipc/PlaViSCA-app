@@ -1101,6 +1101,11 @@ table.dataTable thead th {
   display: block !important;
 }
 
+/* "Color by" and the selected value share one text baseline */
+.comparison-card-header .header-color-by {
+  align-items: baseline !important;
+}
+
 .header-color-by-label {
   font-size: 0.75rem;
   color: #6c757d;
