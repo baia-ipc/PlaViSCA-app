@@ -536,76 +536,8 @@ server <- function(input, output, session) {
   })
 
 
-  observeEvent(
-    c(
-      list(input$data_opt, input$show_missing_meta),
-      lapply(paste0(filter_field_keys(), "_meta"), function(id) input[[id]])
-    ),
-    {
-      current_inputs <- collect_filter_inputs(input, suffix = "_meta")
-
-      filt_data <- apply_secondary_filters(filtered_data(), current_inputs)
-
-      # Metadata Value Boxes
-      output$total_cells_meta <- renderUI({
-        value_box(
-          title = "Total Cells",
-          value = format(nrow(filt_data), big.mark = ","),
-          showcase = fontawesome::fa("dna"),
-          theme = "cells"
-        )
-      })
-
-      output$num_studies_meta <- renderUI({
-        value_box(
-          title = "Studies",
-          value = length(unique(filt_data$study_label)),
-          showcase = fontawesome::fa("book"),
-          theme = "rna"
-        )
-      })
-
-      output$num_species_meta <- renderUI({
-        value_box(
-          title = "Host Species",
-          value = length(unique(filt_data$host_species)),
-          showcase = fontawesome::fa("microscope"),
-          theme = "features"
-        )
-      })
-
-      ## Metadata overview plots. Each output is bound to a logical config
-      ## field key; its axis title comes from get_data_label() and its level
-      ## ordering from the configured biological vocabulary.
-      meta_overview_plots <- list(
-        broad_stage_plotly = "broad_stage",
-        detailed_stage_plotly = "detailed_stage",
-        species_plotly = "host_species",
-        lineage_plotly = "parasite_lineage_isolate",
-        treatment_plotly = "treatment",
-        idc_reference_class_plotly = "idc_reference_class",
-        origin_location_plotly = "parasite_origin_location",
-        pred_gametocyte_sex_plotly = "pred_gametocyte_sex",
-        source_sex_annotation_plotly = "source_sex_annotation"
-      )
-      for (out_id in names(meta_overview_plots)) {
-        local({
-          oid <- out_id
-          key <- meta_overview_plots[[oid]]
-          output[[oid]] <- renderPlotly({
-            meta_plotly(
-              filt_data,
-              get_data_column(key),
-              "Count",
-              get_data_label(key),
-              "bar",
-              show_missing = !isFALSE(input$show_missing_meta)
-            )
-          })
-        })
-      }
-    }
-  )
+  # Plots tab: number boxes and the plot builder (server/tab_plots.R)
+  plots_tab_server(input, output, filtered_data)
 
   # Data table tabset: one row per cell, filtered by the Data table filters
   observeEvent(

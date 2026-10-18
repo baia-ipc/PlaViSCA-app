@@ -129,9 +129,8 @@ test_that_("numeric-sorted fields sort numerically, not lexicographically", {
 test_that_("a filter column missing from the data raises an error", {
     m <- app_data("mr_data")[1:10, , drop = FALSE]
     err <- tryCatch({
-        meta_plotly_exists <- exists("meta_plotly")
-        if (!meta_plotly_exists) skip_test("meta_plotly not loaded in this context")
-        meta_plotly(m, "a_column_that_does_not_exist", "Count", "X")
+        if (!exists("count_cells")) skip_test("count_cells not loaded in this context")
+        count_cells(m, "a_column_that_does_not_exist")
         NULL
     }, error = function(e) conditionMessage(e))
     if (is.null(err)) fail("a missing plot column must raise an error")

@@ -116,7 +116,7 @@ check_app_data <- function(mr_data,
     )
 
     # --- 6. no literal "NA" categories in app-visible categorical fields ------
-    visible_keys <- unique(c(filter_field_keys(), category_field_keys()))
+    visible_keys <- unique(c(filter_field_keys(), category_field_keys(), plot_field_keys()))
     offenders <- character(0)
     for (key in visible_keys) {
         col <- get_data_column(key)

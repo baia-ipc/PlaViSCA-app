@@ -13,6 +13,8 @@ you, without writing code:
   two colourings side by side;
 - plot the expression of one or more genes per group, with links to PlasmoDB
   and NCBI;
+- count the cells by one or two metadata fields (e.g. the life-cycle stages
+  of each study) as bar, pie, heatmap or sunburst plots;
 - filter all views by study, life-cycle stage, host, tissue, treatment,
   strain and reference time point;
 - look at quality-control plots, the per-cell metadata and the source
@@ -117,6 +119,7 @@ run_app.sh                        start the app from the command line
 config/                           data columns, external links, team
 functions/                        helpers: data checks, filters, plots, ...
 ui/                               one file per page section and analysis tab
+server/                           server code of the tabs that have their own file
 www/                              images, CSS and JavaScript served to the browser
 tests/                            test suite (tests/run_tests.R)
 manual/                           user manual (Sphinx sources and HTML build)

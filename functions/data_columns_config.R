@@ -104,6 +104,7 @@ key_for_column <- function(column) {
 filter_field_keys <- function() .data_columns_raw$filter_fields
 category_field_keys <- function() .data_columns_raw$category_fields
 detail_table_field_keys <- function() .data_columns_raw$detail_table_fields
+plot_field_keys <- function() .data_columns_raw$plot_fields
 
 #' Physical columns behind the shared filter row.
 filter_data_columns <- function() {

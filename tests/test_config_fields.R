@@ -24,10 +24,10 @@ test_that_("every configured field also exists in the expression tables", {
     expect_empty_(missing, "configured fields absent from normalize_df")
 })
 
-test_that_("every field referenced by the filter/category/detail lists is configured", {
+test_that_("every field referenced by the filter/category/detail/plot lists is configured", {
     known <- data_field_keys()
     unknown <- setdiff(
-        unique(c(filter_field_keys(), category_field_keys(), detail_table_field_keys())),
+        unique(c(filter_field_keys(), category_field_keys(), detail_table_field_keys(), plot_field_keys())),
         known
     )
     expect_empty_(unknown, "field keys used by the UI but not declared in the config")

@@ -27,12 +27,18 @@ source("functions/data_sources_table.R")
 source("functions/tab_sync.R")
 
 # Plots
-source("functions/plots_metadata_qc.R")
+source("functions/cell_counts.R")
+source("functions/plots_cell_counts.R")
+source("functions/plots_qc.R")
 source("functions/plots_gene_expression.R")
 source("functions/embedding_plots.R")
 
 # UI building blocks
 source("functions/helpers_UI.R")
+source("functions/plot_builder.R")
+
+# Server code of the tabs that have their own file (called from server.R)
+source("server/tab_plots.R")
 
 # Define a function for memoized data loading.
 load_data <- memoise(function(file_path) {

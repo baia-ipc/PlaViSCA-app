@@ -45,7 +45,7 @@ test_that_("cell identifiers are unique and match the metadata rownames", {
 test_that_("no literal 'NA'/'None' strings in app-visible categorical fields", {
     m <- app_data("mr_data")
     offenders <- character(0)
-    for (key in unique(c(filter_field_keys(), category_field_keys(), detail_table_field_keys()))) {
+    for (key in unique(c(filter_field_keys(), category_field_keys(), detail_table_field_keys(), plot_field_keys()))) {
         col <- get_data_column(key)
         if (!col %in% colnames(m)) next
         v <- m[[col]]

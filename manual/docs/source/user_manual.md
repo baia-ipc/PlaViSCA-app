@@ -100,7 +100,7 @@ The Gene Expression tab provides an interactive interface for exploring gene exp
 ![Figure 5: Plots tab](imgs/plots.png)
 **Figure 5**: Plots tab
 
-The Plots tab shows how the selected cells are distributed over the metadata fields (**Figure 5**). Changing the filters updates the value boxes and all charts.
+The Plots tab counts the selected cells by one or two metadata fields and draws the counts as the plot you choose (**Figure 5**). Changing the filters updates the value boxes and the plot.
 
 **Summary value boxes:**
 
@@ -110,13 +110,32 @@ The Plots tab shows how the selected cells are distributed over the metadata fie
 | Studies       | Number of distinct studies represented |
 | Host Species  | Number of distinct host species        |
 
-**Bar charts**, one per field: Broad life-cycle stage, Life-cycle stage, Host species, Parasite strain / isolate, Treatment, Most similar reference time point, Parasite origin location, Gametocyte call of the cluster, and Gametocyte sex (authors).
+**Plot builder.** Four controls above the plot choose what it shows:
 
-> **Note:** Blood-stage cells get the life-cycle stage inferred by PlaViSca: the gametocyte call of the cell's cluster, otherwise the most similar reference time point. Sporozoites and liver stages, which PlaViSca does not classify, keep the authors' labels. The field "Source of the life-cycle stage" in the Data table says which one a cell's stage comes from. The authors' gametocyte labels remain available for comparison ("Gametocyte sex (authors)").
+| Control | What it does |
+|---|---|
+| **Count cells by** | the field to count the cells by, e.g. Study label or Life-cycle stage |
+| **Split by** | optionally, a second field that splits each group of cells, e.g. the life-cycle stages within each study; "Nothing" counts by one field only |
+| **Plot type** | with one field: bar chart or pie chart. With two fields: stacked bars, grouped bars, heatmap, sunburst, or one pie per group (up to 12 groups) |
+| **Show** | numbers of cells, or percentages. With one field, a percentage is the share of all selected cells; with two fields, the share of the cells with the same value of the first field (each bar of a stacked bar chart then adds up to 100%) |
 
-The settings panel (cog button) has one option, **Show missing**: untick it to leave out of the charts the cells whose value is missing.
+The two-field plot types show the same counts in different ways:
 
-Hover over a bar for details; use the controls in the top-right corner of a chart to zoom, pan or download it (as PNG or SVG).
+- **Stacked bars**: one bar per value of the first field, divided by the second field. Shown as percentages, they compare compositions, e.g. of studies of different sizes.
+- **Grouped bars**: the same pieces side by side, for comparing their sizes.
+- **Heatmap**: a table of all pairs of values, with the number or percentage written in each cell; empty cells have no cells of that pair. Readable also when both fields have many values.
+- **Sunburst**: the first field in the inner ring, the second in the outer ring. Click a sector to zoom into it, and the centre to zoom out.
+- **One pie per group**: one pie for each value of the first field.
+
+Below the plot are the descriptions of the chosen fields and **Export .csv**, which saves the counts shown in the plot as a table.
+
+*Example: compare the life-cycle stages of the studies.* Choose **Count cells by** "Study label", **Split by** "Life-cycle stage", **Plot type** "Stacked bars" and **Show** "% of cells". Each bar is one study, divided into its stages. Switch to "Heatmap" to read the exact percentages.
+
+> **Note:** Blood-stage cells get the life-cycle stage inferred by PlaViSca: the gametocyte call of the cell's cluster, otherwise the most similar reference time point. Sporozoites and liver stages, which PlaViSca does not classify, keep the authors' labels. The field "Source of the life-cycle stage" says which one a cell's stage comes from. The authors' labels remain available for comparison ("Life-cycle stage (authors)", "Gametocyte sex (authors)"): split one by the other to compare them.
+
+The settings panel (cog button) has one option, **Show missing**: untick it to leave out of the plot the cells whose value is missing.
+
+Hover over the plot for details; use the controls in its top-right corner to zoom, pan or download it (as PNG or SVG).
 
 ### Data table
 

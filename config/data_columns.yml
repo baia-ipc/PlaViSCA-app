@@ -282,6 +282,26 @@ category_fields:
   - parasite_origin_location
   - sc_technology
 
+# Logical keys offered in the Plots tab, in the order of its menus.
+plot_fields:
+  - study_label
+  - broad_stage
+  - detailed_stage
+  - source_life_cycle_stage
+  - source_stage_provenance
+  - idc_reference_class
+  - gametocyte_state
+  - pred_gametocyte_sex
+  - source_sex_annotation
+  - host_species
+  - tissue_or_sample_type
+  - parasite_lineage_isolate
+  - parasite_origin_location
+  - day_post_infection
+  - treatment
+  - sc_technology
+  - sequencer
+
 # Logical keys surfaced in the metadata detail table, in order.
 detail_table_fields:
   - barcode

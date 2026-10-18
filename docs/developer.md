@@ -14,10 +14,11 @@ the app, see the [README](../README.md); for using it, see the
    fails the app stops here, with a message listing the failed checks.
 2. **`ui.R`** — sources `ui/` and assembles the page from one function per
    section (`ui_menu_bar()`, `ui_analysis_section()`).
-3. **`server.R`** — all server logic in one `server()` function, organised in
-   commented sections: navigation, data loading and caching, filters, one
-   section per analysis tab, embedding plots and comparison mode, cell
-   details, downloads.
+3. **`server.R`** — the `server()` function, organised in commented
+   sections: navigation, data loading and caching, filters, one section per
+   analysis tab, embedding plots and comparison mode, cell details,
+   downloads. The Plots tab has its own file, `server/tab_plots.R`, called
+   from `server()`.
 
 ## Where things are
 
@@ -33,8 +34,11 @@ the app, see the [README](../README.md); for using it, see the
 | `functions/filters.R` | reading the filter widgets and filtering cells |
 | `functions/genes.R`, `gene_expression_data.R` | gene lists, name/ID conversion, per-plot expression tables |
 | `functions/plots_*.R`, `embedding_plots.R` | plotly plots of each tab |
+| `functions/cell_counts.R` | counting cells by one or two fields (Plots tab) |
+| `functions/plot_builder.R` | the plot builder of the Plots tab (a Shiny module: `plot_builder_ui()`, `plot_builder_server()`) |
 | `functions/data_summary.R`, `tab_sync.R` | selection summaries; keeping tabs in sync, cache keys |
 | `functions/helpers_UI.R` | UI building blocks: filter rows, gene links, team cards |
+| `server/` | server code of the tabs that have their own file (`tab_plots.R`) |
 | `ui/` | the top bar (`page_frame.R`), the tab set (`analysis.R`) and one file per tab (`tab_*.R`, `about.R`) |
 | `www/` | `style.css`, `script.js` and images served to the browser |
 | `tests/` | test suite, see [Tests](#tests) |
@@ -71,7 +75,8 @@ last and coloured grey. A field can name them itself with its own
 `missing_label:`; for example, `gametocyte_state` shows "No gametocyte".
 
 Further blocks say where each field is used (`filter_fields`,
-`category_fields` for "Color by"/"Group by", `detail_table_fields`), and
+`category_fields` for "Color by"/"Group by", `detail_table_fields`,
+`plot_fields` for the menus of the Plots tab), and
 give biological orderings (`vocabularies`), fixed colours (`colors`),
 display labels for coded values (`value_labels`), the detailed → broad stage
 mapping (`stage_compatibility`) and the expected studies.
@@ -96,7 +101,8 @@ in the cell table.
 
 2. Add `sample_batch` to `filter_fields` (filter row on every tab) and to
    `detail_table_fields` (Data table tab). Add it to `category_fields` too if
-   it should be offered under "Color by".
+   it should be offered under "Color by", and to `plot_fields` to count cells
+   by it in the Plots tab.
 3. If its values have a natural order, list it under `vocabularies`.
 4. Run the tests (below). `test_config_fields.R` fails if the column is
    missing from the data; the startup checks would stop the app in the same
