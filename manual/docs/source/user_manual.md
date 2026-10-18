@@ -71,7 +71,7 @@ Hover over the help icon next to a filter for its full description. Cells with a
 
 Filters apply with **OR logic within each field** and **AND logic between fields**, allowing precise subsetting of the dataset. All tabs stay synchronized with each other's filter selections.
 
-The **Filters** box starts folded: click its title bar to unfold it, and again to fold it. The **Plot settings** box folds the same way. Folding is shared by all tabs: folding the Filters on one tab folds them on every tab.
+The **Filters** box starts folded: click its title bar to unfold it, and again to fold it. Its title shows how many filters are set, e.g. **Filters (2)**. The **Plot settings** box folds the same way. Folding is shared by all tabs: folding the Filters on one tab folds them on every tab.
 
 ### Embeddings
 

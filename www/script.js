@@ -469,3 +469,24 @@ $(document).on('click', '.foldable-card-header', function () {
     // let Shiny recheck the visibility of outputs inside the cards
     .trigger(open ? 'shown' : 'hidden');
 });
+
+// Number of active filters in the title of each Filters card, e.g.
+// "Filters (2)"; nothing when no filter is set.
+function updateFilterCounts() {
+  $('.foldable-card').has('.meta-filter').each(function () {
+    let n = 0;
+    $(this).find('.meta-filter select').each(function () {
+      const v = $(this).val();
+      if (Array.isArray(v) ? v.filter(x => x !== '').length > 0 : !!v) n++;
+    });
+    $(this).find('.foldable-card-count').text(n > 0 ? '(' + n + ')' : '');
+  });
+}
+
+$(document).on('change', '.meta-filter select', updateFilterCounts);
+$(document).on('shiny:inputchanged', function (event) {
+  const el = document.getElementById(event.name);
+  if (el && $(el).closest('.meta-filter').length) {
+    setTimeout(updateFilterCounts, 0);
+  }
+});

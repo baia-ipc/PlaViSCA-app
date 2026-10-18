@@ -172,6 +172,8 @@ foldable_settings_card <- function(group, icon, title, ..., folded = FALSE,
       title = "Click to show or hide",
       fontawesome::fa(icon, height = "14px"),
       tags$span(title, class = "fw-bold", style = "font-size: 0.9rem;"),
+      # filled in by www/script.js, e.g. "(2)" active filters
+      tags$span(class = "foldable-card-count fw-bold", style = "font-size: 0.9rem;"),
       tags$span(class = "foldable-card-chevron", fontawesome::fa("chevron-down", height = "12px"))
     ),
     div(
