@@ -105,50 +105,6 @@ $(document).ready(function () {
   optimizeSidebarTransition();
 });
 
-// Optimized tooltip management with caching and throttling
-let tooltipUpdateTimeout;
-const tooltipCache = new Map();
-
-function updateTooltips() {
-  // Throttle tooltip updates to prevent excessive DOM manipulation
-  clearTimeout(tooltipUpdateTimeout);
-  tooltipUpdateTimeout = setTimeout(() => {
-    const $labels = $('label[title]');
-
-    // Dispose existing tooltips only if they exist
-    if ($labels.length > 0) {
-      $labels.tooltip('dispose');
-    }
-
-    $('input[type="checkbox"], input[type="radio"]').each(function () {
-      const $input = $(this);
-      const $label = $input.closest('label');
-
-      if ($label.length) {
-        const txt = $label.text().trim();
-        const cacheKey = `${this.id}_${this.checked}`;
-
-        let tip = tooltipCache.get(cacheKey);
-        if (!tip) {
-          tip = $input.is(':checked')
-            ? `${txt} is selected`
-            : `Click to select ${txt}`;
-          tooltipCache.set(cacheKey, tip);
-        }
-
-        $label.attr('title', tip);
-      }
-    });
-
-    // Reinitialize tooltips with better performance options
-    $('label[title]').tooltip({
-      placement: 'right',
-      trigger: 'hover',
-      delay: { show: 300, hide: 100 }
-    });
-  }, 100);
-}
-
 // Function to add highlight on Plotly 2D points
 (function () {
   const originalGetContext = HTMLCanvasElement.prototype.getContext;
@@ -236,26 +192,6 @@ function updateHighlight(xVal, yVal, highlightSize) {
 // Enhanced cleanup with better resource management
 function cleanupResources() {
   try {
-    if (tooltipUpdateTimeout) {
-      clearTimeout(tooltipUpdateTimeout);
-      tooltipUpdateTimeout = null;
-    }
-
-    // Clear caches
-    tooltipCache.clear();
-
-    // Cleanup tooltips with error handling
-    const $tooltips = $('label[title]');
-    if ($tooltips.length > 0) {
-      $tooltips.each(function () {
-        try {
-          $(this).tooltip('dispose');
-        } catch (e) {
-          // Ignore disposal errors
-        }
-      });
-    }
-
     // Cleanup plotly events
     if (plotlyElement) {
       $(plotlyElement).off('plotly_click.highlight');
@@ -295,14 +231,11 @@ $(document).ready(function () {
   // Cache input selectors for performance
   const $inputs = $('input[type="checkbox"], input[type="radio"]');
 
-  // Initial update of label styles and tooltips
+  // Initial update of label styles
   $inputs.each(function () {
     updateLabelStyles($(this));
   });
-  updateTooltips();
 
-  // Debounced update for better performance
-  let updateTimeout;
   $inputs.on('change', function () {
     const $i = $(this);
     if ($i.attr('type') === 'radio') {
@@ -312,12 +245,6 @@ $(document).ready(function () {
         .removeClass('checked-label');
     }
     updateLabelStyles($i);
-
-    // Debounce tooltip updates
-    clearTimeout(updateTimeout);
-    updateTimeout = setTimeout(() => {
-      updateTooltips();
-    }, 50);
   });
 
   // Optimized button handlers with event delegation
