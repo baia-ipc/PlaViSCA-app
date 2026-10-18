@@ -114,7 +114,9 @@ The Plots tab shows how the selected cells are distributed over the metadata fie
 
 > **Note:** Blood-stage cells get the life-cycle stage inferred by PlaViSca: the gametocyte call of the cell's cluster, otherwise the most similar reference time point. Sporozoites and liver stages, which PlaViSca does not classify, keep the authors' labels. The field "Source of the life-cycle stage" in the Data table says which one a cell's stage comes from. The authors' gametocyte labels remain available for comparison ("Gametocyte sex (authors)").
 
-Hover over a bar for details; use the controls in the top-right corner of a chart to zoom, pan or download it.
+The settings panel (cog button) has one option, **Show missing**: untick it to leave out of the charts the cells whose value is missing.
+
+Hover over a bar for details; use the controls in the top-right corner of a chart to zoom, pan or download it (as PNG or SVG).
 
 ### Data table
 

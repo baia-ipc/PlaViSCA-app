@@ -538,7 +538,7 @@ server <- function(input, output, session) {
 
   observeEvent(
     c(
-      list(input$data_opt),
+      list(input$data_opt, input$show_missing_meta),
       lapply(paste0(filter_field_keys(), "_meta"), function(id) input[[id]])
     ),
     {
@@ -598,7 +598,8 @@ server <- function(input, output, session) {
               get_data_column(key),
               "Count",
               get_data_label(key),
-              "bar"
+              "bar",
+              show_missing = !isFALSE(input$show_missing_meta)
             )
           })
         })
