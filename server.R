@@ -781,10 +781,10 @@ server <- function(input, output, session) {
             pageLength = 10,
             scrollX = TRUE,
             autoWidth = TRUE,
-            # Authors and Title get most of the width
+            # Title gets most of the width; Authors are short ("... et al.")
             columnDefs = list(
-              list(width = "25%", targets = 2, className = "dt-left"),
-              list(width = "35%", targets = 3, className = "dt-left")
+              list(width = "12%", targets = 2, className = "dt-left text-nowrap"),
+              list(width = "45%", targets = 3, className = "dt-left")
             )
           ),
           selection = "single",
