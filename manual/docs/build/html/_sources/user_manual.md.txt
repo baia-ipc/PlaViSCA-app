@@ -163,34 +163,7 @@ To set up the app with these files, see the [Setup Guide](setup_guide.md).
 
 ### About
 
-The **About** tab starts with a short welcome text, then gives information on the PlaViSca project, including its development background, team members, and how to get involved. It highlights the collaborative efforts behind creating a tool for malaria research.
-
-#### Project Background
-
-PlaViSca was developed to democratize access to single-cell RNA-seq data for _Plasmodium vivax_, enabling researchers worldwide to explore parasite biology without coding expertise.
-
-#### Development Team
-
-| Name | Role |
-|---|---|
-| Sopheap Oeng | Bioinformatic system engineer |
-| Lionel Brice Feufack-Donfack | Postdoctoral researcher |
-| Thomas Obadia | Senior scientist |
-| Anthony Ruberto | Assistant Professor, Department of Biomedical Sciences, College of Medicine, Florida State University |
-| Giorgio Gonnella | Head, BAIA Unit |
-
-The corresponding authors are Giorgio Gonnella (ggonnella@pasteur-kh.org) and Anthony Ruberto (anthony.ruberto@med.fsu.edu).
-
-#### Open-source and Collaboration
-
-PlaViSca is an open-source initiative, and we welcome contributions from the scientific community. Researchers interested in:
-
-- Integrating new datasets
-- Enhancing existing features
-- Reporting bugs or issues
-- Collaborating on future development
-
-... are warmly encouraged to get in touch with the development team or open an issue on [GitHub](https://github.com/baia-ipc/PlaViSca-app).
+The **About** tab describes what PlaViSca contains and how the data were processed, links to the source code of the app and of the analysis pipeline, and gives the contact person.
 
 ## Best Practices
 
@@ -200,13 +173,8 @@ PlaViSca is an open-source initiative, and we welcome contributions from the sci
 - **Compare Systematically**: Add multiple Gene Expression plots side-by-side for cross-condition comparison.
 - **Document Findings**: Download all plots and data for reproducibility.
 
-## Support and Feedback
+## Contact
 
-For questions, issues, or suggestions, contact the PlaViSca development team:
+For questions, bug reports or suggestions, or if you would like a further dataset to be integrated, contact Giorgio Gonnella, Head of Bioinformatics and AI Applications, Institut Pasteur du Cambodge ([ggonnella@pasteur-kh.org](mailto:ggonnella@pasteur-kh.org)), or open an issue on [GitHub](https://github.com/baia-ipc/PlaViSca-app/issues).
 
-- **Emails**: ggonnella@pasteur-kh.org, anthony.ruberto@med.fsu.edu
-- **GitHub Issues**: [Report bugs or request features](https://github.com/baia-ipc/PlaViSca-app/issues)
-
-© 2025 BAIA Team, Institut Pasteur du Cambodge. All rights reserved.
-
-**Disclaimer**: This manual is provided "as is" for informational purposes. PlaViSca is a research tool; users should verify results independently.
+PlaViSca is a research tool for exploring published data; verify results independently before drawing conclusions.

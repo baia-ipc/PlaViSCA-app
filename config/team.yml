@@ -1,8 +1,6 @@
-# The team behind PlaViSca, shown on the About page and in the menu bar (logos).
+# Organizations (logos in the top bar) and the contact person (About tab).
 # =============================================================================
-# Read with team_info() (functions/site_config.R). Members are shown in the
-# order listed here; affiliation and email are optional. Only the
-# corresponding authors have an email. Logos are files in www/.
+# Read with team_info() (functions/site_config.R). Logos are files in www/.
 # =============================================================================
 
 organizations:
@@ -12,17 +10,8 @@ organizations:
   - name: "BAIA Unit"
     logo: "baia_logo.png"
 
-members:
-  - name: "Sopheap Oeng"
-    role: "bioinformatic system engineer"
-  - name: "Lionel Brice Feufack-Donfack"
-    role: "postdoctoral researcher"
-  - name: "Thomas Obadia"
-    role: "senior scientist"
-  - name: "Anthony Ruberto"
-    role: "Assistant Professor"
-    affiliation: "Department of Biomedical Sciences, College of Medicine, Florida State University"
-    email: "anthony.ruberto@med.fsu.edu"
-  - name: "Giorgio Gonnella"
-    role: "Head, BAIA Unit"
-    email: "ggonnella@pasteur-kh.org"
+contact:
+  name: "Giorgio Gonnella"
+  role: "Head of Bioinformatics and AI Applications"
+  affiliation: "Institut Pasteur du Cambodge"
+  email: "ggonnella@pasteur-kh.org"

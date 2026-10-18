@@ -10,8 +10,10 @@
 plasmodb_gene: "https://plasmodb.org/plasmo/app/record/gene/{id}"
 ncbi_protein: "https://www.ncbi.nlm.nih.gov/protein/{id}"
 
-# Source code of the app (About tab, Code tab).
+# Source code of the app (About tab, Code tab) and of the analysis pipeline
+# (About tab).
 source_code: "https://github.com/baia-ipc/PlaViSca-app"
+analysis_source_code: "https://github.com/baia-ipc/PlaViSca-meta-analysis"
 
 # Front-end libraries and fonts loaded by the browser.
 jquery_ui_css: "https://code.jquery.com/ui/1.13.2/themes/smoothness/jquery-ui.css"

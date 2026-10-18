@@ -341,28 +341,7 @@ newBlock <- function(new_count, counter, choice_exp, dynamicBlock, session) {
   })
 }
 
-# ------------------------------------------------------- team and logos
-
-# Colour accents of the team cards (classes in www/style.css), used in turn.
-TEAM_CARD_ACCENTS <- c("accent-teal", "accent-blue", "accent-green", "accent-purple", "accent-orange")
-
-# One card per team member in config/team.yml, in the listed order.
-create_team_cards <- function(members = team_info()$members) {
-  cards <- lapply(seq_along(members), function(i) {
-    m <- members[[i]]
-    accent <- TEAM_CARD_ACCENTS[(i - 1) %% length(TEAM_CARD_ACCENTS) + 1]
-    div(
-      class = paste("team-card-prof", accent),
-      h5(m$name, class = "team-name-prof"),
-      span(m$role, class = "team-role-prof"),
-      if (!is.null(m$affiliation)) span(m$affiliation, class = "team-affiliation-prof"),
-      if (!is.null(m$email)) {
-        a(href = paste0("mailto:", m$email), class = "team-email-prof", fontawesome::fa("envelope"), paste0(" ", m$email))
-      }
-    )
-  })
-  div(class = "team-grid-professional", cards)
-}
+# ----------------------------------------------------------------- logos
 
 # Logos of the organizations in config/team.yml, linked to their website
 # when one is given. Shown at the right end of the menu bar.

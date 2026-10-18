@@ -103,10 +103,8 @@ test_that_("external links and team information are complete", {
         "gene link template"
     )
     team <- team_info()
-    expect_true_(length(team$members) > 0, "team.yml lists no members")
-    incomplete <- Filter(function(m) is.null(m$name) || is.null(m$role), team$members)
-    expect_empty_(vapply(incomplete, function(m) m$name %||% "?", character(1)),
-        "team members without name or role")
+    missing <- setdiff(c("name", "role", "affiliation", "email"), names(team$contact))
+    expect_empty_(missing, "fields missing from the contact in team.yml")
     no_logo <- Filter(function(o) is.null(o$logo) || !file.exists(file.path(APP_ROOT, "www", o$logo)),
         team$organizations)
     expect_empty_(vapply(no_logo, function(o) o$name %||% "?", character(1)),
