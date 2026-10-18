@@ -21,10 +21,9 @@ ui_analysis_section <- function() {
             ui_tab_data_table(),
             ui_tab_qc(),
             ui_tab_data_sources(),
+            code_link_tab("Code", "source_code"),
             ui_tab_manual(),
-            ui_tab_about(),
-            code_link_tab("Code (app)", "source_code"),
-            code_link_tab("Code (analysis)", "analysis_source_code")
+            ui_tab_about()
           )
         )
       )

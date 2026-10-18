@@ -1,0 +1,53 @@
+# Screenshots of the user manual (manual/docs/source/imgs/).
+# Run from the app directory:
+#   PLAVISCA_DATA_DIR=/path/to/app_data tools/screenshots/.venv/bin/python \
+#     tools/screenshots/take_screenshots.py tools/screenshots/manual.yml --start-app
+
+settings:
+  width: 1500        # browser window, in CSS pixels
+  height: 950
+  scale: 1           # device pixels per CSS pixel (2 for sharper images)
+  settle: 3          # seconds to wait after the steps; then plots must be drawn
+
+shots:
+  - name: embeddings
+    tab: Embeddings
+    steps:
+      - click: ".tab-pane.active .plot-settings-layout .collapse-toggle"
+      - select: {id: color, value: stage}
+    output: manual/docs/source/imgs/embeddings.png
+
+  - name: embeddings_compare
+    tab: Embeddings
+    steps:
+      - click: "#enable_comparison"
+      - drawn: true
+      - select: {id: color_second, value: study_label}
+    output: manual/docs/source/imgs/embeddings_compare.png
+
+  - name: filters
+    tab: Embeddings
+    steps:
+      - click: ".tab-pane.active .foldable-card-header"
+    element: ".tab-pane.active .foldable-card"
+    output: manual/docs/source/imgs/filters.png
+
+  - name: gene_expression
+    tab: Gene expression
+    output: manual/docs/source/imgs/gene_expression.png
+
+  - name: plots
+    tab: Plots
+    output: manual/docs/source/imgs/plots.png
+
+  - name: data_table
+    tab: Data table
+    output: manual/docs/source/imgs/data_table.png
+
+  - name: qc_plots
+    tab: QC Plots
+    output: manual/docs/source/imgs/quality_control.png
+
+  - name: data_sources
+    tab: Data sources
+    output: manual/docs/source/imgs/data_source.png

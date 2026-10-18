@@ -35,9 +35,10 @@ the app, see the [README](../README.md); for using it, see the
 | `functions/plots_*.R`, `embedding_plots.R` | plotly plots of each tab |
 | `functions/data_summary.R`, `tab_sync.R` | selection summaries; keeping tabs in sync, cache keys |
 | `functions/helpers_UI.R` | UI building blocks: filter rows, gene links, team cards |
-| `ui/` | one file per page section (`home.R`, `about.R`, `page_frame.R`) and analysis tab (`tab_*.R`) |
+| `ui/` | the top bar (`page_frame.R`), the tab set (`analysis.R`) and one file per tab (`tab_*.R`, `about.R`) |
 | `www/` | `style.css`, `script.js` and images served to the browser |
 | `tests/` | test suite, see [Tests](#tests) |
+| `tools/screenshots/` | screenshots of the app in a headless browser, for the manual and for figures ([README](../tools/screenshots/README.md)) |
 
 Rules the tests enforce:
 
@@ -140,13 +141,18 @@ file of that topic, or a new `tests/test_<topic>.R` listed in
 
 The manual is a [Sphinx](https://www.sphinx-doc.org/) project with Markdown
 pages in `manual/docs/source/` (`user_manual.md`, `setup_guide.md`). The app
-serves the HTML build in `manual/docs/build/html/` (the *User manual*
-button), so rebuild and commit it after editing the pages:
+serves the HTML build in `manual/docs/build/html/` (the *Manual* tab), so
+rebuild and commit it after editing the pages:
 
 ```bash
 pip install sphinx myst-parser sphinx-rtd-theme
 sphinx-build -E -b html manual/docs/source manual/docs/build/html
 ```
+
+The images in `manual/docs/source/imgs/` are screenshots of the app, made with
+`tools/screenshots/` from the shot list `tools/screenshots/manual.yml`. Retake
+them after a change of the interface (see its
+[README](../tools/screenshots/README.md)).
 
 ## Code style
 

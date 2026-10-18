@@ -20,9 +20,9 @@ PlaViSca is a single page: a top bar with the application name and the Institut 
 - **Data table**: one row per cell with its metadata
 - **QC Plots**
 - **Data Sources**
+- **Code**: opens the source code of the app on GitHub, in a new browser tab
 - **Manual**: this manual
 - **About**: the project, its team and how to get involved
-- **Code (app)** and **Code (analysis)**: open the source code of the app and of the analysis pipeline on GitHub, in a new browser tab
 
 The app opens on the Embeddings tab, over an animated particle background.
 
@@ -45,11 +45,20 @@ Filters apply with **OR logic within each field** and **AND logic between fields
 
 The **Filters** box starts folded: click its title bar to unfold it, and again to fold it. Its title shows how many filters are set, e.g. **Filters (2)**. The **Plot settings** box folds the same way. Folding is shared by all tabs: folding the Filters on one tab folds them on every tab.
 
+![Figure 1: the Filters box, unfolded](imgs/filters.png)
+**Figure 1**: the Filters box, unfolded
+
 ### Embeddings
 
 <iframe width="100%" height="360" src="https://www.youtube.com/embed/gcubjXeIxUY" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
 **Video 1**: Embedding tab functionality
+
+![Figure 2: Embeddings tab, with the plot settings open and cells colored by life-cycle stage](imgs/embeddings.png)
+**Figure 2**: Embeddings tab, with the plot settings open and cells colored by life-cycle stage
+
+![Figure 3: Compare Plots mode: the same embedding colored by broad life-cycle stage and by study](imgs/embeddings_compare.png)
+**Figure 3**: Compare Plots mode: the same embedding colored by broad life-cycle stage and by study
 
 The Embeddings tab offers dimensionality reduction and customizable visualization of single-cell data **Video 1**. Key capabilities:
 
@@ -80,6 +89,9 @@ The Embeddings tab offers dimensionality reduction and customizable visualizatio
 
 **Video 2**: Gene expression tab functionality
 
+![Figure 4: Gene expression tab](imgs/gene_expression.png)
+**Figure 4**: Gene expression tab
+
 The Gene Expression tab provides an interactive interface for exploring gene expression across various biological conditions **Video 2**. Key features:
 
 - **Flexible Plot Management**: Add or remove plot panels dynamically (panels display in a 2-column layout). Each panel has its own gene selection and grouping.
@@ -96,6 +108,9 @@ The Gene Expression tab provides an interactive interface for exploring gene exp
 <iframe width="100%" height="360" src="https://www.youtube.com/embed/ul_ulDxMQZk" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
 **Video 3:** Metadata filtration
+
+![Figure 5: Plots tab](imgs/plots.png)
+**Figure 5**: Plots tab
 
 A short video demonstration of the metadata views **Video 3**. This video provides an overview of how to filter datasets by biological and experimental attributes. Applying filters dynamically updates both plots and tables, enabling users to focus on relevant data subsets for further analysis.
 
@@ -115,14 +130,17 @@ Hover over a bar for details; use the controls in the top-right corner of a char
 
 ### Data table
 
+![Figure 6: Data table tab](imgs/data_table.png)
+**Figure 6**: Data table tab
+
 One row per cell: the cell ID, study, SRA run and the authors' cell ID (missing for Hazzard2022, whose cells were called by PlaViSca), then the host and tissue, strain and origin, treatment, life-cycle stage (and the authors' stage), reference time point, gametocyte calls, biological replicate, day post infection, technology, sequencer and counts. Search globally or filter by column, and export the table as CSV.
 
 ### QC Plots
 
-![Figure 2: Quality control image](imgs/quality_control.png)
-**Figure 2**: Quality control image
+![Figure 7: QC Plots tab](imgs/quality_control.png)
+**Figure 7**: QC Plots tab
 
-The QC Plots tab provides visualizations to assess the integrity of single-cell RNA sequencing data **Figure 2**.
+The QC Plots tab provides visualizations to assess the integrity of single-cell RNA sequencing data (**Figure 7**).
 
 **Summary value boxes:**
 
@@ -144,10 +162,10 @@ All plots respect the shared metadata filters and support interactive zooming, p
 
 ### Data Sources
 
-![Figure 3: Data source](imgs/data_source.png)
-**Figure 3**: Data source
+![Figure 8: Data sources tab](imgs/data_source.png)
+**Figure 8**: Data sources tab
 
-The Data Sources section provides detailed documentation and attribution for the datasets utilized within PlaViSca **Figure 3**. It includes comprehensive metadata such as journal names, publication dates, article titles, authors, and DOI links, enabling users to directly access the original publications. This ensures transparency, facilitates reproducibility, and appropriately credits the contributors of the datasets.
+The Data Sources section provides detailed documentation and attribution for the datasets utilized within PlaViSca (**Figure 8**). It lists each study with its number of cells, authors, title, journal, year, PubMed ID and DOI link, enabling users to directly access the original publications. This ensures transparency, facilitates reproducibility, and appropriately credits the contributors of the datasets.
 
 #### Data Processing Pipeline
 

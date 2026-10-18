@@ -60,6 +60,7 @@ ui_tab_embeddings <- function() {
             style = "display: none;",
             layout_column_wrap(
               width = 1 / 2,
+              class = "mb-0",
               comparison_gene_panel("a", "color_first_comp", "genes_label_first_comp",
                 "check_first_comp", "genes_n_first_comp", "plasmo_link_a", "ncbi_link_a",
                 btn_class = "btn-outline-primary"
@@ -74,7 +75,7 @@ ui_tab_embeddings <- function() {
           # Comparison plots
           div(
             id = "comparison_plots_panel",
-            class = "comparison-plots-container mt-2",
+            class = "comparison-plots-container",
             style = "display: none;",
             layout_column_wrap(
               width = 1 / 2,
@@ -226,7 +227,7 @@ comparison_gene_panel <- function(side, color_id, label_id, check_id, genes_id,
                                   plasmo_id, ncbi_id, btn_class) {
   conditionalPanel(
     condition = sprintf("input.%s == 'genes'", color_id),
-    class = sprintf("mt-2 comparison-controls comparison-plot-section plot-%s-section", side),
+    class = sprintf("mb-2 comparison-controls comparison-plot-section plot-%s-section", side),
     fluidRow(
       class = "g-1 align-items-end",
       column(
