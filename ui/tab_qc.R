@@ -1,9 +1,9 @@
-# Quality control tab: RNA / feature counts, PCA elbow plot and variable genes.
+# QC Plots tab: RNA / feature counts, PCA elbow plot and variable genes.
 
 ui_tab_qc <- function() {
   tabPanel(
-    tagList(fontawesome::fa("vial-circle-check"), " Quality control"),
-    value = "Quality control",
+    tagList(fontawesome::fa("vial-circle-check"), " QC Plots"),
+    value = "QC Plots",
     create_meta_filter_row("_qc"),
     layout_column_wrap(
       width = 1 / 3,

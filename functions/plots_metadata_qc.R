@@ -1,4 +1,4 @@
-# Plots of the Metadata and Quality control tabs.
+# Plots of the Plots and QC Plots tabs.
 
 # Set color pallet
 colors <- RColorBrewer::brewer.pal(12, "Set3")

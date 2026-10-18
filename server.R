@@ -138,7 +138,7 @@ server <- function(input, output, session) {
 
   # Navigation between main sections
   observeEvent(input$metadata_link, {
-    navigate_tabset(session, "analysis", "Metadata")
+    navigate_tabset(session, "analysis", "Plots")
   })
 
   observeEvent(input$analysis_link, {
@@ -146,7 +146,7 @@ server <- function(input, output, session) {
   })
 
   observeEvent(input$qc_link, {
-    navigate_tabset(session, "analysis", "Quality control")
+    navigate_tabset(session, "analysis", "QC Plots")
   })
 
   observeEvent(input$sources_link, {
@@ -157,9 +157,8 @@ server <- function(input, output, session) {
     navigate_tabset(session, "analysis", "Gene expression")
   })
 
-  addResourcePath("manual", "manual/docs/build/html")
   observeEvent(input$usermanual_link, {
-    runjs("window.open('manual/index.html', '_blank')")
+    navigate_tabset(session, "analysis", "Manual")
   })
 
   # Synchronize plot controls (data type, size, dimension) across tabs
@@ -170,8 +169,8 @@ server <- function(input, output, session) {
     tab_suffixes <- list(
       "Embeddings" = "",
       "Gene expression" = "_exp",
-      "Quality control" = "_qc",
-      "Metadata" = "_meta"
+      "QC Plots" = "_qc",
+      "Plots" = "_meta"
     )
 
     current_tab <- input$tabset
@@ -373,7 +372,7 @@ server <- function(input, output, session) {
     req(gene_data()$data)
 
     filt_data <- gene_data()$data
-    filter_suffixes <- c("", "_gex", "_qc", "_meta")
+    filter_suffixes <- c("", "_gex", "_qc", "_meta", "_table")
     missing_columns <- character(0)
 
     for (key in filter_field_keys()) {
@@ -419,7 +418,7 @@ server <- function(input, output, session) {
   # Sync filter values across all tabs
   # When a filter changes in any tab, update all other tabs to match
   filter_names <- filter_field_keys()
-  filter_suffixes <- c("", "_gex", "_qc", "_meta")
+  filter_suffixes <- c("", "_gex", "_qc", "_meta", "_table")
 
   # Create observers for each filter to sync across tabs
   lapply(filter_names, function(filter_name) {
@@ -549,12 +548,12 @@ server <- function(input, output, session) {
   })
 
   # Synchronize plot controls between tabs on change
-  lapply(c("Embeddings", "Gene expression", "Quality control", "Metadata"), function(tab) {
+  lapply(c("Embeddings", "Gene expression", "QC Plots", "Plots"), function(tab) {
     suffix_map <- list(
       "Embeddings" = "",
       "Gene expression" = "_exp",
-      "Quality control" = "_qc",
-      "Metadata" = "_meta"
+      "QC Plots" = "_qc",
+      "Plots" = "_meta"
     )
     suffix <- suffix_map[[tab]]
 
@@ -663,6 +662,49 @@ server <- function(input, output, session) {
         )
       })
 
+      ## Metadata overview plots. Each output is bound to a logical config
+      ## field key; its axis title comes from get_data_label() and its level
+      ## ordering from the configured biological vocabulary.
+      meta_overview_plots <- list(
+        broad_stage_plotly = "broad_stage",
+        detailed_stage_plotly = "detailed_stage",
+        species_plotly = "host_species",
+        lineage_plotly = "parasite_lineage_isolate",
+        treatment_plotly = "treatment",
+        idc_reference_class_plotly = "idc_reference_class",
+        origin_location_plotly = "parasite_origin_location",
+        pred_gametocyte_sex_plotly = "pred_gametocyte_sex",
+        source_sex_annotation_plotly = "source_sex_annotation"
+      )
+      for (out_id in names(meta_overview_plots)) {
+        local({
+          oid <- out_id
+          key <- meta_overview_plots[[oid]]
+          output[[oid]] <- renderPlotly({
+            meta_plotly(
+              filt_data,
+              get_data_column(key),
+              "Count",
+              get_data_label(key),
+              "bar"
+            )
+          })
+        })
+      }
+    }
+  )
+
+  # Data table tabset: one row per cell, filtered by the Data table filters
+  observeEvent(
+    c(
+      list(input$data_opt),
+      lapply(paste0(filter_field_keys(), "_table"), function(id) input[[id]])
+    ),
+    {
+      current_inputs <- collect_filter_inputs(input, suffix = "_table")
+
+      filt_data <- apply_secondary_filters(filtered_data(), current_inputs)
+
       output$data_table <- renderDT(
         {
           # Metadata detail table. Column set, order and display labels all
@@ -715,40 +757,10 @@ server <- function(input, output, session) {
         },
         server = TRUE
       )
-
-      ## Metadata overview plots. Each output is bound to a logical config
-      ## field key; its axis title comes from get_data_label() and its level
-      ## ordering from the configured biological vocabulary.
-      meta_overview_plots <- list(
-        broad_stage_plotly = "broad_stage",
-        detailed_stage_plotly = "detailed_stage",
-        species_plotly = "host_species",
-        lineage_plotly = "parasite_lineage_isolate",
-        treatment_plotly = "treatment",
-        idc_reference_class_plotly = "idc_reference_class",
-        origin_location_plotly = "parasite_origin_location",
-        pred_gametocyte_sex_plotly = "pred_gametocyte_sex",
-        source_sex_annotation_plotly = "source_sex_annotation"
-      )
-      for (out_id in names(meta_overview_plots)) {
-        local({
-          oid <- out_id
-          key <- meta_overview_plots[[oid]]
-          output[[oid]] <- renderPlotly({
-            meta_plotly(
-              filt_data,
-              get_data_column(key),
-              "Count",
-              get_data_label(key),
-              "bar"
-            )
-          })
-        })
-      }
     }
   )
 
-  # Quality control tabset
+  # QC Plots tabset
   observeEvent(
     c(
       list(input$data_opt),

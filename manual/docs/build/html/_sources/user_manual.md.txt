@@ -3,7 +3,7 @@
 Welcome to PlaViSca, an interactive web application for exploring single-cell RNA-seq data from _Plasmodium vivax_. This manual provides comprehensive guidance on navigating and utilizing the application's features for malaria research.
 
 **Quick Start:**
-1. Filter data using the **Metadata** tab to focus on relevant samples
+1. Open the **Filters** box on any tab to focus on relevant samples
 2. Explore expression patterns and quality metrics via interactive visualizations
 3. Compare multiple genes in the **Gene Expression** tab
 4. Download plots and data for external analysis
@@ -33,30 +33,31 @@ The menu bar provides consistent branding and navigation across the entire appli
 - The left section of the Home page contains a brief text outlining the goals and motivation behind the development of PlaViSca. It introduces the app as an interactive, code-free platform for exploring single-cell RNA-seq data from _P. vivax_, targeting researchers and public health professionals.
 - The right section displays a grid of interactive icons, each linking to a specific part of the application. These icons act as shortcuts, enabling users to quickly access key modules:
 
-  - **Metadata**: Explore and filter dataset metadata.
+  - **Metadata**: Charts of the cells by study, stage, host and other metadata (Plots tab).
   - **Embedding**: Access the Embeddings visualization tab.
-  - **Quality Control**: Assess data quality metrics.
+  - **QC plots**: Assess data quality metrics.
   - **Data Sources**: View dataset references and sources.
   - **Gene Expression**: Visualize gene expression patterns.
-  - **User Manual**: Access this documentation.
+  - **User Manual**: Open this documentation in the Manual tab.
 
 Detailed explanations of these modules' functionalities are provided in the following sections.
 
-**Footer**:
-
-The home page has an animated particle background. The footer shows the Institut Pasteur du Cambodge (IPC) and BAIA logos and the copyright notice.
+The menu bar at the top of every page shows the Institut Pasteur du Cambodge (IPC) and BAIA logos. The home page has an animated particle background.
 
 ## Analysis page
 
-The Analysis page is designed to facilitate interactive exploration of both metadata and gene expression data. The page is organized into five tabs, each focusing on a distinct aspect of data analysis:
+The Analysis page is designed to facilitate interactive exploration of both metadata and gene expression data. The page is organized into tabs, each focusing on a distinct aspect of data analysis:
 
 - **Embeddings**
 - **Gene Expression**
-- **Quality Control**
-- **Metadata**
+- **Plots**: charts of the cell metadata
+- **Data table**: one row per cell with its metadata
+- **QC Plots**
 - **Data Sources**
+- **Manual**: this manual
+- **Code (app)** and **Code (analysis)**: open the source code of the app and of the analysis pipeline on GitHub, in a new browser tab
 
-All tabs (except Data Sources) share a common **Filters** row at the top with the following fields:
+All data tabs (Embeddings, Gene Expression, Plots, Data table, QC Plots) share a common **Filters** row at the top with the following fields:
 
 | Filter field | Description |
 |---|---|
@@ -73,7 +74,7 @@ Hover over the help icon next to a filter for its full description. Cells with a
 
 Filters apply with **OR logic within each field** and **AND logic between fields**, allowing precise subsetting of the dataset. All tabs stay synchronized with each other's filter selections.
 
-The **Filters** box starts folded: click its title bar to unfold it, and again to fold it. The **Plot settings** box folds the same way. Folding is shared by all tabs: folding the Filters on one tab folds them on every tab.
+The **Filters** box starts folded: click its title bar to unfold it, and again to fold it. Its title shows how many filters are set, e.g. **Filters (2)**. The **Plot settings** box folds the same way. Folding is shared by all tabs: folding the Filters on one tab folds them on every tab.
 
 ### Embeddings
 
@@ -83,7 +84,7 @@ The **Filters** box starts folded: click its title bar to unfold it, and again t
 
 The Embeddings tab offers dimensionality reduction and customizable visualization of single-cell data **Video 1**. Key capabilities:
 
-**Plot Settings:**
+**Plot Settings:** the settings sit in a panel left of the plot, folded by default: click the cog button to open it, and the arrow at its edge to fold it again. The Gene expression tab has the same panel, and the panel is open or folded on both tabs at once.
 
 | Setting      | Options                                        |
 |--------------|------------------------------------------------|
@@ -119,12 +120,38 @@ The Gene Expression tab provides an interactive interface for exploring gene exp
 - **Annotations**: Direct links to PlasmoDB and NCBI per gene (supports multiple tabs for multi-gene selections).
 - **Download**: Export per-panel expression data as an `.xlsx` file containing an Expression Data sheet and a Metadata sheet.
 
-### Quality Control
+### Plots
+
+<iframe width="100%" height="360" src="https://www.youtube.com/embed/ul_ulDxMQZk" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
+**Video 3:** Metadata filtration
+
+A short video demonstration of the metadata views **Video 3**. This video provides an overview of how to filter datasets by biological and experimental attributes. Applying filters dynamically updates both plots and tables, enabling users to focus on relevant data subsets for further analysis.
+
+**Summary value boxes:**
+
+| Box           | Description                            |
+|---------------|----------------------------------------|
+| Total Cells   | Number of cells after filtering        |
+| Studies       | Number of distinct studies represented |
+| Host Species  | Number of distinct host species        |
+
+**Bar charts**, one per field: Broad life-cycle stage, Life-cycle stage, Host species, Parasite strain / isolate, Treatment, Most similar reference time point, Parasite origin location, Gametocyte call of the cluster, and Gametocyte sex (authors).
+
+> **Note:** Blood-stage cells get the life-cycle stage inferred by PlaViSca: the gametocyte call of the cell's cluster, otherwise the most similar reference time point. Sporozoites and liver stages, which PlaViSca does not classify, keep the authors' labels. The field "Source of the life-cycle stage" in the Data table says which one a cell's stage comes from. The authors' gametocyte labels remain available for comparison ("Gametocyte sex (authors)").
+
+Hover over a bar for details; use the controls in the top-right corner of a chart to zoom, pan or download it.
+
+### Data table
+
+One row per cell: the cell ID, study, SRA run and the authors' cell ID (missing for Hazzard2022, whose cells were called by PlaViSca), then the host and tissue, strain and origin, treatment, life-cycle stage (and the authors' stage), reference time point, gametocyte calls, biological replicate, day post infection, technology, sequencer and counts. Search globally or filter by column, and export the table as CSV.
+
+### QC Plots
 
 ![Figure 2: Quality control image](imgs/quality_control.png)
 **Figure 2**: Quality control image
 
-The Quality Control tab provides visualizations to assess the integrity of single-cell RNA sequencing data **Figure 2**.
+The QC Plots tab provides visualizations to assess the integrity of single-cell RNA sequencing data **Figure 2**.
 
 **Summary value boxes:**
 
@@ -143,31 +170,6 @@ The Quality Control tab provides visualizations to assess the integrity of singl
 
 All plots respect the shared metadata filters and support interactive zooming, panning, and download via the Plotly toolbar.
 
-### Metadata
-
-<iframe width="100%" height="360" src="https://www.youtube.com/embed/ul_ulDxMQZk" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-
-**Video 3:** Metadata filtration
-
-A short video demonstration of the Metadata tab **Video 3**. This video provides an overview of how to filter datasets by biological and experimental attributes. Applying filters dynamically updates both plots and tables, enabling users to focus on relevant data subsets for further analysis.
-
-**Summary value boxes:**
-
-| Box           | Description                            |
-|---------------|----------------------------------------|
-| Total Cells   | Number of cells after filtering        |
-| Studies       | Number of distinct studies represented |
-| Host Species  | Number of distinct host species        |
-
-**Bar charts**, one per field: Broad life-cycle stage, Life-cycle stage, Host species, Parasite strain / isolate, Treatment, Most similar reference time point, Parasite origin location, Gametocyte call of the cluster, and Gametocyte sex (authors).
-
-> **Note:** Blood-stage cells get the life-cycle stage inferred by PlaViSca: the gametocyte call of the cell's cluster, otherwise the most similar reference time point. Sporozoites and liver stages, which PlaViSca does not classify, keep the authors' labels. The field "Source of the life-cycle stage" in the metadata table says which one a cell's stage comes from. The authors' gametocyte labels remain available for comparison ("Gametocyte sex (authors)").
-
-**Metadata table**: one row per cell with the study, host and tissue, strain and origin, treatment, life-cycle stage (and the authors' stage), reference time point, gametocyte calls, biological replicate, day post infection, technology, sequencer and counts.
-
-**Interactive Features:**
-- **Plotly Charts**: Hover for details. Use controls (zoom, pan, download) in the top-right corner.
-- **DT Table**: Search globally or filter by column. Export as CSV.
 
 ### Data Sources
 
@@ -219,9 +221,9 @@ PlaViSca is an open-source initiative, and we welcome contributions from the sci
 
 ## Best Practices
 
-- **Filter First**: Always start with the Metadata tab to focus on relevant data.
+- **Filter First**: Start by setting the Filters to focus on relevant data.
 - **Leverage Interactivity**: Hover for tooltips, download plots, and export data for external tools.
-- **Quality Check**: Verify data reliability in the Quality Control tab before drawing conclusions.
+- **Quality Check**: Verify data reliability in the QC Plots tab before drawing conclusions.
 - **Compare Systematically**: Add multiple Gene Expression plots side-by-side for cross-condition comparison.
 - **Document Findings**: Download all plots and data for reproducibility.
 

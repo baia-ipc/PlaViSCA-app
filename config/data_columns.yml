@@ -53,6 +53,19 @@ fields:
     column: study_pmid
     role: detail
     required: true
+  run_id:
+    label: "SRA run"
+    column: run_id
+    role: detail
+    required: true
+  author_cell_id:
+    label: "Cell ID (authors)"
+    column: author_cell_id
+    role: detail
+    required: true
+    help: >
+      Identifier of the cell in the source study's data; missing for
+      Hazzard2022, whose cells were called by PlaViSca.
   n_count_rna:
     label: "RNA count"
     column: n_count_rna
@@ -271,7 +284,10 @@ category_fields:
 
 # Logical keys surfaced in the metadata detail table, in order.
 detail_table_fields:
+  - barcode
   - study_label
+  - run_id
+  - author_cell_id
   - tissue_or_sample_type
   - host_species
   - parasite_lineage_isolate

@@ -21,7 +21,7 @@ sort_numeric_choices <- function(values) {
 # Collects the current filter widget selections into a named list keyed by the
 # actual data column names (via get_data_column()), suitable for
 # apply_secondary_filters()/fun_filter_df(). `suffix` selects which tab's set
-# of widgets to read (e.g. "_meta", "_qc", "_gex", or "" for Embeddings).
+# of widgets to read (e.g. "_meta", "_table", "_qc", "_gex", or "" for Embeddings).
 collect_filter_inputs <- function(input, suffix = "") {
     setNames(
         lapply(FILTER_FIELDS, function(field) input[[paste0(field, suffix)]]),

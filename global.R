@@ -96,3 +96,6 @@ group_choices <- unlist(field_choices(c(
   "host_species",
   "treatment"
 )))
+
+# The user manual (built HTML), served at manual/ for the Manual tab
+addResourcePath("manual", "manual/docs/build/html")

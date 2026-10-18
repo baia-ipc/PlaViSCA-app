@@ -50,8 +50,9 @@
 <li class="toctree-l2"><a class="reference internal" href="#analysis-page">Analysis page</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#embeddings">Embeddings</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#gene-expression">Gene Expression</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#quality-control">Quality Control</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#metadata">Metadata</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#plots">Plots</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#data-table">Data table</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#qc-plots">QC Plots</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#data-sources">Data Sources</a></li>
 </ul>
 </li>
@@ -111,7 +112,7 @@
 <p>Welcome to PlaViSca, an interactive web application for exploring single-cell RNA-seq data from <em>Plasmodium vivax</em>. This manual provides comprehensive guidance on navigating and utilizing the application’s features for malaria research.</p>
 <p><strong>Quick Start:</strong></p>
 <ol class="arabic simple">
-<li><p>Filter data using the <strong>Metadata</strong> tab to focus on relevant samples</p></li>
+<li><p>Open the <strong>Filters</strong> box on any tab to focus on relevant samples</p></li>
 <li><p>Explore expression patterns and quality metrics via interactive visualizations</p></li>
 <li><p>Compare multiple genes in the <strong>Gene Expression</strong> tab</p></li>
 <li><p>Download plots and data for external analysis</p></li>
@@ -137,30 +138,32 @@
 <li><p>The left section of the Home page contains a brief text outlining the goals and motivation behind the development of PlaViSca. It introduces the app as an interactive, code-free platform for exploring single-cell RNA-seq data from <em>P. vivax</em>, targeting researchers and public health professionals.</p></li>
 <li><p>The right section displays a grid of interactive icons, each linking to a specific part of the application. These icons act as shortcuts, enabling users to quickly access key modules:</p>
 <ul>
-<li><p><strong>Metadata</strong>: Explore and filter dataset metadata.</p></li>
+<li><p><strong>Metadata</strong>: Charts of the cells by study, stage, host and other metadata (Plots tab).</p></li>
 <li><p><strong>Embedding</strong>: Access the Embeddings visualization tab.</p></li>
-<li><p><strong>Quality Control</strong>: Assess data quality metrics.</p></li>
+<li><p><strong>QC plots</strong>: Assess data quality metrics.</p></li>
 <li><p><strong>Data Sources</strong>: View dataset references and sources.</p></li>
 <li><p><strong>Gene Expression</strong>: Visualize gene expression patterns.</p></li>
-<li><p><strong>User Manual</strong>: Access this documentation.</p></li>
+<li><p><strong>User Manual</strong>: Open this documentation in the Manual tab.</p></li>
 </ul>
 </li>
 </ul>
 <p>Detailed explanations of these modules’ functionalities are provided in the following sections.</p>
-<p><strong>Footer</strong>:</p>
-<p>The home page has an animated particle background. The footer shows the Institut Pasteur du Cambodge (IPC) and BAIA logos and the copyright notice.</p>
+<p>The menu bar at the top of every page shows the Institut Pasteur du Cambodge (IPC) and BAIA logos. The home page has an animated particle background.</p>
 </section>
 <section id="analysis-page">
 <h2>Analysis page<a class="headerlink" href="#analysis-page" title="Link to this heading"></a></h2>
-<p>The Analysis page is designed to facilitate interactive exploration of both metadata and gene expression data. The page is organized into five tabs, each focusing on a distinct aspect of data analysis:</p>
+<p>The Analysis page is designed to facilitate interactive exploration of both metadata and gene expression data. The page is organized into tabs, each focusing on a distinct aspect of data analysis:</p>
 <ul class="simple">
 <li><p><strong>Embeddings</strong></p></li>
 <li><p><strong>Gene Expression</strong></p></li>
-<li><p><strong>Quality Control</strong></p></li>
-<li><p><strong>Metadata</strong></p></li>
+<li><p><strong>Plots</strong>: charts of the cell metadata</p></li>
+<li><p><strong>Data table</strong>: one row per cell with its metadata</p></li>
+<li><p><strong>QC Plots</strong></p></li>
 <li><p><strong>Data Sources</strong></p></li>
+<li><p><strong>Manual</strong>: this manual</p></li>
+<li><p><strong>Code (app)</strong> and <strong>Code (analysis)</strong>: open the source code of the app and of the analysis pipeline on GitHub, in a new browser tab</p></li>
 </ul>
-<p>All tabs (except Data Sources) share a common <strong>Filters</strong> row at the top with the following fields:</p>
+<p>All data tabs (Embeddings, Gene Expression, Plots, Data table, QC Plots) share a common <strong>Filters</strong> row at the top with the following fields:</p>
 <table class="docutils align-default">
 <thead>
 <tr class="row-odd"><th class="head"><p>Filter field</p></th>
@@ -196,13 +199,13 @@
 </table>
 <p>Hover over the help icon next to a filter for its full description. Cells with a missing value are shown as “Missing”; for the gametocyte state, cells that are not gametocytes are shown as “No gametocyte”.</p>
 <p>Filters apply with <strong>OR logic within each field</strong> and <strong>AND logic between fields</strong>, allowing precise subsetting of the dataset. All tabs stay synchronized with each other’s filter selections.</p>
-<p>The <strong>Filters</strong> box starts folded: click its title bar to unfold it, and again to fold it. The <strong>Plot settings</strong> box folds the same way. Folding is shared by all tabs: folding the Filters on one tab folds them on every tab.</p>
+<p>The <strong>Filters</strong> box starts folded: click its title bar to unfold it, and again to fold it. Its title shows how many filters are set, e.g. <strong>Filters (2)</strong>. The <strong>Plot settings</strong> box folds the same way. Folding is shared by all tabs: folding the Filters on one tab folds them on every tab.</p>
 <section id="embeddings">
 <h3>Embeddings<a class="headerlink" href="#embeddings" title="Link to this heading"></a></h3>
 <iframe width="100%" height="360" src="https://www.youtube.com/embed/gcubjXeIxUY" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 <p><strong>Video 1</strong>: Embedding tab functionality</p>
 <p>The Embeddings tab offers dimensionality reduction and customizable visualization of single-cell data <strong>Video 1</strong>. Key capabilities:</p>
-<p><strong>Plot Settings:</strong></p>
+<p><strong>Plot Settings:</strong> the settings sit in a panel left of the plot, folded by default: click the cog button to open it, and the arrow at its edge to fold it again. The Gene expression tab has the same panel, and the panel is open or folded on both tabs at once.</p>
 <table class="docutils align-default">
 <thead>
 <tr class="row-odd"><th class="head"><p>Setting</p></th>
@@ -251,11 +254,45 @@
 <li><p><strong>Download</strong>: Export per-panel expression data as an <code class="docutils literal notranslate"><span class="pre">.xlsx</span></code> file containing an Expression Data sheet and a Metadata sheet.</p></li>
 </ul>
 </section>
-<section id="quality-control">
-<h3>Quality Control<a class="headerlink" href="#quality-control" title="Link to this heading"></a></h3>
+<section id="plots">
+<h3>Plots<a class="headerlink" href="#plots" title="Link to this heading"></a></h3>
+<iframe width="100%" height="360" src="https://www.youtube.com/embed/ul_ulDxMQZk" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+<p><strong>Video 3:</strong> Metadata filtration</p>
+<p>A short video demonstration of the metadata views <strong>Video 3</strong>. This video provides an overview of how to filter datasets by biological and experimental attributes. Applying filters dynamically updates both plots and tables, enabling users to focus on relevant data subsets for further analysis.</p>
+<p><strong>Summary value boxes:</strong></p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Box</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Total Cells</p></td>
+<td><p>Number of cells after filtering</p></td>
+</tr>
+<tr class="row-odd"><td><p>Studies</p></td>
+<td><p>Number of distinct studies represented</p></td>
+</tr>
+<tr class="row-even"><td><p>Host Species</p></td>
+<td><p>Number of distinct host species</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Bar charts</strong>, one per field: Broad life-cycle stage, Life-cycle stage, Host species, Parasite strain / isolate, Treatment, Most similar reference time point, Parasite origin location, Gametocyte call of the cluster, and Gametocyte sex (authors).</p>
+<blockquote>
+<div><p><strong>Note:</strong> Blood-stage cells get the life-cycle stage inferred by PlaViSca: the gametocyte call of the cell’s cluster, otherwise the most similar reference time point. Sporozoites and liver stages, which PlaViSca does not classify, keep the authors’ labels. The field “Source of the life-cycle stage” in the Data table says which one a cell’s stage comes from. The authors’ gametocyte labels remain available for comparison (“Gametocyte sex (authors)”).</p>
+</div></blockquote>
+<p>Hover over a bar for details; use the controls in the top-right corner of a chart to zoom, pan or download it.</p>
+</section>
+<section id="data-table">
+<h3>Data table<a class="headerlink" href="#data-table" title="Link to this heading"></a></h3>
+<p>One row per cell: the cell ID, study, SRA run and the authors’ cell ID (missing for Hazzard2022, whose cells were called by PlaViSca), then the host and tissue, strain and origin, treatment, life-cycle stage (and the authors’ stage), reference time point, gametocyte calls, biological replicate, day post infection, technology, sequencer and counts. Search globally or filter by column, and export the table as CSV.</p>
+</section>
+<section id="qc-plots">
+<h3>QC Plots<a class="headerlink" href="#qc-plots" title="Link to this heading"></a></h3>
 <p><img alt="Figure 2: Quality control image" src="_images/quality_control.png" />
 <strong>Figure 2</strong>: Quality control image</p>
-<p>The Quality Control tab provides visualizations to assess the integrity of single-cell RNA sequencing data <strong>Figure 2</strong>.</p>
+<p>The QC Plots tab provides visualizations to assess the integrity of single-cell RNA sequencing data <strong>Figure 2</strong>.</p>
 <p><strong>Summary value boxes:</strong></p>
 <table class="docutils align-default">
 <thead>
@@ -283,41 +320,6 @@
 <li><p><strong>Variable Genes</strong>: Mean expression vs. standardized variance scatter plot, highlighting the top 15 highly variable features (HVF).</p></li>
 </ul>
 <p>All plots respect the shared metadata filters and support interactive zooming, panning, and download via the Plotly toolbar.</p>
-</section>
-<section id="metadata">
-<h3>Metadata<a class="headerlink" href="#metadata" title="Link to this heading"></a></h3>
-<iframe width="100%" height="360" src="https://www.youtube.com/embed/ul_ulDxMQZk" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-<p><strong>Video 3:</strong> Metadata filtration</p>
-<p>A short video demonstration of the Metadata tab <strong>Video 3</strong>. This video provides an overview of how to filter datasets by biological and experimental attributes. Applying filters dynamically updates both plots and tables, enabling users to focus on relevant data subsets for further analysis.</p>
-<p><strong>Summary value boxes:</strong></p>
-<table class="docutils align-default">
-<thead>
-<tr class="row-odd"><th class="head"><p>Box</p></th>
-<th class="head"><p>Description</p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td><p>Total Cells</p></td>
-<td><p>Number of cells after filtering</p></td>
-</tr>
-<tr class="row-odd"><td><p>Studies</p></td>
-<td><p>Number of distinct studies represented</p></td>
-</tr>
-<tr class="row-even"><td><p>Host Species</p></td>
-<td><p>Number of distinct host species</p></td>
-</tr>
-</tbody>
-</table>
-<p><strong>Bar charts</strong>, one per field: Broad life-cycle stage, Life-cycle stage, Host species, Parasite strain / isolate, Treatment, Most similar reference time point, Parasite origin location, Gametocyte call of the cluster, and Gametocyte sex (authors).</p>
-<blockquote>
-<div><p><strong>Note:</strong> Blood-stage cells get the life-cycle stage inferred by PlaViSca: the gametocyte call of the cell’s cluster, otherwise the most similar reference time point. Sporozoites and liver stages, which PlaViSca does not classify, keep the authors’ labels. The field “Source of the life-cycle stage” in the metadata table says which one a cell’s stage comes from. The authors’ gametocyte labels remain available for comparison (“Gametocyte sex (authors)”).</p>
-</div></blockquote>
-<p><strong>Metadata table</strong>: one row per cell with the study, host and tissue, strain and origin, treatment, life-cycle stage (and the authors’ stage), reference time point, gametocyte calls, biological replicate, day post infection, technology, sequencer and counts.</p>
-<p><strong>Interactive Features:</strong></p>
-<ul class="simple">
-<li><p><strong>Plotly Charts</strong>: Hover for details. Use controls (zoom, pan, download) in the top-right corner.</p></li>
-<li><p><strong>DT Table</strong>: Search globally or filter by column. Export as CSV.</p></li>
-</ul>
 </section>
 <section id="data-sources">
 <h3>Data Sources<a class="headerlink" href="#data-sources" title="Link to this heading"></a></h3>
@@ -383,9 +385,9 @@
 <section id="best-practices">
 <h2>Best Practices<a class="headerlink" href="#best-practices" title="Link to this heading"></a></h2>
 <ul class="simple">
-<li><p><strong>Filter First</strong>: Always start with the Metadata tab to focus on relevant data.</p></li>
+<li><p><strong>Filter First</strong>: Start by setting the Filters to focus on relevant data.</p></li>
 <li><p><strong>Leverage Interactivity</strong>: Hover for tooltips, download plots, and export data for external tools.</p></li>
-<li><p><strong>Quality Check</strong>: Verify data reliability in the Quality Control tab before drawing conclusions.</p></li>
+<li><p><strong>Quality Check</strong>: Verify data reliability in the QC Plots tab before drawing conclusions.</p></li>
 <li><p><strong>Compare Systematically</strong>: Add multiple Gene Expression plots side-by-side for cross-condition comparison.</p></li>
 <li><p><strong>Document Findings</strong>: Download all plots and data for reproducibility.</p></li>
 </ul>

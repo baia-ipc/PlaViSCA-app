@@ -1617,3 +1617,11 @@ table.dataTable thead th {
     margin-top: 20px;
   }
 }
+/* Manual tab: the user manual in a frame filling the window */
+.manual-frame {
+  width: 100%;
+  height: calc(100vh - 150px);
+  border: none;
+  border-radius: 12px;
+  background: #fff;
+}

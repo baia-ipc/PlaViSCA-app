@@ -39,8 +39,8 @@ ui_home_section <- function() {
           actionLink(
             "qc_link",
             tagList(
-              img(src = "qc.png", alt = "Quality control", class = "link-icon"),
-              span("Quality control")
+              img(src = "qc.png", alt = "QC plots", class = "link-icon"),
+              span("QC plots")
             )
           ),
           actionLink(

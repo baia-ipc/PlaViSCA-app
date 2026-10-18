@@ -94,7 +94,7 @@ in the cell table.
    ```
 
 2. Add `sample_batch` to `filter_fields` (filter row on every tab) and to
-   `detail_table_fields` (Metadata table). Add it to `category_fields` too if
+   `detail_table_fields` (Data table tab). Add it to `category_fields` too if
    it should be offered under "Color by".
 3. If its values have a natural order, list it under `vocabularies`.
 4. Run the tests (below). `test_config_fields.R` fails if the column is

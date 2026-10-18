@@ -17,14 +17,14 @@ ui_analysis_section <- function() {
             id = "tabset",
 
             ui_tab_embeddings(),
-
             ui_tab_gene_expression(),
-
+            ui_tab_plots(),
+            ui_tab_data_table(),
             ui_tab_qc(),
-
-            ui_tab_metadata(),
-
-            ui_tab_data_sources()
+            ui_tab_data_sources(),
+            ui_tab_manual(),
+            code_link_tab("Code (app)", "source_code"),
+            code_link_tab("Code (analysis)", "analysis_source_code")
           )
         )
       )

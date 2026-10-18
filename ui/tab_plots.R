@@ -1,9 +1,9 @@
-# Metadata tab: metadata charts and the per-cell metadata table.
+# Plots tab: counts of cells by study, stage, host and other metadata.
 
-ui_tab_metadata <- function() {
+ui_tab_plots <- function() {
   tabPanel(
-    tagList(fontawesome::fa("table-list"), " Metadata"),
-    value = "Metadata",
+    tagList(fontawesome::fa("chart-column"), " Plots"),
+    value = "Plots",
     create_meta_filter_row("_meta"),
     layout_column_wrap(
       width = 1 / 3,
@@ -82,16 +82,6 @@ ui_tab_metadata <- function() {
           )
         )
       ),
-      card(
-        class = "mt-3",
-        card_header("Data Table"),
-        withSpinner(
-          type = 6,
-          size = 0.5,
-          color = "#3498db",
-          DT::DTOutput("data_table")
-        )
-      )
     )
   )
 }
