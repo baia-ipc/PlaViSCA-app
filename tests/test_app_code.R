@@ -119,6 +119,8 @@ test_that_("external links and team information are complete", {
     team <- team_info()
     missing <- setdiff(c("name", "role", "affiliation", "email"), names(team$contact))
     expect_empty_(missing, "fields missing from the contact in team.yml")
+    missing <- setdiff(c("authors", "title", "status"), names(team$citation))
+    expect_empty_(missing, "fields missing from the citation in team.yml")
     no_logo <- Filter(function(o) is.null(o$logo) || !file.exists(file.path(APP_ROOT, "www", o$logo)),
         team$organizations)
     expect_empty_(vapply(no_logo, function(o) o$name %||% "?", character(1)),

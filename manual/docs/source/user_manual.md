@@ -163,7 +163,7 @@ To set up the app with these files, see the [Setup Guide](setup_guide.md).
 
 ### About
 
-The **About** tab describes what PlaViSca contains and how the data were processed, links to the source code of the app and of the analysis pipeline, and gives the contact person.
+The **About** tab describes what PlaViSca contains and how the data were processed, links to the source code of the app and of the analysis pipeline, and gives the citation of the PlaViSca study and the contact person.
 
 ## Best Practices
 

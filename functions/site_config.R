@@ -30,8 +30,8 @@ external_link <- function(key, id = NULL) {
     vapply(id, function(x) gsub("{id}", x, url, fixed = TRUE), character(1), USE.NAMES = FALSE)
 }
 
-#' Organizations (name, url, logo) and contact (name, role, affiliation,
-#' email) from config/team.yml.
+#' Organizations (name, url, logo), contact (name, role, affiliation, email)
+#' and citation (authors, title, status) from config/team.yml.
 team_info <- function() {
     .team
 }

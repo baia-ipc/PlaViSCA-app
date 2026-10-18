@@ -1,7 +1,9 @@
-# About tab: what PlaViSca contains, how the data were processed, and contact.
+# About tab: what PlaViSca contains, how the data were processed, citation
+# and contact.
 
 ui_tab_about <- function() {
   contact <- team_info()$contact
+  citation <- team_info()$citation
   n_cells <- format(nrow(mr_data), big.mark = ",")
   n_genes <- format(length(GENE_COLUMNS), big.mark = ",")
   n_studies <- length(unique(mr_data[[get_data_column("study_label")]]))
@@ -36,6 +38,14 @@ ui_tab_about <- function() {
         a("analysis pipeline", href = external_link("analysis_source_code"), target = "_blank"),
         " is open source."
       ),
+      h3("Citation"),
+      # one HTML string, so that no space is added before the full stops; the
+      # title may contain <em>
+      p(HTML(sprintf(
+        "%s. %s. <em>%s</em>",
+        htmltools::htmlEscape(citation$authors), citation$title,
+        htmltools::htmlEscape(citation$status)
+      ))),
       h3("Contact"),
       # one HTML string, so that no space is added around the name and link
       p(HTML(sprintf(

@@ -1,4 +1,5 @@
-# Organizations (logos in the top bar) and the contact person (About tab).
+# Organizations (logos in the top bar), the contact person and the citation
+# of the PlaViSca study (About tab).
 # =============================================================================
 # Read with team_info() (functions/site_config.R). Logos are files in www/.
 # =============================================================================
@@ -15,3 +16,9 @@ contact:
   role: "Head of Bioinformatics and AI Applications"
   affiliation: "Institut Pasteur du Cambodge"
   email: "ggonnella@pasteur-kh.org"
+
+# The title may contain <em> for italics.
+citation:
+  authors: "Sopheap Oeng, Lionel Brice Feufack-Donfack, Thomas Obadia, Anthony Ruberto, Giorgio Gonnella"
+  title: "PlaViSCA: <em>Plasmodium vivax</em> single-cell transcriptomics meta-analysis and interactive community resource"
+  status: "Submitted for peer review."
