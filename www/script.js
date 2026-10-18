@@ -583,3 +583,58 @@ $(document).on('contextmenu', embeddingPlots, function (event) {
   event.preventDefault();
   openCellDetails(hoveredCellKey);
 });
+
+// Every plot gets a "Download plot as SVG" button next to the PNG one. In
+// WebGL plots (the embeddings) the points stay a bitmap inside the SVG; the
+// axes, labels and legend are vector graphics. The R plotly package sends its
+// own list of extra buttons with each plot, so the button is appended to that
+// list whenever a plot is drawn.
+const svgDownloadButton = {
+  name: 'downloadSvg',
+  title: 'Download plot as SVG',
+  icon: null, // set once Plotly is loaded
+  click: function (gd) {
+    Plotly.downloadImage(gd, { format: 'svg', filename: gd.id || 'plot' });
+  }
+};
+
+function withSvgButton(config) {
+  const out = Object.assign({}, config);
+  const buttons = (out.modeBarButtonsToAdd || []).slice();
+  if (!buttons.some(b => b && b.name === svgDownloadButton.name)) buttons.push(svgDownloadButton);
+  out.modeBarButtonsToAdd = buttons;
+  return out;
+}
+
+function addSvgButtonToPlotly(plotly) {
+  svgDownloadButton.icon = plotly.Icons.disk;
+  ['newPlot', 'react'].forEach(function (fn) {
+    const original = plotly[fn];
+    plotly[fn] = function (gd, data, layout, config) {
+      if (data && typeof data === 'object' && !Array.isArray(data) && data.data) {
+        // single-object form: Plotly.newPlot(gd, {data, layout, config})
+        data = Object.assign({}, data, { config: withSvgButton(data.config) });
+        return original.call(this, gd, data);
+      }
+      return original.call(this, gd, data, layout, withSvgButton(config));
+    };
+  });
+}
+
+// plotly.js is loaded with the first plot, after this script: wrap it as
+// soon as it is defined
+(function () {
+  if (window.Plotly) {
+    addSvgButtonToPlotly(window.Plotly);
+    return;
+  }
+  let plotly;
+  Object.defineProperty(window, 'Plotly', {
+    configurable: true,
+    get: function () { return plotly; },
+    set: function (value) {
+      plotly = value;
+      if (value && value.newPlot) addSvgButtonToPlotly(value);
+    }
+  });
+})();
