@@ -653,7 +653,8 @@ server <- function(input, output, session) {
             options = list(
               pageLength = 10,
               scrollX = TRUE,
-              dom = "lfrtipB",
+              # page length and search on one row, as in Data sources
+              dom = "<'d-flex justify-content-between align-items-center'lf>rt<'d-flex justify-content-between align-items-center'ip>B",
               buttons = list(
                 list(
                   extend = "csv",
