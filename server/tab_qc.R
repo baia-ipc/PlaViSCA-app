@@ -1,9 +1,9 @@
 # Server code of the QC Plots tab: number boxes, RNA and feature counts of
 # the cells selected by the tab's filters (`filters`, a reactive with the
 # filter values, from shared_filters_server()), and the elbow and variable
-# gene plots of one study.
+# gene plots of the first study the filters select.
 
-qc_tab_server <- function(input, output, filters) {
+qc_tab_server <- function(output, filters) {
   observeEvent(filters(), {
     filt_data <- apply_secondary_filters(mr_data, filters())
 
@@ -59,18 +59,21 @@ qc_tab_server <- function(input, output, filters) {
     })
 
     output$data_pca_stdv_plotly <- renderPlotly({
-      selected_study <- qc_study(input$study_label)
+      selected_study <- qc_study(filters())
       elbow_plot(pca_df %>% filter(study == selected_study), selected_study)
     })
 
     output$variable_genes_plotly <- renderPlotly({
-      var_genes_plot(hiv_data, qc_study(input$study_label), top_n = 15)
+      var_genes_plot(hiv_data, qc_study(filters()), top_n = 15)
     })
   })
 }
 
-# Study of the elbow and variable gene plots: the first selected study, or
-# the first study of the atlas.
-qc_study <- function(selected) {
-  if (length(selected) > 0) selected[1] else unique(mr_data$study_label)[1]
+# Study of the elbow and variable gene plots: the first study kept by the
+# filter values `filter_values`, or the first study of the atlas.
+qc_study <- function(filter_values) {
+  col <- get_data_column("study_label")
+  studies <- unique(as.character(mr_data[[col]]))
+  kept <- filter_effective_values(filter_values[[col]], col %in% attr(filter_values, "exclude"), studies)
+  if (length(kept) > 0) kept[1] else studies[1]
 }

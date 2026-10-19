@@ -103,7 +103,7 @@ server <- function(input, output, session) {
 
   # Metadata table, QC Plots and Data sources tabs (server/tab_*.R)
   data_table_tab_server(output, tab_filters[["Metadata table"]])
-  qc_tab_server(input, output, tab_filters[["QC Plots"]])
+  qc_tab_server(output, tab_filters[["QC Plots"]])
   data_sources_tab_server(input, output)
 
   # Gene Expression tabset - with optimized caching and debouncing

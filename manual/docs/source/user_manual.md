@@ -190,8 +190,10 @@ The QC Plots tab provides visualizations to assess the integrity of single-cell 
 
 - **RNA Count distribution**: Violin plot of RNA counts per cell, per study, coloured by broad life-cycle stage.
 - **Feature Count distribution**: Violin plot of feature (gene) counts per cell, per study, coloured by broad life-cycle stage.
-- **Elbow Plot**: PCA standard deviation per component, per study — used to determine the optimal number of PCs.
+- **Elbow Plot**: PCA standard deviation per component — used to determine the optimal number of PCs.
 - **Variable Genes**: Mean expression vs. standardized variance scatter plot, highlighting the top 15 highly variable features (HVF).
+
+The Elbow and Variable Genes plots show one study: the first one the Study filter selects, or the first study of the atlas when no study is selected.
 
 All plots respect the shared metadata filters and support interactive zooming, panning, and download via the Plotly toolbar.
 
