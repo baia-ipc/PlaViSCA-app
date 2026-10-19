@@ -12,7 +12,9 @@ settings:
 
 shots:
   # Fig 5: views of the app. (A) side-by-side coloring of the integrated 2D
-  # UMAP, harmonized stage (Plot A) and study (Plot B); (B) Gene expression
+  # UMAP, by harmonized stage (Plot A) and by the mean expression of the
+  # hemoglobin digestion genes PM4, vivapain-2 (two copies), vivapain-3 and
+  # DPAP1 (Plot B, by gene ID: the vivapain-2 copies have no name); (B) Gene expression
   # card: Seurat-style dot plot of stage marker genes by life-cycle stage;
   # (C) Metadata plots builder: sunburst of the cells by study and stage.
   # The panels have no output of their own: they are composed into
@@ -26,7 +28,18 @@ shots:
       - click: "#enable_comparison"
       - drawn: true
       - select: {id: color_first_comp, value: stage}
-      - select: {id: color_second, value: study_label}
+      # Plot B has nothing to draw until genes are selected: no "drawn" here
+      - select: {id: color_second, value: genes}
+      - wait: 3
+      - click: "#check_second"
+      - wait: 3
+      - js: >-
+          (() => { const s = document.getElementById('genes_second').selectize;
+          const genes = ['PVP01_1340900', 'PVP01_0916000', 'PVP01_0916200',
+                         'PVP01_0916100', 'PVP01_0917300'];
+          genes.forEach(g => s.addOption({value: g, label: g}));
+          s.setValue(genes); })()
+      - drawn: true
     element: "#comparison_plots_panel"
 
   - name: fig5_gene_dotplot
@@ -35,12 +48,13 @@ shots:
       - drawn: true
       - select: {id: plot_type_exp_0, value: dotplot}
       - select: {id: group_exp_0, value: stage}
-      # stage markers, from blood stages to liver stages (Pvs25 is P25 in
-      # the annotation). The gene menu loads its choices from the server
+      # stage markers, from blood stages to liver stages (Pvs25 is P25 and
+      # UIS4 an unnamed ETRAMP in the annotation). The gene menu loads its choices from the server
       # while typing: add the genes as choices before selecting them
       - js: >-
           (() => { const s = document.getElementById('genes_exp_0').selectize;
-          const genes = ['SBP1', 'PM4', 'AMA1', 'RBP2b', 'P25', 'CSP', 'LISP2'];
+          const genes = ['SBP1', 'PM4', 'AMA1', 'RBP2b', 'P25', 'CSP',
+                         'ETRAMP (PVP01_0602100)', 'LISP2'];
           genes.forEach(g => s.addOption({value: g, label: g}));
           s.setValue(genes); })()
       - drawn: true

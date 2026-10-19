@@ -126,6 +126,28 @@ get_dim <- function(plot_type) {
 
 
 get_legend_layout <- function(legend_title, num_categories = NULL, is_dual_plot = FALSE, is_gene_plot = FALSE) {
+  # Side by side, the plots are narrow: the legend goes below the plot, in
+  # the bottom margin (get_plot_margins()), so that it does not cover cells
+  if (is_dual_plot && is_gene_plot) {
+    return(list(
+      title = list(text = legend_title, font = list(size = 11, family = "Arial"), side = "top"),
+      orientation = "h",
+      x = 0, xanchor = "left", y = -0.08, yanchor = "top",
+      len = 0.5, thickness = 10,
+      tickfont = list(size = 10, family = "Arial")
+    ))
+  }
+  if (is_dual_plot) {
+    return(list(
+      title = list(text = legend_title, font = list(size = 12, family = "Arial"), side = "top"),
+      orientation = "h",
+      x = 0, xanchor = "left", y = -0.06, yanchor = "top",
+      itemsizing = "constant",
+      font = list(size = 11, family = "Arial"),
+      itemclick = "toggle",
+      itemdoubleclick = "toggleothers"
+    ))
+  }
   # Check if this is a gene plot (continuous color scale)
   if (is_gene_plot) {
     # For gene plots, use a smaller, borderless legend
@@ -167,8 +189,9 @@ get_legend_layout <- function(legend_title, num_categories = NULL, is_dual_plot 
 
 # Get appropriate margins based on legend orientation
 get_plot_margins <- function(num_categories = NULL, is_dual_plot = FALSE) {
-  # Absolute minimum margins to maximize plot size
-  list(l = 10, r = 10, t = 10, b = 10)
+  # Minimum margins to maximize plot size; side by side, the same bottom
+  # margin for both plots holds the legend, so that both have the same size
+  list(l = 10, r = 10, t = 10, b = if (is_dual_plot) 130 else 10)
 }
 
 
