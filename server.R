@@ -969,35 +969,16 @@ server <- function(input, output, session) {
 
     tryCatch(
       {
-        # Get the filtered data
         fg <- filtered_gene_exp_data()
         if (is.null(fg) || is.null(fg$data)) {
           return(create_empty_plot("Data not loaded"))
         }
-
-        # Identify gene IDs
-        gene_ids <- if (isTRUE(selected_check)) selected_genes else get_gene_id(selected_genes, fg$genes)
-        valid_gene_ids <- gene_ids[gene_ids %in% colnames(fg$full)]
-
-        if (length(valid_gene_ids) == 0) {
-          return(create_empty_plot("No valid genes found in data"))
-        }
-
-        # Extract filtered data and expression values
-        static_df <- fg$data
-        row_idx <- fg$row_idx
-
-        if (length(valid_gene_ids) > 1) {
-          static_df$gene_expr <- rowMeans(fg$full[row_idx, valid_gene_ids, drop = FALSE], na.rm = TRUE)
-          plot_title <- paste("Average of", length(valid_gene_ids), "genes:", paste(selected_genes, collapse = ", "))
-        } else {
-          static_df$gene_expr <- fg$full[row_idx, valid_gene_ids]
-          plot_title <- selected_genes[1]
-        }
-
-        # Generate plot using filtered data
-        p <- gene_exp_plot(static_df, tolower(selected_group), add_title = plot_title)
-        return(p)
+        gene_expression_card_plot(
+          fg, selected_genes, selected_check, selected_group,
+          plot_type = input$plot_type_exp_0,
+          split = input$split_exp_0,
+          min_cells = input$min_cells_exp_0
+        )
       },
       error = function(e) {
         return(create_empty_plot(paste("Error:", e$message)))
@@ -1091,26 +1072,12 @@ server <- function(input, output, session) {
               return(create_empty_plot("No genes selected"))
             }
 
-            gene_ids <- if (isTRUE(cur_check)) cur_genes else get_gene_id(cur_genes, fg$genes)
-            valid_gene_ids <- gene_ids[gene_ids %in% colnames(fg$full)]
-
-            if (length(valid_gene_ids) == 0) {
-              return(create_empty_plot("Selected gene(s) not found in data"))
-            }
-
-            static_df <- fg$data
-            row_idx <- fg$row_idx
-
-            if (length(valid_gene_ids) > 1) {
-              static_df$gene_expr <- rowMeans(fg$full[row_idx, valid_gene_ids, drop = FALSE], na.rm = TRUE)
-              plot_title <- paste("Average of", length(valid_gene_ids), "genes:", paste(cur_genes, collapse = ", "))
-            } else {
-              static_df$gene_expr <- fg$full[row_idx, valid_gene_ids]
-              plot_title <- cur_genes[1]
-            }
-
-            p <- gene_exp_plot(static_df, tolower(cur_group), add_title = plot_title)
-            return(p)
+            gene_expression_card_plot(
+              fg, cur_genes, cur_check, cur_group,
+              plot_type = input[[paste0("plot_type_exp_", curr_id)]],
+              split = input[[paste0("split_exp_", curr_id)]],
+              min_cells = input[[paste0("min_cells_exp_", curr_id)]]
+            )
           },
           error = function(e) {
             return(create_empty_plot(paste("Error:", e$message)))

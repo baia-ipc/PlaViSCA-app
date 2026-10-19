@@ -1,5 +1,44 @@
 # Gene expression plots (violin plots, one or several genes).
 
+# Plot of one Gene expression card. `fg` is the filtered expression data of
+# the tab (data = metadata of the selected cells, full = expression of all
+# cells, row_idx = rows of the selected cells in full), `genes` the selected
+# gene names (or IDs when `use_ids` is TRUE). "violin": expression by
+# `group`, the mean of the genes when there are several. "detection": cells
+# detecting each gene by `group` and `split` (functions/plots_gene_detection.R).
+gene_expression_card_plot <- function(fg, genes, use_ids, group,
+                                      plot_type = "violin", split = NULL,
+                                      min_cells = DETECTION_MIN_CELLS) {
+    gene_ids <- if (isTRUE(use_ids)) genes else get_gene_id(genes, fg$genes)
+    found <- !is.na(gene_ids) & gene_ids %in% colnames(fg$full)
+    if (!any(found)) {
+        return(message_plot("Selected gene(s) not found in data"))
+    }
+    gene_ids <- gene_ids[found]
+    genes <- genes[found]
+    expression <- fg$full[fg$row_idx, gene_ids, drop = FALSE]
+
+    if (identical(plot_type, "detection")) {
+        expression <- as.matrix(expression)
+        colnames(expression) <- genes
+        if (is.null(split) || !nzchar(split)) split <- get_data_column("study_label")
+        min_cells <- suppressWarnings(as.numeric(min_cells))
+        if (length(min_cells) != 1 || is.na(min_cells)) min_cells <- DETECTION_MIN_CELLS
+        table <- gene_detection_table(fg$data, expression, group, split, min_cells)
+        return(plot_gene_detection(table, group, split))
+    }
+
+    df <- fg$data
+    if (length(gene_ids) > 1) {
+        df$gene_expr <- rowMeans(expression, na.rm = TRUE)
+        title <- paste("Average of", length(gene_ids), "genes:", paste(genes, collapse = ", "))
+    } else {
+        df$gene_expr <- expression[, 1]
+        title <- genes[[1]]
+    }
+    gene_exp_plot(df, tolower(group), add_title = title)
+}
+
 # Function to create multi-gene violin plots
 create_multi_gene_plot <- function(gene_data_list, x_col) {
     # gene_data_list is a named list where each element is a data frame for one gene

@@ -216,9 +216,14 @@
 <li><p><strong>Flexible Plot Management</strong>: Add or remove plot panels dynamically (panels display in a 2-column layout). Each panel has its own gene selection and grouping.</p></li>
 <li><p><strong>Data Type</strong>: Choose Raw or Normalized expression data (Scaled data is currently disabled).</p></li>
 <li><p><strong>Gene Search</strong>: Toggle between Gene Name and Gene ID search using the switch in each panel.</p></li>
-<li><p><strong>Gene Selection</strong>: Select up to 10 genes per panel; multi-gene panels display the averaged expression.</p></li>
+<li><p><strong>Gene Selection</strong>: Select up to 10 genes per panel; multi-gene violin plots display the averaged expression.</p></li>
 <li><p><strong>Group by</strong>: Organize expression by Study label, Broad life-cycle stage, Life-cycle stage, Host species, or Treatment.</p></li>
-<li><p><strong>Violin Plots</strong>: Each panel displays a Plotly violin plot with hover tooltips showing mean, SD, and cell count per group.</p></li>
+<li><p><strong>Plot</strong>: choose the kind of plot of each panel:</p>
+<ul>
+<li><p><strong>Violin</strong>: each panel displays a Plotly violin plot with hover tooltips showing mean, SD, and cell count per group.</p></li>
+<li><p><strong>Cells detecting</strong>: the percentage of cells in which each gene is detected (expression above 0), per group, with one point per value of <strong>Points by</strong> (Study label by default) and one row of points per gene. Groups with fewer cells than <strong>Min. cells per point</strong> (20 by default) are left out, and so are cells with a missing value. For example, select DBP, CSP and AMA1, group by Life-cycle stage and keep the points by Study label to see whether each study detects the genes in the same stages.</p></li>
+</ul>
+</li>
 <li><p><strong>Annotations</strong>: Direct links to PlasmoDB and NCBI per gene (supports multiple tabs for multi-gene selections).</p></li>
 <li><p><strong>Download</strong>: Export per-panel expression data as an <code class="docutils literal notranslate"><span class="pre">.xlsx</span></code> file containing an Expression Data sheet and a Metadata sheet.</p></li>
 </ul>

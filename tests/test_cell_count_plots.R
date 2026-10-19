@@ -94,3 +94,26 @@ test_that_("the exported count table has display labels and the counts", {
         "column names of the exported table")
     expect_equal_(sum(out$Cells), nrow(m), "cells in the exported table")
 })
+
+test_that_("cells detecting a gene: counts per stage and study, min. cells", {
+    if (!exists("gene_detection_table")) skip_test("plot functions not loaded in this context")
+    n <- app_data("norm_df")
+    gene_ids <- head(grep("^PVP01", colnames(n), value = TRUE), 2)
+    stage <- col("detailed_stage")
+    study <- col("study_label")
+    expression <- as.matrix(n[, gene_ids, drop = FALSE])
+    table <- gene_detection_table(n, expression, stage, study, min_cells = 1)
+
+    known <- !is_missing_value(n[[stage]]) & !is_missing_value(n[[study]])
+    per_gene <- tapply(table$cells, table$gene, sum)
+    expect_true_(all(per_gene == sum(known)), "every cell with a stage and study is counted once per gene")
+    detected <- tapply(table$detected, table$gene, sum)
+    expect_equal_(unname(detected[[gene_ids[[1]]]]), sum(expression[known, 1] > 0),
+        "cells detecting the first gene")
+    expect_true_(all(table$fraction >= 0 & table$fraction <= 1), "fractions between 0 and 1")
+
+    table20 <- gene_detection_table(n, expression, stage, study, min_cells = 20)
+    expect_true_(all(table20$cells >= 20), "points with fewer than 20 cells are left out")
+    p <- plot_gene_detection(table20, stage, study)
+    expect_true_(inherits(p, "plotly"), "the detection plot is a plotly object")
+})

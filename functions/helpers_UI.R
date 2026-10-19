@@ -319,12 +319,59 @@ subBlock <- function(i) {
           )
         )
       ),
+      gene_plot_type_row(i),
       withSpinner(plotlyOutput(paste0("gene_exp_plotly_", i), height = "400px"), type = 6, size = 0.5, color = "#3498db"),
       div(
         class = "d-flex justify-content-end gap-2 mt-2",
         downloadButton(paste0("download_gene_exp_", i), label = "Data", class = "btn-sm btn-outline-secondary"),
         actionButton(paste0("remove_btn_", i), label = fontawesome::fa("minus"), class = "btn-sm btn-outline-danger btn_remove"),
         actionButton(paste0("add_btn_", i), label = fontawesome::fa("plus"), class = "btn-sm btn-outline-success btn_add")
+      )
+    )
+  )
+}
+
+# Plot type of gene expression card `i`; "Cells detecting" also asks for the
+# field of the points and the minimum number of cells per point.
+gene_plot_type_row <- function(i) {
+  is_detection <- sprintf("input['plot_type_exp_%s'] == 'detection'", i)
+  fluidRow(
+    class = "g-1 align-items-end",
+    column(
+      width = 4,
+      selectInput(
+        paste0("plot_type_exp_", i),
+        tags$span("Plot", class = "small fw-semibold"),
+        choices = GENE_PLOT_TYPES,
+        width = "100%"
+      )
+    ),
+    column(
+      width = 4,
+      conditionalPanel(
+        is_detection,
+        selectInput(
+          paste0("split_exp_", i),
+          tags$span("Points by", class = "small fw-semibold"),
+          choices = group_choices,
+          selected = get_data_column("study_label"),
+          width = "100%"
+        )
+      )
+    ),
+    column(
+      width = 4,
+      conditionalPanel(
+        is_detection,
+        tags$div(
+          title = "Groups with fewer cells are not shown",
+          numericInput(
+            paste0("min_cells_exp_", i),
+            tags$span("Min. cells per point", class = "small fw-semibold"),
+            value = DETECTION_MIN_CELLS, min = 1, step = 1,
+            width = "100%"
+          )
+        )
       )
     )
   )

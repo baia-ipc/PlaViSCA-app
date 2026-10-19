@@ -31,6 +31,7 @@ source("functions/cell_counts.R")
 source("functions/plots_cell_counts.R")
 source("functions/plots_qc.R")
 source("functions/plots_gene_expression.R")
+source("functions/plots_gene_detection.R")
 source("functions/embedding_plots.R")
 
 # UI building blocks

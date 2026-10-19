@@ -91,9 +91,11 @@ The Gene Expression tab provides an interactive interface for exploring gene exp
 - **Flexible Plot Management**: Add or remove plot panels dynamically (panels display in a 2-column layout). Each panel has its own gene selection and grouping.
 - **Data Type**: Choose Raw or Normalized expression data (Scaled data is currently disabled).
 - **Gene Search**: Toggle between Gene Name and Gene ID search using the switch in each panel.
-- **Gene Selection**: Select up to 10 genes per panel; multi-gene panels display the averaged expression.
+- **Gene Selection**: Select up to 10 genes per panel; multi-gene violin plots display the averaged expression.
 - **Group by**: Organize expression by Study label, Broad life-cycle stage, Life-cycle stage, Host species, or Treatment.
-- **Violin Plots**: Each panel displays a Plotly violin plot with hover tooltips showing mean, SD, and cell count per group.
+- **Plot**: choose the kind of plot of each panel:
+  - **Violin**: each panel displays a Plotly violin plot with hover tooltips showing mean, SD, and cell count per group.
+  - **Cells detecting**: the percentage of cells in which each gene is detected (expression above 0), per group, with one point per value of **Points by** (Study label by default) and one row of points per gene. Groups with fewer cells than **Min. cells per point** (20 by default) are left out, and so are cells with a missing value. For example, select DBP, CSP and AMA1, group by Life-cycle stage and keep the points by Study label to see whether each study detects the genes in the same stages.
 - **Annotations**: Direct links to PlasmoDB and NCBI per gene (supports multiple tabs for multi-gene selections).
 - **Download**: Export per-panel expression data as an `.xlsx` file containing an Expression Data sheet and a Metadata sheet.
 
