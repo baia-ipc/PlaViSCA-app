@@ -71,11 +71,11 @@ The Embeddings tab offers dimensionality reduction and customizable visualizatio
 | Dimension    | 2D / 3D (default)                              |
 | X / Y axes   | Selectable when 2D mode is active              |
 
-**Color by**: Study label, Broad life-cycle stage, Life-cycle stage, Host species, Host and tissue, Treatment, Parasite strain / isolate, Parasite origin location, Single-cell technology, or Genes.
+**Color by** (in the title bar of the plot): Study label, Broad life-cycle stage, Life-cycle stage, Host species, Host and tissue, Treatment, Parasite strain / isolate, Parasite origin location, Single-cell technology, or Genes. With Genes, choose the genes in the settings panel.
 
-**Visualization bar**: the title bar of the plot holds the **Compare Plots** and **Download Data** buttons.
+**Visualization bar**: the title bar of the plot holds **Color by** and the **Compare Plots** and **Download Data** buttons.
 
-**Compare Plots mode**: Click **Compare Plots** to display two independent plots (Plot A and Plot B) side-by-side, each with its own **Color by** selector in its title bar; a gene input appears above a plot when it is colored by genes.
+**Compare Plots mode**: Click **Compare Plots** to display two independent plots (Plot A and Plot B) side-by-side, each with its own **Color by** selector in its title bar; a gene input appears above a plot when it is colored by genes. The legends sit below the plots, so that they do not cover cells.
 
 **Interactive Cell Selection**: Click any cell to open a modal dialog showing a per-cell gene expression table (gene ID, gene name, expression value, description). The table is filterable and exportable as CSV.
 

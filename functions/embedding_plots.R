@@ -126,7 +126,7 @@ get_dim <- function(plot_type) {
 
 
 get_legend_layout <- function(legend_title, num_categories = NULL, is_dual_plot = FALSE, is_gene_plot = FALSE) {
-  # Side by side, the plots are narrow: the legend goes below the plot, in
+  # Side by side (2D), the plots are narrow: the legend goes below the plot, in
   # the bottom margin (get_plot_margins()), so that it does not cover cells
   if (is_dual_plot && is_gene_plot) {
     return(list(
@@ -360,8 +360,10 @@ plot_3d <- function(
     NULL
   }
 
-  legend_layout <- get_legend_layout(legend_title, num_categories, is_dual_plot, !is_categorical)
-  plot_margins <- get_plot_margins(num_categories, is_dual_plot)
+  # a 3D scene needs all of the height: side by side too, the legend stays
+  # over the plot
+  legend_layout <- get_legend_layout(legend_title, num_categories, FALSE, !is_categorical)
+  plot_margins <- get_plot_margins(num_categories, FALSE)
 
   if (is_categorical) {
     p <- plot_ly(

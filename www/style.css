@@ -849,6 +849,41 @@ table.dataTable thead th {
   margin-left: auto;
 }
 
+/* "Color by" of the single plot, in the dark title bar */
+.visualization-header .header-color-by {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.visualization-header .header-color-by-label {
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.8rem;
+}
+
+.visualization-header .header-color-by .selectize-input,
+.visualization-header .header-color-by .selectize-input input {
+  color: #fff !important;
+}
+
+.visualization-header .header-color-by .selectize-input {
+  border-color: rgba(255, 255, 255, 0.6) !important;
+  border-radius: 999px;
+}
+
+.visualization-header .header-color-by .selectize-control.single .selectize-input:after {
+  border-top-color: #fff;
+}
+
+.visualization-header .header-color-by .selectize-input:hover,
+.visualization-header .header-color-by .selectize-input.focus {
+  color: var(--primary-color) !important;
+}
+
+.visualization-header .header-color-by .selectize-input.focus input {
+  color: var(--primary-color) !important;
+}
+
 .visualization-header #enable_comparison,
 .visualization-header #download_data {
   min-width: 0;
@@ -873,8 +908,8 @@ table.dataTable thead th {
   color: var(--primary-color);
 }
 
-/* the title bar forces its children visible; let conditionalPanel hide this */
-.card-header.visualization-header .link-views[style*="display: none"] {
+/* the title bar forces its children visible; let conditionalPanel hide them */
+.card-header.visualization-header [data-display-if][style*="display: none"] {
   display: none !important;
 }
 

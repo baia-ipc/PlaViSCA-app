@@ -21,6 +21,23 @@ ui_tab_embeddings <- function() {
           tags$span("Visualization", class = "fw-bold", style = "font-size: 0.9rem;"),
           div(
             class = "visualization-actions",
+            # Color by of the single plot (the comparison plots have theirs in
+            # their own title bars)
+            conditionalPanel(
+              condition = "!input.comparison_active",
+              div(
+                class = "header-color-by",
+                tags$span("Color by", class = "header-color-by-label"),
+                selectizeInput(
+                  "color",
+                  NULL,
+                  choices = category_choices(),
+                  selected = get_data_column("broad_stage"),
+                  width = "190px",
+                  options = list(dropdownParent = "body")
+                )
+              )
+            ),
             # Compare Plots only: rotating or zooming one plot moves the other
             # (www/script.js)
             conditionalPanel(
@@ -171,18 +188,6 @@ embedding_settings_controls <- function() {
       )
     ),
     shinyjs::hidden(checkboxInput("comparison_active", NULL, value = FALSE)),
-    # Color by (single plot only; comparison plots have theirs in the title bars)
-    conditionalPanel(
-      condition = "!input.comparison_active",
-      selectizeInput(
-        "color",
-        tags$span("Color by", class = "settings-label"),
-        choices = category_choices(),
-        selected = get_data_column("broad_stage"),
-        width = "100%",
-        options = list(dropdownParent = "body")
-      )
-    ),
     # Gene selection, shown when the single plot is coloured by genes
     div(
       id = "genes_single_panel",
