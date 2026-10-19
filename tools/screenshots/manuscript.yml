@@ -47,6 +47,20 @@ shots:
           const genes = ['CSP', 'DBP', 'P47'];
           genes.forEach(g => s.addOption({value: g, label: g}));
           s.setValue(genes); })()
+      # set again in case the menu was reset after the first time
+      - wait: 5
+      - js: >-
+          (() => { const s = document.getElementById('genes_second').selectize;
+          const genes = ['CSP', 'DBP', 'P47'];
+          genes.forEach(g => s.addOption({value: g, label: g}));
+          s.setValue(genes); })()
+      # set again in case the menu was reset after the first time
+      - wait: 5
+      - js: >-
+          (() => { const s = document.getElementById('genes_second').selectize;
+          const genes = ['CSP', 'DBP', 'P47'];
+          genes.forEach(g => s.addOption({value: g, label: g}));
+          s.setValue(genes); })()
       - drawn: true
       - select: {id: combine_genes_second, value: each}
       - drawn: true
