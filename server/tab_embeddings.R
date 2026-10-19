@@ -43,8 +43,10 @@ embeddings_tab_server <- function(input, output, session, loaded, filters) {
   })
 
   # Plot of the cells as set by `params` (see embedding_figure()); `dual`
-  # for the comparison plots
+  # for the comparison plots. The plot depends on `params`, the cells and the
+  # embedding; the rest is read without dependency.
   draw_plot <- function(params, dual) {
+    force(params)
     plot_data <- cells()$data
     type <- plot_type()
     isolate(embedding_figure(
