@@ -144,7 +144,8 @@ embedding_gene_plot <- function(df, expression, combine, xaxis_input, yaxis_inpu
                                 plot_type, plot_dim, is_dual_plot = FALSE) {
     combine <- effective_gene_combine(combine, ncol(expression))
     if (combine == "each") {
-        return(embedding_blend_plot(df, expression, xaxis_input, yaxis_input, size, plot_type, plot_dim))
+        return(embedding_blend_plot(df, expression, xaxis_input, yaxis_input, size, plot_type, plot_dim,
+                                    is_dual_plot))
     }
     df$.gene_colour <- combine_gene_expression(expression, combine)
     embedding_plot(df, xaxis_input, yaxis_input, ".gene_colour",
@@ -155,7 +156,10 @@ embedding_gene_plot <- function(df, expression, combine, xaxis_input, yaxis_inpu
 # Embedding plot with one colour per gene (2 or 3 genes), mixed in each cell
 # (blend_gene_colours()). Cells with higher expression are drawn on top. The
 # key: a colour grid for 2 genes, legend entries for 3.
-embedding_blend_plot <- function(df, expression, xaxis_input, yaxis_input, size, plot_type, plot_dim) {
+embedding_blend_plot <- function(df, expression, xaxis_input, yaxis_input, size, plot_type, plot_dim,
+                                 is_dual_plot = FALSE) {
+    # side by side in 2D, the legend goes below the plot (get_legend_layout())
+    below <- is_dual_plot && plot_dim != "3d"
     genes <- colnames(expression)
     scaled <- lapply(seq_along(genes), function(g) scale_gene_expression(expression[, g]))
     tops <- vapply(scaled, function(s) attr(s, "top"), numeric(1))
@@ -186,10 +190,10 @@ embedding_blend_plot <- function(df, expression, xaxis_input, yaxis_input, size,
                 text = hover, hoverinfo = "text", key = ~plotly_key, source = "embedding",
                 showlegend = FALSE)
     }
-    p <- layout(p, font = list(size = 14), margin = get_plot_margins(), autosize = TRUE)
+    p <- layout(p, font = list(size = 14), margin = get_plot_margins(NULL, below), autosize = TRUE)
     # the colour grid of 2 genes sits right of the plot
     p <- embedding_axis_titles(p, axes, plot_dim, domain = if (length(genes) == 2) c(0, 0.78) else c(0, 1))
-    if (length(genes) == 2) add_gene_colour_grid(p, genes, tops) else add_gene_colour_legend(p, genes, coords)
+    if (length(genes) == 2) add_gene_colour_grid(p, genes, tops) else add_gene_colour_legend(p, genes, coords, below)
 }
 
 # Axis titles of an embedding plot (2D axes or 3D scene); `domain`: the part
@@ -232,7 +236,7 @@ add_gene_colour_grid <- function(p, genes, tops) {
 # Legend of 3 genes: one entry per gene, pair and all three. Each entry is a
 # tiny point on the first cell (plotly leaves traces without points out of
 # the legend); the legend draws its symbols at a constant size.
-add_gene_colour_legend <- function(p, genes, coords) {
+add_gene_colour_legend <- function(p, genes, coords, below = FALSE) {
     entries <- gene_colour_legend(genes)
     at <- lapply(coords, function(v) v[1])
     for (i in seq_len(nrow(entries))) {
@@ -247,7 +251,7 @@ add_gene_colour_legend <- function(p, genes, coords) {
                       hoverinfo = "skip", inherit = FALSE)
         }
     }
-    legend <- get_legend_layout("Expressed genes")
+    legend <- get_legend_layout("Expressed genes", NULL, below)
     legend$itemclick <- FALSE
     legend$itemdoubleclick <- FALSE
     layout(p, legend = legend, showlegend = TRUE)

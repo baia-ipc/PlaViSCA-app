@@ -153,7 +153,7 @@ get_legend_layout <- function(legend_title, num_categories = NULL, is_dual_plot 
     return(list(
       title = list(text = legend_title, font = list(size = 11, family = "Arial"), side = "top"),
       orientation = "h",
-      x = 0, xanchor = "left", y = -0.08, yanchor = "top",
+      x = 0, xanchor = "left", y = -0.22, yanchor = "top",
       len = 0.5, thickness = 10,
       tickfont = list(size = 10, family = "Arial")
     ))
@@ -162,7 +162,7 @@ get_legend_layout <- function(legend_title, num_categories = NULL, is_dual_plot 
     return(list(
       title = list(text = legend_title, font = list(size = 12, family = "Arial"), side = "top"),
       orientation = "h",
-      x = 0, xanchor = "left", y = -0.06, yanchor = "top",
+      x = 0, xanchor = "left", y = -0.22, yanchor = "top",
       itemsizing = "constant",
       font = list(size = 11, family = "Arial"),
       itemclick = "toggle",
@@ -212,7 +212,7 @@ get_legend_layout <- function(legend_title, num_categories = NULL, is_dual_plot 
 get_plot_margins <- function(num_categories = NULL, is_dual_plot = FALSE) {
   # Minimum margins to maximize plot size; side by side, the same bottom
   # margin for both plots holds the legend, so that both have the same size
-  list(l = 10, r = 10, t = 10, b = if (is_dual_plot) 130 else 10)
+  list(l = 10, r = 10, t = 10, b = if (is_dual_plot) 180 else 10)
 }
 
 
@@ -524,6 +524,9 @@ embedding_plot <- function(
       colors,
       is_dual_plot
     )
+    # axis titles from the column names (plot_2d() gets the coordinates)
+    p <- layout(p, xaxis = list(title = paste("X-", xaxis_input)),
+                yaxis = list(title = paste("Y-", yaxis_input)))
   } else {
     coords <- get_dim(plot_type)
     p <- plot_3d(
