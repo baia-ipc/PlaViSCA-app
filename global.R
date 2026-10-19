@@ -35,7 +35,6 @@ source("functions/data_checks.R")
 source("functions/filters.R")
 source("functions/genes.R")
 source("functions/gene_expression_data.R")
-source("functions/data_summary.R")
 source("functions/data_sources_table.R")
 source("functions/cache_keys.R")
 

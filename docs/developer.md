@@ -39,7 +39,7 @@ the app, see the [README](../README.md); for using it, see the
 | `functions/gene_summaries.R`, `plots_gene_summaries.R`, `plots_gene_distribution.R` | per-group summaries of gene expression (`gene_group_summary()`) and their plots; violin and box plots |
 | `functions/cell_counts.R` | counting cells by one or two fields (Metadata plots tab) |
 | `functions/plot_builder.R` | the plot builder of the Metadata plots tab (a Shiny module: `plot_builder_ui()`, `plot_builder_server()`); the tab adds and removes builders in `server/tab_plots.R` |
-| `functions/data_summary.R`, `cache_keys.R` | selection summaries; cache keys |
+| `functions/cache_keys.R` | cache keys of the per-session caches |
 | `functions/helpers_UI.R` | UI building blocks: filter rows, gene links, team cards |
 | `functions/embedding_figure.R`, `cell_details.R` | the embedding plot of a set of cells (`embedding_figure()`); the expressed genes of one cell |
 | `server/` | server code, one file per tab or shared part (see [The server code](#the-server-code)) |
