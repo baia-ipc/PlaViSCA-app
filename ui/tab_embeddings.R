@@ -32,7 +32,7 @@ ui_tab_embeddings <- function() {
                   "color",
                   NULL,
                   choices = category_choices(),
-                  selected = get_data_column("broad_stage"),
+                  selected = get_data_column("detailed_stage"),
                   width = "190px",
                   options = list(dropdownParent = "body")
                 )

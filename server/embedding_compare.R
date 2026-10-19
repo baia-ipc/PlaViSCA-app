@@ -7,7 +7,7 @@
 # `draw_plot(params, dual)` draws a plot (see embeddings_tab_server()).
 
 embedding_compare_server <- function(input, output, session, gene_data, comparison_mode, draw_plot) {
-  single_plot_color <- reactiveVal(get_data_column("broad_stage"))
+  single_plot_color <- reactiveVal(get_data_column("detailed_stage"))
   observe({
     if (!comparison_mode()) single_plot_color(input$color)
   })

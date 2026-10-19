@@ -75,7 +75,7 @@ The Embeddings tab offers dimensionality reduction and customizable visualizatio
 
 **Legend position and size**: the legend (the colors of a category, the color scale of gene expression, or the color key of *Each gene separately*) goes over a corner of the plot, right of it or below it, or is hidden. *Auto* puts it over the top-left corner, or below the plots in 2D Compare Plots mode; the color grid of 2 genes goes right of the plot. Outside the plot, the legend takes room from the plot. **Legend Size** makes its text and color scale smaller or larger, e.g. for a screenshot.
 
-**Color by** (in the title bar of the plot): Study label, Broad life-cycle stage, Life-cycle stage, Host species, Host and tissue, Treatment, Parasite strain / isolate, Parasite origin location, Single-cell technology, or Genes. With Genes, a row with the gene menu (and, for several genes, **Combine genes**) appears above the plot, under its title bar.
+**Color by** (in the title bar of the plot): Study label, Broad life-cycle stage, Life-cycle stage, Host species, Host and tissue, Treatment, Parasite strain / isolate, Parasite origin location, Single-cell technology, or Genes (default: Life-cycle stage). With Genes, a row with the gene menu (and, for several genes, **Combine genes**) appears above the plot, under its title bar.
 
 **Coloring by genes**: with **Color by** set to *Genes*, select up to 10 genes by name, or by ID with the switch next to the menu (switching keeps the selected genes). With more than one gene, **Combine genes** sets how they color the cells:
 
