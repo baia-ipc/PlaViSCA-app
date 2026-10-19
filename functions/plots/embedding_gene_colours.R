@@ -26,9 +26,14 @@ gene_combine_choices <- function(n_genes) {
 }
 
 # The combination used for `n_genes` genes: the menu value if it is a
-# choice for that number of genes, otherwise the mean.
+# choice for that number of genes, otherwise "Each gene separately" (2 or 3
+# genes) or the mean.
 effective_gene_combine <- function(combine, n_genes) {
-    if (length(combine) == 1 && combine %in% gene_combine_choices(n_genes)) combine else "mean"
+    choices <- gene_combine_choices(n_genes)
+    if (length(combine) == 1 && combine %in% choices) {
+        return(combine)
+    }
+    if ("each" %in% choices) "each" else "mean"
 }
 
 # Expression of the selected genes in the cells of the plot: a numeric matrix

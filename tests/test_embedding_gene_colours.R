@@ -19,7 +19,8 @@ test_that_("Combine genes: the choices of the Gene expression tab, Each for 2 or
     expect_equal_(effective_gene_combine("each", 3), "each", "Each kept for 3 genes")
     expect_equal_(effective_gene_combine("each", 4), "mean", "Each falls back to Mean above 3 genes")
     expect_equal_(effective_gene_combine("sum", 5), "sum", "Sum for any number of genes")
-    expect_equal_(effective_gene_combine(NULL, 2), "mean", "Mean without a choice")
+    expect_equal_(effective_gene_combine(NULL, 2), "each", "Each gene separately without a choice, 2 genes")
+    expect_equal_(effective_gene_combine(NULL, 5), "mean", "Mean without a choice, 5 genes")
 })
 
 test_that_("Combine genes: mean and sum of the genes in each cell", {

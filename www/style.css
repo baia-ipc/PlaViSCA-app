@@ -941,6 +941,18 @@ table.dataTable thead th {
   margin-left: auto;
 }
 
+/* "Genes" choice of the Color by menus: first and set apart from the
+   categories, since it opens the gene menu */
+.selectize-dropdown .option[data-value="genes"] {
+  font-weight: 700;
+  color: var(--primary-color);
+  border-bottom: 1px solid #dee2e6;
+}
+
+.header-color-by .selectize-input .item[data-value="genes"] {
+  font-weight: 700;
+}
+
 /* "Color by" of the single plot, in the dark title bar */
 .visualization-header .header-color-by {
   display: flex;

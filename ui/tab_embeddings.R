@@ -259,8 +259,8 @@ embedding_gene_panel <- function(condition, label_id, check_id, genes_id, plasmo
 }
 
 # "Combine genes" menu of an embedding plot (choices: COMBINE_GENES), shown
-# while more than one gene is selected in `genes_id`. The server offers "Each
-# gene separately" only for 2 or 3 genes.
+# while more than one gene is selected in `genes_id`; by default "Each gene
+# separately", which the server offers only for 2 or 3 genes (otherwise Mean).
 gene_combine_menu <- function(id, genes_id) {
   conditionalPanel(
     condition = sprintf("input.%s && input.%s.length > 1", genes_id, genes_id),
@@ -273,7 +273,7 @@ gene_combine_menu <- function(id, genes_id) {
         id,
         NULL,
         choices = COMBINE_GENES,
-        selected = "mean",
+        selected = "each",
         width = "165px",
         options = list(dropdownParent = "body")
       )
