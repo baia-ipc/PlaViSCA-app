@@ -24,7 +24,7 @@ gene_expression_card <- function(i) {
           )
         ),
         column(width = 6, gene_select(i)),
-        column(width = 2, gene_links(i))
+        column(width = 2, gene_link_buttons(i))
       ),
       gene_plot_options_row(i),
       withSpinner(plotlyOutput(paste0("gene_exp_plotly_", i), height = "400px"), type = 6, size = 0.5, color = "#3498db"),
@@ -61,7 +61,7 @@ gene_select <- function(i) {
 }
 
 # PlasmoDB and NCBI buttons of the selected gene(s).
-gene_links <- function(i) {
+gene_link_buttons <- function(i) {
   link <- function(id, title, icon) {
     tags$a(
       id = paste0(id, i), href = "#", target = "_blank",

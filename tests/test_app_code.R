@@ -55,6 +55,24 @@ test_that_("every app R file parses", {
     expect_empty_(basename(broken), "R files with syntax errors")
 })
 
+test_that_("no function is defined in two files of functions/ or ui/", {
+    # all these files are sourced into one environment: a second definition
+    # silently replaces the first
+    files <- grep("/(functions|ui)/[^/]*\\.R$", live_app_files(), value = TRUE)
+    defined <- unlist(lapply(files, function(f) {
+        names <- vapply(parse(f), function(e) {
+            if (is.call(e) && identical(e[[1]], as.name("<-")) && is.name(e[[2]]) &&
+                is.call(e[[3]]) && identical(e[[3]][[1]], as.name("function"))) {
+                as.character(e[[2]])
+            } else NA_character_
+        }, character(1))
+        setNames(rep(f, sum(!is.na(names))), names[!is.na(names)])
+    }))
+    twice <- unique(names(defined)[duplicated(names(defined))])
+    expect_empty_(vapply(twice, function(n) paste0(n, ": ", paste(basename(defined[names(defined) == n]), collapse = ", ")),
+                         character(1)), "functions defined in more than one file")
+})
+
 test_that_("global.R and ui.R build the page", {
     if (!file.exists(app_data_path("cleaned_dataset.rds"))) {
         skip_test(sprintf("no data at %s", app_data_path("cleaned_dataset.rds")))
