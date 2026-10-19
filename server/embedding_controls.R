@@ -86,7 +86,8 @@ embedding_controls_server <- function(input, output, session, gene_data, compari
     })
   }
 
-  # PlasmoDB and NCBI links of the genes of each plot coloured by genes
+  # PlasmoDB and NCBI links of each plot coloured by genes, while one gene is
+  # selected
   observe({
     req(!isTRUE(comparison_mode()), input$color == "genes", gene_data()$genes)
     gene_links(convert_gene_selection(input$genes_n, gene_data()$genes, TRUE), "plasmo_link")

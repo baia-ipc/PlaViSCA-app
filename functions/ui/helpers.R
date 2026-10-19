@@ -1,26 +1,29 @@
-# Points the PlasmoDB button `plasmo_id` and its NCBI twin (the same ID with
-# "ncbi" for "plasmo") at the pages of the genes `gene_ids`: a click opens the
-# page of the gene or, for several genes, one page per gene.
-gene_links <- function(gene_ids, plasmo_id) {
-  if (length(gene_ids) == 0) {
-    return(invisible(NULL))
+# PlasmoDB and NCBI pages of the selected gene (`plasmodb`, `ncbi`); NULL
+# unless exactly one gene is selected.
+gene_link_urls <- function(gene_ids) {
+  if (length(gene_ids) != 1) {
+    return(NULL)
   }
-  point_button <- function(id, urls) {
+  list(plasmodb = external_link("plasmodb_gene", gene_ids), ncbi = external_link("ncbi_protein", gene_ids))
+}
+
+# Shows the PlasmoDB button `plasmo_id` and its NCBI twin (the same ID with
+# "ncbi" for "plasmo") only while one gene is selected (`gene_ids`), and
+# points them at the pages of that gene. The buttons start hidden.
+gene_links <- function(gene_ids, plasmo_id) {
+  urls <- gene_link_urls(gene_ids)
+  set_button <- function(id, url) {
     shinyjs::runjs(sprintf(
-      "(function (el, urls) {
+      "(function (el, url) {
         if (!el) return;
-        el.href = urls[0];
-        el.onclick = urls.length < 2 ? null : function (e) {
-          e.preventDefault();
-          urls.forEach(function (url) { window.open(url, '_blank'); });
-          return false;
-        };
+        el.style.display = url ? '' : 'none';
+        if (url) el.href = url;
       })(document.getElementById('%s'), %s);",
-      id, jsonlite::toJSON(unname(urls))
+      id, if (is.null(url)) "null" else jsonlite::toJSON(url, auto_unbox = TRUE)
     ))
   }
-  point_button(plasmo_id, external_link("plasmodb_gene", gene_ids))
-  point_button(sub("plasmo", "ncbi", plasmo_id), external_link("ncbi_protein", gene_ids))
+  set_button(plasmo_id, urls$plasmodb)
+  set_button(sub("plasmo", "ncbi", plasmo_id), urls$ncbi)
 }
 
 # One filter widget, built entirely from config/data_columns.yml.

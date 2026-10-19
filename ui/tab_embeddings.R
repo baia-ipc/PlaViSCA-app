@@ -241,14 +241,14 @@ embedding_gene_panel <- function(condition, label_id, check_id, genes_id, plasmo
         class = "embedding-gene-links",
         tags$a(
           id = plasmo_id, href = "#", target = "_blank",
-          class = paste("btn btn-sm gene-link-btn", btn_class),
+          class = paste("btn btn-sm gene-link-btn", btn_class), style = "display: none;",
           `data-bs-toggle` = "tooltip", `data-bs-placement` = "top",
           title = "PlasmoDB",
           tags$i(class = "fas fa-external-link-alt")
         ),
         tags$a(
           id = ncbi_id, href = "#", target = "_blank",
-          class = paste("btn btn-sm gene-link-btn", btn_class),
+          class = paste("btn btn-sm gene-link-btn", btn_class), style = "display: none;",
           `data-bs-toggle` = "tooltip", `data-bs-placement` = "top",
           title = "NCBI",
           tags$i(class = "fas fa-dna")

@@ -60,12 +60,13 @@ gene_select <- function(i) {
   )
 }
 
-# PlasmoDB and NCBI buttons of the selected gene(s).
+# PlasmoDB and NCBI buttons of the selected gene, shown only for one gene
+# (gene_links()).
 gene_link_buttons <- function(i) {
   link <- function(id, title, icon) {
     tags$a(
       id = paste0(id, i), href = "#", target = "_blank",
-      class = "btn btn-outline-info btn-sm gene-link-btn",
+      class = "btn btn-outline-info btn-sm gene-link-btn", style = "display: none;",
       `data-bs-toggle` = "tooltip", `data-bs-placement` = "top",
       title = title, tags$i(class = icon)
     )

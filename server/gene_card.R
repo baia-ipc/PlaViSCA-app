@@ -67,7 +67,8 @@ gene_card_server <- function(i, input, output, cells, global_loading) {
     }
   )
 
-  # PlasmoDB and NCBI buttons: the pages of the selected genes
+  # PlasmoDB and NCBI buttons: the pages of the selected gene, while only one
+  # is selected
   observe({
     req(cells())
     gene_links(convert_gene_selection(card_input("genes"), cells()$genes, TRUE), paste0("plasmo_link_exp_", i))

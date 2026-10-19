@@ -127,6 +127,16 @@ test_that_("external URLs are written only in config/external_links.yml and conf
     expect_empty_(offenders, "hardcoded external URLs")
 })
 
+test_that_("PlasmoDB and NCBI buttons only for one selected gene", {
+    helpers <- new.env(parent = globalenv())
+    sys.source(file.path(APP_ROOT, "functions", "ui", "helpers.R"), envir = helpers)
+    urls <- helpers$gene_link_urls("PVP01_A")
+    expect_equal_(urls$plasmodb, "https://plasmodb.org/plasmo/app/record/gene/PVP01_A", "PlasmoDB page")
+    expect_equal_(urls$ncbi, external_link("ncbi_protein", "PVP01_A"), "NCBI page")
+    expect_true_(is.null(helpers$gene_link_urls(c("PVP01_A", "PVP01_B"))), "no links for 2 genes")
+    expect_true_(is.null(helpers$gene_link_urls(character(0))), "no links without a gene")
+})
+
 test_that_("external links and team information are complete", {
     expect_equal_(
         external_link("plasmodb_gene", c("PVP01_A", "PVP01_B")),
