@@ -35,7 +35,7 @@ the app, see the [README](../README.md); for using it, see the
 | `functions/genes.R`, `gene_expression_data.R` | gene lists, name/ID conversion, per-plot expression tables |
 | `functions/plots_*.R`, `embedding_plots.R` | plotly plots of each tab |
 | `functions/cell_counts.R` | counting cells by one or two fields (Metadata plots tab) |
-| `functions/plot_builder.R` | the plot builder of the Metadata plots tab (a Shiny module: `plot_builder_ui()`, `plot_builder_server()`) |
+| `functions/plot_builder.R` | the plot builder of the Metadata plots tab (a Shiny module: `plot_builder_ui()`, `plot_builder_server()`); the tab adds and removes builders in `server/tab_plots.R` |
 | `functions/data_summary.R`, `tab_sync.R` | selection summaries; keeping tabs in sync, cache keys |
 | `functions/helpers_UI.R` | UI building blocks: filter rows, gene links, team cards |
 | `server/` | server code with its own file: the filters shared by the tabs (`shared_filters.R`) and the Metadata plots tab (`tab_plots.R`) |

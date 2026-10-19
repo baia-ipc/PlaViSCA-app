@@ -519,7 +519,7 @@ server <- function(input, output, session) {
   })
 
 
-  # Metadata plots tab: number boxes and the plot builder (server/tab_plots.R)
+  # Metadata plots tab: number boxes and the plot builders (server/tab_plots.R)
   plots_tab_server(input, output, filtered_data, tab_filters[["Metadata plots"]])
 
   # Metadata table tab: one row per cell, filtered by the tab's filters

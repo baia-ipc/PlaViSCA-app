@@ -38,13 +38,20 @@ shots:
 
   - name: plots
     tab: Metadata plots
-    # the example of the manual: life-cycle stages of each study, in %
+    # the example of the manual: life-cycle stages of each study, in %, as
+    # stacked bars and, in a second plot, as a heatmap
     steps:
       - drawn: true
-      - select: {id: plot_builder-type, value: stacked}
-      - select: {id: plot_builder-split_by, value: detailed_stage}
+      - select: {id: plot_builder_1-type, value: stacked}
+      - select: {id: plot_builder_1-split_by, value: detailed_stage}
       - drawn: true
-      - click: "input[name='plot_builder-show_as'][value='percent']"
+      - click: "input[name='plot_builder_1-show_as'][value='percent']"
+      - click: "#plot_builder_1-add"
+      - wait_for: "#plot_builder_2-plot"
+      - drawn: true
+      - select: {id: plot_builder_2-type, value: heatmap}
+      - select: {id: plot_builder_2-split_by, value: detailed_stage}
+      - drawn: true
     output: manual/docs/source/imgs/plots.png
 
   - name: data_table

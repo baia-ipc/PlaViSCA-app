@@ -1,6 +1,7 @@
-# Metadata plots tab: the plot builder, which counts the selected cells by one
-# or two metadata fields (functions/plot_builder.R). The settings sidebar can
-# hide the missing values.
+# Metadata plots tab: plot builders, each counting the selected cells by one
+# or two metadata fields (functions/plot_builder.R), two per row. The "+"
+# button of the last plot adds another one (server/tab_plots.R). The settings
+# sidebar can hide the missing values.
 
 ui_tab_plots <- function() {
   tabPanel(
@@ -17,7 +18,10 @@ ui_tab_plots <- function() {
         uiOutput("num_studies_meta"),
         uiOutput("num_species_meta")
       ),
-      plot_builder_ui("plot_builder")
+      fluidRow(
+        id = "metadata_plots_container",
+        metadata_plot_column("plot_builder_1", can_remove = FALSE)
+      )
     )
   )
 }

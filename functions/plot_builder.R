@@ -3,13 +3,16 @@
 # A card where the user chooses the plot type, then the field to count cells
 # by and, for the plot types of two fields, a second field to split them by.
 # Below the plot: the help text of the chosen fields, the choice between
-# numbers of cells and percentages and a button to export the counts as CSV.
+# numbers of cells and percentages, a button to export the counts as CSV, and
+# the "-" / "+" buttons that remove this plot or add another one.
 #
-#   plot_builder_ui("builder")
-#   plot_builder_server("builder", cells, show_missing)
+#   metadata_plot_column("plot_builder_1")
+#   handles <- plot_builder_server("plot_builder_1", cells, show_missing)
 #
 # `cells` is a reactive with the selected cells (metadata rows), and
-# `show_missing` a reactive TRUE/FALSE.
+# `show_missing` a reactive TRUE/FALSE. The server returns the "+" and "-"
+# button values (`handles$add()`, `handles$remove()`), which the tab server
+# (server/tab_plots.R) uses to add and remove plots.
 # =============================================================================
 
 # Fields to split by: all fields except the one counted by.
@@ -18,8 +21,19 @@ split_by_choices <- function(field) {
     fields[fields != field]
 }
 
+# The plot builder in a half-width column of the tab's plot row. Its ID is the
+# builder ID followed by "_column". `can_remove = FALSE` hides the "-" button.
+metadata_plot_column <- function(id, can_remove = TRUE) {
+    column(
+        width = 6,
+        id = paste0(id, "_column"),
+        plot_builder_ui(id, can_remove = can_remove)
+    )
+}
+
 plot_builder_ui <- function(id, type = "stacked", field = "study_label",
-                            split_by = "broad_stage", show_as = "percent") {
+                            split_by = "broad_stage", show_as = "percent",
+                            can_remove = TRUE) {
     ns <- NS(id)
     split_choices <- split_by_choices(field)
     if (!split_by %in% split_choices) split_by <- split_choices[[1]]
@@ -29,10 +43,11 @@ plot_builder_ui <- function(id, type = "stacked", field = "study_label",
         paste0("'", PLOT_TYPES_TWO_FIELDS, "'", collapse = ", ")
     )
 
+    # No full-screen button: it would cover the "+" button
     card(
-        full_screen = TRUE,
-        class = "plot-builder",
+        class = "plot-builder shadow-sm mb-3",
         card_body(
+            padding = "10px",
             # Not in the card header: the header styles of the app would
             # break this layout
             fluidRow(
@@ -58,7 +73,7 @@ plot_builder_ui <- function(id, type = "stacked", field = "study_label",
             ),
             withSpinner(
                 type = 6, size = 0.5, color = "#3498db",
-                plotlyOutput(ns("plot"), height = "600px")
+                plotlyOutput(ns("plot"), height = "450px")
             ),
             div(class = "text-muted small mt-2", uiOutput(ns("help")))
         ),
@@ -70,8 +85,20 @@ plot_builder_ui <- function(id, type = "stacked", field = "study_label",
                     c("Cells" = "cells", "% of cells" = "percent"),
                     selected = show_as, inline = TRUE
                 ),
-                downloadButton(ns("download"), "Export .csv",
-                               class = "btn-sm btn-outline-secondary")
+                div(
+                    class = "d-flex gap-2",
+                    downloadButton(ns("download"), "Export .csv",
+                                   class = "btn-sm btn-outline-secondary"),
+                    actionButton(
+                        ns("remove"), fontawesome::fa("minus"),
+                        class = "btn-sm btn-outline-danger", title = "Remove this plot",
+                        style = if (!can_remove) "display: none;"
+                    ),
+                    actionButton(
+                        ns("add"), fontawesome::fa("plus"),
+                        class = "btn-sm btn-outline-success", title = "Add a plot"
+                    )
+                )
             )
         )
     )
@@ -130,5 +157,7 @@ plot_builder_server <- function(id, cells, show_missing) {
                 )
             }
         )
+
+        list(add = reactive(input$add), remove = reactive(input$remove))
     })
 }

@@ -102,7 +102,7 @@ The Gene Expression tab provides an interactive interface for exploring gene exp
 ![Figure 5: Metadata plots tab](imgs/plots.png)
 **Figure 5**: Metadata plots tab
 
-The Metadata plots tab counts the selected cells by one or two metadata fields and draws the counts as the plot you choose (**Figure 5**). Changing the filters updates the value boxes and the plot.
+The Metadata plots tab counts the selected cells by one or two metadata fields and draws the counts as the plot you choose (**Figure 5**). Changing the filters updates the value boxes and the plots.
 
 **Summary value boxes:**
 
@@ -112,7 +112,7 @@ The Metadata plots tab counts the selected cells by one or two metadata fields a
 | Studies       | Number of distinct studies represented |
 | Host Species  | Number of distinct host species        |
 
-**Plot builder.** Choose the plot type first; it decides whether the cells are counted by one field or by two:
+**Plots.** Each plot sits in a panel taking half the width of the page. Choose the plot type first; it decides whether the cells are counted by one field or by two:
 
 | Control | What it does |
 |---|---|
@@ -131,11 +131,13 @@ The two-field plot types show the same counts in different ways:
 
 Below the plot are the descriptions of the chosen fields and **Export .csv**, which saves the counts shown in the plot as a table.
 
-*Example: compare the life-cycle stages of the studies.* Choose **Plot type** "Stacked bars", **Count by** "Study label", **Split by** "Life-cycle stage" and "% of cells". Each bar is one study, divided into its stages. Switch to "Heatmap" to read the exact percentages.
+**More plots.** Click **+** below the last plot to add another one next to it (two per row), and **−** to remove a plot. Each plot has its own controls; all of them use the same filters.
+
+*Example: compare the life-cycle stages of the studies.* Choose **Plot type** "Stacked bars", **Count by** "Study label", **Split by** "Life-cycle stage" and "% of cells". Each bar is one study, divided into its stages. Click **+** and choose "Heatmap" with the same fields in the new plot to read the exact percentages next to it.
 
 > **Note:** Blood-stage cells get the life-cycle stage inferred by PlaViSca: the gametocyte call of the cell's cluster, otherwise the most similar reference time point. Sporozoites and liver stages, which PlaViSca does not classify, keep the authors' labels. The field "Source of the life-cycle stage" says which one a cell's stage comes from. The authors' labels remain available for comparison ("Life-cycle stage (authors)", "Gametocyte sex (authors)"): split one by the other to compare them.
 
-The settings panel (cog button) has one option, **Show missing**: untick it to leave out of the plot the cells whose value is missing.
+The settings panel (cog button) has one option, **Show missing**: untick it to leave out of all plots the cells whose value is missing.
 
 Hover over the plot for details; use the controls in its top-right corner to zoom, pan or download it (as PNG or SVG).
 
