@@ -1,6 +1,8 @@
-# Colours of "Each gene separately" in the embedding plots: a colour wheel.
-# Each of the k genes gets a hue, evenly spaced around the wheel in gene
-# order, and the colour of a cell mixes the hues of the genes it expresses:
+# Colours of "Each gene separately" for 4 genes or more (above
+# MAX_GENES_RGB_MIX; 2 or 3 genes are mixed as red, green and blue in
+# gene_colour_mix.R): a colour wheel. Each of the k genes gets a hue, evenly
+# spaced around the wheel in gene order, and the colour of a cell mixes the
+# hues of the genes it expresses:
 #   hue          the genes the cell expresses (the vector sum of their hues,
 #                weighted by their share of the cell's scaled expression);
 #   saturation   how specific the cell is: one gene gives the full colour,
@@ -11,10 +13,8 @@
 # chroma and luminance look equally strong. A colour that sRGB cannot show
 # keeps its hue and luminance and loses chroma (wheel_hcl()).
 
-# Colour (RGB, 0..1) of a cell that expresses none of the genes.
-GENE_COLOUR_NONE <- c(0.85, 0.85, 0.85)
-
-# Hue (degrees) of the first gene: 12 makes 3 genes red, green and blue.
+# Hue (degrees) of the first gene: 12 makes it red, as in the mixing of 2 or
+# 3 genes.
 GENE_WHEEL_HUE_OFFSET <- 12
 
 # Chroma of a cell expressing one gene at full intensity; luminance at zero
@@ -51,19 +51,6 @@ wheel_chroma_limits <- local({
 wheel_hcl <- function(h, c, l) {
     limit <- wheel_chroma_limits()[cbind(round(h) %% 360 + 1, pmin(pmax(round(l), 0), 100) + 1)]
     grDevices::hcl(h, pmin(c, 0.97 * limit), l, fixup = TRUE)
-}
-
-# Expression scaled to 0..1: divided by its `upper` quantile and clipped at 1,
-# so that a few very high cells do not make all others look unexpressed.
-# Missing values count as 0. The value scaled to 1 is in attribute "top".
-scale_gene_expression <- function(x, upper = 0.99) {
-    x[is.na(x)] <- 0
-    x <- pmax(x, 0)
-    top <- if (length(x) > 0) unname(stats::quantile(x, upper)) else 0
-    if (top <= 0) top <- max(c(x, 0))
-    scaled <- if (top > 0) pmin(x / top, 1) else x * 0
-    attr(scaled, "top") <- top
-    scaled
 }
 
 # Hue (degrees) of each of `k` genes, in gene order.

@@ -1,6 +1,6 @@
 # Tests of the legend of the embedding plots (functions/plots/embedding_legend.R):
 # "Legend position" and "Legend size" for the legend of a category, the
-# colour bar of gene expression and the colour wheel of "Each gene separately".
+# colour bar of gene expression and the colour keys of "Each gene separately".
 
 needs_legend_functions <- function() {
     if (!exists("legend_settings") || !exists("embedding_gene_plot")) {
@@ -48,12 +48,15 @@ test_that_("legend position Auto, size M: the legends over and below the plot", 
     expect_equal_(c(bar$len, bar$thickness, bar$title$font$size), c(0.5, 10, 11), "colour bar below the plot")
     expect_equal_(legend_margins("below"), list(l = 10, r = 10, t = 10, b = 180), "room below the plot")
     expect_equal_(legend_margins("top_left"), list(l = 10, r = 10, t = 10, b = 10), "minimal margins")
-    key <- gene_key_placement("auto")
+    grid <- gene_grid_placement("auto")
+    expect_equal_(c(grid$grid_x, grid$grid_y, grid$plot_x), c(0.86, 0.99, 0.55, 0.86, 0, 0.78),
+                  "colour grid of 2 genes on the right")
+    key <- gene_wheel_placement("auto")
     expect_equal_(c(key$key_x, key$key_y, key$plot_x), c(0.71, 0.87, 0.62, 0.88, 0, 0.56),
                   "colour wheel on the right")
 })
 
-test_that_("legend positions and sizes: anchors, margins and colour wheels", {
+test_that_("legend positions and sizes: anchors, margins, colour grids and wheels", {
     needs_legend_functions()
     inside <- c("top_left", "top_right", "bottom_left", "bottom_right")
     for (position in setdiff(LEGEND_POSITIONS, c("auto", "hidden"))) {
@@ -68,10 +71,15 @@ test_that_("legend positions and sizes: anchors, margins and colour wheels", {
             margins <- legend_margins(position, scale)
             expect_true_((margins$r > 10) == (position == "right"), paste(label, "room on the right"))
             expect_true_((margins$b > 10) == (position == "below"), paste(label, "room below"))
-            key <- gene_key_placement(position, scale)
+            grid <- gene_grid_placement(position, scale)
+            ranges <- c(grid$grid_x, grid$grid_y, grid$plot_x, grid$plot_y, grid$title_y)
+            expect_true_(all(ranges >= 0 & ranges <= 1), paste(label, "colour grid inside the figure"))
+            key <- gene_wheel_placement(position, scale)
             ranges <- c(key$key_x, key$key_y, key$plot_x, key$plot_y)
             expect_true_(all(ranges >= 0 & ranges <= 1), paste(label, "colour wheel inside the figure"))
             if (!position %in% inside) {
+                apart <- grid$grid_x[[1]] > grid$plot_x[[2]] || grid$grid_y[[2]] < grid$plot_y[[1]]
+                expect_true_(apart, paste(label, "colour grid beside the cells"))
                 apart <- key$key_x[[1]] > key$plot_x[[2]] || key$key_y[[2]] < key$plot_y[[1]]
                 expect_true_(apart, paste(label, "colour wheel beside the cells"))
             }
@@ -83,7 +91,7 @@ test_that_("embedding plots: every legend position and size, all kinds of legend
     needs_legend_functions()
     df <- legend_test_cells()
     n <- nrow(df)
-    expression <- cbind(CSP = runif(n), AMA1 = runif(n), SBP1 = runif(n))
+    expression <- cbind(CSP = runif(n), AMA1 = runif(n), SBP1 = runif(n), DBP = runif(n))
     for (dim in c("2d", "3d")) {
         for (dual in c(FALSE, TRUE)) {
             for (position in LEGEND_POSITIONS) {
@@ -99,7 +107,7 @@ test_that_("embedding plots: every legend position and size, all kinds of legend
                 built <- plotly_build(p)$x
                 expect_equal_(isTRUE(built$data[[1]]$marker$showscale), position != "hidden",
                               paste(label, "colour bar shown unless hidden"))
-                for (genes in list(1:2, 1:3)) {
+                for (genes in list(1:2, 1:3, 1:4)) {
                     p <- embedding_gene_plot(df, expression[, genes, drop = FALSE], "each", "umap_i_1",
                                              "umap_i_2", 4, "umap_i", dim, dual, legend)
                     built <- plotly_build(p)$x

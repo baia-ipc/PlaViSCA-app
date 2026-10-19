@@ -46,8 +46,10 @@ source("functions/plots/gene_distribution.R")
 source("functions/plots/gene_summaries.R")
 source("functions/plots/embedding_legend.R")
 source("functions/plots/embeddings.R")
+source("functions/plots/gene_colour_mix.R")
 source("functions/plots/gene_colour_wheel.R")
 source("functions/plots/embedding_gene_colours.R")
+source("functions/plots/embedding_gene_keys.R")
 source("functions/plots/embedding_figure.R")
 
 # UI building blocks

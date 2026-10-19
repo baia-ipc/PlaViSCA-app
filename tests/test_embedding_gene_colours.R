@@ -1,10 +1,11 @@
 # Tests of the embedding plots coloured by genes
-# (functions/plots/embedding_gene_colours.R, gene_colour_wheel.R): combining
-# genes, scaling, mixing one colour per gene on the colour wheel, and the
-# plots built from them.
+# (functions/plots/embedding_gene_colours.R, gene_colour_mix.R,
+# gene_colour_wheel.R, embedding_gene_keys.R): combining genes, scaling,
+# mixing one colour per gene as red, green and blue (2 or 3 genes) or on the
+# colour wheel (more), and the plots built from them.
 
 needs_gene_colour_functions <- function() {
-    if (!exists("wheel_gene_colours") || !exists("embedding_plot")) {
+    if (!exists("wheel_gene_colours") || !exists("blend_gene_colours") || !exists("embedding_plot")) {
         skip_test("embedding functions not loaded in this context")
     }
 }
@@ -70,6 +71,38 @@ test_that_("scaling to 0..1 at the 99th percentile", {
     expect_equal_(attr(sparse, "top"), 4, "rare expression: scaled by its maximum")
 })
 
+test_that_("mixing one colour per gene", {
+    needs_gene_colour_functions()
+    none <- blend_gene_colours(matrix(0, 1, 2))
+    expect_true_(all(abs(rgb_of(none) - GENE_COLOUR_NONE) < 0.01), "no expression: light grey")
+    red <- rgb_of(blend_gene_colours(matrix(c(1, 0), 1)))
+    green <- rgb_of(blend_gene_colours(matrix(c(0, 1), 1)))
+    both <- rgb_of(blend_gene_colours(matrix(c(1, 1), 1)))
+    expect_true_(red[1] > 0.8 && red[2] < 0.1 && red[3] < 0.1, "gene 1 alone: red")
+    expect_true_(green[2] > 0.8 && green[1] < 0.1, "gene 2 alone: green")
+    expect_true_(both[1] > 0.7 && both[2] > 0.7 && both[3] < 0.1, "genes 1 and 2: yellow")
+    half <- rgb_of(blend_gene_colours(matrix(c(0.5, 0), 1)))
+    expect_true_(half[2] > red[2] && half[2] < GENE_COLOUR_NONE[2], "half expression: between grey and red")
+    all3 <- rgb_of(blend_gene_colours(matrix(1, 1, 3)))
+    expect_true_(all(all3 < 0.4), "three genes together: dark grey")
+    blue <- rgb_of(blend_gene_colours(matrix(c(0, 0, 1), 1)))
+    expect_true_(blue[3] > 0.8 && blue[1] < 0.1, "gene 3 alone: blue")
+    failed <- tryCatch(blend_gene_colours(matrix(1, 1, 4)), error = function(e) "error")
+    expect_equal_(failed, "error", "at most 3 genes")
+})
+
+test_that_("colour keys: grid of 2 genes, legend entries of 3", {
+    needs_gene_colour_functions()
+    grid <- gene_colour_grid(c("CSP", "AMA1"), c(2, 4), steps = 5)
+    expect_equal_(dim(grid$colours), c(5L, 5L), "5 x 5 grid")
+    expect_equal_(range(grid$y), c(0, 4), "gene 2 from 0 to its full-colour value")
+    expect_equal_(grid$colours[1, 1], blend_gene_colours(matrix(0, 1, 2)), "corner without expression")
+    expect_equal_(grid$colours[1, 5], blend_gene_colours(matrix(c(1, 0), 1)), "gene 1 along x")
+    legend <- gene_colour_legend(c("CSP", "AMA1", "SBP1"))
+    expect_equal_(legend$label, c("CSP", "AMA1", "SBP1", "CSP + AMA1", "CSP + SBP1", "AMA1 + SBP1",
+                                  "All three", "None"), "one entry per gene, pair, all and none")
+})
+
 test_that_("colour wheel: hues of the genes and the colour of a cell", {
     needs_gene_colour_functions()
     for (k in 2:8) {
@@ -94,14 +127,6 @@ test_that_("colour wheel: hues of the genes and the colour of a cell", {
     weak <- wheel_gene_colours(matrix(c(0.3, 0), 1))
     expect_true_(mean(rgb_of(weak$colour)) > mean(rgb_of(alone$colour[[1]])),
                  "lower expression: lighter")
-})
-
-test_that_("colour wheel: 3 genes red, green, blue", {
-    needs_gene_colour_functions()
-    rgb <- vapply(wheel_gene_colours(diag(3))$colour, rgb_of, numeric(3))
-    expect_true_(which.max(rgb[, 1]) == 1 && rgb[1, 1] > 0.7, "gene 1: red")
-    expect_true_(which.max(rgb[, 2]) == 2 && rgb[2, 2] > 0.5, "gene 2: green")
-    expect_true_(which.max(rgb[, 3]) == 3 && rgb[3, 3] > 0.8, "gene 3: blue")
 })
 
 test_that_("colour wheel: no expression, rare genes and many cells", {
@@ -132,13 +157,25 @@ test_that_("colour wheel key: genes at their hues, gene 1 at the top", {
     expect_true_(all(abs(sqrt(key$ring$x^2 + key$ring$y^2) - 1) < 1e-9), "ring of radius 1")
 })
 
+test_that_("Each gene separately: red, green, blue up to 3 genes, the wheel above", {
+    needs_gene_colour_functions()
+    scaled <- cbind(c(1, 0.2), c(0, 0.5), c(0, 0))
+    mixed <- each_gene_colours(scaled)
+    expect_equal_(mixed$colour, blend_gene_colours(scaled), "3 genes: red, green, blue")
+    expect_equal_(mixed$intensity, c(1, 0.5), "3 genes: intensity of the strongest gene")
+    expect_true_(is.null(mixed$dominant), "3 genes: no dominant gene")
+    scaled <- cbind(scaled, c(0, 1))
+    expect_equal_(each_gene_colours(scaled)$colour, wheel_gene_colours(scaled)$colour, "4 genes: wheel")
+})
+
 test_that_("hover text: expression of each gene and the dominant gene", {
     needs_gene_colour_functions()
     expression <- cbind(CSP = c(3, 0), DBP = c(1, 0))
     wheel <- wheel_gene_colours(cbind(c(0.75, 0), c(0.25, 0)))
-    text <- wheel_hover_values(expression, wheel)
-    expect_equal_(text[[1]], "CSP 3.00, DBP 1.00<br>Dominant: CSP (75%)", "expressing cell")
+    text <- gene_hover_values(expression, wheel$dominant, wheel$share)
+    expect_equal_(text[[1]], "CSP 3.00, DBP 1.00<br>Dominant: CSP (75%)", "expressing cell, colour wheel")
     expect_equal_(text[[2]], "CSP 0.00, DBP 0.00", "no dominant gene without expression")
+    expect_equal_(gene_hover_values(expression)[[1]], "CSP 3.00, DBP 1.00", "red, green, blue: values only")
 })
 
 test_that_("embedding plots coloured by genes: mean, sum and each gene, 2D and 3D", {
@@ -152,7 +189,7 @@ test_that_("embedding plots coloured by genes: mean, sum and each gene, 2D and 3
     expression <- cbind(CSP = runif(n), AMA1 = c(rep(0, n - 1), 5), SBP1 = runif(n),
                         DBP = runif(n), P47 = 0, MSP1 = runif(n), TRAP = runif(n), CelTOS = runif(n))
     for (dim in c("2d", "3d")) {
-        for (genes in list(1:2, 1:3, 1:8)) {
+        for (genes in list(1:2, 1:3, 1:4, 1:8)) {
             for (combine in COMBINE_GENES) {
                 p <- embedding_gene_plot(df, expression[, genes, drop = FALSE], combine,
                                          "umap_i_1", "umap_i_2", 4, "umap_i", dim)

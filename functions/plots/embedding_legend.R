@@ -2,7 +2,8 @@
 # needs. The "Legend position" and "Legend size" plot settings choose one of
 # LEGEND_POSITIONS and LEGEND_SIZES. Three kinds of legend use them: the
 # legend of a category, the colour bar of gene expression, and the colour key
-# of "Each gene separately" (a colour wheel).
+# of "Each gene separately" (a colour grid for 2 genes, legend entries for 3,
+# a colour wheel for more).
 
 # Over the plot in a corner, outside it (right of or below the plot), or no
 # legend. "auto": below side-by-side 2D plots, which are narrow, otherwise
@@ -114,14 +115,51 @@ legend_margins <- function(position, scale = 1) {
   )
 }
 
-# Where the colour wheel of "Each gene separately" goes at `position` (not
-# "hidden"), in paper coordinates: the ranges of its axes (`key_x`, `key_y`)
-# and the ranges left to the cells (`plot_x`, `plot_y`). The wheel is drawn
-# on axes of its own, which must lie inside the figure: on the right of or
-# below the plot, the cells get less room. The gene names around the wheel
-# reach out of its axes, so the axes keep some distance from the edges.
-# "auto" is on the right.
-gene_key_placement <- function(position, scale = 1) {
+# Where the colour grid of 2 genes goes at `position` (not "hidden"), in paper
+# coordinates: its ranges (`grid_x`, `grid_y`), the place of its title
+# (`title_x`, `title_y`) and the ranges left to the cells (`plot_x`, `plot_y`).
+# The grid is drawn on axes of its own, which must lie inside the figure: on
+# the right of or below the plot, the cells get less room. Over the plot, the
+# grid leaves room on its left and below for its axis titles. "auto" is on
+# the right.
+gene_grid_placement <- function(position, scale = 1) {
+  w <- 0.13 * scale
+  h <- 0.31 * scale
+  left <- 0.09
+  right <- 0.99
+  top <- 0.86
+  bottom <- 0.1
+  place <- function(grid_x, grid_y, plot_x = c(0, 1), plot_y = c(0, 1)) {
+    list(grid_x = grid_x, grid_y = grid_y, title_x = mean(grid_x), title_y = grid_y[[2]] + 0.06,
+         plot_x = plot_x, plot_y = plot_y)
+  }
+  switch(position,
+    auto = ,
+    right = place(c(right - w, right), c(top - h, top), plot_x = c(0, right - w - 0.08)),
+    top_left = place(c(left, left + w), c(top - h, top)),
+    top_right = place(c(right - w, right), c(top - h, top)),
+    bottom_left = place(c(left, left + w), c(bottom, bottom + h)),
+    bottom_right = place(c(right - w, right), c(bottom, bottom + h)),
+    # lower than on the side, so that the cells keep most of the height; its
+    # title stays under the x axis title of the plot
+    below = {
+      h <- 0.22 * scale
+      grid <- place(c(left, left + w), c(0.08, 0.08 + h), plot_y = c(0.08 + h + 0.2, 1))
+      grid$title_y <- 0.08 + h + 0.04
+      grid
+    },
+    stop("unknown legend position: ", position, call. = FALSE)
+  )
+}
+
+# Where the colour wheel of "Each gene separately" (4 genes or more) goes at
+# `position` (not "hidden"), in paper coordinates: the ranges of its axes
+# (`key_x`, `key_y`) and the ranges left to the cells (`plot_x`, `plot_y`).
+# The wheel is drawn on axes of its own, which must lie inside the figure: on
+# the right of or below the plot, the cells get less room. The gene names
+# around the wheel reach out of its axes, so the axes keep some distance from
+# the edges. "auto" is on the right.
+gene_wheel_placement <- function(position, scale = 1) {
   w <- 0.16 * scale
   h <- 0.26 * scale
   left <- 0.13
