@@ -1,91 +1,26 @@
-# Generate PlasmoDB and NCBI links
-gene_links <- function(gene_id, target = "") {
-  plasmo_url <- external_link("plasmodb_gene", gene_id)
-  ncbi_url <- external_link("ncbi_protein", gene_id)
-
-  plasmo_selector <- if (target == "") "[id^=plasmo_link]" else paste0("#", target)
-  ncbi_selector <- if (target == "") "[id^=ncbi_link]" else paste0("#", gsub("plasmo", "ncbi", target))
-
-  shinyjs::runjs(sprintf(
-    "
-    document.querySelectorAll('%s').forEach(function(el) {
-      el.href = '%s';
-    });
-  ",
-    plasmo_selector,
-    plasmo_url
-  ))
-
-  shinyjs::runjs(sprintf(
-    "
-    document.querySelectorAll('%s').forEach(function(el) {
-      el.href = '%s';
-    });
-  ",
-    ncbi_selector,
-    ncbi_url
-  ))
-}
-
-# Generate links for multiple genes and open multiple tabs
-gene_links_multiple <- function(gene_ids, target = "") {
+# Points the PlasmoDB button `plasmo_id` and its NCBI twin (the same ID with
+# "ncbi" for "plasmo") at the pages of the genes `gene_ids`: a click opens the
+# page of the gene or, for several genes, one page per gene.
+gene_links <- function(gene_ids, plasmo_id) {
   if (length(gene_ids) == 0) {
-    return()
+    return(invisible(NULL))
   }
-
-  if (length(gene_ids) == 1) {
-    # Single gene - use the regular function
-    gene_links(gene_ids[1], target)
-  } else {
-    # Multiple genes - create JavaScript to open multiple tabs
-    plasmo_urls <- external_link("plasmodb_gene", gene_ids)
-    ncbi_urls <- external_link("ncbi_protein", gene_ids)
-
-    # Update the first gene's links in the UI
-    gene_links(gene_ids[1], target)
-
-    # Create JSON arrays manually for JavaScript
-    plasmo_json <- paste0('["', paste(plasmo_urls, collapse = '","'), '"]')
-    ncbi_json <- paste0('["', paste(ncbi_urls, collapse = '","'), '"]')
-
-    plasmo_selector <- if (target == "") "[id^=plasmo_link]" else paste0("#", target)
-    ncbi_selector <- if (target == "") "[id^=ncbi_link]" else paste0("#", gsub("plasmo", "ncbi", target))
-
-    # Add click handlers for multiple tab opening
+  point_button <- function(id, urls) {
     shinyjs::runjs(sprintf(
-      "
-        document.querySelectorAll('%s').forEach(function(el) {
-            el.onclick = function(e) {
-                e.preventDefault();
-                var urls = %s;
-                urls.forEach(function(url) {
-                    window.open(url, '_blank');
-                });
-                return false;
-            };
-        });
-        ",
-      plasmo_selector,
-      plasmo_json
-    ))
-
-    shinyjs::runjs(sprintf(
-      "
-        document.querySelectorAll('%s').forEach(function(el) {
-            el.onclick = function(e) {
-                e.preventDefault();
-                var urls = %s;
-                urls.forEach(function(url) {
-                    window.open(url, '_blank');
-                });
-                return false;
-            };
-        });
-        ",
-      ncbi_selector,
-      ncbi_json
+      "(function (el, urls) {
+        if (!el) return;
+        el.href = urls[0];
+        el.onclick = urls.length < 2 ? null : function (e) {
+          e.preventDefault();
+          urls.forEach(function (url) { window.open(url, '_blank'); });
+          return false;
+        };
+      })(document.getElementById('%s'), %s);",
+      id, jsonlite::toJSON(unname(urls))
     ))
   }
+  point_button(plasmo_id, external_link("plasmodb_gene", gene_ids))
+  point_button(sub("plasmo", "ncbi", plasmo_id), external_link("ncbi_protein", gene_ids))
 }
 
 # One filter widget, built entirely from config/data_columns.yml.

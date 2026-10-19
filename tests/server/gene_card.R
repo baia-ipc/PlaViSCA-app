@@ -1,8 +1,9 @@
 check("gene_card_server draws the plot of a card and writes its download", {
   cells <- gex_cells()
   testServer(function(input, output, session) {
-    gene_card_server(3, input, output, reactive(cells), reactiveVal(FALSE))
+    links <- gene_card_server(3, input, output, reactive(cells), reactiveVal(FALSE))
   }, {
+    stop_unless(inherits(links, "Observer"), "no observer of the gene links returned")
     session$setInputs(genes_exp_3 = "CSP", group_exp_3 = get_data_column("broad_stage"),
                       check_exp_3 = FALSE, plot_type_exp_3 = "violin", min_cells_exp = 0,
                       data_type_exp = "normalize")

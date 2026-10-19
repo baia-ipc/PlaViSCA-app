@@ -3,6 +3,7 @@
 # (reactive, list(data, genes, full, row_idx), from
 # gene_expression_tab_server()). The inputs of card `i` have the IDs
 # <name>_exp_<i>. While `global_loading()` is TRUE the plot says "Loading...".
+# Returns the observer of the card's gene links, to destroy with the card.
 
 gene_card_server <- function(i, input, output, cells, global_loading) {
   card_input <- function(name) input[[paste0(name, "_exp_", i)]]
@@ -65,6 +66,12 @@ gene_card_server <- function(i, input, output, cells, global_loading) {
       })
     }
   )
+
+  # PlasmoDB and NCBI buttons: the pages of the selected genes
+  observe({
+    req(cells())
+    gene_links(convert_gene_selection(card_input("genes"), cells()$genes, TRUE), paste0("plasmo_link_exp_", i))
+  })
 }
 
 # Options of the plot type of card `i`.

@@ -609,67 +609,18 @@ server <- function(input, output, session) {
     ignoreInit = FALSE
   )
 
-  # Observer for first plot gene links (during comparison)
+  # PlasmoDB and NCBI links of the genes of each plot coloured by genes
   observe({
-    req(comparison_mode(), input$color_first_comp == "genes", input$genes_n_first_comp)
-
-    # Get all selected genes for links
-    selected_genes <- input$genes_n_first_comp
-    if (!is.null(selected_genes) && length(selected_genes) > 0) {
-      gene_data_obj <- tryCatch(gene_data()$genes, error = function(e) NULL)
-      if (!is.null(gene_data_obj)) {
-        # Get gene IDs for all selected genes
-        gene_ids <- sapply(selected_genes, function(gene) {
-          tryCatch(get_gene_id(gene, gene_data_obj), error = function(e) gene)
-        })
-        gene_ids <- gene_ids[!is.null(gene_ids) & nzchar(gene_ids)]
-        if (length(gene_ids) > 0) {
-          gene_links_multiple(gene_ids, target = "plasmo_link_a")
-        }
-      }
-    }
+    req(comparison_mode(), input$color_first_comp == "genes", gene_data()$genes)
+    gene_links(convert_gene_selection(input$genes_n_first_comp, gene_data()$genes, TRUE), "plasmo_link_a")
   })
-
-  # Observer for second plot gene links
   observe({
-    req(comparison_mode(), input$color_second == "genes", input$genes_second)
-
-    # Get all selected genes for links
-    selected_genes <- input$genes_second
-    if (!is.null(selected_genes) && length(selected_genes) > 0) {
-      gene_data_obj <- tryCatch(gene_data()$genes, error = function(e) NULL)
-      if (!is.null(gene_data_obj)) {
-        # Get gene IDs for all selected genes
-        gene_ids <- sapply(selected_genes, function(gene) {
-          tryCatch(get_gene_id(gene, gene_data_obj), error = function(e) gene)
-        })
-        gene_ids <- gene_ids[!is.null(gene_ids) & nzchar(gene_ids)]
-        if (length(gene_ids) > 0) {
-          gene_links_multiple(gene_ids, target = "plasmo_link_b")
-        }
-      }
-    }
+    req(comparison_mode(), input$color_second == "genes", gene_data()$genes)
+    gene_links(convert_gene_selection(input$genes_second, gene_data()$genes, TRUE), "plasmo_link_b")
   })
-
-  # Observer for single plot gene links (when comparison is disabled)
   observe({
-    req(!isTRUE(comparison_mode()), input$color == "genes", input$genes_n)
-
-    # Get all selected genes for links
-    selected_genes <- input$genes_n
-    if (!is.null(selected_genes) && length(selected_genes) > 0) {
-      gene_data_obj <- tryCatch(gene_data()$genes, error = function(e) NULL)
-      if (!is.null(gene_data_obj)) {
-        # Get gene IDs for all selected genes
-        gene_ids <- sapply(selected_genes, function(gene) {
-          tryCatch(get_gene_id(gene, gene_data_obj), error = function(e) gene)
-        })
-        gene_ids <- gene_ids[!is.null(gene_ids) & nzchar(gene_ids)]
-        if (length(gene_ids) > 0) {
-          gene_links_multiple(gene_ids)
-        }
-      }
-    }
+    req(!isTRUE(comparison_mode()), input$color == "genes", gene_data()$genes)
+    gene_links(convert_gene_selection(input$genes_n, gene_data()$genes, TRUE), "plasmo_link")
   })
 
   # First plot output (uses main color control - same as single plot)

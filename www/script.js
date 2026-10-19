@@ -273,10 +273,6 @@ $(document).ready(function () {
       { priority: 'event' });
   });
 
-  $(document).on('change', '[id^="genes_exp_"]', function () {
-    Shiny.setInputValue('change_gene_exp', this.id, { priority: 'event' });
-  });
-
   // Setup Plotly 2D highlight feature
   setupPlotlyHighlight();
 

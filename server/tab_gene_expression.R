@@ -27,9 +27,9 @@ gene_expression_tab_server <- function(input, output, session, loaded, filters) 
     )
   }) %>% debounce(500)
 
-  # IDs of the cards on the page
+  # IDs of the cards on the page, and the observers of each card
   card_ids <- reactiveVal(0)
-  gene_card_server(0, input, output, cells, loaded$global_loading)
+  card_observers <- list("0" = gene_card_server(0, input, output, cells, loaded$global_loading))
 
   # "Group by" choices: the grouping fields present in the data. The default
   # is the detailed stage, then the broad stage, then the first choice.
@@ -112,7 +112,7 @@ gene_expression_tab_server <- function(input, output, session, loaded, filters) 
       updateSelectizeInput(session, paste0("genes_exp_", new_id),
                            choices = choices, selected = choices[1], server = TRUE)
     })
-    gene_card_server(new_id, input, output, cells, loaded$global_loading)
+    card_observers[[as.character(new_id)]] <<- gene_card_server(new_id, input, output, cells, loaded$global_loading)
   })
 
   # "-" button of a card (www/script.js sends click_remove_btn): removes it
@@ -125,6 +125,8 @@ gene_expression_tab_server <- function(input, output, session, loaded, filters) 
       removeUI(selector = paste0("#dynamic_col_", id), immediate = TRUE)
       shinyjs::runjs(sprintf("$('#dynamic_col_%s').remove();", id))
       card_ids(setdiff(card_ids(), id))
+      card_observers[[as.character(id)]]$destroy()
+      card_observers[[as.character(id)]] <<- NULL
 
       # the "+" button is shown on the last card only
       remaining <- ids[ids != id]
@@ -154,19 +156,6 @@ gene_expression_tab_server <- function(input, output, session, loaded, filters) 
       selected = selected,
       server = TRUE
     )
-  })
-
-  # PlasmoDB and NCBI links of the first selected gene (www/script.js sends
-  # change_gene_exp when the genes of a card change)
-  show_gene_links <- function(genes) {
-    if (length(genes) > 0 && genes[1] != "") {
-      gene_links(get_gene_id(genes[1], gene_data()$genes))
-    }
-  }
-  observeEvent(input$genes_exp_0, show_gene_links(input$genes_exp_0))
-  observeEvent(input$change_gene_exp, {
-    id <- as.numeric(gsub("genes_exp_", "", input$change_gene_exp))
-    show_gene_links(input[[paste0("genes_exp_", id)]])
   })
 
   card_ids
