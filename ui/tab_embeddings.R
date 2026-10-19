@@ -68,9 +68,14 @@ ui_tab_embeddings <- function() {
           fillable = FALSE,
           padding = c(2, 8, 8, 8),
 
-          # Single plot
+          # Single plot, with its gene selector above it while it is
+          # coloured by genes
           div(
             id = "single_plot_panel",
+            embedding_gene_panel("input.color == 'genes'", "genes_label_single", "check",
+              "genes_n", "plasmo_link", "ncbi_link", "combine_genes",
+              btn_class = "btn-outline-info", class = "single-gene-panel mb-2"
+            ),
             card(
               full_screen = TRUE,
               height = "650px",
@@ -84,26 +89,6 @@ ui_tab_embeddings <- function() {
             )
           ),
 
-          # Gene selectors for the comparison plots, shown above each plot only
-          # when that plot is coloured by genes. The "Color by" selectors
-          # themselves sit in the plot title bars.
-          div(
-            id = "comparison_controls_panel",
-            style = "display: none;",
-            layout_column_wrap(
-              width = 1 / 2,
-              class = "mb-0",
-              comparison_gene_panel("a", "color_first_comp", "genes_label_first_comp",
-                "check_first_comp", "genes_n_first_comp", "plasmo_link_a", "ncbi_link_a",
-                btn_class = "btn-outline-primary", combine_id = "combine_genes_first_comp"
-              ),
-              comparison_gene_panel("b", "color_second", "genes_label_second",
-                "check_second", "genes_second", "plasmo_link_b", "ncbi_link_b",
-                btn_class = "btn-outline-success", combine_id = "combine_genes_second"
-              )
-            )
-          ),
-
           # Comparison plots
           div(
             id = "comparison_plots_panel",
@@ -111,13 +96,21 @@ ui_tab_embeddings <- function() {
             style = "display: none;",
             layout_column_wrap(
               width = 1 / 2,
-              height = "600px",
-              heights_equal = "all",
               comparison_plot_card("a", "Plot A", "#007bff", "color_first_comp",
-                get_data_column("broad_stage"), "first_plotly"
+                get_data_column("broad_stage"), "first_plotly",
+                embedding_gene_panel("input.color_first_comp == 'genes'", "genes_label_first_comp",
+                  "check_first_comp", "genes_n_first_comp", "plasmo_link_a", "ncbi_link_a",
+                  "combine_genes_first_comp", btn_class = "btn-outline-primary",
+                  class = "plot-a-section"
+                )
               ),
               comparison_plot_card("b", "Plot B", "#28a745", "color_second",
-                get_data_column("detailed_stage"), "second_plotly"
+                get_data_column("detailed_stage"), "second_plotly",
+                embedding_gene_panel("input.color_second == 'genes'", "genes_label_second",
+                  "check_second", "genes_second", "plasmo_link_b", "ncbi_link_b",
+                  "combine_genes_second", btn_class = "btn-outline-success",
+                  class = "plot-b-section"
+                )
               )
             )
           )
@@ -187,68 +180,19 @@ embedding_settings_controls <- function() {
         div(class = "d-flex align-items-center gap-1", tags$span("Y", class = "xy-label"), tags$div(selectInput("yaxis", NULL, choices = c("pc_2" = "pc_2"), selected = "pc_2", width = "80px")))
       )
     ),
-    shinyjs::hidden(checkboxInput("comparison_active", NULL, value = FALSE)),
-    # Gene selection, shown when the single plot is coloured by genes
-    div(
-      id = "genes_single_panel",
-      style = "display: none;",
-      div(
-        class = "gene-select-wrapper",
-        style = "position: relative;",
-        tags$label(
-          class = "control-label d-flex align-items-center gap-2",
-          tags$span(textOutput("genes_label_single", inline = TRUE), class = "settings-label"),
-          div(
-            class = "single-toggle-container",
-            title = "Click to switch ID and name",
-            `data-bs-toggle` = "tooltip",
-            `data-bs-placement` = "top",
-            input_switch("check", label = NULL, value = FALSE)
-          )
-        ),
-        selectizeInput(
-          "genes_n",
-          label = NULL,
-          choices = "", multiple = TRUE,
-          options = list(placeholder = "Search for genes...", maxItems = 10, dropdownParent = "body"),
-          width = "100%"
-        )
-      ),
-      gene_combine_menu("combine_genes", "genes_n"),
-      div(
-        class = "links-row mt-1",
-        tags$a(
-          id = "plasmo_link",
-          href = "#",
-          target = "_blank",
-          class = "btn btn-outline-info btn-sm gene-link-btn",
-          `data-bs-toggle` = "tooltip",
-          `data-bs-placement` = "top",
-          title = "PlasmoDB",
-          tags$i(class = "fas fa-external-link-alt")
-        ),
-        tags$a(
-          id = "ncbi_link",
-          href = "#",
-          target = "_blank",
-          class = "btn btn-outline-info btn-sm gene-link-btn",
-          `data-bs-toggle` = "tooltip",
-          `data-bs-placement` = "top",
-          title = "NCBI",
-          tags$i(class = "fas fa-dna")
-        )
-      )
-    )
+    shinyjs::hidden(checkboxInput("comparison_active", NULL, value = FALSE))
   )
 }
 
-# Gene selector (with ID/name switch and PlasmoDB/NCBI links) for one
-# comparison plot; visible only while that plot is coloured by genes.
-comparison_gene_panel <- function(side, color_id, label_id, check_id, genes_id,
-                                  plasmo_id, ncbi_id, btn_class, combine_id) {
+# Gene selector of an embedding plot (with ID/name switch, PlasmoDB/NCBI links
+# and "Combine genes" menu), shown while `condition` (JavaScript) holds, i.e.
+# while the plot is coloured by genes. It sits between the plot and its title
+# bar.
+embedding_gene_panel <- function(condition, label_id, check_id, genes_id, plasmo_id, ncbi_id,
+                                 combine_id, btn_class, class = NULL) {
   conditionalPanel(
-    condition = sprintf("input.%s == 'genes'", color_id),
-    class = sprintf("mb-2 comparison-controls comparison-plot-section plot-%s-section", side),
+    condition = condition,
+    class = paste("embedding-gene-panel", class),
     fluidRow(
       class = "g-1 align-items-end",
       column(
@@ -260,7 +204,7 @@ comparison_gene_panel <- function(side, color_id, label_id, check_id, genes_id,
             class = "control-label d-flex align-items-center gap-2",
             tags$span(textOutput(label_id, inline = TRUE), class = "settings-label"),
             div(
-              class = sprintf("comparison-toggle-container-%s", side),
+              class = "embedding-toggle-container",
               title = "Click to switch ID and name",
               `data-bs-toggle` = "tooltip",
               `data-bs-placement` = "top",
@@ -325,8 +269,9 @@ gene_combine_menu <- function(id, genes_id, width = "100%") {
   )
 }
 
-# One comparison plot card; its "Color by" selector sits in the title bar.
-comparison_plot_card <- function(side, title, colour, color_id, selected, plot_id) {
+# One comparison plot card; its "Color by" selector sits in the title bar,
+# `gene_panel` (embedding_gene_panel()) between the title bar and the plot.
+comparison_plot_card <- function(side, title, colour, color_id, selected, plot_id, gene_panel) {
   card(
     full_screen = TRUE,
     class = sprintf("comparison-card plot-%s-card", side),
@@ -350,11 +295,17 @@ comparison_plot_card <- function(side, title, colour, color_id, selected, plot_i
         )
       )
     ),
-    withSpinner(
-      type = 6,
-      size = 0.4,
-      color = colour,
-      plotlyOutput(plot_id, height = "100%")
+    card_body(
+      gene_panel,
+      div(
+        class = "comparison-plot-area",
+        withSpinner(
+          type = 6,
+          size = 0.4,
+          color = colour,
+          plotlyOutput(plot_id, height = "100%")
+        )
+      )
     )
   )
 }

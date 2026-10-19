@@ -68,15 +68,6 @@ embedding_controls_server <- function(input, output, session, gene_data, compari
     }
   })
 
-  # the gene menu of the single plot is shown when it is coloured by genes
-  observe({
-    if (!comparison_mode() && identical(input$color, "genes")) {
-      shinyjs::show("genes_single_panel")
-    } else {
-      shinyjs::hide("genes_single_panel")
-    }
-  })
-
   # "Combine genes" menu of each plot: "Each gene separately" is a choice only
   # for 2 or 3 genes. The menu is hidden for fewer than 2 genes and keeps its
   # value (the selection is briefly empty while the name/ID switch converts it).

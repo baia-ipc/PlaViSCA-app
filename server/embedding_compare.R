@@ -22,12 +22,10 @@ embedding_compare_server <- function(input, output, session, gene_data, comparis
     )
     shinyjs::toggleClass("enable_comparison", "btn-primary", condition = comparing)
     shinyjs::toggleClass("enable_comparison", "btn-outline-primary", condition = !comparing)
-    shinyjs::toggle("comparison_controls_panel", condition = comparing)
     shinyjs::toggle("comparison_plots_panel", condition = comparing)
     shinyjs::toggle("single_plot_panel", condition = !comparing)
 
     if (comparing) {
-      shinyjs::hide("genes_single_panel")
       shinyjs::runjs("var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle=\"tooltip\"]')); var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) { return new bootstrap.Tooltip(tooltipTriggerEl); });")
 
       single_plot_color(input$color)

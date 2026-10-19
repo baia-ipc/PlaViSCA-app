@@ -237,11 +237,10 @@ body {
   margin-bottom: 0 !important;
 }
 
-/* Compact the gene selection panels */
-#genes_single_panel,
-.comparison-controls {
+/* Gene selectors of the embedding plots, between title bar and plot */
+.embedding-gene-panel {
   padding: 6px 10px !important;
-  margin-top: 4px !important;
+  overflow: visible !important;
 }
 
 /* Standardize card margins */
@@ -563,6 +562,32 @@ body {
   display: block !important;
 }
 
+/* The comparison plots keep the same size whether or not a gene selector sits
+   above them; expanded full-screen, the plot takes the rest of the card */
+.comparison-plot-area {
+  height: 560px;
+}
+
+.comparison-plot-area > div,
+.comparison-plot-area .html-widget {
+  height: 100% !important;
+}
+
+#analysis_section .comparison-card[data-full-screen="true"] {
+  background: var(--white) !important;
+}
+
+.comparison-card[data-full-screen="true"] .card-body {
+  display: flex !important;
+  flex-direction: column;
+}
+
+.comparison-card[data-full-screen="true"] .comparison-plot-area {
+  flex: 1 1 auto;
+  height: auto;
+  min-height: 0;
+}
+
 .comparison-card .plotly,
 .comparison-card .js-plotly-plot {
   width: 100% !important;
@@ -594,17 +619,6 @@ table.dataTable thead th {
 }
 
 .selectize-input {
-  overflow: visible !important;
-}
-
-/* Gene selection panel - ensure dropdowns are visible */
-#genes_single_panel {
-  overflow: visible !important;
-  position: relative;
-  z-index: 5;
-}
-
-#comparison_controls_panel {
   overflow: visible !important;
 }
 
@@ -654,9 +668,7 @@ table.dataTable thead th {
 
 /* Targeted alignment for gene selection toggles (Single, Comparison, and Gene Expression) */
 .gene-expression-toggle-container,
-.single-toggle-container,
-.comparison-toggle-container-a,
-.comparison-toggle-container-b {
+.embedding-toggle-container {
   display: inline-block;
   margin-left: 4px;
 }
@@ -670,18 +682,14 @@ table.dataTable thead th {
 }
 
 .gene-expression-toggle-container .form-check.form-switch,
-.single-toggle-container .form-check.form-switch,
-.comparison-toggle-container-a .form-check.form-switch,
-.comparison-toggle-container-b .form-check.form-switch {
+.embedding-toggle-container .form-check.form-switch {
   padding-left: 2.5em !important;
   margin-bottom: 0 !important;
   margin-top: 0 !important;
 }
 
 .gene-expression-toggle-container .form-check-input,
-.single-toggle-container .form-check-input,
-.comparison-toggle-container-a .form-check-input,
-.comparison-toggle-container-b .form-check-input {
+.embedding-toggle-container .form-check-input {
   margin-left: 0 !important;
   --bs-form-switch-bg: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='rgba%280, 0, 0, 0.25%29'/%3e%3c/svg%3e");
   width: 2em;
@@ -1053,29 +1061,25 @@ table.dataTable thead th {
   color: var(--accent-color);
 }
 
-/* Comparison Mode Styles */
-.comparison-controls {
+/* Gene selector of the single plot: a box of its own above the plot card */
+.single-gene-panel {
   background: var(--white);
-  border-radius: 10px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  border-radius: 8px;
   border: 1px solid #e1e4e8;
-  overflow: visible;
 }
 
-.comparison-plot-section {
-  padding: 8px 10px;
+/* Gene selectors of the comparison plots: inside the card, under the title bar */
+.plot-a-section,
+.plot-b-section {
+  border-bottom: 1px solid #e1e4e8;
 }
 
 .plot-a-section {
   background: rgba(0, 123, 255, 0.02);
-  border: 1px solid #e1e4e8;
-  border-radius: 8px;
 }
 
 .plot-b-section {
   background: rgba(40, 167, 69, 0.02);
-  border: 1px solid #e1e4e8;
-  border-radius: 8px;
 }
 
 /* Gene select wrapper */
@@ -1083,7 +1087,7 @@ table.dataTable thead th {
   width: 100%;
 }
 
-.comparison-plot-section .shiny-input-container {
+.embedding-gene-panel .shiny-input-container {
   margin-bottom: 0 !important;
 }
 
