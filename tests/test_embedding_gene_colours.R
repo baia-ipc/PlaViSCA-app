@@ -1,26 +1,36 @@
 # Tests of the embedding plots coloured by genes
-# (functions/plots/embedding_gene_colours.R): combining genes, scaling, mixing one
-# colour per gene, and the plots built from them.
+# (functions/plots/embedding_gene_colours.R, gene_colour_wheel.R): combining
+# genes, scaling, mixing one colour per gene on the colour wheel, and the
+# plots built from them.
 
 needs_gene_colour_functions <- function() {
-    if (!exists("blend_gene_colours") || !exists("embedding_plot")) {
+    if (!exists("wheel_gene_colours") || !exists("embedding_plot")) {
         skip_test("embedding functions not loaded in this context")
     }
 }
 
 rgb_of <- function(hex) as.numeric(grDevices::col2rgb(hex)) / 255
 
-test_that_("Combine genes: the choices of the Gene expression tab, Each for 2 or 3 genes", {
+# Hue (degrees) and chroma of hex colours in HCL, the polar form of CIELUV.
+hcl_of <- function(hex) {
+    luv <- grDevices::convertColor(t(grDevices::col2rgb(hex)) / 255, from = "sRGB", to = "Luv")
+    list(h = (atan2(luv[, 3], luv[, 2]) * 180 / pi) %% 360, c = sqrt(luv[, 2]^2 + luv[, 3]^2))
+}
+
+# Smallest difference between two hues, in degrees.
+hue_distance <- function(a, b) abs((a - b + 180) %% 360 - 180)
+
+test_that_("Combine genes: the choices of the Gene expression tab, Each for 2 to 8 genes", {
     needs_gene_colour_functions()
     expect_equal_(names(gene_combine_choices(2)), names(COMBINE_GENES), "same labels as COMBINE_GENES")
-    expect_true_("each" %in% gene_combine_choices(3), "Each gene separately for 3 genes")
-    expect_true_(!"each" %in% gene_combine_choices(4), "no Each gene separately for 4 genes")
+    expect_true_("each" %in% gene_combine_choices(8), "Each gene separately for 8 genes")
+    expect_true_(!"each" %in% gene_combine_choices(9), "no Each gene separately for 9 genes")
     expect_true_(!"each" %in% gene_combine_choices(1), "no Each gene separately for 1 gene")
-    expect_equal_(effective_gene_combine("each", 3), "each", "Each kept for 3 genes")
-    expect_equal_(effective_gene_combine("each", 4), "mean", "Each falls back to Mean above 3 genes")
-    expect_equal_(effective_gene_combine("sum", 5), "sum", "Sum for any number of genes")
+    expect_equal_(effective_gene_combine("each", 5), "each", "Each kept for 5 genes")
+    expect_equal_(effective_gene_combine("each", 9), "mean", "Each falls back to Mean above 8 genes")
+    expect_equal_(effective_gene_combine("sum", 9), "sum", "Sum for any number of genes")
     expect_equal_(effective_gene_combine(NULL, 2), "each", "Each gene separately without a choice, 2 genes")
-    expect_equal_(effective_gene_combine(NULL, 5), "mean", "Mean without a choice, 5 genes")
+    expect_equal_(effective_gene_combine(NULL, 9), "mean", "Mean without a choice, 9 genes")
 })
 
 test_that_("Combine genes: mean and sum of the genes in each cell", {
@@ -60,36 +70,75 @@ test_that_("scaling to 0..1 at the 99th percentile", {
     expect_equal_(attr(sparse, "top"), 4, "rare expression: scaled by its maximum")
 })
 
-test_that_("mixing one colour per gene", {
+test_that_("colour wheel: hues of the genes and the colour of a cell", {
     needs_gene_colour_functions()
-    none <- blend_gene_colours(matrix(0, 1, 2))
-    expect_true_(all(abs(rgb_of(none) - GENE_BLEND_NONE) < 0.01), "no expression: light grey")
-    red <- rgb_of(blend_gene_colours(matrix(c(1, 0), 1)))
-    green <- rgb_of(blend_gene_colours(matrix(c(0, 1), 1)))
-    both <- rgb_of(blend_gene_colours(matrix(c(1, 1), 1)))
-    expect_true_(red[1] > 0.8 && red[2] < 0.1 && red[3] < 0.1, "gene 1 alone: red")
-    expect_true_(green[2] > 0.8 && green[1] < 0.1, "gene 2 alone: green")
-    expect_true_(both[1] > 0.7 && both[2] > 0.7 && both[3] < 0.1, "genes 1 and 2: yellow")
-    half <- rgb_of(blend_gene_colours(matrix(c(0.5, 0), 1)))
-    expect_true_(half[2] > red[2] && half[2] < GENE_BLEND_NONE[2], "half expression: between grey and red")
-    all3 <- rgb_of(blend_gene_colours(matrix(1, 1, 3)))
-    expect_true_(all(all3 < 0.4), "three genes together: dark grey")
-    blue <- rgb_of(blend_gene_colours(matrix(c(0, 0, 1), 1)))
-    expect_true_(blue[3] > 0.8 && blue[1] < 0.1, "gene 3 alone: blue")
-    failed <- tryCatch(blend_gene_colours(matrix(1, 1, 4)), error = function(e) "error")
-    expect_equal_(failed, "error", "at most 3 genes")
+    for (k in 2:8) {
+        hues <- wheel_gene_hues(k)
+        expect_equal_(hues[[1]], GENE_WHEEL_HUE_OFFSET, sprintf("%d genes: gene 1 at the offset", k))
+        expect_equal_(diff(hues[1:2]), 360 / k, sprintf("%d genes: evenly spaced", k))
+    }
+    alone <- wheel_gene_colours(diag(5))
+    found <- hcl_of(alone$colour)
+    expect_true_(all(hue_distance(found$h, wheel_gene_hues(5)) < 3), "one gene alone: its hue")
+    expect_true_(all(found$c > 40), "one gene alone: strong colour")
+    expect_equal_(alone$dominant, 1:5, "one gene alone: dominant")
+    expect_equal_(alone$share, rep(1, 5), "one gene alone: all of the expression")
+    pair <- wheel_gene_colours(matrix(c(1, 1, 0, 0, 0, 0), 1))
+    expect_true_(hue_distance(hcl_of(pair$colour)$h, mean(wheel_gene_hues(6)[1:2])) < 3,
+                 "two neighbouring genes: the hue halfway between them")
+    expect_equal_(pair$share, 0.5, "two genes equal: half each")
+    for (k in 2:8) {
+        expect_true_(hcl_of(wheel_gene_colours(matrix(1, 1, k))$colour)$c < 2,
+                     sprintf("%d genes equal: grey", k))
+    }
+    weak <- wheel_gene_colours(matrix(c(0.3, 0), 1))
+    expect_true_(mean(rgb_of(weak$colour)) > mean(rgb_of(alone$colour[[1]])),
+                 "lower expression: lighter")
 })
 
-test_that_("colour keys: grid of 2 genes, legend entries of 3", {
+test_that_("colour wheel: 3 genes red, green, blue", {
     needs_gene_colour_functions()
-    grid <- gene_colour_grid(c("CSP", "AMA1"), c(2, 4), steps = 5)
-    expect_equal_(dim(grid$colours), c(5L, 5L), "5 x 5 grid")
-    expect_equal_(range(grid$y), c(0, 4), "gene 2 from 0 to its full-colour value")
-    expect_equal_(grid$colours[1, 1], blend_gene_colours(matrix(0, 1, 2)), "corner without expression")
-    expect_equal_(grid$colours[1, 5], blend_gene_colours(matrix(c(1, 0), 1)), "gene 1 along x")
-    legend <- gene_colour_legend(c("CSP", "AMA1", "SBP1"))
-    expect_equal_(legend$label, c("CSP", "AMA1", "SBP1", "CSP + AMA1", "CSP + SBP1", "AMA1 + SBP1",
-                                  "All three", "None"), "one entry per gene, pair, all and none")
+    rgb <- vapply(wheel_gene_colours(diag(3))$colour, rgb_of, numeric(3))
+    expect_true_(which.max(rgb[, 1]) == 1 && rgb[1, 1] > 0.7, "gene 1: red")
+    expect_true_(which.max(rgb[, 2]) == 2 && rgb[2, 2] > 0.5, "gene 2: green")
+    expect_true_(which.max(rgb[, 3]) == 3 && rgb[3, 3] > 0.8, "gene 3: blue")
+})
+
+test_that_("colour wheel: no expression, rare genes and many cells", {
+    needs_gene_colour_functions()
+    none <- wheel_gene_colours(matrix(0, 2, 4))
+    expect_true_(all(abs(rgb_of(none$colour[[1]]) - GENE_COLOUR_NONE) < 0.01), "no expression: light grey")
+    expect_true_(all(is.na(none$dominant)) && all(is.na(none$share)), "no expression: no dominant gene")
+    n <- 2000
+    expression <- cbind(rexp(n), 0, c(rep(0, n - 1), 3), runif(n))
+    scaled <- vapply(1:4, function(g) as.numeric(scale_gene_expression(expression[, g])), numeric(n))
+    expect_true_(all(is.finite(scaled)), "a gene with no or rare expression scales without NaN")
+    wheel <- wheel_gene_colours(scaled)
+    expect_equal_(length(wheel$colour), n, "one colour per cell")
+    expect_true_(all(grepl("^#[0-9A-F]{6}$", wheel$colour)), "valid hex colours")
+    expect_true_(all(wheel$intensity >= 0 & wheel$intensity <= 1), "intensity between 0 and 1")
+    failed <- tryCatch(wheel_gene_colours(matrix(0, 3, 0)), error = function(e) "error")
+    expect_equal_(failed, "error", "at least 1 gene")
+})
+
+test_that_("colour wheel key: genes at their hues, gene 1 at the top", {
+    needs_gene_colour_functions()
+    key <- gene_wheel_key(c("CSP", "DBP", "P47", "AMA1"))
+    expect_equal_(key$genes$label, c("CSP", "DBP", "P47", "AMA1"), "one point per gene")
+    expect_equal_(round(c(key$genes$x[[1]], key$genes$y[[1]]), 6), c(0, 1), "gene 1 at the top")
+    expect_equal_(round(key$genes$x[[2]], 6), 1, "gene 2 on the right: clockwise")
+    expect_equal_(key$genes$position, c("top center", "middle right", "bottom center", "middle left"),
+                  "names outside the wheel")
+    expect_true_(all(abs(sqrt(key$ring$x^2 + key$ring$y^2) - 1) < 1e-9), "ring of radius 1")
+})
+
+test_that_("hover text: expression of each gene and the dominant gene", {
+    needs_gene_colour_functions()
+    expression <- cbind(CSP = c(3, 0), DBP = c(1, 0))
+    wheel <- wheel_gene_colours(cbind(c(0.75, 0), c(0.25, 0)))
+    text <- wheel_hover_values(expression, wheel)
+    expect_equal_(text[[1]], "CSP 3.00, DBP 1.00<br>Dominant: CSP (75%)", "expressing cell")
+    expect_equal_(text[[2]], "CSP 0.00, DBP 0.00", "no dominant gene without expression")
 })
 
 test_that_("embedding plots coloured by genes: mean, sum and each gene, 2D and 3D", {
@@ -100,9 +149,10 @@ test_that_("embedding plots coloured by genes: mean, sum and each gene, 2D and 3
     names(df)[names(df) == "barcode"] <- get_data_column("barcode")
     df[[get_data_column("study_label")]] <- "Study"
     df[[get_data_column("detailed_stage")]] <- "Ring"
-    expression <- cbind(CSP = runif(n), AMA1 = c(rep(0, n - 1), 5), SBP1 = runif(n))
+    expression <- cbind(CSP = runif(n), AMA1 = c(rep(0, n - 1), 5), SBP1 = runif(n),
+                        DBP = runif(n), P47 = 0, MSP1 = runif(n), TRAP = runif(n), CelTOS = runif(n))
     for (dim in c("2d", "3d")) {
-        for (genes in list(1:2, 1:3)) {
+        for (genes in list(1:2, 1:3, 1:8)) {
             for (combine in COMBINE_GENES) {
                 p <- embedding_gene_plot(df, expression[, genes, drop = FALSE], combine,
                                          "umap_i_1", "umap_i_2", 4, "umap_i", dim)

@@ -1,21 +1,12 @@
 # Embedding plots coloured by genes ("Color by" = Genes): the expression of
 # the selected genes, how several genes are combined ("Combine genes", the
-# choices of COMBINE_GENES in gene_distribution.R), and the colours of
-# "Each gene separately", where every gene has its own colour and the colour
-# of a cell mixes them.
+# choices of COMBINE_GENES in gene_distribution.R), and the plot of "Each gene
+# separately", where every gene has its own colour on a colour wheel and the
+# colour of a cell mixes them (gene_colour_wheel.R).
 
-# "Each gene separately" is offered for 2 genes up to this number.
-MAX_GENES_EACH_COLOUR <- 3
-
-# Colour (RGB, 0..1) of a cell that expresses none of the genes, and the
-# colour channel of each gene: gene 1 red, gene 2 green, gene 3 blue.
-GENE_BLEND_NONE <- c(0.85, 0.85, 0.85)
-GENE_BLEND_CHANNELS <- diag(3)
-
-# Brightness of the mixed colour when 1, 2 or 3 genes are fully expressed:
-# lower for several genes, so that their mixtures (yellow, cyan, magenta)
-# stay readable on white and the three genes together give a dark grey.
-GENE_BLEND_BRIGHTNESS <- c(0.9, 0.8, 0.25)
+# "Each gene separately" is offered for 2 genes up to this number: beyond it,
+# neighbouring hues of the wheel are too hard to tell apart.
+MAX_GENES_EACH_COLOUR <- 8
 
 # Choices of the "Combine genes" menu for `n_genes` selected genes.
 gene_combine_choices <- function(n_genes) {
@@ -26,8 +17,8 @@ gene_combine_choices <- function(n_genes) {
 }
 
 # The combination used for `n_genes` genes: the menu value if it is a
-# choice for that number of genes, otherwise "Each gene separately" (2 or 3
-# genes) or the mean.
+# choice for that number of genes, otherwise "Each gene separately" (2 to
+# MAX_GENES_EACH_COLOUR genes) or the mean.
 effective_gene_combine <- function(combine, n_genes) {
     choices <- gene_combine_choices(n_genes)
     if (length(combine) == 1 && combine %in% choices) {
@@ -82,67 +73,6 @@ gene_colour_title <- function(genes, combine = "mean") {
     sprintf("%s of %d genes", if (combine == "sum") "Sum" else "Mean", length(genes))
 }
 
-# Expression scaled to 0..1: divided by its `upper` quantile and clipped at 1,
-# so that a few very high cells do not make all others look unexpressed.
-# Missing values count as 0. The value scaled to 1 is in attribute "top".
-scale_gene_expression <- function(x, upper = 0.99) {
-    x[is.na(x)] <- 0
-    x <- pmax(x, 0)
-    top <- if (length(x) > 0) unname(stats::quantile(x, upper)) else 0
-    if (top <= 0) top <- max(c(x, 0))
-    scaled <- if (top > 0) pmin(x / top, 1) else x * 0
-    attr(scaled, "top") <- top
-    scaled
-}
-
-# Colour (hex) of each row of `scaled` (cells x 1 to 3 genes, values 0..1).
-# The strongest gene sets the intensity (light grey at 0, the full colour at
-# 1) and the ratios of the genes set the hue: red and green mix to yellow,
-# red and blue to magenta, green and blue to cyan, all three to dark grey.
-blend_gene_colours <- function(scaled) {
-    scaled <- as.matrix(scaled)
-    k <- ncol(scaled)
-    if (k < 1 || k > MAX_GENES_EACH_COLOUR) {
-        stop("blend_gene_colours(): 1 to ", MAX_GENES_EACH_COLOUR, " genes, got ", k, call. = FALSE)
-    }
-    strength <- apply(scaled, 1, max)
-    hue <- scaled / ifelse(strength > 0, strength, 1)
-    brightness <- stats::approx(seq_along(GENE_BLEND_BRIGHTNESS), GENE_BLEND_BRIGHTNESS,
-                                xout = pmax(1, rowSums(hue)), rule = 2)$y
-    full <- (hue %*% GENE_BLEND_CHANNELS[seq_len(k), , drop = FALSE]) * brightness
-    none <- matrix(GENE_BLEND_NONE, nrow(scaled), 3, byrow = TRUE)
-    mixed <- none * (1 - strength) + full * strength
-    grDevices::rgb(mixed[, 1], mixed[, 2], mixed[, 3])
-}
-
-# Colour key of 2 genes: a grid of expression of gene 1 (x) by gene 2 (y),
-# from 0 to the value shown at full colour (`tops`). Returns the x and y
-# values, the colours of the grid (rows = y) and its hover text.
-gene_colour_grid <- function(genes, tops, steps = 9) {
-    levels <- seq(0, 1, length.out = steps)
-    grid <- expand.grid(g1 = levels, g2 = levels)
-    colours <- matrix(blend_gene_colours(as.matrix(grid)), steps, steps, byrow = TRUE)
-    text <- matrix(sprintf("%s: %.2f<br>%s: %.2f", genes[[1]], grid$g1 * tops[[1]],
-                           genes[[2]], grid$g2 * tops[[2]]), steps, steps, byrow = TRUE)
-    list(x = levels * tops[[1]], y = levels * tops[[2]], colours = colours, text = text)
-}
-
-# Legend entries of 3 genes: each gene alone, each pair, all three, none.
-gene_colour_legend <- function(genes) {
-    sets <- c(lapply(seq_along(genes), function(i) i), utils::combn(seq_along(genes), 2, simplify = FALSE),
-              list(seq_along(genes)))
-    labels <- vapply(sets, function(s) paste(genes[s], collapse = " + "), character(1))
-    labels[length(labels)] <- "All three"
-    colours <- vapply(sets, function(s) {
-        x <- numeric(length(genes))
-        x[s] <- 1
-        blend_gene_colours(matrix(x, nrow = 1))
-    }, character(1))
-    data.frame(label = c(labels, "None"),
-               colour = c(colours, blend_gene_colours(matrix(0, 1, length(genes)))),
-               stringsAsFactors = FALSE)
-}
-
 # Embedding plot coloured by the genes of `expression` (cells x genes, rows as
 # in `df`), combined by `combine` (one of COMBINE_GENES); `legend`: see
 # legend_settings().
@@ -150,7 +80,7 @@ embedding_gene_plot <- function(df, expression, combine, xaxis_input, yaxis_inpu
                                 plot_type, plot_dim, is_dual_plot = FALSE, legend = legend_settings()) {
     combine <- effective_gene_combine(combine, ncol(expression))
     if (combine == "each") {
-        return(embedding_blend_plot(df, expression, xaxis_input, yaxis_input, size, plot_type, plot_dim,
+        return(embedding_wheel_plot(df, expression, xaxis_input, yaxis_input, size, plot_type, plot_dim,
                                     is_dual_plot, legend))
     }
     df$.gene_colour <- combine_gene_expression(expression, combine)
@@ -160,26 +90,24 @@ embedding_gene_plot <- function(df, expression, combine, xaxis_input, yaxis_inpu
                    legend = legend)
 }
 
-# Embedding plot with one colour per gene (2 or 3 genes), mixed in each cell
-# (blend_gene_colours()). Cells with higher expression are drawn on top. The
-# key: a colour grid for 2 genes, legend entries for 3.
-embedding_blend_plot <- function(df, expression, xaxis_input, yaxis_input, size, plot_type, plot_dim,
+
+# Embedding plot with one colour per gene (2 to MAX_GENES_EACH_COLOUR genes),
+# mixed in each cell on the colour wheel (wheel_gene_colours()). Cells with
+# higher expression are drawn on top. The key: the colour wheel with the
+# genes at their hues.
+embedding_wheel_plot <- function(df, expression, xaxis_input, yaxis_input, size, plot_type, plot_dim,
                                  is_dual_plot = FALSE, legend = legend_settings()) {
     position <- resolve_legend_position(legend$position, is_dual_plot, plot_dim)
     genes <- colnames(expression)
-    scaled <- lapply(seq_along(genes), function(g) scale_gene_expression(expression[, g]))
-    tops <- vapply(scaled, function(s) attr(s, "top"), numeric(1))
-    scaled <- do.call(cbind, lapply(scaled, as.numeric))
+    scaled <- vapply(seq_along(genes), function(g) as.numeric(scale_gene_expression(expression[, g])),
+                     numeric(nrow(expression)))
+    scaled <- matrix(scaled, nrow = nrow(expression))
+    wheel <- wheel_gene_colours(scaled)
     df$plotly_key <- seq_len(nrow(df))
-    df$.gene_colour <- blend_gene_colours(scaled)
-    values <- vapply(seq_along(genes), function(g) {
-        sprintf("%s %.2f", genes[[g]], expression[, g])
-    }, character(nrow(df)))
-    values <- matrix(values, nrow = nrow(df))
-    df$.gene_values <- apply(values, 1, paste, collapse = ", ")
+    df$.gene_colour <- wheel$colour
+    df$.gene_values <- wheel_hover_values(expression, wheel)
 
-    drawn <- order(apply(scaled, 1, max))
-    df <- df[drawn, , drop = FALSE]
+    df <- df[order(wheel$intensity), , drop = FALSE]
 
     axes <- embedding_axes(plot_type, xaxis_input, yaxis_input, plot_dim)
     coords <- lapply(axes, function(a) df[[a]])
@@ -200,20 +128,27 @@ embedding_blend_plot <- function(df, expression, xaxis_input, yaxis_input, size,
         p <- layout(p, font = list(size = 14), margin = legend_margins(position), autosize = TRUE)
         return(embedding_axis_titles(p, axes, plot_dim))
     }
-    if (length(genes) == 3) {
-        p <- layout(p, font = list(size = 14), margin = legend_margins(position, legend$scale), autosize = TRUE)
-        p <- embedding_axis_titles(p, axes, plot_dim)
-        return(add_gene_colour_legend(p, genes, coords, position, legend$scale))
-    }
-    # the colour grid lies inside the figure, also on the right or below; by
+    # the colour wheel lies inside the figure, also on the right or below; by
     # default on the right, and then, side by side, with the margins of the
     # other plot, so that both have the same size
     auto <- legend$position == "auto"
-    placement <- gene_grid_placement(if (auto) "right" else position, legend$scale)
+    placement <- gene_key_placement(if (auto) "right" else position, legend$scale)
     margins <- legend_margins(if (auto && is_dual_plot) position else "hidden", legend$scale)
     p <- layout(p, font = list(size = 14), margin = margins, autosize = TRUE)
     p <- embedding_axis_titles(p, axes, plot_dim, placement$plot_x, placement$plot_y)
-    add_gene_colour_grid(p, genes, tops, placement, legend$scale)
+    add_gene_wheel_key(p, genes, placement, legend$scale)
+}
+
+# Hover text of each cell of a colour wheel plot: the expression of each gene
+# and, for cells that express any, the gene with the largest share.
+wheel_hover_values <- function(expression, wheel) {
+    genes <- colnames(expression)
+    values <- lapply(seq_along(genes), function(g) sprintf("%s %.2f", genes[[g]], expression[, g]))
+    text <- do.call(paste, c(values, sep = ", "))
+    expressed <- !is.na(wheel$dominant)
+    text[expressed] <- sprintf("%s<br>Dominant: %s (%.0f%%)", text[expressed],
+                               genes[wheel$dominant[expressed]], 100 * wheel$share[expressed])
+    text
 }
 
 # Axis titles of an embedding plot (2D axes or 3D scene); `x_domain`,
@@ -231,52 +166,37 @@ embedding_axis_titles <- function(p, axes, plot_dim, x_domain = c(0, 1), y_domai
            yaxis = list(title = paste("Y-", axes[[2]]), domain = y_domain))
 }
 
-# Colour grid of 2 genes, placed as in `placement` (gene_grid_placement()),
-# its text scaled by `text_scale`.
-add_gene_colour_grid <- function(p, genes, tops, placement, text_scale = 1) {
-    grid <- gene_colour_grid(genes, tops)
-    n <- length(grid$colours)
-    index <- matrix(seq_len(n), nrow(grid$colours))
-    scale <- lapply(seq_len(n), function(i) list((i - 1) / (n - 1), grid$colours[[i]]))
-    key_axis <- function(title, domain, anchor) {
-        list(title = list(text = title, font = list(size = 11 * text_scale)), domain = domain, anchor = anchor,
-             fixedrange = TRUE, showgrid = FALSE, zeroline = FALSE, nticks = 3,
-             tickfont = list(size = 10 * text_scale))
+# Colour wheel of the genes (gene_wheel_key()), on axes of its own placed as
+# in `placement` (gene_key_placement()), its text scaled by `text_scale`. The
+# gene names and the title reach out of the axes, which do not clip them; the
+# title follows the wheel, which plotly shrinks to keep it round.
+add_gene_wheel_key <- function(p, genes, placement, text_scale = 1) {
+    key <- gene_wheel_key(genes)
+    key_axis <- function(domain, anchor) {
+        list(domain = domain, anchor = anchor, range = c(-1.3, 1.3), fixedrange = TRUE,
+             visible = FALSE, showgrid = FALSE, zeroline = FALSE)
     }
-    p <- add_trace(p, type = "heatmap", x = grid$x, y = grid$y, z = index, colorscale = scale,
-                   zmin = 1, zmax = n, showscale = FALSE, text = grid$text, hoverinfo = "text",
+    p <- add_trace(p, type = "scatter", mode = "markers", x = key$ring$x, y = key$ring$y,
+                   marker = list(color = key$ring$colour, size = 5 * text_scale),
+                   hoverinfo = "skip", showlegend = FALSE, xaxis = "x2", yaxis = "y2", inherit = FALSE)
+    p <- add_trace(p, type = "scatter", mode = "markers", x = key$centre$x, y = key$centre$y,
+                   marker = list(color = key$centre$colour, size = 12 * text_scale),
+                   text = "No expression", hoverinfo = "text", showlegend = FALSE,
                    xaxis = "x2", yaxis = "y2", inherit = FALSE)
-    p <- layout(p,
-        xaxis2 = key_axis(genes[[1]], placement$grid_x, "y2"),
-        yaxis2 = key_axis(genes[[2]], placement$grid_y, "x2"),
-        annotations = list(list(text = "Expression", x = placement$title_x, y = placement$title_y,
-                                xref = "paper", yref = "paper", showarrow = FALSE,
+    p <- add_trace(p, type = "scatter", mode = "markers+text", x = key$genes$x, y = key$genes$y,
+                   marker = list(color = key$genes$colour, size = 11 * text_scale,
+                                 line = list(color = "white", width = 1)),
+                   text = key$genes$label, textposition = key$genes$position,
+                   textfont = list(size = 11 * text_scale), cliponaxis = FALSE,
+                   hovertext = key$genes$text, hoverinfo = "text", showlegend = FALSE,
+                   xaxis = "x2", yaxis = "y2", inherit = FALSE)
+    y_axis <- key_axis(placement$key_y, "x2")
+    y_axis$scaleanchor <- "x2"
+    layout(p,
+        xaxis2 = key_axis(placement$key_x, "y2"),
+        yaxis2 = y_axis,
+        annotations = list(list(text = "Expression", x = 0, y = 1, xref = "x2", yref = "y2",
+                                yanchor = "bottom", yshift = 24 * text_scale, showarrow = FALSE,
                                 font = list(size = 12 * text_scale)))
     )
-}
-
-# Legend of 3 genes: one entry per gene, pair and all three. Each entry is a
-# tiny point on the first cell (plotly leaves traces without points out of
-# the legend); the legend draws its symbols at a constant size.
-# `position`: see LEGEND_POSITIONS (not "auto" or "hidden").
-add_gene_colour_legend <- function(p, genes, coords, position, scale = 1) {
-    entries <- gene_colour_legend(genes)
-    at <- lapply(coords, function(v) v[1])
-    for (i in seq_len(nrow(entries))) {
-        marker <- list(color = entries$colour[[i]], size = 0.1)
-        p <- if (length(coords) == 3) {
-            add_trace(p, type = "scatter3d", mode = "markers", x = at[[1]], y = at[[2]], z = at[[3]],
-                      name = entries$label[[i]], marker = marker, showlegend = TRUE,
-                      hoverinfo = "skip", inherit = FALSE)
-        } else {
-            add_trace(p, type = "scattergl", mode = "markers", x = at[[1]], y = at[[2]],
-                      name = entries$label[[i]], marker = marker, showlegend = TRUE,
-                      hoverinfo = "skip", inherit = FALSE)
-        }
-    }
-    legend <- category_legend_layout("Expressed genes", position, scale,
-                                     if (length(coords) == 3) "3d" else "2d")
-    legend$itemclick <- FALSE
-    legend$itemdoubleclick <- FALSE
-    layout(p, legend = legend, showlegend = TRUE)
 }

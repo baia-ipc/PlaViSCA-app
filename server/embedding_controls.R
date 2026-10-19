@@ -69,8 +69,9 @@ embedding_controls_server <- function(input, output, session, gene_data, compari
   })
 
   # "Combine genes" menu of each plot: "Each gene separately" is a choice only
-  # for 2 or 3 genes. The menu is hidden for fewer than 2 genes and keeps its
-  # value (the selection is briefly empty while the name/ID switch converts it).
+  # for 2 to MAX_GENES_EACH_COLOUR genes. The menu is hidden for fewer than 2
+  # genes and keeps its value (the selection is briefly empty while the
+  # name/ID switch converts it).
   for (ids in list(c("genes_n", "combine_genes"), c("genes_n_first_comp", "combine_genes_first_comp"),
                    c("genes_second", "combine_genes_second"))) {
     local({
