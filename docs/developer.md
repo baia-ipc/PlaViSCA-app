@@ -143,10 +143,23 @@ PLAVISCA_DATA_DIR=/path/to/app_data Rscript tests/run_tests.R
 | `test_cell_count_plots.R`, `test_gene_plots.R` | plots of the Metadata plots and Gene expression tabs |
 | `test_embedding_gene_colours.R` | embeddings coloured by genes: mean, sum, scaling, colour mixing, colour keys |
 | `test_app_code.R` | the code rules listed above |
+| `test_server.R` | the server code of `server/`, with `shiny::testServer()`: runs `tests/server_checks.R` in a separate R process, which loads `global.R` and the checks in `tests/server/` (one file per server file) |
 
 To add a test, add a `test_that_("what it checks", { ... })` block to the
 file of that topic, or a new `tests/test_<topic>.R` listed in
-`tests/run_tests.R`.
+`tests/run_tests.R`. A check of server code is a `check("what it checks",
+{ ... })` block in `tests/server/`, for example:
+
+```r
+check("qc_tab_server counts the cells of the filtered study", {
+  testServer(function(input, output, session) {
+    qc_tab_server(input, output, reactive(study_filter("Sa2020")))
+  }, {
+    session$flushReact()
+    stop_unless(!is.null(output$data_count_plotly), "no RNA count plot")
+  })
+})
+```
 
 ## The user manual
 

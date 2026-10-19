@@ -54,7 +54,8 @@ test_files <- c(
     "tests/test_cell_count_plots.R",
     "tests/test_gene_plots.R",
     "tests/test_embedding_gene_colours.R",
-    "tests/test_app_code.R"
+    "tests/test_app_code.R",
+    "tests/test_server.R"
 )
 
 cat(sprintf("PlaViSCA test suite\n  app root: %s\n  data dir: %s\n\n",
