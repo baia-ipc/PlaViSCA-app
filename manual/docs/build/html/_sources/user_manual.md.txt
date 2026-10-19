@@ -73,9 +73,19 @@ The Embeddings tab offers dimensionality reduction and customizable visualizatio
 
 **Color by**: Study label, Broad life-cycle stage, Life-cycle stage, Host species, Host and tissue, Treatment, Parasite strain / isolate, Parasite origin location, Single-cell technology, or Genes.
 
+**Coloring by genes**: with **Color by** set to *Genes*, select up to 10 genes by name, or by ID with the switch next to the menu (switching keeps the selected genes). With more than one gene, **Combine genes** sets how they color the cells:
+
+| Combine genes | Color of a cell |
+|---|---|
+| *Mean* (default) | the mean expression of the genes, on one color scale |
+| *Sum* | the sum of their expression |
+| *Each gene separately* (2 or 3 genes) | each gene has its own color, and the color of a cell mixes them: light grey where no gene is expressed, red for the first gene, green for the second, blue for the third. Co-expression gives mixed colors: red + green = yellow, red + blue = magenta, green + blue = cyan, all three = dark grey |
+
+With *Each gene separately*, the expression of each gene is scaled to 0–1 within the cells shown, with full color at its 99th percentile, and the cells with the highest expression are drawn on top. For 2 genes, a color grid right of the plot shows the color of each combination of the two expression values; for 3 genes, the legend lists the color of each gene and of their combinations. The hover text gives the expression of each gene. Example: select CSP and AMA1 and choose *Each gene separately*, to see the cells expressing CSP (red), AMA1 (green) or both (yellow).
+
 **Visualization bar**: the title bar of the plot holds the **Compare Plots** and **Download Data** buttons.
 
-**Compare Plots mode**: Click **Compare Plots** to display two independent plots (Plot A and Plot B) side-by-side, each with its own **Color by** selector in its title bar; a gene input appears above a plot when it is colored by genes.
+**Compare Plots mode**: Click **Compare Plots** to display two independent plots (Plot A and Plot B) side-by-side, each with its own **Color by** selector in its title bar; a gene input, with its own **Combine genes** menu, appears above a plot when it is colored by genes.
 
 **Interactive Cell Selection**: Click any cell to open a modal dialog showing a per-cell gene expression table (gene ID, gene name, expression value, description). The table is filterable and exportable as CSV.
 

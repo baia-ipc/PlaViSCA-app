@@ -35,6 +35,7 @@ source("functions/plots_gene_expression.R")
 source("functions/plots_gene_distribution.R")
 source("functions/plots_gene_summaries.R")
 source("functions/embedding_plots.R")
+source("functions/embedding_gene_colours.R")
 
 # UI building blocks
 source("functions/helpers_UI.R")

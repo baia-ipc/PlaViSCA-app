@@ -8,25 +8,6 @@ y_col <- function(check_input, x_col, unintegrated, integrated) {
   }
 }
 
-# Generate color column based on input option
-get_color_column <- function(color_type, gene_input, gene_data_obj) {
-  switch(color_type,
-    "genes" = {
-      # Handle multiple gene selection by averaging
-      if (length(gene_input) > 1) {
-        # For multiple genes, return a special identifier that signals averaging
-        # The actual averaging will be handled in the server logic
-        paste0("multi_gene_avg_", length(gene_input))
-      } else {
-        get_gene_id(gene_input, gene_data_obj)
-      }
-    },
-    "cca_snn" = gene_input,
-    color_type
-  )
-}
-
-
 # Assign colors based on the number of categories
 assign_colors <- function(num_categories) {
   if (num_categories <= 8) {
@@ -124,6 +105,46 @@ get_dim <- function(plot_type) {
   )[[plot_type]]
 }
 
+
+# Coordinate columns of an embedding plot: the 3 of `plot_type` in 3D; in 2D
+# the chosen X and Y axes, or the first two coordinates of `plot_type` when
+# the chosen ones belong to another embedding.
+embedding_axes <- function(plot_type, xaxis_input, yaxis_input, plot_dim = "2d") {
+  valid_coords <- get_dim(plot_type)
+  if (plot_dim == "3d") {
+    return(valid_coords)
+  }
+  if (is.null(xaxis_input) || !xaxis_input %in% valid_coords) {
+    xaxis_input <- valid_coords[1]
+  }
+  if (is.null(yaxis_input) || !yaxis_input %in% valid_coords) {
+    yaxis_input <- valid_coords[2]
+  }
+  c(xaxis_input, yaxis_input)
+}
+
+# Click events and mode bar of an embedding plot.
+embedding_plot_config <- function(p) {
+  p %>%
+    event_register("plotly_click") %>%
+    config(
+      displaylogo = FALSE,
+      scrollZoom = TRUE,
+      # double-click opens the cell details (www/script.js), not a zoom reset
+      doubleClick = FALSE,
+      # no camera is ever saved, so "last save" would equal the default
+      # a list, so that it reaches plotly.js as an array
+      modeBarButtonsToRemove = list("resetCameraLastSave3d"),
+      displayModeBar = TRUE,
+      toImageButtonOptions = list(
+        format = "png",
+        filename = "embedding_plot",
+        width = 1600,
+        height = 1200,
+        scale = 3
+      )
+    )
+}
 
 get_legend_layout <- function(legend_title, num_categories = NULL, is_dual_plot = FALSE, is_gene_plot = FALSE) {
   # Check if this is a gene plot (continuous color scale)
@@ -435,18 +456,9 @@ embedding_plot <- function(
     color <- fallback
   }
 
-  # Robust coordinate resolution: ensure selected axes belong to the current embedding type
-  valid_coords <- get_dim(plot_type)
-  if (is.null(xaxis_input) || !xaxis_input %in% valid_coords) {
-    xaxis_input <- valid_coords[1]
-  }
-  if (is.null(yaxis_input) || !yaxis_input %in% valid_coords) {
-    # Try to pick a different one than xaxis if possible
-    yaxis_input <- if (length(valid_coords) > 1) valid_coords[2] else valid_coords[1]
-  }
-
-  x <- df[[xaxis_input]]
-  y <- df[[yaxis_input]]
+  axes <- embedding_axes(plot_type, xaxis_input, yaxis_input)
+  x <- df[[axes[[1]]]]
+  y <- df[[axes[[2]]]]
 
   if (is.null(x) || is.null(y)) {
     warning("Could not resolve coordinates for plot")
