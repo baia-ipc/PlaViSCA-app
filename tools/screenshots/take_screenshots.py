@@ -14,7 +14,9 @@ Options:
 
 The shot list (YAML) gives the browser window size, the waits, and one entry
 per screenshot: the tab to open, the steps to perform on it, what to capture
-and where to save it. See README.md and manual.yml.
+and where to save it. A shot without an output is a panel of a figure: the
+`figures:` section composes panels into multi-panel figures (see
+compose_figures.py). See README.md, manual.yml and manuscript.yml.
 Output paths are relative to the app directory (the parent of tools/), or to
 --out-dir.
 """
@@ -23,12 +25,15 @@ import argparse
 import os
 import subprocess
 import sys
+import tempfile
 import time
 import urllib.request
 from pathlib import Path
 
 import yaml
 from playwright.sync_api import sync_playwright
+
+from compose_figures import compose_figure
 
 APP_DIR = Path(__file__).resolve().parents[2]
 
@@ -102,8 +107,8 @@ def wait_until_drawn(page, timeout):
         timeout=timeout * 1000, polling=500)
 
 
-def take_shot(page, shot, settings, out_dir):
-    """Open the shot's tab, perform its steps and save the screenshot."""
+def take_shot(page, shot, settings, out):
+    """Open the shot's tab, perform its steps and save the screenshot to out."""
     if "tab" in shot:
         page.click(f"#tabset a[data-value='{shot['tab']}']")
         time.sleep(1)
@@ -111,13 +116,12 @@ def take_shot(page, shot, settings, out_dir):
         run_step(page, step, settings)
     time.sleep(shot.get("settle", settings["settle"]))
     wait_until_drawn(page, settings["draw_timeout"])
-    out = out_dir / shot["output"]
     out.parent.mkdir(parents=True, exist_ok=True)
     if "element" in shot:
         page.locator(shot["element"]).first.screenshot(path=out)
     else:
         page.screenshot(path=out, full_page=shot.get("full_page", False))
-    print(f"{shot['name']}: {shot['output']}")
+    print(f"{shot['name']}: {out}")
 
 
 def main():
@@ -137,6 +141,11 @@ def main():
     if args.only:
         shots = [s for s in shots if s["name"] in args.only]
 
+    out_dir = args.out_dir.resolve()
+    panel_dir = Path(tempfile.mkdtemp(prefix="plavisca_panels_"))
+    paths = {s["name"]: out_dir / s["output"] if "output" in s else panel_dir / f"{s['name']}.png"
+             for s in spec["shots"]}
+
     app = start_app(args.url) if args.start_app else None
     try:
         wait_for_url(args.url, settings["start_timeout"])
@@ -150,12 +159,22 @@ def main():
                 page.goto(args.url)
                 page.wait_for_selector("#tabset", timeout=settings["start_timeout"] * 1000)
                 time.sleep(settings["settle"])
-                take_shot(page, shot, settings, args.out_dir.resolve())
+                take_shot(page, shot, settings, paths[shot["name"]])
                 page.close()
             browser.close()
+        taken = {s["name"] for s in shots}
+        for figure in spec.get("figures", []):
+            names = [n for row in figure["rows"] for n in row]
+            if all(n in taken for n in names):
+                rows = [[paths[n] for n in row] for row in figure["rows"]]
+                compose_figure(rows, out_dir / figure["output"])
+                print(f"{figure['name']}: {out_dir / figure['output']}")
     finally:
         if app:
             stop_app(app)
+        for f in panel_dir.glob("*.png"):
+            f.unlink()
+        panel_dir.rmdir()
 
 
 if __name__ == "__main__":

@@ -11,8 +11,12 @@ settings:
   settle: 3
 
 shots:
-  # Fig 5: side-by-side coloring of the integrated 2D UMAP, harmonized stage
-  # (Plot A) and study (Plot B)
+  # Fig 5: views of the app. (A) side-by-side coloring of the integrated 2D
+  # UMAP, harmonized stage (Plot A) and study (Plot B); (B) Gene expression
+  # card: Seurat-style dot plot of stage marker genes by life-cycle stage;
+  # (C) Metadata plots builder: sunburst of the cells by study and stage.
+  # The panels have no output of their own: they are composed into
+  # fig5_app_views.png (figures: below).
   - name: fig5_side_by_side
     tab: Embeddings
     steps:
@@ -24,4 +28,37 @@ shots:
       - select: {id: color_first_comp, value: stage}
       - select: {id: color_second, value: study_label}
     element: "#comparison_plots_panel"
-    output: fig5_side_by_side.png
+
+  - name: fig5_gene_dotplot
+    tab: Gene expression
+    steps:
+      - drawn: true
+      - select: {id: plot_type_exp_0, value: dotplot}
+      - select: {id: group_exp_0, value: stage}
+      # stage markers, from blood stages to liver stages (Pvs25 is P25 in
+      # the annotation). The gene menu loads its choices from the server
+      # while typing: add the genes as choices before selecting them
+      - js: >-
+          (() => { const s = document.getElementById('genes_exp_0').selectize;
+          const genes = ['SBP1', 'PM4', 'AMA1', 'RBP2b', 'P25', 'CSP', 'LISP2'];
+          genes.forEach(g => s.addOption({value: g, label: g}));
+          s.setValue(genes); })()
+      - drawn: true
+    element: "#dynamic_col_0 .card"
+
+  - name: fig5_metadata_sunburst
+    tab: Metadata plots
+    steps:
+      - drawn: true
+      - select: {id: plot_builder_1-type, value: sunburst}
+      - select: {id: plot_builder_1-field, value: study_label}
+      - select: {id: plot_builder_1-split_by, value: detailed_stage}
+      - drawn: true
+    element: "#plot_builder_1_column .card"
+
+figures:
+  - name: fig5_app_views
+    rows:
+      - [fig5_side_by_side]
+      - [fig5_gene_dotplot, fig5_metadata_sunburst]
+    output: fig5_app_views.png

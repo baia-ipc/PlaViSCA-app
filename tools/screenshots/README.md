@@ -66,6 +66,20 @@ shots:
 Other steps: `wait: <seconds>`, `wait_for: <selector>` (until visible) and
 `js: <JavaScript>`. By default the whole window is captured; `element:
 <selector>` captures one element only (e.g. a card), and `full_page: true` the
-whole scrollable page. Output paths are relative to the app directory. Each
+whole scrollable page. Output paths are relative to the app directory.
+
+A shot without `output` is a panel of a figure. The `figures:` section
+composes panels into one multi-panel image, one list of shot names per row;
+the panels of a row are scaled to the same height, the rows to the same
+width, and the panels are labelled A, B, C, ... (see `manuscript.yml`):
+
+```yaml
+figures:
+  - name: fig5_app_views
+    rows:
+      - [fig5_side_by_side]
+      - [fig5_gene_dotplot, fig5_metadata_sunburst]
+    output: fig5_app_views.png
+``` Each
 shot starts from a freshly loaded app, and is saved only once the server is
 idle, no output is recalculating and every visible plot is drawn.
