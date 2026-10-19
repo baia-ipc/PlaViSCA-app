@@ -12,11 +12,12 @@ settings:
 
 shots:
   # Fig 5: views of the app. (A) side-by-side coloring of the integrated 2D
-  # UMAP, by harmonized stage (Plot A) and by the mean expression of the
-  # hemoglobin digestion genes PM4, vivapain-2 (two copies), vivapain-3 and
-  # DPAP1 (Plot B, by gene ID: the vivapain-2 copies have no name); (B) Gene expression
-  # card: Seurat-style dot plot of stage marker genes by life-cycle stage;
-  # (C) Metadata plots builder: sunburst of the cells by study and stage.
+  # UMAP, by harmonized stage (Plot A) and by three genes of different stages,
+  # each in its own colour ("Each gene separately"): CSP (sporozoites, red),
+  # DBP (blood schizonts, green), P47 (gametocytes, blue)
+  # (Plot B); (B) Gene
+  # expression card: Seurat-style dot plot of stage marker genes by life-cycle
+  # stage; (C) Metadata plots builder: sunburst of the cells by study and stage.
   # The panels have no output of their own: they are composed into
   # fig5_app_views.png (figures: below).
   - name: fig5_side_by_side
@@ -30,15 +31,24 @@ shots:
       - select: {id: color_first_comp, value: stage}
       # Plot B has nothing to draw until genes are selected: no "drawn" here
       - select: {id: color_second, value: genes}
-      - wait: 3
-      - click: "#check_second"
-      - wait: 3
+      # wait until the server has filled the gene menu, which resets it
+      - wait: 8
+      # the gene menu loads its choices from the server while typing: add
+      # the genes as choices before selecting them
       - js: >-
           (() => { const s = document.getElementById('genes_second').selectize;
-          const genes = ['PVP01_1340900', 'PVP01_0916000', 'PVP01_0916200',
-                         'PVP01_0916100', 'PVP01_0917300'];
+          const genes = ['CSP', 'DBP', 'P47'];
           genes.forEach(g => s.addOption({value: g, label: g}));
           s.setValue(genes); })()
+      # set again in case the menu was reset after the first time
+      - wait: 5
+      - js: >-
+          (() => { const s = document.getElementById('genes_second').selectize;
+          const genes = ['CSP', 'DBP', 'P47'];
+          genes.forEach(g => s.addOption({value: g, label: g}));
+          s.setValue(genes); })()
+      - drawn: true
+      - select: {id: combine_genes_second, value: each}
       - drawn: true
     element: "#comparison_plots_panel"
 
