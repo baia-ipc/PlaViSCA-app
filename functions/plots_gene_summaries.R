@@ -50,16 +50,33 @@ plot_gene_cleveland <- function(table, group_col, split_col = NULL, value = "per
             yaxis = list(title = genes[[g]], range = y_range, zeroline = FALSE,
                          ticksuffix = if (value == "percent") "%" else ""),
             xaxis = list(tickvals = seq_along(group_labels), ticktext = group_labels,
-                         range = c(0.5, length(group_labels) + 0.5), zeroline = FALSE)
+                         range = c(0.5, length(group_labels) + 0.5), zeroline = FALSE,
+                         showgrid = FALSE)
         )
     })
 
-    subplot(rows, nrows = length(rows), shareX = TRUE, titleY = TRUE, margin = 0.02) %>%
+    p <- subplot(rows, nrows = length(rows), shareX = TRUE, titleY = TRUE, margin = 0.02) %>%
         layout(
             title = list(text = summary_value_title(value), font = list(size = 14)),
             legend = list(title = list(text = if (is.null(split_col)) "" else get_label_for_column(split_col))),
             showlegend = !is.null(split_col)
         )
+    # subplot() drops shapes set on the combined plot: add them once built
+    p <- plotly_build(p)
+    y_axes <- c("y", paste0("y", seq_len(length(rows))[-1]))
+    p$x$layout$shapes <- do.call(c, lapply(y_axes, group_separators,
+                                           n = length(group_labels), y_range = y_range))
+    p
+}
+
+# Grid lines between `n` groups on the x axis (at 1.5, 2.5, ...), over
+# `y_range` of y axis `y_axis` and below the points.
+group_separators <- function(y_axis, n, y_range) {
+    lapply(seq_len(max(0, n - 1)) + 0.5, function(x) {
+        list(type = "line", x0 = x, x1 = x, xref = "x", y0 = y_range[[1]], y1 = y_range[[2]],
+             yref = y_axis,
+             layer = "below", line = list(color = "#eeeeee", width = 1))
+    })
 }
 
 # x offsets that put `n` points of a group side by side within +-0.3.
@@ -102,7 +119,8 @@ plot_gene_dotplot <- function(table, group_col, scaled = TRUE) {
         add_trace(
             x = rep(0.2, length(key)), y = rev(seq_along(key)),
             xaxis = "x2", yaxis = "y2", type = "scatter", mode = "markers+text",
-            marker = list(size = dot_size(key), color = "#999999"),
+            marker = list(size = dot_size(key), color = "#999999",
+                          line = list(width = 0.5, color = "#555555")),
             text = paste0(key, "%"), textposition = "middle right",
             hoverinfo = "skip", cliponaxis = FALSE
         ) %>%
