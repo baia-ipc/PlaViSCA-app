@@ -100,7 +100,7 @@ The Gene Expression tab provides an interactive interface for exploring gene exp
 
 - **Flexible Plot Management**: Add or remove plot panels dynamically (panels display in a 2-column layout). Each panel has its own plot type, gene selection and grouping.
 - **Data Type**: Choose Raw or Normalized expression data (Scaled data is currently disabled).
-- **Gene Search**: Toggle between Gene Name and Gene ID search using the switch in each panel.
+- **Gene Search**: Toggle between Gene Name and Gene ID search using the switch in each panel. The selected genes are kept: they switch to the other identifier, and genes without a name keep their ID.
 - **Gene Selection**: Select up to 10 genes per panel.
 - **Group by**: Organize expression by Study label, Broad life-cycle stage, Life-cycle stage, Host species, or Treatment.
 - **Plot type**: the first menu of each panel; the options below it depend on the plot type:

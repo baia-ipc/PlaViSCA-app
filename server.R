@@ -898,44 +898,6 @@ server <- function(input, output, session) {
     once = TRUE
   )
 
-  # Update dropdown when check box changes
-  observeEvent(input$check_exp_0, {
-    req(gene_data()$genes)
-    is_checked <- input$check_exp_0
-
-    # Get choices based on checkbox state
-    choices <- get_gene_choices(gene_data()$genes, is_checked)
-    label <- if (is_checked) "Gene(s) id" else "Gene(s) name"
-
-    # Try to preserve current selection if it's still valid in new choices
-    current_selection <- input$genes_exp_0
-    if (!is.null(current_selection) && all(current_selection %in% choices)) {
-      default_selection <- current_selection
-    } else {
-      # If current selection is not valid, keep first choice
-      default_selection <- if (length(choices) > 0) choices[1] else NULL
-    }
-
-    tryCatch(
-      {
-        updateSelectizeInput(
-          session,
-          "genes_exp_0",
-          label = label,
-          choices = choices,
-          selected = default_selection,
-          options = list(
-            placeholder = "Select one or more genes",
-            maxItems = 10
-          )
-        )
-      },
-      error = function(e) {
-        # Silent error handling
-      }
-    )
-  })
-
   # Data summary output for gene expression tab
   output$gene_exp_data_summary <- renderUI({
     # Summary display removed per user request - keeping terminal debug only
@@ -1038,16 +1000,6 @@ server <- function(input, output, session) {
     )
 
     shinyjs::delay(100, {
-      observeEvent(input[[paste0("check_exp_", new_id)]],
-        {
-          is_checked <- input[[paste0("check_exp_", new_id)]]
-          label <- if (is_checked) "Gene(s) id" else "Gene(s) name"
-          choices <- get_gene_choices(gene_data()$genes, is_checked)
-          updateSelectizeInput(session, paste0("genes_exp_", new_id), label = label, choices = choices, server = TRUE)
-        },
-        ignoreInit = FALSE
-      )
-
       initial_choices <- choice_exp()
       if (!is.null(initial_choices)) {
         updateSelectizeInput(
@@ -1137,34 +1089,26 @@ server <- function(input, output, session) {
     ignoreNULL = TRUE
   )
 
-  ## update gene_id or name in SelectizeInput when toggle button click
-  observeEvent(input$check_exp_0, {
-    is_checked <- input$check_exp_0
-    choice_exp(get_gene_choices(gene_data()$genes, is_checked))
-
+  # The name/ID switch of a gene expression card (www/script.js sends
+  # click_toggle_exp): the selected genes are converted to the other kind of
+  # identifier; genes without a name keep their ID.
+  update_gene_menu <- function(input_id, to_ids) {
+    genes_df <- gene_data()$genes
+    selected <- convert_gene_selection(isolate(input[[input_id]]), genes_df, to_ids)
+    choices <- get_gene_choices(genes_df, to_ids)
     updateSelectizeInput(
-      session,
-      "genes_exp_0",
-      choices = choice_exp(),
+      session, input_id,
+      label = if (to_ids) "Gene(s) id" else "Gene(s) name",
+      choices = c(choices, setdiff(selected, choices)),
+      selected = selected,
       server = TRUE
     )
-  })
+  }
 
-  observeEvent(list(input$click_toggle_exp), {
-    req(input$click_toggle_exp)
-
-    tg_id <- input$click_toggle_exp$id
-    id <- as.numeric(gsub("check_exp_", "", tg_id))
-    is_checked <- input$click_toggle_exp$value
-
-    choice_exp(get_gene_choices(gene_data()$genes, is_checked))
-
-    updateSelectizeInput(
-      session,
-      paste0("genes_exp_", id),
-      choices = choice_exp(),
-      server = TRUE
-    )
+  observeEvent(input$click_toggle_exp, {
+    req(gene_data()$genes)
+    id <- gsub("check_exp_", "", input$click_toggle_exp$id)
+    update_gene_menu(paste0("genes_exp_", id), isTRUE(input$click_toggle_exp$value))
   })
 
   observeEvent(input$change_gene_exp, {
