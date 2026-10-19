@@ -14,11 +14,10 @@ the app, see the [README](../README.md); for using it, see the
    fails the app stops here, with a message listing the failed checks.
 2. **`ui.R`** — sources `ui/` and assembles the page from one function per
    section (`ui_menu_bar()`, `ui_analysis_section()`).
-3. **`server.R`** — the `server()` function, organised in commented
-   sections: navigation, data loading and caching, filters, one section per
-   analysis tab, embedding plots and comparison mode, cell details,
-   downloads. The Metadata plots tab has its own file, `server/tab_plots.R`, called
-   from `server()`.
+3. **`server.R`** — the `server()` function. It calls the server code in
+   `server/` (one file per tab or shared part) and passes it the reactives
+   the parts share: the loaded data and the filter values of each tab. The
+   Embeddings and Gene expression tabs are in `server.R` itself.
 
 ## Where things are
 
@@ -40,9 +39,9 @@ the app, see the [README](../README.md); for using it, see the
 | `functions/gene_summaries.R`, `plots_gene_summaries.R`, `plots_gene_distribution.R` | per-group summaries of gene expression (`gene_group_summary()`) and their plots; violin and box plots |
 | `functions/cell_counts.R` | counting cells by one or two fields (Metadata plots tab) |
 | `functions/plot_builder.R` | the plot builder of the Metadata plots tab (a Shiny module: `plot_builder_ui()`, `plot_builder_server()`); the tab adds and removes builders in `server/tab_plots.R` |
-| `functions/data_summary.R`, `tab_sync.R` | selection summaries; keeping tabs in sync, cache keys |
+| `functions/data_summary.R`, `cache_keys.R` | selection summaries; cache keys |
 | `functions/helpers_UI.R` | UI building blocks: filter rows, gene links, team cards |
-| `server/` | server code with its own file: the filters shared by the tabs (`shared_filters.R`) and the Metadata plots tab (`tab_plots.R`) |
+| `server/` | server code, one file per tab or shared part: the data of the session and the two Data type controls (`data_loading.R`), the filter menus and the stage filters (`filter_choices.R`), the filter state shared by the tabs (`shared_filters.R`), the Metadata plots, Metadata table, QC Plots and Data sources tabs (`tab_*.R`) |
 | `ui/` | the top bar (`page_frame.R`), the tab set (`analysis.R`) and one file per tab (`tab_*.R`, `about.R`) |
 | `www/` | `style.css`, `script.js` and images served to the browser |
 | `tests/` | test suite, see [Tests](#tests) |
@@ -169,7 +168,7 @@ them after a change of the interface (see its
 ## Code style
 
 - Follow the style of the file you edit: R files in `functions/` use 4-space
-  indentation, `ui/`, `ui.R` and `server.R` use 2 spaces.
+  indentation, `ui/`, `server/`, `ui.R` and `server.R` use 2 spaces.
 - `<-` for assignment, `snake_case` for functions, variables and Shiny IDs,
   `UPPER_SNAKE_CASE` for constants (`DATA_PATHS`).
 - Keep files short and about one topic (at most a few hundred lines); put

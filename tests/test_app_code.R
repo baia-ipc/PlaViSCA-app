@@ -55,10 +55,10 @@ test_that_("every app R file parses", {
     expect_empty_(basename(broken), "R files with syntax errors")
 })
 
-test_that_("no function is defined in two files of functions/ or ui/", {
+test_that_("no function is defined in two files of functions/, ui/ or server/", {
     # all these files are sourced into one environment: a second definition
     # silently replaces the first
-    files <- grep("/(functions|ui)/[^/]*\\.R$", live_app_files(), value = TRUE)
+    files <- grep("/(functions|ui|server)/[^/]*\\.R$", live_app_files(), value = TRUE)
     defined <- unlist(lapply(files, function(f) {
         names <- vapply(parse(f), function(e) {
             if (is.call(e) && identical(e[[1]], as.name("<-")) && is.name(e[[2]]) &&

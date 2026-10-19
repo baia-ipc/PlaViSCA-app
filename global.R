@@ -30,13 +30,13 @@ source("functions/site_config.R")
 source("functions/data_paths.R")
 source("functions/data_checks.R")
 
-# Server-side helpers (no Shiny reactivity, except tab_sync.R)
+# Server-side helpers (no Shiny reactivity)
 source("functions/filters.R")
 source("functions/genes.R")
 source("functions/gene_expression_data.R")
 source("functions/data_summary.R")
 source("functions/data_sources_table.R")
-source("functions/tab_sync.R")
+source("functions/cache_keys.R")
 
 # Plots
 source("functions/cell_counts.R")
@@ -54,9 +54,14 @@ source("functions/helpers_UI.R")
 source("functions/gene_expression_card.R")
 source("functions/plot_builder.R")
 
-# Server code of the tabs that have their own file (called from server.R)
+# Server code, one file per tab or shared part (called from server.R)
+source("server/data_loading.R")
+source("server/filter_choices.R")
 source("server/shared_filters.R")
 source("server/tab_plots.R")
+source("server/tab_data_table.R")
+source("server/tab_qc.R")
+source("server/tab_data_sources.R")
 
 # Define a function for memoized data loading.
 load_data <- memoise(function(file_path) {
