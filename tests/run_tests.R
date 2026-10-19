@@ -41,6 +41,7 @@ suppressWarnings(try({
     source("functions/plots_gene_distribution.R")
     source("functions/plots_gene_summaries.R")
     source("functions/embedding_plots.R")
+    source("functions/embedding_gene_colours.R")
 }, silent = TRUE))
 
 test_files <- c(
@@ -52,6 +53,7 @@ test_files <- c(
     "tests/test_expression.R",
     "tests/test_cell_count_plots.R",
     "tests/test_gene_plots.R",
+    "tests/test_embedding_gene_colours.R",
     "tests/test_app_code.R"
 )
 

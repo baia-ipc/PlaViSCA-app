@@ -34,6 +34,7 @@ the app, see the [README](../README.md); for using it, see the
 | `functions/filters.R` | reading the filter widgets and filtering cells |
 | `functions/genes.R`, `gene_expression_data.R` | gene lists, name/ID conversion, per-plot expression tables |
 | `functions/plots_*.R`, `embedding_plots.R` | plotly plots of each tab |
+| `functions/embedding_gene_colours.R` | embeddings coloured by genes: expression of the selected genes, "Combine genes" (mean, sum, or one colour per gene mixed in each cell, `blend_gene_colours()`), the colour key; `embedding_gene_plot()` |
 | `functions/gene_expression_card.R` | the card of the Gene expression tab: plot type, genes, grouping, the options of the plot type |
 | `functions/plots_gene_expression.R` | plot types of a card and their options (`GENE_PLOT_TYPES`, `GENE_PLOT_OPTIONS`), the plot of a card (`gene_expression_card_plot()`) |
 | `functions/gene_summaries.R`, `plots_gene_summaries.R`, `plots_gene_distribution.R` | per-group summaries of gene expression (`gene_group_summary()`) and their plots; violin and box plots |
@@ -139,7 +140,9 @@ PLAVISCA_DATA_DIR=/path/to/app_data Rscript tests/run_tests.R
 | `test_lifecycle.R` | broad/detailed stage mapping, ordering, stage filters |
 | `test_idc_and_gametocytes.R` | reference time point, gametocyte, treatment and replicate fields |
 | `test_bibliography_and_filters.R` | `data_source.csv` agrees with the data; filter behaviour |
-| `test_expression.R` | gene columns, expression lookup, alignment of the tables |
+| `test_expression.R` | gene columns, expression lookup, alignment of the tables, name/ID switch of the gene menus |
+| `test_cell_count_plots.R`, `test_gene_plots.R` | plots of the Metadata plots and Gene expression tabs |
+| `test_embedding_gene_colours.R` | embeddings coloured by genes: mean, sum, scaling, colour mixing, colour keys |
 | `test_app_code.R` | the code rules listed above |
 
 To add a test, add a `test_that_("what it checks", { ... })` block to the

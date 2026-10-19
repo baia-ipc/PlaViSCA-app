@@ -95,11 +95,11 @@ ui_tab_embeddings <- function() {
               class = "mb-0",
               comparison_gene_panel("a", "color_first_comp", "genes_label_first_comp",
                 "check_first_comp", "genes_n_first_comp", "plasmo_link_a", "ncbi_link_a",
-                btn_class = "btn-outline-primary"
+                btn_class = "btn-outline-primary", combine_id = "combine_genes_first_comp"
               ),
               comparison_gene_panel("b", "color_second", "genes_label_second",
                 "check_second", "genes_second", "plasmo_link_b", "ncbi_link_b",
-                btn_class = "btn-outline-success"
+                btn_class = "btn-outline-success", combine_id = "combine_genes_second"
               )
             )
           ),
@@ -214,6 +214,7 @@ embedding_settings_controls <- function() {
           width = "100%"
         )
       ),
+      gene_combine_menu("combine_genes", "genes_n"),
       div(
         class = "links-row mt-1",
         tags$a(
@@ -244,7 +245,7 @@ embedding_settings_controls <- function() {
 # Gene selector (with ID/name switch and PlasmoDB/NCBI links) for one
 # comparison plot; visible only while that plot is coloured by genes.
 comparison_gene_panel <- function(side, color_id, label_id, check_id, genes_id,
-                                  plasmo_id, ncbi_id, btn_class) {
+                                  plasmo_id, ncbi_id, btn_class, combine_id) {
   conditionalPanel(
     condition = sprintf("input.%s == 'genes'", color_id),
     class = sprintf("mb-2 comparison-controls comparison-plot-section plot-%s-section", side),
@@ -295,6 +296,31 @@ comparison_gene_panel <- function(side, color_id, label_id, check_id, genes_id,
           )
         )
       )
+    ),
+    gene_combine_menu(combine_id, genes_id, width = "50%")
+  )
+}
+
+# "Combine genes" menu of an embedding plot (choices: COMBINE_GENES), shown
+# while more than one gene is selected in `genes_id`. The server offers "Each
+# gene separately" only for 2 or 3 genes.
+gene_combine_menu <- function(id, genes_id, width = "100%") {
+  conditionalPanel(
+    condition = sprintf("input.%s && input.%s.length > 1", genes_id, genes_id),
+    class = "mt-1",
+    title = "How the expression of the selected genes gives the colour of a cell",
+    selectizeInput(
+      id,
+      tags$span("Combine genes", class = "settings-label"),
+      choices = COMBINE_GENES,
+      selected = "mean",
+      width = width,
+      options = list(dropdownParent = "body")
+    ),
+    conditionalPanel(
+      condition = sprintf("input.%s.length > %d", genes_id, MAX_GENES_EACH_COLOUR),
+      tags$small(class = "text-muted",
+        sprintf("Each gene separately: at most %d genes.", MAX_GENES_EACH_COLOUR))
     )
   )
 }

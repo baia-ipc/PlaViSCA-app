@@ -1247,8 +1247,9 @@ server <- function(input, output, session) {
             return()
           }
 
-          # Store current selection before updating choices
-          current_selection <- input$genes_n
+          # Keep the selection, as names or IDs like the menu
+          current_selection <- convert_gene_selection(input$genes_n, genes_df, isTRUE(input$check))
+          gene_choices <- c(gene_choices, setdiff(current_selection, gene_choices))
 
           # If color by genes is selected and no gene is chosen, pick a default
           if (is.null(current_selection) || length(current_selection) == 0) {
@@ -1424,8 +1425,12 @@ server <- function(input, output, session) {
     req(isTRUE(comparison_mode()), identical(input$color_first_comp, "genes"), gene_data()$genes)
     tryCatch(
       {
-        choices <- get_gene_choices(gene_data()$genes, isTRUE(input$check_first_comp))
-        updateSelectizeInput(session, "genes_n_first_comp", choices = choices, selected = input$genes_n_first_comp, server = TRUE)
+        genes_df <- gene_data()$genes
+        # Keep the selection, as names or IDs like the menu
+        selected <- convert_gene_selection(input$genes_n_first_comp, genes_df, isTRUE(input$check_first_comp))
+        choices <- get_gene_choices(genes_df, isTRUE(input$check_first_comp))
+        choices <- c(choices, setdiff(selected, choices))
+        updateSelectizeInput(session, "genes_n_first_comp", choices = choices, selected = selected, server = TRUE)
       },
       error = function(e) {}
     )
@@ -1448,6 +1453,7 @@ server <- function(input, output, session) {
       color = color_val,
       genes = genes_val,
       check = check_val,
+      combine = input$combine_genes_first_comp,
       xaxis = input$xaxis,
       yaxis = input$yaxis,
       size = if (!is.null(input$size)) input$size else 4,
@@ -1473,6 +1479,7 @@ server <- function(input, output, session) {
       color = color_val,
       genes = genes_val,
       check = check_val,
+      combine = input$combine_genes_second,
       xaxis = input$xaxis,
       yaxis = input$yaxis,
       size = if (!is.null(input$size)) input$size else 4,
@@ -1499,6 +1506,7 @@ server <- function(input, output, session) {
       input$color,
       input$size,
       input$genes_n,
+      input$combine_genes,
       input$data_type,
       input$check,
       input$check_all,
@@ -1598,253 +1606,41 @@ server <- function(input, output, session) {
   })
 
 
-  # Helper function to generate embedding plots with different color options
-  generate_embedding_plot <- function(color_input, genes_input, check_input, xaxis_input, yaxis_input, size_input, plot_input, plot_type_input, is_dual_plot = FALSE, data_source = NULL) {
-    # For dual plot mode, skip the global dependency checks and use simpler validation
-    if (is_dual_plot) {
-      # Basic data validation for comparison mode
-      plot_data <- if (!is.null(data_source)) data_source else data()
-      if (is.null(plot_data) || nrow(plot_data) == 0) {
-        return(NULL)
-      }
-
-      # For gene coloring in dual plot mode, check the specific gene inputs
-      if (color_input == "genes") {
-        if (is.null(genes_input) || length(genes_input) == 0 || any(is.na(genes_input)) || any(genes_input == "")) {
-          return(NULL)
-        }
-      }
-    } else {
-      # Single plot mode - use the existing dependency system
+  # Embedding plot with the given colour options. The comparison plots
+  # (is_dual_plot) use the gene tables cached with their data (data_source);
+  # the single plot waits until its inputs are stable.
+  generate_embedding_plot <- function(color_input, genes_input, check_input, xaxis_input, yaxis_input,
+                                      size_input, plot_input, plot_type_input, is_dual_plot = FALSE,
+                                      data_source = NULL, combine_input = "mean") {
+    if (!is_dual_plot) {
       req(all_dependencies_ready(), embedding_ready())
     }
-
-    # For single plot mode, get data after dependency checks
-    if (!is_dual_plot) {
-      plot_data <- if (!is.null(data_source)) data_source else data()
-      if (is.null(plot_data) || nrow(plot_data) == 0) {
-        return(NULL)
-      }
+    plot_data <- if (!is.null(data_source)) data_source else data()
+    if (is.null(plot_data) || nrow(plot_data) == 0) {
+      return(NULL)
     }
 
-    # Generate plot without progress bar
     isolate({
-      # Work on a local copy so we can attach a temporary gene-expression column
-      df_local <- plot_data
-
-      color_column <- NULL
-
       if (isTRUE(color_input == "genes")) {
-        gene_inputs <- genes_input
-
-        # Handle empty or invalid gene inputs by falling back to sample_type
-        if (is.null(gene_inputs) || length(gene_inputs) == 0 ||
-          (length(gene_inputs) == 1 && (is.na(gene_inputs) || gene_inputs == ""))) {
-          color_column <- get_data_column("broad_stage")
-        } else {
-          # For dual plot mode, use cached data to prevent interference between plots
-          if (is_dual_plot && !is.null(data_source)) {
-            gene_data_obj <- attr(data_source, "cached_genes")
-            full_mat <- attr(data_source, "cached_full_data")
-
-            # Fallback if cached data is missing
-            if (is.null(gene_data_obj)) {
-              gene_data_obj <- tryCatch(gene_data()$genes, error = function(e) NULL)
-            }
-            if (is.null(full_mat)) {
-              full_mat <- tryCatch(gene_data()$data, error = function(e) NULL)
-            }
-          } else {
-            # Single plot mode - use dynamic data
-            gene_data_obj <- tryCatch(gene_data()$genes, error = function(e) NULL)
-            full_mat <- if (!is.null(cached_data[[get_current_data_type()]])) cached_data[[get_current_data_type()]] else gene_data()$data
-          }
-
-          row_idx <- attr(df_local, "row_idx")
-
-          resolved_gene_col <- NULL
-
-          # Handle multiple gene selection
-          if (!is.null(gene_inputs) && length(gene_inputs) > 0) {
-            if (length(gene_inputs) > 1) {
-              # For multiple genes, calculate average expression
-              valid_gene_ids <- c()
-
-              for (gene_input in gene_inputs) {
-                current_resolved <- NULL
-
-                # If the UI 'check' toggle indicates the user entered gene ids, try that first
-                if (!is.null(gene_input) && nzchar(as.character(gene_input)) && isTRUE(check_input)) {
-                  gene_id_from_input <- as.character(gene_input)
-
-                  # Directly check if this gene ID exists in our data matrix
-                  if (gene_id_from_input %in% colnames(full_mat)) {
-                    current_resolved <- gene_id_from_input
-                  }
-                }
-
-                # If we didn't resolve by gene ID, try by gene name
-                if (is.null(current_resolved) && !is.null(gene_data_obj)) {
-                  tryCatch(
-                    {
-                      candidate_id <- get_gene_id(as.character(gene_input), gene_data_obj)
-                      if (!is.null(candidate_id) && !is.na(candidate_id) && candidate_id %in% colnames(full_mat)) {
-                        current_resolved <- candidate_id
-                      }
-                    },
-                    error = function(e) {
-                      # Silently continue if gene lookup fails
-                    }
-                  )
-                }
-
-                # Final fallback: direct string match in column names
-                if (is.null(current_resolved)) {
-                  gene_as_string <- as.character(gene_input)
-                  if (gene_as_string %in% colnames(full_mat)) {
-                    current_resolved <- gene_as_string
-                  }
-                }
-
-                if (!is.null(current_resolved)) {
-                  valid_gene_ids <- c(valid_gene_ids, current_resolved)
-                }
-              }
-
-              # Calculate average if we have multiple valid genes
-              if (length(valid_gene_ids) > 1) {
-                if (!is.null(row_idx) && length(row_idx) > 0) {
-                  # Average the selected genes for the filtered rows
-                  gene_matrix <- full_mat[row_idx, valid_gene_ids, drop = FALSE]
-                  avg_expression <- rowMeans(gene_matrix, na.rm = TRUE)
-                  df_local$multi_gene_avg <- avg_expression
-                  resolved_gene_col <- "multi_gene_avg"
-                }
-              } else if (length(valid_gene_ids) == 1) {
-                # Single valid gene from multi-gene selection - attach expression values
-                gene_id <- valid_gene_ids[1]
-                if (!is.null(row_idx) && length(row_idx) > 0) {
-                  df_local[[gene_id]] <- full_mat[row_idx, gene_id]
-                } else {
-                  df_local[[gene_id]] <- full_mat[, gene_id]
-                }
-                resolved_gene_col <- gene_id
-              }
-            } else {
-              # Single gene selection
-              gene_input <- gene_inputs[1]
-
-              # If the UI 'check' toggle indicates the user entered a gene id, try that first
-              if (!is.null(gene_input) && nzchar(as.character(gene_input)) && isTRUE(check_input)) {
-                gene_id_from_input <- as.character(gene_input)
-
-                # Directly check if this gene ID exists in our data matrix
-                if (gene_id_from_input %in% colnames(full_mat)) {
-                  resolved_gene_col <- gene_id_from_input
-                }
-              }
-
-              # If we didn't resolve by gene ID, try by gene name
-              if (is.null(resolved_gene_col) && !is.null(gene_data_obj)) {
-                tryCatch(
-                  {
-                    candidate_id <- get_gene_id(as.character(gene_input), gene_data_obj)
-                    if (!is.null(candidate_id) && !is.na(candidate_id) && candidate_id %in% colnames(full_mat)) {
-                      resolved_gene_col <- candidate_id
-                    }
-                  },
-                  error = function(e) {
-                    # Silently continue if gene lookup fails
-                  }
-                )
-              }
-
-              # Final fallback: direct string match in column names
-              if (is.null(resolved_gene_col)) {
-                gene_as_string <- as.character(gene_input)
-                if (gene_as_string %in% colnames(full_mat)) {
-                  resolved_gene_col <- gene_as_string
-                }
-              }
-            }
-          }
-
-          if (!is.null(resolved_gene_col)) {
-            if (resolved_gene_col != "multi_gene_avg" && resolved_gene_col %in% colnames(full_mat)) {
-              if (!is.null(row_idx) && length(row_idx) > 0) {
-                # Attach gene expression values for the filtered rows
-                df_local[[resolved_gene_col]] <- full_mat[row_idx, resolved_gene_col]
-              } else {
-                # If no row_idx, use all rows
-                df_local[[resolved_gene_col]] <- full_mat[, resolved_gene_col]
-              }
-            }
-
-            # Now verify the gene column exists in df_local
-            if (resolved_gene_col %in% colnames(df_local)) {
-              color_column <- resolved_gene_col
-            } else {
-              # Gene was resolved but doesn't exist in current data
-              return(NULL)
-            }
-          } else {
-            # No valid gene found
-            return(NULL)
-          }
-        } # End of gene processing block
-      } else {
-        # For non-gene colors, use the column directly
-        color_column <- color_input
-      }
-
-      if (is.null(color_column)) {
-        return(NULL)
-      }
-
-      # Determine proper legend title for gene expression
-      effective_legend_title <- if (isTRUE(color_input == "genes")) {
-        if (!is.null(genes_input) && length(genes_input) > 0) {
-          if (length(genes_input) == 1) genes_input[1] else paste0("Avg of ", length(genes_input), " genes")
-        } else {
-          "Gene expression"
+        gene_names <- attr(plot_data, "cached_genes")
+        full_mat <- attr(plot_data, "cached_full_data")
+        if (is.null(gene_names)) gene_names <- tryCatch(gene_data()$genes, error = function(e) NULL)
+        if (is.null(full_mat)) full_mat <- cached_data[[get_current_data_type()]]
+        if (is.null(full_mat)) full_mat <- gene_data()$data
+        expression <- embedding_gene_expression(genes_input, check_input, gene_names, full_mat,
+                                                attr(plot_data, "row_idx"))
+        if (is.null(expression)) {
+          return(NULL)
         }
+        p <- embedding_gene_plot(plot_data, expression, combine_input, xaxis_input, yaxis_input,
+                                 size_input, plot_type_input, plot_input, is_dual_plot)
       } else {
-        get_label_for_column(color_input)
+        p <- embedding_plot(plot_data, xaxis_input, yaxis_input, color_input,
+                            get_label_for_column(color_input), size_input,
+                            plot_type = plot_type_input, plot_dim = plot_input,
+                            is_dual_plot = is_dual_plot)
       }
-
-      # Generate the actual plot
-      p <- embedding_plot(
-        df_local,
-        xaxis_input,
-        yaxis_input,
-        color_column,
-        effective_legend_title,
-        size_input,
-        plot_type = plot_type_input,
-        plot_dim = plot_input,
-        is_dual_plot = is_dual_plot
-      )
-      p <- p %>%
-        event_register("plotly_click") %>%
-        config(
-          displaylogo = FALSE,
-          scrollZoom = TRUE,
-          # double-click opens the cell details (www/script.js), not a zoom reset
-          doubleClick = FALSE,
-          # no camera is ever saved, so "last save" would equal the default
-          # a list, so that it reaches plotly.js as an array
-          modeBarButtonsToRemove = list("resetCameraLastSave3d"),
-          displayModeBar = TRUE,
-          toImageButtonOptions = list(
-            format = "png",
-            filename = "embedding_plot",
-            width = 1600,
-            height = 1200,
-            scale = 3
-          )
-        )
-
-      return(p)
+      embedding_plot_config(p)
     })
   }
 
@@ -1885,10 +1681,13 @@ server <- function(input, output, session) {
 
       # If using genes, copy gene selection
       if (!is.null(input$color) && input$color == "genes" && !is.null(input$genes_n) && length(input$genes_n) > 0) {
-        current_genes <- input$genes_n
+        # as names or IDs, like each comparison menu
+        genes_df <- gene_data()$genes
+        genes_a <- convert_gene_selection(input$genes_n, genes_df, isTRUE(input$check_first_comp))
+        genes_b <- convert_gene_selection(input$genes_n, genes_df, isTRUE(input$check_second))
         later(function() {
-          updateSelectizeInput(session, "genes_n_first_comp", selected = current_genes)
-          updateSelectizeInput(session, "genes_second", selected = current_genes)
+          updateSelectizeInput(session, "genes_n_first_comp", selected = genes_a)
+          updateSelectizeInput(session, "genes_second", selected = genes_b)
         }, 0.2)
       }
     } else {
@@ -1929,6 +1728,24 @@ server <- function(input, output, session) {
     }
   })
 
+  # "Combine genes" menu of each embedding plot: "Each gene separately" is a
+  # choice only for 2 or 3 genes. The menu is hidden for fewer than 2 genes
+  # and keeps its value (the selection is briefly empty while the name/ID
+  # switch converts it).
+  for (ids in list(c("genes_n", "combine_genes"), c("genes_n_first_comp", "combine_genes_first_comp"),
+                   c("genes_second", "combine_genes_second"))) {
+    local({
+      genes_id <- ids[[1]]
+      combine_id <- ids[[2]]
+      observeEvent(length(input[[genes_id]]), {
+        n_genes <- length(input[[genes_id]])
+        req(n_genes >= 2)
+        updateSelectizeInput(session, combine_id, choices = gene_combine_choices(n_genes),
+                             selected = effective_gene_combine(input[[combine_id]], n_genes))
+      })
+    })
+  }
+
   # Update gene choices for second plot when comparison mode and color_second changes
   observeEvent(list(input$color_second, input$check_second),
     {
@@ -1951,8 +1768,9 @@ server <- function(input, output, session) {
             return()
           }
 
-          # Store current selection before updating choices
-          current_selection_second <- input$genes_second
+          # Keep the selection, as names or IDs like the menu
+          current_selection_second <- convert_gene_selection(input$genes_second, genes_df, isTRUE(input$check_second))
+          gene_choices <- c(gene_choices, setdiff(current_selection_second, gene_choices))
 
           updateSelectizeInput(
             session,
@@ -2079,7 +1897,8 @@ server <- function(input, output, session) {
       plot_params$plot,
       plot_type_input = get_plot_type(),
       is_dual_plot = TRUE,
-      data_source = first_plot_data()
+      data_source = first_plot_data(),
+      combine_input = plot_params$combine
     )
   })
 
@@ -2103,184 +1922,22 @@ server <- function(input, output, session) {
       plot_params$plot,
       plot_type_input = get_plot_type(),
       is_dual_plot = TRUE,
-      data_source = second_plot_data()
+      data_source = second_plot_data(),
+      combine_input = plot_params$combine
     )
   })
 
   # Single embedding plot, shown when comparison mode is off
   output$all_plotly <- renderPlotly({
-    # Only render when comparison is NOT enabled
     req(!isTRUE(comparison_mode()))
     req(all_dependencies_ready(), embedding_ready())
-
-    # Triple-check data is still valid
-    if (is.null(data()) || nrow(data()) == 0) {
-      return(NULL)
-    }
-
-    # Determine plot type outside isolate to add dependency
     ptype <- get_plot_type()
-
-    # Generate plot without progress bar
-    isolate({
-      df_local <- data()
-
-      color_column <- NULL
-
-      if (isTRUE(input$color == "genes")) {
-        # Resolve gene input robustly: user may supply display names or gene ids (multiple selection supported)
-        gene_inputs <- input$genes_n
-        gene_data_obj <- tryCatch(gene_data()$genes, error = function(e) NULL)
-        full_mat <- if (!is.null(cached_data[[get_current_data_type()]])) cached_data[[get_current_data_type()]] else gene_data()$data
-        row_idx <- attr(df_local, "row_idx")
-
-        resolved_gene_col <- NULL
-
-        # Handle multiple gene selection
-        if (!is.null(gene_inputs) && length(gene_inputs) > 0) {
-          if (length(gene_inputs) > 1) {
-            # For multiple genes, calculate average expression
-            valid_gene_ids <- c()
-
-            for (gene_input in gene_inputs) {
-              current_resolved <- NULL
-
-              # If the UI 'check' toggle indicates the user entered gene ids, try that first
-              if (!is.null(gene_input) && nzchar(as.character(gene_input)) && isTRUE(input$check)) {
-                candidate <- as.character(gene_input)
-                if (!is.null(full_mat) && candidate %in% colnames(full_mat)) {
-                  current_resolved <- candidate
-                }
-              }
-
-              # If still not resolved, try mapping display name -> gene id using helper
-              if (is.null(current_resolved) && !is.null(gene_input) && nzchar(as.character(gene_input))) {
-                mapped <- tryCatch(get_gene_id(as.character(gene_input), gene_data_obj), error = function(e) NULL)
-                if (!is.null(mapped) && !is.na(mapped) && !is.null(full_mat) && mapped %in% colnames(full_mat)) {
-                  current_resolved <- as.character(mapped)
-                }
-              }
-
-              # Final fallback: maybe the input text itself is the column name in the matrix
-              if (is.null(current_resolved) && !is.null(gene_input) && !is.null(full_mat) && as.character(gene_input) %in% colnames(full_mat)) {
-                current_resolved <- as.character(gene_input)
-              }
-
-              if (!is.null(current_resolved)) {
-                valid_gene_ids <- c(valid_gene_ids, current_resolved)
-              }
-            }
-
-            # Calculate average expression if we have valid genes
-            if (length(valid_gene_ids) > 0 && !is.null(row_idx) && length(row_idx) > 0) {
-              gene_matrices <- list()
-              for (gene_id in valid_gene_ids) {
-                gene_matrices[[gene_id]] <- full_mat[[gene_id]][row_idx]
-              }
-
-              if (length(gene_matrices) > 0) {
-                gene_matrix <- do.call(cbind, gene_matrices)
-                avg_expression <- rowMeans(gene_matrix, na.rm = TRUE)
-                gene_color_col <- paste0(".gene_color_avg_", length(valid_gene_ids), "_genes")
-                df_local[[gene_color_col]] <- avg_expression
-                resolved_gene_col <- gene_color_col
-              }
-            }
-          } else {
-            # Single gene - use existing logic
-            gene_input <- gene_inputs[1]
-
-            # If the UI 'check' toggle indicates the user entered a gene id, try that first
-            if (!is.null(gene_input) && nzchar(as.character(gene_input)) && isTRUE(input$check)) {
-              candidate <- as.character(gene_input)
-              if (!is.null(full_mat) && candidate %in% colnames(full_mat)) {
-                resolved_gene_col <- candidate
-              }
-            }
-
-            # If still not resolved, try mapping display name -> gene id using helper
-            if (is.null(resolved_gene_col) && !is.null(gene_input) && nzchar(as.character(gene_input))) {
-              mapped <- tryCatch(get_gene_id(as.character(gene_input), gene_data_obj), error = function(e) NULL)
-              if (!is.null(mapped) && !is.na(mapped) && !is.null(full_mat) && mapped %in% colnames(full_mat)) {
-                resolved_gene_col <- as.character(mapped)
-              }
-            }
-
-            # Final fallback: maybe the input text itself is the column name in the matrix
-            if (is.null(resolved_gene_col) && !is.null(gene_input) && !is.null(full_mat) && as.character(gene_input) %in% colnames(full_mat)) {
-              resolved_gene_col <- as.character(gene_input)
-            }
-
-            # Attach single gene expression column
-            if (!is.null(resolved_gene_col) && !is.na(resolved_gene_col) && !is.null(full_mat) && resolved_gene_col %in% colnames(full_mat) && !is.null(row_idx) && length(row_idx) > 0) {
-              gene_color_col <- paste0(".gene_color_", gsub("[^A-Za-z0-9]", "_", resolved_gene_col))
-              df_local[[gene_color_col]] <- full_mat[[resolved_gene_col]][row_idx]
-              resolved_gene_col <- gene_color_col
-            }
-          }
-        }
-
-        # Set color column
-        if (!is.null(resolved_gene_col) && resolved_gene_col %in% colnames(df_local)) {
-          color_column <- resolved_gene_col
-        } else {
-          # If gene resolution failed, fall back to the broad life-cycle stage
-          color_column <- get_data_column("broad_stage")
-        }
-      } else {
-        color_column <- input$color
-      }
-
-      # Final safety check: ensure the resolved color column exists in df_local
-      if (is.null(color_column) || is.na(color_column) || color_column == "" || !(color_column %in% colnames(df_local))) {
-        color_column <- get_data_column("broad_stage")
-      }
-
-      # Determine proper legend title for gene expression
-      effective_legend_title <- if (isTRUE(input$color == "genes")) {
-        if (!is.null(input$genes_n) && length(input$genes_n) > 0) {
-          if (length(input$genes_n) == 1) input$genes_n[1] else paste0("Avg of ", length(input$genes_n), " genes")
-        } else {
-          "Gene expression"
-        }
-      } else {
-        get_label_for_column(input$color)
-      }
-
-      p <- embedding_plot(
-        df_local,
-        input$xaxis,
-        input$yaxis,
-        color_column,
-        effective_legend_title,
-        input$size,
-        plot_type = ptype,
-        plot_dim = input$plot
-      )
-
-      p <- p %>%
-        event_register("plotly_click") %>%
-        config(
-          displaylogo = FALSE,
-          scrollZoom = TRUE,
-          # double-click opens the cell details (www/script.js), not a zoom reset
-          doubleClick = FALSE,
-          # no camera is ever saved, so "last save" would equal the default
-          # a list, so that it reaches plotly.js as an array
-          modeBarButtonsToRemove = list("resetCameraLastSave3d"),
-          displayModeBar = TRUE,
-          toImageButtonOptions = list(
-            format = "png",
-            filename = "embedding_plot",
-            width = 1600,
-            height = 1200,
-            scale = 3
-          )
-        )
-
-      embplot(TRUE)
-      return(p)
-    })
+    p <- isolate(generate_embedding_plot(
+      input$color, input$genes_n, input$check, input$xaxis, input$yaxis, input$size, input$plot,
+      plot_type_input = ptype, combine_input = input$combine_genes
+    ))
+    embplot(TRUE)
+    p
   })
 
   # Add a loading state output for the plot
