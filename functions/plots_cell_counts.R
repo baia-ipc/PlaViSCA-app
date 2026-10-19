@@ -19,8 +19,19 @@ PLOT_TYPES_TWO_FIELDS <- c(
 # "One pie per group" draws at most this many pies.
 MAX_PIE_GROUPS <- 12
 
+# All plot types, grouped by the number of fields (menu of the plot builder).
+PLOT_TYPE_CHOICES <- list(
+    "One category" = PLOT_TYPES_ONE_FIELD,
+    "Two categories" = PLOT_TYPES_TWO_FIELDS
+)
+
 plot_types_for <- function(two_fields) {
     if (two_fields) PLOT_TYPES_TWO_FIELDS else PLOT_TYPES_ONE_FIELD
+}
+
+# TRUE if the plot type counts the cells by two fields.
+is_two_field_type <- function(type) {
+    isTRUE(type %in% PLOT_TYPES_TWO_FIELDS)
 }
 
 # Plot of the selected cells counted by `column1` (and `column2`). `type` is

@@ -478,6 +478,15 @@ body {
   margin-bottom: 1px !important;
 }
 
+/* Plot builders of the Metadata plots tab: compact menus and footer */
+.plot-builder .plot-builder-controls .shiny-input-container {
+  margin-bottom: 4px;
+}
+
+.plot-builder .card-footer .shiny-input-container {
+  margin-bottom: 0;
+}
+
 /* Vertical Space Optimization for Settings */
 .settings-card-compact .card-header {
   padding: 4px 12px !important;

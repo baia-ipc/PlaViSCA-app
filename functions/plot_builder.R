@@ -1,9 +1,9 @@
 # Plot builder of the Metadata plots tab (a Shiny module).
 # =============================================================================
-# A card where the user chooses the field to count cells by, an optional
-# second field to split them by, the plot type and whether to show numbers of
-# cells or percentages. Below the plot: the help text of the chosen fields and
-# a button to export the counts as CSV.
+# A card where the user chooses the plot type, then the field to count cells
+# by and, for the plot types of two fields, a second field to split them by.
+# Below the plot: the help text of the chosen fields, the choice between
+# numbers of cells and percentages and a button to export the counts as CSV.
 #
 #   plot_builder_ui("builder")
 #   plot_builder_server("builder", cells, show_missing)
@@ -12,53 +12,66 @@
 # `show_missing` a reactive TRUE/FALSE.
 # =============================================================================
 
-NO_SPLIT <- "none"
-
+# Fields to split by: all fields except the one counted by.
 split_by_choices <- function(field) {
     fields <- plot_field_choices()
-    c("Nothing" = NO_SPLIT, fields[fields != field])
+    fields[fields != field]
 }
 
-plot_builder_ui <- function(id, field = "study_label", split_by = "broad_stage",
-                            type = "stacked", show_as = "percent") {
+plot_builder_ui <- function(id, type = "stacked", field = "study_label",
+                            split_by = "broad_stage", show_as = "percent") {
     ns <- NS(id)
+    split_choices <- split_by_choices(field)
+    if (!split_by %in% split_choices) split_by <- split_choices[[1]]
+    # The "Split by" menu is shown only for the plot types of two fields
+    two_field_condition <- sprintf(
+        "[%s].indexOf(input.type) >= 0",
+        paste0("'", PLOT_TYPES_TWO_FIELDS, "'", collapse = ", ")
+    )
+
     card(
         full_screen = TRUE,
         class = "plot-builder",
         card_body(
             # Not in the card header: the header styles of the app would
             # break this layout
-            layout_column_wrap(
-                width = "220px",
-                class = "plot-builder-controls",
-                selectInput(
-                    ns("field"), "Count cells by", plot_field_choices(),
-                    selected = field
+            fluidRow(
+                class = "g-2 plot-builder-controls",
+                column(
+                    width = 4,
+                    selectInput(ns("type"), "Plot type", PLOT_TYPE_CHOICES,
+                                selected = type, width = "100%")
                 ),
-                selectInput(
-                    ns("split_by"), "Split by", split_by_choices(field),
-                    selected = split_by
+                column(
+                    width = 4,
+                    selectInput(ns("field"), "Count by", plot_field_choices(),
+                                selected = field, width = "100%")
                 ),
-                selectInput(
-                    ns("type"), "Plot type", plot_types_for(split_by != NO_SPLIT),
-                    selected = type
-                ),
-                radioButtons(
-                    ns("show_as"), "Show",
-                    c("Cells" = "cells", "% of cells" = "percent"),
-                    selected = show_as, inline = TRUE
+                column(
+                    width = 4,
+                    conditionalPanel(
+                        two_field_condition, ns = ns,
+                        selectInput(ns("split_by"), "Split by", split_choices,
+                                    selected = split_by, width = "100%")
+                    )
                 )
             ),
             withSpinner(
                 type = 6, size = 0.5, color = "#3498db",
                 plotlyOutput(ns("plot"), height = "600px")
-            )
+            ),
+            div(class = "text-muted small mt-2", uiOutput(ns("help")))
         ),
         card_footer(
             div(
-                class = "d-flex justify-content-between align-items-start gap-3",
-                div(class = "text-muted small", uiOutput(ns("help"))),
-                downloadButton(ns("download"), "Export .csv", class = "btn btn-success btn-sm")
+                class = "d-flex justify-content-between align-items-center gap-2",
+                radioButtons(
+                    ns("show_as"), NULL,
+                    c("Cells" = "cells", "% of cells" = "percent"),
+                    selected = show_as, inline = TRUE
+                ),
+                downloadButton(ns("download"), "Export .csv",
+                               class = "btn-sm btn-outline-secondary")
             )
         )
     )
@@ -68,25 +81,19 @@ plot_builder_server <- function(id, cells, show_missing) {
     moduleServer(id, function(input, output, session) {
         # A field cannot be split by itself
         observeEvent(input$field, {
+            choices <- split_by_choices(input$field)
             split_by <- input$split_by
-            if (identical(split_by, input$field)) split_by <- NO_SPLIT
-            updateSelectInput(session, "split_by",
-                choices = split_by_choices(input$field), selected = split_by
-            )
-        }, ignoreInit = TRUE)
-
-        two_fields <- reactive(!is.null(input$split_by) && input$split_by != NO_SPLIT)
-
-        # Plot types that fit one or two fields; keep the current type if it fits
-        observeEvent(two_fields(), {
-            types <- plot_types_for(two_fields())
-            selected <- if (isTRUE(input$type %in% types)) input$type else types[[1]]
-            updateSelectInput(session, "type", choices = types, selected = selected)
+            if (!isTRUE(split_by %in% choices)) split_by <- choices[[1]]
+            updateSelectInput(session, "split_by", choices = choices, selected = split_by)
         }, ignoreInit = TRUE)
 
         keys <- reactive({
-            req(input$field)
-            split_by <- if (two_fields() && input$split_by != input$field) input$split_by
+            req(input$field, input$type)
+            split_by <- input$split_by
+            if (!is_two_field_type(input$type) || is.null(split_by) ||
+                identical(split_by, input$field)) {
+                split_by <- NULL
+            }
             c(input$field, split_by)
         })
         columns <- reactive(vapply(keys(), get_data_column, character(1), USE.NAMES = FALSE))
