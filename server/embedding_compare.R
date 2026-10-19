@@ -1,8 +1,8 @@
 # Comparison mode of the Embeddings tab: the "Compare Plots" button shows two
 # plots side by side, A and B, each with its own colour, genes and gene
-# combination; they share the embedding, axes and point size. The two plots
-# start from the colour (and genes) of the single plot, whose colour is
-# restored when the single plot comes back.
+# combination; they share the embedding, axes, point size and legend
+# settings. The two plots start from the colour (and genes) of the single
+# plot, whose colour is restored when the single plot comes back.
 # `comparison_mode` (reactiveVal) is TRUE while the two plots are shown;
 # `draw_plot(params, dual)` draws a plot (see embeddings_tab_server()).
 
@@ -62,7 +62,9 @@ embedding_compare_server <- function(input, output, session, gene_data, comparis
         xaxis = input$xaxis,
         yaxis = input$yaxis,
         size = input$size %||% 4,
-        plot = input$plot %||% "3d"
+        plot = input$plot %||% "3d",
+        legend_pos = input$legend_pos %||% "auto",
+        legend_size = input$legend_size %||% "M"
       )
     })
   }

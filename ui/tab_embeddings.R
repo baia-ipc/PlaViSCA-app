@@ -165,6 +165,27 @@ embedding_settings_controls <- function() {
       )
     ),
     tags$div(
+      title = "Where the legend goes: over the plot, next to it, or hidden",
+      class = "compact-select",
+      selectInput(
+        "legend_pos",
+        tags$span("Legend position", class = "settings-label"),
+        choices = LEGEND_POSITIONS,
+        selected = "auto",
+        width = "130px"
+      )
+    ),
+    tags$div(
+      title = "Adjust the size of the legend",
+      radioButtons(
+        "legend_size",
+        tags$span("Legend size", class = "settings-label"),
+        choices = names(LEGEND_SIZES),
+        selected = "M",
+        inline = TRUE
+      )
+    ),
+    tags$div(
       title = "Select 2D or 3D visualization",
       radioButtons(
         "plot",

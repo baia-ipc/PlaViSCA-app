@@ -65,6 +65,7 @@ embeddings_tab_server <- function(input, output, session, loaded, filters) {
   observe({
     list(
       input$embedding, input$plot, input$xaxis, input$yaxis, input$color, input$size,
+      input$legend_pos, input$legend_size,
       input$genes_n, input$combine_genes, input$data_type, input$check, input$check_all,
       lapply(filter_field_keys(), function(k) input[[k]])
     )
@@ -105,7 +106,8 @@ embeddings_tab_server <- function(input, output, session, loaded, filters) {
     req(!isTRUE(comparison_mode()), plot_inputs_ready(), plot_ready())
     params <- isolate(list(
       color = input$color, genes = input$genes_n, check = input$check, combine = input$combine_genes,
-      xaxis = input$xaxis, yaxis = input$yaxis, size = input$size, plot = input$plot
+      xaxis = input$xaxis, yaxis = input$yaxis, size = input$size, plot = input$plot,
+      legend_pos = input$legend_pos, legend_size = input$legend_size
     ))
     p <- draw_plot(params, dual = FALSE)
     plot_drawn(TRUE)

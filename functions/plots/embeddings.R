@@ -195,7 +195,8 @@ plot_2d <- function(
   is_categorical,
   selected_color,
   colors,
-  is_dual_plot = FALSE
+  is_dual_plot = FALSE,
+  legend = legend_settings()
 ) {
   display_color <- if (color %in% italicised_columns()) {
     format_species_name(selected_color, color)
@@ -205,15 +206,7 @@ plot_2d <- function(
 
   hover_text <- build_hover_text(df, legend_title, display_color, x, y)
 
-  # Calculate number of unique categories for categorical data
-  num_categories <- if (is_categorical) {
-    length(unique(df[[color]]))
-  } else {
-    NULL
-  }
-
-  legend_layout <- get_legend_layout(legend_title, num_categories, is_dual_plot, !is_categorical)
-  plot_margins <- get_plot_margins(num_categories, is_dual_plot)
+  key <- embedding_legend(legend_title, legend, !is_categorical, is_dual_plot, "2d")
   df$plotly_key <- seq_len(nrow(df))
 
   if (is_categorical) {
@@ -237,9 +230,9 @@ plot_2d <- function(
       layout(
         xaxis = list(title = paste("X-", x)),
         yaxis = list(title = paste("Y-", y)),
-        legend = legend_layout,
+        legend = key$layout,
         font = list(size = 14),
-        margin = plot_margins,
+        margin = key$margins,
         autosize = TRUE
       )
   } else {
@@ -257,17 +250,20 @@ plot_2d <- function(
         size = size,
         color = selected_color,
         colorscale = list(c(0, "#0000FF4C"), c(1, "red")),
-        showscale = TRUE,
-        colorbar = legend_layout
+        showscale = key$show,
+        colorbar = key$layout
       )
     ) %>%
       layout(
         xaxis = list(title = paste("X-", x)),
         yaxis = list(title = paste("Y-", y)),
         font = list(size = 14),
-        margin = plot_margins,
+        margin = key$margins,
         autosize = TRUE
       )
+  }
+  if (!key$show) {
+    p <- layout(p, showlegend = FALSE)
   }
   return(p)
 }
@@ -283,7 +279,8 @@ plot_3d <- function(
   is_categorical,
   colors,
   coords,
-  is_dual_plot = FALSE
+  is_dual_plot = FALSE,
+  legend = legend_settings()
 ) {
   x_col <- coords[1]
   y_col <- coords[2]
@@ -304,17 +301,9 @@ plot_3d <- function(
 
   hover_text <- build_hover_text(df, legend_title, display_color, x_vals, y_vals, z_vals)
 
-  # Calculate number of unique categories for categorical data
-  num_categories <- if (is_categorical) {
-    length(unique(df[[color]]))
-  } else {
-    NULL
-  }
-
-  # a 3D scene needs all of the height: side by side too, the legend stays
-  # over the plot
-  legend_layout <- get_legend_layout(legend_title, num_categories, FALSE, !is_categorical)
-  plot_margins <- get_plot_margins(num_categories, FALSE)
+  # by default a 3D scene keeps all of the height: side by side too, the
+  # legend goes over the plot
+  key <- embedding_legend(legend_title, legend, !is_categorical, is_dual_plot, "3d")
 
   if (is_categorical) {
     p <- plot_ly(
@@ -337,9 +326,9 @@ plot_3d <- function(
           yaxis = list(title = paste("Y-", y_col)),
           zaxis = list(title = paste("Z-", z_col))
         ),
-        legend = legend_layout,
+        legend = key$layout,
         font = list(size = 14),
-        margin = plot_margins,
+        margin = key$margins,
         autosize = TRUE
       )
   } else {
@@ -353,8 +342,8 @@ plot_3d <- function(
         size = as.numeric(size) * 0.4,
         color = selected_color,
         colorscale = list(c(0, "#0000FF4C"), c(1, "red")),
-        showscale = TRUE,
-        colorbar = legend_layout
+        showscale = key$show,
+        colorbar = key$layout
       ),
       text = hover_text,
       hoverinfo = "text",
@@ -368,9 +357,12 @@ plot_3d <- function(
           zaxis = list(title = paste("Z-", z_col))
         ),
         font = list(size = 14),
-        margin = plot_margins,
+        margin = key$margins,
         autosize = TRUE
       )
+  }
+  if (!key$show) {
+    p <- layout(p, showlegend = FALSE)
   }
   return(p)
 }
@@ -386,7 +378,8 @@ embedding_plot <- function(
   size,
   plot_type = "pca_u",
   plot_dim = "2d",
-  is_dual_plot = FALSE
+  is_dual_plot = FALSE,
+  legend = legend_settings()
 ) {
   # A colour column that is not present means data and configuration do not
   # match (not a user-input problem): fall back to a configured field that
@@ -452,7 +445,8 @@ embedding_plot <- function(
       is_categorical,
       selected_color,
       colors,
-      is_dual_plot
+      is_dual_plot,
+      legend
     )
     # axis titles from the column names (plot_2d() gets the coordinates)
     p <- layout(p, xaxis = list(title = paste("X-", xaxis_input)),
@@ -468,7 +462,8 @@ embedding_plot <- function(
       is_categorical,
       colors,
       coords,
-      is_dual_plot
+      is_dual_plot,
+      legend
     )
   }
 

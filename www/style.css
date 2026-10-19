@@ -394,6 +394,17 @@ body {
   font-size: 0.75rem !important;
 }
 
+/* Compact menu of a plot settings sidebar (Legend position) */
+.compact-select .form-group {
+  margin-bottom: 0 !important;
+}
+
+.compact-select .selectize-input {
+  padding: 1px 6px !important;
+  min-height: 24px !important;
+  font-size: 0.75rem !important;
+}
+
 /* Simplified Compact Integration Switch */
 .integration-control-group {
   margin-bottom: 0;

@@ -68,8 +68,12 @@ The Embeddings tab offers dimensionality reduction and customizable visualizatio
 | Integration  | Integrated / Unintegrated (not available for t-SNE) |
 | Embedding    | PCA, UMAP (default), t-SNE                     |
 | Point Size   | S / M (default) / L                            |
+| Legend Position | Auto (default), Top left, Top right, Bottom left, Bottom right, Right, Below, Hidden |
+| Legend Size  | S / M (default) / L                            |
 | Dimension    | 2D / 3D (default)                              |
 | X / Y axes   | Selectable when 2D mode is active              |
+
+**Legend position and size**: the legend (the colors of a category, the color scale of gene expression, or the color key of *Each gene separately*) goes over a corner of the plot, right of it or below it, or is hidden. *Auto* puts it over the top-left corner, or below the plots in 2D Compare Plots mode; the color grid of 2 genes goes right of the plot. Outside the plot, the legend takes room from the plot. **Legend Size** makes its text and color scale smaller or larger, e.g. for a screenshot.
 
 **Color by** (in the title bar of the plot): Study label, Broad life-cycle stage, Life-cycle stage, Host species, Host and tissue, Treatment, Parasite strain / isolate, Parasite origin location, Single-cell technology, or Genes. With Genes, a row with the gene menu (and, for several genes, **Combine genes**) appears above the plot, under its title bar.
 
@@ -81,11 +85,11 @@ The Embeddings tab offers dimensionality reduction and customizable visualizatio
 | *Sum* | the sum of their expression |
 | *Each gene separately* (2 or 3 genes) | each gene has its own color, and the color of a cell mixes them: light grey where no gene is expressed, red for the first gene, green for the second, blue for the third. Co-expression gives mixed colors: red + green = yellow, red + blue = magenta, green + blue = cyan, all three = dark grey |
 
-With *Each gene separately*, the expression of each gene is scaled to 0–1 within the cells shown, with full color at its 99th percentile, and the cells with the highest expression are drawn on top. For 2 genes, a color grid right of the plot shows the color of each combination of the two expression values; for 3 genes, the legend lists the color of each gene and of their combinations. The hover text gives the expression of each gene. Example: select CSP and AMA1 and choose *Each gene separately*, to see the cells expressing CSP (red), AMA1 (green) or both (yellow).
+With *Each gene separately*, the expression of each gene is scaled to 0–1 within the cells shown, with full color at its 99th percentile, and the cells with the highest expression are drawn on top. For 2 genes, a color grid (by default right of the plot) shows the color of each combination of the two expression values; for 3 genes, the legend lists the color of each gene and of their combinations. The hover text gives the expression of each gene. Example: select CSP and AMA1 and choose *Each gene separately*, to see the cells expressing CSP (red), AMA1 (green) or both (yellow).
 
 **Visualization bar**: the title bar of the plot holds **Color by** and the **Compare Plots** and **Download Data** buttons.
 
-**Compare Plots mode**: Click **Compare Plots** to display two independent plots (Plot A and Plot B) side-by-side, each with its own **Color by** selector in its title bar; a plot colored by genes has its own gene row between its title bar and the plot, and the two plots stay aligned. In 2D, the legends sit below the plots, so that they do not cover cells.
+**Compare Plots mode**: Click **Compare Plots** to display two independent plots (Plot A and Plot B) side-by-side, each with its own **Color by** selector in its title bar; a plot colored by genes has its own gene row between its title bar and the plot, and the two plots stay aligned. In 2D, the legends sit below the plots by default, so that they do not cover cells; the two plots share the plot settings, including the legend position and size.
 
 **Interactive Cell Selection**: Click any cell to open a modal dialog showing a per-cell gene expression table (gene ID, gene name, expression value, description). The table is filterable and exportable as CSV.
 

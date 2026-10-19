@@ -42,3 +42,20 @@ check("the comparison plots are redrawn when their colour changes", {
     stop_unless(grepl(get_data_label("study_label"), output$second_plotly, fixed = TRUE), "plot B not redrawn by study")
   })
 })
+
+check("the single plot is redrawn when the legend position changes", {
+  testServer(function(input, output, session) {
+    tab <- embeddings_tab_server(input, output, session, loaded_data(), reactive(study_filter(STUDY)))
+  }, {
+    session$setInputs(tabset = "Embeddings", embedding = "umap", check_all = TRUE, plot = "2d",
+                      xaxis = umap_i[1], yaxis = umap_i[2], size = 2,
+                      color = get_data_column("broad_stage"), check = FALSE)
+    wait_later(0.7)
+    session$flushReact()
+    stop_unless(grepl("\"orientation\":\"v\"", output$all_plotly, fixed = TRUE), "legend not over the plot")
+    session$setInputs(legend_pos = "below", legend_size = "L")
+    wait_later(0.7)
+    session$flushReact()
+    stop_unless(grepl("\"orientation\":\"h\"", output$all_plotly, fixed = TRUE), "legend not moved below the plot")
+  })
+})

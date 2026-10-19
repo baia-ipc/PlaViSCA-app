@@ -139,27 +139,28 @@ gene_colour_legend <- function(genes) {
 }
 
 # Embedding plot coloured by the genes of `expression` (cells x genes, rows as
-# in `df`), combined by `combine` (one of COMBINE_GENES).
+# in `df`), combined by `combine` (one of COMBINE_GENES); `legend`: see
+# legend_settings().
 embedding_gene_plot <- function(df, expression, combine, xaxis_input, yaxis_input, size,
-                                plot_type, plot_dim, is_dual_plot = FALSE) {
+                                plot_type, plot_dim, is_dual_plot = FALSE, legend = legend_settings()) {
     combine <- effective_gene_combine(combine, ncol(expression))
     if (combine == "each") {
         return(embedding_blend_plot(df, expression, xaxis_input, yaxis_input, size, plot_type, plot_dim,
-                                    is_dual_plot))
+                                    is_dual_plot, legend))
     }
     df$.gene_colour <- combine_gene_expression(expression, combine)
     embedding_plot(df, xaxis_input, yaxis_input, ".gene_colour",
                    gene_colour_title(colnames(expression), combine), size,
-                   plot_type = plot_type, plot_dim = plot_dim, is_dual_plot = is_dual_plot)
+                   plot_type = plot_type, plot_dim = plot_dim, is_dual_plot = is_dual_plot,
+                   legend = legend)
 }
 
 # Embedding plot with one colour per gene (2 or 3 genes), mixed in each cell
 # (blend_gene_colours()). Cells with higher expression are drawn on top. The
 # key: a colour grid for 2 genes, legend entries for 3.
 embedding_blend_plot <- function(df, expression, xaxis_input, yaxis_input, size, plot_type, plot_dim,
-                                 is_dual_plot = FALSE) {
-    # side by side in 2D, the legend goes below the plot (get_legend_layout())
-    below <- is_dual_plot && plot_dim != "3d"
+                                 is_dual_plot = FALSE, legend = legend_settings()) {
+    position <- resolve_legend_position(legend$position, is_dual_plot, plot_dim)
     genes <- colnames(expression)
     scaled <- lapply(seq_along(genes), function(g) scale_gene_expression(expression[, g]))
     tops <- vapply(scaled, function(s) attr(s, "top"), numeric(1))
@@ -190,53 +191,70 @@ embedding_blend_plot <- function(df, expression, xaxis_input, yaxis_input, size,
                 text = hover, hoverinfo = "text", key = ~plotly_key, source = "embedding",
                 showlegend = FALSE)
     }
-    p <- layout(p, font = list(size = 14), margin = get_plot_margins(NULL, below), autosize = TRUE)
-    # the colour grid of 2 genes sits right of the plot
-    p <- embedding_axis_titles(p, axes, plot_dim, domain = if (length(genes) == 2) c(0, 0.78) else c(0, 1))
-    if (length(genes) == 2) add_gene_colour_grid(p, genes, tops) else add_gene_colour_legend(p, genes, coords, below)
+    if (position == "hidden") {
+        p <- layout(p, font = list(size = 14), margin = legend_margins(position), autosize = TRUE)
+        return(embedding_axis_titles(p, axes, plot_dim))
+    }
+    if (length(genes) == 3) {
+        p <- layout(p, font = list(size = 14), margin = legend_margins(position, legend$scale), autosize = TRUE)
+        p <- embedding_axis_titles(p, axes, plot_dim)
+        return(add_gene_colour_legend(p, genes, coords, position, legend$scale))
+    }
+    # the colour grid lies inside the figure, also on the right or below; by
+    # default on the right, and then, side by side, with the margins of the
+    # other plot, so that both have the same size
+    auto <- legend$position == "auto"
+    placement <- gene_grid_placement(if (auto) "right" else position, legend$scale)
+    margins <- legend_margins(if (auto && is_dual_plot) position else "hidden", legend$scale)
+    p <- layout(p, font = list(size = 14), margin = margins, autosize = TRUE)
+    p <- embedding_axis_titles(p, axes, plot_dim, placement$plot_x, placement$plot_y)
+    add_gene_colour_grid(p, genes, tops, placement, legend$scale)
 }
 
-# Axis titles of an embedding plot (2D axes or 3D scene); `domain`: the part
-# of the width left for the plot.
-embedding_axis_titles <- function(p, axes, plot_dim, domain = c(0, 1)) {
+# Axis titles of an embedding plot (2D axes or 3D scene); `x_domain`,
+# `y_domain`: the part of the width and height left for the plot.
+embedding_axis_titles <- function(p, axes, plot_dim, x_domain = c(0, 1), y_domain = c(0, 1)) {
     if (plot_dim == "3d") {
         return(layout(p, scene = list(
-            domain = list(x = domain, y = c(0, 1)),
+            domain = list(x = x_domain, y = y_domain),
             xaxis = list(title = paste("X-", axes[[1]])),
             yaxis = list(title = paste("Y-", axes[[2]])),
             zaxis = list(title = paste("Z-", axes[[3]]))
         )))
     }
-    layout(p, xaxis = list(title = paste("X-", axes[[1]]), domain = domain),
-           yaxis = list(title = paste("Y-", axes[[2]])))
+    layout(p, xaxis = list(title = paste("X-", axes[[1]]), domain = x_domain),
+           yaxis = list(title = paste("Y-", axes[[2]]), domain = y_domain))
 }
 
-# Colour grid of 2 genes, in the right part of the plot area.
-add_gene_colour_grid <- function(p, genes, tops) {
+# Colour grid of 2 genes, placed as in `placement` (gene_grid_placement()),
+# its text scaled by `text_scale`.
+add_gene_colour_grid <- function(p, genes, tops, placement, text_scale = 1) {
     grid <- gene_colour_grid(genes, tops)
     n <- length(grid$colours)
     index <- matrix(seq_len(n), nrow(grid$colours))
     scale <- lapply(seq_len(n), function(i) list((i - 1) / (n - 1), grid$colours[[i]]))
     key_axis <- function(title, domain, anchor) {
-        list(title = list(text = title, font = list(size = 11)), domain = domain, anchor = anchor,
+        list(title = list(text = title, font = list(size = 11 * text_scale)), domain = domain, anchor = anchor,
              fixedrange = TRUE, showgrid = FALSE, zeroline = FALSE, nticks = 3,
-             tickfont = list(size = 10))
+             tickfont = list(size = 10 * text_scale))
     }
     p <- add_trace(p, type = "heatmap", x = grid$x, y = grid$y, z = index, colorscale = scale,
                    zmin = 1, zmax = n, showscale = FALSE, text = grid$text, hoverinfo = "text",
                    xaxis = "x2", yaxis = "y2", inherit = FALSE)
     p <- layout(p,
-        xaxis2 = key_axis(genes[[1]], c(0.86, 0.99), "y2"),
-        yaxis2 = key_axis(genes[[2]], c(0.55, 0.86), "x2"),
-        annotations = list(list(text = "Expression", x = 0.925, y = 0.92, xref = "paper",
-                                yref = "paper", showarrow = FALSE, font = list(size = 12)))
+        xaxis2 = key_axis(genes[[1]], placement$grid_x, "y2"),
+        yaxis2 = key_axis(genes[[2]], placement$grid_y, "x2"),
+        annotations = list(list(text = "Expression", x = placement$title_x, y = placement$title_y,
+                                xref = "paper", yref = "paper", showarrow = FALSE,
+                                font = list(size = 12 * text_scale)))
     )
 }
 
 # Legend of 3 genes: one entry per gene, pair and all three. Each entry is a
 # tiny point on the first cell (plotly leaves traces without points out of
 # the legend); the legend draws its symbols at a constant size.
-add_gene_colour_legend <- function(p, genes, coords, below = FALSE) {
+# `position`: see LEGEND_POSITIONS (not "auto" or "hidden").
+add_gene_colour_legend <- function(p, genes, coords, position, scale = 1) {
     entries <- gene_colour_legend(genes)
     at <- lapply(coords, function(v) v[1])
     for (i in seq_len(nrow(entries))) {
@@ -251,7 +269,8 @@ add_gene_colour_legend <- function(p, genes, coords, below = FALSE) {
                       hoverinfo = "skip", inherit = FALSE)
         }
     }
-    legend <- get_legend_layout("Expressed genes", NULL, below)
+    legend <- category_legend_layout("Expressed genes", position, scale,
+                                     if (length(coords) == 3) "3d" else "2d")
     legend$itemclick <- FALSE
     legend$itemdoubleclick <- FALSE
     layout(p, legend = legend, showlegend = TRUE)
