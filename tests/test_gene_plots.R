@@ -68,3 +68,11 @@ test_that_("every plot type draws, with and without split, one or two genes", {
         }
     }
 })
+
+test_that_("every gene name of the menus selects one gene", {
+    if (!exists("genes") || !exists("get_gene_id")) skip_test("gene functions not loaded in this context")
+    g <- genes(app_data("norm_df"), readRDS(app_data_path("gene_annotation.rds")))
+    expect_true_(!any(duplicated(g$name)), "gene names are unique")
+    choices <- get_gene_choices(g, FALSE)
+    expect_equal_(get_gene_id(choices, g), g$gene[match(choices, g$name)], "names map back to their IDs")
+})
