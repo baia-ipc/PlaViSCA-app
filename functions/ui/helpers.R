@@ -48,7 +48,7 @@ create_filter_widget <- function(key, suffix = "", width_class = "col-md-3") {
   div(
     class = paste(width_class, "filter-widget"),
     # name of the filter, and its "exclude" switch: when on, the selected
-    # values are left out instead of kept (functions/filters.R)
+    # values are left out instead of kept (functions/data/filters.R)
     div(
       class = "filter-head",
       tags$label(

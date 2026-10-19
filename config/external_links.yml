@@ -1,7 +1,7 @@
 # External web addresses used by the app.
 # =============================================================================
 # Every http(s) address the app links to or loads is listed here and read
-# with external_link() (functions/site_config.R); no URL is written anywhere
+# with external_link() (functions/config/site.R); no URL is written anywhere
 # else in the app code. In gene link templates, {id} is replaced by a gene
 # identifier (e.g. PVP01_0000000).
 # =============================================================================

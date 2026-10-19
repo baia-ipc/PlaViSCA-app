@@ -1,5 +1,5 @@
 # Tests of the embedding plots coloured by genes
-# (functions/embedding_gene_colours.R): combining genes, scaling, mixing one
+# (functions/plots/embedding_gene_colours.R): combining genes, scaling, mixing one
 # colour per gene, and the plots built from them.
 
 needs_gene_colour_functions <- function() {

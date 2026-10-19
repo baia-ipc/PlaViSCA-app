@@ -1,4 +1,4 @@
-# One card of the Gene expression tab (functions/gene_expression_card.R):
+# One card of the Gene expression tab (functions/ui/gene_expression_card.R):
 # the plot and the "Data" download of card `i`, for the cells `cells`
 # (reactive, list(data, genes, full, row_idx), from
 # gene_expression_tab_server()). The inputs of card `i` have the IDs

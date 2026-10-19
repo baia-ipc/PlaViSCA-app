@@ -1,5 +1,5 @@
 # A card of the Gene expression tab: plot type, genes, grouping, the options
-# of the plot type (GENE_PLOT_OPTIONS in functions/plots_gene_expression.R),
+# of the plot type (GENE_PLOT_OPTIONS in functions/plots/gene_expression.R),
 # the plot and its buttons. Card `i` has the input IDs <name>_exp_<i>.
 
 # Menus open on top of the page, not inside the card, so that the next row of

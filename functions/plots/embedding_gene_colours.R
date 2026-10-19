@@ -1,6 +1,6 @@
 # Embedding plots coloured by genes ("Color by" = Genes): the expression of
 # the selected genes, how several genes are combined ("Combine genes", the
-# choices of COMBINE_GENES in plots_gene_distribution.R), and the colours of
+# choices of COMBINE_GENES in gene_distribution.R), and the colours of
 # "Each gene separately", where every gene has its own colour and the colour
 # of a cell mixes them.
 

@@ -20,41 +20,38 @@ suppressMessages({
   conflict_prefer("layout", "plotly")
 })
 
-# Source data column config first - other function files rely on
-# get_data_column()/get_data_label() and the vocabulary/ordering helpers.
-source("functions/data_columns_config.R")
+# Helpers, by topic (functions/<topic>/). The data column configuration comes
+# first: the other files use get_data_column(), get_data_label() and the
+# orderings.
+source("functions/config/data_columns.R")  # config/data_columns.yml
+source("functions/config/site.R")          # config/external_links.yml, team.yml
+source("functions/config/data_paths.R")    # data files (PLAVISCA_DATA_DIR)
 
-# External links and team information (config/external_links.yml, team.yml).
-source("functions/site_config.R")
-
-# Data file paths (PLAVISCA_DATA_DIR) and the startup data checks.
-source("functions/data_paths.R")
-source("functions/data_checks.R")
-
-# Server-side helpers (no Shiny reactivity)
-source("functions/filters.R")
-source("functions/genes.R")
-source("functions/gene_expression_data.R")
-source("functions/data_sources_table.R")
-source("functions/cache_keys.R")
+# Data: startup checks, filtering, genes, tables (no Shiny reactivity)
+source("functions/data/checks.R")
+source("functions/data/filters.R")
+source("functions/data/genes.R")
+source("functions/data/gene_expression.R")
+source("functions/data/gene_summaries.R")
+source("functions/data/cell_counts.R")
+source("functions/data/cell_details.R")
+source("functions/data/data_sources.R")
+source("functions/data/cache_keys.R")
 
 # Plots
-source("functions/cell_counts.R")
-source("functions/plots_cell_counts.R")
-source("functions/plots_qc.R")
-source("functions/gene_summaries.R")
-source("functions/plots_gene_expression.R")
-source("functions/plots_gene_distribution.R")
-source("functions/plots_gene_summaries.R")
-source("functions/embedding_plots.R")
-source("functions/embedding_gene_colours.R")
-source("functions/embedding_figure.R")
-source("functions/cell_details.R")
+source("functions/plots/cell_counts.R")
+source("functions/plots/qc.R")
+source("functions/plots/gene_expression.R")
+source("functions/plots/gene_distribution.R")
+source("functions/plots/gene_summaries.R")
+source("functions/plots/embeddings.R")
+source("functions/plots/embedding_gene_colours.R")
+source("functions/plots/embedding_figure.R")
 
 # UI building blocks
-source("functions/helpers_UI.R")
-source("functions/gene_expression_card.R")
-source("functions/plot_builder.R")
+source("functions/ui/helpers.R")
+source("functions/ui/gene_expression_card.R")
+source("functions/ui/plot_builder.R")
 
 # Server code, one file per tab or shared part (called from server.R)
 source("server/data_loading.R")

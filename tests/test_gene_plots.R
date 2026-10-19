@@ -1,7 +1,7 @@
 # Tests of the Gene expression tab plots: summaries per group
-# (functions/gene_summaries.R) and every plot type of a card
-# (functions/plots_gene_expression.R, plots_gene_distribution.R,
-# plots_gene_summaries.R).
+# (functions/data/gene_summaries.R) and every plot type of a card
+# (functions/plots/gene_expression.R, gene_distribution.R,
+# gene_summaries.R).
 
 needs_gene_plot_functions <- function() {
     if (!exists("gene_group_summary") || !exists("gene_expression_card_plot")) {

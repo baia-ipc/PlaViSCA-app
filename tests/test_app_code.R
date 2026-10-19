@@ -29,14 +29,14 @@ scan_unsupported_columns <- function(files = live_app_files()) {
 
 test_that_("no app code uses an unsupported column name", {
     # Two files name them on purpose: data_columns.yml lists them, and
-    # data_checks.R checks that hour_post_invasion is not required.
+    # functions/data/checks.R checks that hour_post_invasion is not required.
     files <- live_app_files()
-    files <- files[!basename(files) %in% c("data_columns.yml", "data_checks.R")]
+    files <- files[!endsWith(files, "config/data_columns.yml") & !endsWith(files, "functions/data/checks.R")]
     expect_empty_(scan_unsupported_columns(files), "unsupported column names in app code")
 })
 
 test_that_("functions/ holds no preprocessing scripts", {
-    live <- list.files(file.path(APP_ROOT, "functions"), full.names = TRUE)
+    live <- list.files(file.path(APP_ROOT, "functions"), full.names = TRUE, recursive = TRUE)
     offenders <- grep("preprocess", basename(live), ignore.case = TRUE, value = TRUE)
     expect_empty_(offenders, "preprocessing scripts in the sourced functions/ directory")
 })
@@ -58,7 +58,7 @@ test_that_("every app R file parses", {
 test_that_("no function is defined in two files of functions/, ui/ or server/", {
     # all these files are sourced into one environment: a second definition
     # silently replaces the first
-    files <- grep("/(functions|ui|server)/[^/]*\\.R$", live_app_files(), value = TRUE)
+    files <- grep("/(functions/[^/]+|ui|server)/[^/]*\\.R$", live_app_files(), value = TRUE)
     defined <- unlist(lapply(files, function(f) {
         names <- vapply(parse(f), function(e) {
             if (is.call(e) && identical(e[[1]], as.name("<-")) && is.name(e[[2]]) &&
@@ -100,7 +100,7 @@ test_that_("no absolute machine-specific path is hardcoded in app code", {
     expect_empty_(offenders, "hardcoded absolute paths in application code")
 })
 
-test_that_("data file paths are built only in functions/data_paths.R", {
+test_that_("data file paths are built only in functions/config/data_paths.R", {
     offenders <- character(0)
     for (f in live_app_files()) {
         if (basename(f) == "data_paths.R") next

@@ -1,5 +1,5 @@
 # Gene expression tab: cards with plots of selected genes
-# (functions/gene_expression_card.R).
+# (functions/ui/gene_expression_card.R).
 
 ui_tab_gene_expression <- function() {
   tabPanel(

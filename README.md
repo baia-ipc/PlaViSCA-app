@@ -118,7 +118,7 @@ test fails. Pass a file name to also write the results as a table:
 app.R, global.R, ui.R, server.R   Shiny entry point, startup, page, server logic
 run_app.sh                        start the app from the command line
 config/                           data columns, external links, team
-functions/                        helpers: data checks, filters, plots, ...
+functions/                        helpers by topic: config/, data/, plots/, ui/
 ui/                               one file per page section and analysis tab
 server/                           server code, one file per tab or shared part
 www/                              images, CSS and JavaScript served to the browser

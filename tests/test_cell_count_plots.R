@@ -1,5 +1,5 @@
 # Tests of the Metadata plots tab: counting cells by one or two fields
-# (functions/cell_counts.R) and the plot types (functions/plots_cell_counts.R).
+# (functions/data/cell_counts.R) and the plot types (functions/plots/cell_counts.R).
 
 needs_plot_functions <- function() {
     if (!exists("count_cells") || !exists("plot_cell_counts")) {

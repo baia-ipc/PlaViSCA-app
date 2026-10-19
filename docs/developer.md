@@ -10,7 +10,7 @@ the app, see the [README](../README.md); for using it, see the
 
 1. **`global.R`** — loads packages, sources `functions/`, reads the data from
    `PLAVISCA_DATA_DIR` and runs the startup checks
-   (`stop_if_app_data_invalid()` in `functions/data_checks.R`). If a check
+   (`stop_if_app_data_invalid()` in `functions/data/checks.R`). If a check
    fails the app stops here, with a message listing the failed checks.
 2. **`ui.R`** — sources `ui/` and assembles the page from one function per
    section (`ui_menu_bar()`, `ui_analysis_section()`).
@@ -26,22 +26,10 @@ the app, see the [README](../README.md); for using it, see the
 | `config/data_columns.yml` | the data columns the app uses (see below) |
 | `config/external_links.yml` | every external URL; read with `external_link()` |
 | `config/team.yml` | team, organisations, contacts; read with `team_info()` |
-| `functions/data_paths.R` | where the data files are (`PLAVISCA_DATA_DIR`) |
-| `functions/data_checks.R` | startup checks: `check_app_data()`, `stop_if_app_data_invalid()` |
-| `functions/data_columns_config.R` | accessors for `data_columns.yml`: `get_data_column()`, `get_data_label()`, orderings, colours, stage mapping |
-| `functions/site_config.R` | accessors for `external_links.yml` and `team.yml` |
-| `functions/filters.R` | reading the filter widgets and filtering cells |
-| `functions/genes.R`, `gene_expression_data.R` | gene lists, name/ID conversion, per-plot expression tables, the "Data" download of a gene expression card |
-| `functions/plots_*.R`, `embedding_plots.R` | plotly plots of each tab |
-| `functions/embedding_gene_colours.R` | embeddings coloured by genes: expression of the selected genes, "Combine genes" (mean, sum, or one colour per gene mixed in each cell, `blend_gene_colours()`), the colour key; `embedding_gene_plot()` |
-| `functions/gene_expression_card.R` | the card of the Gene expression tab: plot type, genes, grouping, the options of the plot type |
-| `functions/plots_gene_expression.R` | plot types of a card and their options (`GENE_PLOT_TYPES`, `GENE_PLOT_OPTIONS`), the plot of a card (`gene_expression_card_plot()`) |
-| `functions/gene_summaries.R`, `plots_gene_summaries.R`, `plots_gene_distribution.R` | per-group summaries of gene expression (`gene_group_summary()`) and their plots; violin and box plots |
-| `functions/cell_counts.R` | counting cells by one or two fields (Metadata plots tab) |
-| `functions/plot_builder.R` | the plot builder of the Metadata plots tab (a Shiny module: `plot_builder_ui()`, `plot_builder_server()`); the tab adds and removes builders in `server/tab_plots.R` |
-| `functions/cache_keys.R` | cache keys of the per-session caches |
-| `functions/helpers_UI.R` | UI building blocks: filter rows, gene links, team cards |
-| `functions/embedding_figure.R`, `cell_details.R` | the embedding plot of a set of cells (`embedding_figure()`); the expressed genes of one cell |
+| `functions/config/` | reading the configuration: `data_columns.R` (`get_data_column()`, `get_data_label()`, orderings, colours, stage mapping), `site.R` (`external_link()`, `team_info()`), `data_paths.R` (where the data files are, `PLAVISCA_DATA_DIR`) |
+| `functions/data/` | working with the data, without Shiny: startup checks (`checks.R`: `check_app_data()`, `stop_if_app_data_invalid()`), filtering cells (`filters.R`), gene lists and name/ID conversion (`genes.R`), per-plot expression tables and the "Data" download of a gene expression card (`gene_expression.R`), per-group summaries of gene expression (`gene_summaries.R`: `gene_group_summary()`), counting cells by one or two fields (`cell_counts.R`), the expressed genes of one cell (`cell_details.R`), the Data sources table (`data_sources.R`), cache keys (`cache_keys.R`) |
+| `functions/plots/` | plotly plots: QC (`qc.R`), cell counts of the Metadata plots tab (`cell_counts.R`), the plot types of a gene expression card (`gene_expression.R`: `GENE_PLOT_TYPES`, `GENE_PLOT_OPTIONS`, `gene_expression_card_plot()`), violin and box plots (`gene_distribution.R`), plots of per-group summaries (`gene_summaries.R`), embeddings (`embeddings.R`), embeddings coloured by genes (`embedding_gene_colours.R`: "Combine genes", `blend_gene_colours()`, the colour key), the embedding plot of a set of cells (`embedding_figure.R`: `embedding_figure()`) |
+| `functions/ui/` | UI building blocks: filter rows, gene links, logos (`helpers.R`), the card of the Gene expression tab (`gene_expression_card.R`), the plot builder of the Metadata plots tab (`plot_builder.R`, a Shiny module: `plot_builder_ui()`, `plot_builder_server()`) |
 | `server/` | server code, one file per tab or shared part (see [The server code](#the-server-code)) |
 | `ui/` | the top bar (`page_frame.R`), the tab set (`analysis.R`) and one file per tab (`tab_*.R`, `about.R`) |
 | `www/` | `style.css`, `script.js` and images served to the browser |
@@ -52,7 +40,7 @@ Rules the tests enforce:
 
 - data column names appear only in `config/data_columns.yml`; code uses
   `get_data_column("broad_stage")`, never `"broad_stage"` directly;
-- data file paths are built only in `functions/data_paths.R`;
+- data file paths are built only in `functions/config/data_paths.R`;
 - external URLs appear only in `config/external_links.yml` and
   `config/team.yml`;
 - no code uses the column names listed under `unsupported_columns` in

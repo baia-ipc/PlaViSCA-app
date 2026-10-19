@@ -1,5 +1,5 @@
 # Metadata plots tab: plot builders, each counting the selected cells by one
-# or two metadata fields (functions/plot_builder.R), two per row. The "+"
+# or two metadata fields (functions/ui/plot_builder.R), two per row. The "+"
 # button of the last plot adds another one (server/tab_plots.R). The settings
 # sidebar can hide the missing values.
 

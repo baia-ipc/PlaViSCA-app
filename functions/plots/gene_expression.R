@@ -1,7 +1,7 @@
 # Plots of a Gene expression card: the plot types, their options and the
 # plot of a card. The violin and box plots are in
-# functions/plots_gene_distribution.R, the plots of summaries per group in
-# functions/plots_gene_summaries.R.
+# functions/plots/gene_distribution.R, the plots of summaries per group in
+# functions/plots/gene_summaries.R.
 
 # Plot types of a gene expression card (names = menu labels).
 GENE_PLOT_TYPES <- c(

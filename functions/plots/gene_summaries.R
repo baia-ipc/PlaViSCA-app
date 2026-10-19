@@ -1,4 +1,4 @@
-# Plots of gene expression summarized per group (functions/gene_summaries.R):
+# Plots of gene expression summarized per group (functions/data/gene_summaries.R):
 # Cleveland dot plot, dot plot (Seurat style) and heatmap.
 
 # Cleveland dot plot: one row of points per gene, groups on the x axis and

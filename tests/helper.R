@@ -89,10 +89,10 @@ if (!file.exists(file.path(APP_ROOT, "config", "data_columns.yml"))) {
 load_app_config <- function() {
     old <- setwd(APP_ROOT)
     on.exit(setwd(old), add = TRUE)
-    source(file.path(APP_ROOT, "functions", "data_columns_config.R"), local = FALSE)
-    source(file.path(APP_ROOT, "functions", "site_config.R"), local = FALSE)
-    source(file.path(APP_ROOT, "functions", "data_paths.R"), local = FALSE)
-    source(file.path(APP_ROOT, "functions", "data_checks.R"), local = FALSE)
+    source(file.path(APP_ROOT, "functions", "config", "data_columns.R"), local = FALSE)
+    source(file.path(APP_ROOT, "functions", "config", "site.R"), local = FALSE)
+    source(file.path(APP_ROOT, "functions", "config", "data_paths.R"), local = FALSE)
+    source(file.path(APP_ROOT, "functions", "data", "checks.R"), local = FALSE)
     invisible(TRUE)
 }
 
@@ -134,7 +134,7 @@ app_data <- function(which = c("mr_data", "norm_df", "raw_df", "bibliography")) 
 live_app_files <- function() {
     files <- c(
         file.path(APP_ROOT, c("app.R", "global.R", "ui.R", "server.R")),
-        list.files(file.path(APP_ROOT, "functions"), pattern = "\\.R$", full.names = TRUE),
+        list.files(file.path(APP_ROOT, "functions"), pattern = "\\.R$", full.names = TRUE, recursive = TRUE),
         list.files(file.path(APP_ROOT, "ui"), pattern = "\\.R$", full.names = TRUE),
         list.files(file.path(APP_ROOT, "server"), pattern = "\\.R$", full.names = TRUE),
         list.files(file.path(APP_ROOT, "config"), pattern = "\\.ya?ml$", full.names = TRUE)
