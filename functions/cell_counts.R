@@ -1,4 +1,4 @@
-# Counts of cells by one or two metadata fields, for the Plots tab.
+# Counts of cells by one or two metadata fields, for the Metadata plots tab.
 # =============================================================================
 # count_cells() returns one row per value (or pair of values) with the number
 # of cells and their percentage. Values are ordered by the biological ordering
@@ -6,7 +6,7 @@
 # take physical column names and do not depend on Shiny.
 # =============================================================================
 
-# Logical keys of the fields offered in the Plots tab, as select choices
+# Logical keys of the fields offered in the Metadata plots tab, as select choices
 # (names = display labels).
 plot_field_choices <- function() {
     keys <- plot_field_keys()

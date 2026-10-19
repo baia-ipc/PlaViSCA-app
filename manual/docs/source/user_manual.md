@@ -16,8 +16,8 @@ PlaViSca is a single page: a top bar with the application name and the Institut 
 
 - **Embeddings**
 - **Gene Expression**
-- **Plots**: charts of the cell metadata
-- **Data table**: one row per cell with its metadata
+- **Metadata plots**: charts of the cell metadata
+- **Metadata table**: one row per cell with its metadata
 - **QC Plots**
 - **Data Sources**
 - **Code**: opens the source code of the app on GitHub, in a new browser tab
@@ -26,7 +26,7 @@ PlaViSca is a single page: a top bar with the application name and the Institut 
 
 The app opens on the Embeddings tab, over an animated particle background.
 
-All data tabs (Embeddings, Gene Expression, Plots, Data table, QC Plots) share a common **Filters** row at the top with the following fields:
+All data tabs (Embeddings, Gene Expression, Metadata plots, Metadata table, QC Plots) share a common **Filters** row at the top with the following fields:
 
 | Filter field | Description |
 |---|---|
@@ -97,12 +97,12 @@ The Gene Expression tab provides an interactive interface for exploring gene exp
 - **Annotations**: Direct links to PlasmoDB and NCBI per gene (supports multiple tabs for multi-gene selections).
 - **Download**: Export per-panel expression data as an `.xlsx` file containing an Expression Data sheet and a Metadata sheet.
 
-### Plots
+### Metadata plots
 
-![Figure 5: Plots tab](imgs/plots.png)
-**Figure 5**: Plots tab
+![Figure 5: Metadata plots tab](imgs/plots.png)
+**Figure 5**: Metadata plots tab
 
-The Plots tab counts the selected cells by one or two metadata fields and draws the counts as the plot you choose (**Figure 5**). Changing the filters updates the value boxes and the plot.
+The Metadata plots tab counts the selected cells by one or two metadata fields and draws the counts as the plot you choose (**Figure 5**). Changing the filters updates the value boxes and the plot.
 
 **Summary value boxes:**
 
@@ -139,10 +139,10 @@ The settings panel (cog button) has one option, **Show missing**: untick it to l
 
 Hover over the plot for details; use the controls in its top-right corner to zoom, pan or download it (as PNG or SVG).
 
-### Data table
+### Metadata table
 
-![Figure 6: Data table tab](imgs/data_table.png)
-**Figure 6**: Data table tab
+![Figure 6: Metadata table tab](imgs/data_table.png)
+**Figure 6**: Metadata table tab
 
 One row per cell: the cell ID, study, SRA run and the authors' cell ID (missing for Hazzard2022, whose cells were called by PlaViSca), then the host and tissue, strain and origin, treatment, life-cycle stage (and the authors' stage), reference time point, gametocyte calls, biological replicate, day post infection, technology, sequencer and counts. Search globally or filter by column, and export the table as CSV.
 

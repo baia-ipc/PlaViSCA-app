@@ -1,4 +1,4 @@
-# Tests of the Plots tab: counting cells by one or two fields
+# Tests of the Metadata plots tab: counting cells by one or two fields
 # (functions/cell_counts.R) and the plot types (functions/plots_cell_counts.R).
 
 needs_plot_functions <- function() {
@@ -9,10 +9,10 @@ needs_plot_functions <- function() {
 
 col <- function(key) get_data_column(key)
 
-test_that_("every Plots tab field is a column of the data", {
+test_that_("every Metadata plots tab field is a column of the data", {
     m <- app_data("mr_data")
     absent <- Filter(function(k) !col(k) %in% colnames(m), plot_field_keys())
-    expect_empty_(unlist(absent), "Plots tab fields without a data column")
+    expect_empty_(unlist(absent), "Metadata plots tab fields without a data column")
 })
 
 test_that_("counts by one field add up to all cells, percentages to 100", {

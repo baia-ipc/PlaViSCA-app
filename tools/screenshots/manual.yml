@@ -37,7 +37,7 @@ shots:
     output: manual/docs/source/imgs/gene_expression.png
 
   - name: plots
-    tab: Plots
+    tab: Metadata plots
     # the example of the manual: life-cycle stages of each study, in %
     steps:
       - drawn: true
@@ -48,7 +48,7 @@ shots:
     output: manual/docs/source/imgs/plots.png
 
   - name: data_table
-    tab: Data table
+    tab: Metadata table
     output: manual/docs/source/imgs/data_table.png
 
   - name: qc_plots

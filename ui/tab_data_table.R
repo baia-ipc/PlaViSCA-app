@@ -1,9 +1,9 @@
-# Data table tab: one row per cell with its metadata, exportable as CSV.
+# Metadata table tab: one row per cell with its metadata, exportable as CSV.
 
 ui_tab_data_table <- function() {
   tabPanel(
-    tagList(fontawesome::fa("table-list"), " Data table"),
-    value = "Data table",
+    tagList(fontawesome::fa("table-list"), " Metadata table"),
+    value = "Metadata table",
     create_meta_filter_row("_table"),
     card(
       class = "mt-2",

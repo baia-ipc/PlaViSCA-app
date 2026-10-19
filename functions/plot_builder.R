@@ -1,4 +1,4 @@
-# Plot builder of the Plots tab (a Shiny module).
+# Plot builder of the Metadata plots tab (a Shiny module).
 # =============================================================================
 # A card where the user chooses the field to count cells by, an optional
 # second field to split them by, the plot type and whether to show numbers of

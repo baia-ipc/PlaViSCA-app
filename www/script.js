@@ -45,7 +45,7 @@ function setupImmediateSidebarControl() {
     if (!sidebar || !main) return;
 
     // Tabs that should hide the sidebar
-    const hideSidebarTabs = ['Plots', 'Data table', 'QC Plots', 'Data sources', 'Manual', 'Gene expression', 'Embeddings'];
+    const hideSidebarTabs = ['Metadata plots', 'Metadata table', 'QC Plots', 'Data sources', 'Manual', 'Gene expression', 'Embeddings'];
 
     if (hideSidebarTabs.includes(tabName)) {
       // Hide sidebar immediately

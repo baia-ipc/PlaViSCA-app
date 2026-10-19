@@ -1,6 +1,6 @@
-# Server code of the Plots tab: the number boxes and the plot builder, for the
-# cells selected by the tab's filters (`filters`, a reactive with the filter
-# values, from shared_filters_server()).
+# Server code of the Metadata plots tab: the number boxes and the plot
+# builder, for the cells selected by the tab's filters (`filters`, a reactive
+# with the filter values, from shared_filters_server()).
 
 plots_tab_server <- function(input, output, all_cells, filters) {
   cells <- reactive({

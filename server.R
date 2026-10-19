@@ -82,7 +82,7 @@ server <- function(input, output, session) {
       "Embeddings" = "",
       "Gene expression" = "_exp",
       "QC Plots" = "_qc",
-      "Plots" = "_meta"
+      "Metadata plots" = "_meta"
     )
 
     current_tab <- input$tabset
@@ -443,12 +443,12 @@ server <- function(input, output, session) {
   })
 
   # Synchronize plot controls between tabs on change
-  lapply(c("Embeddings", "Gene expression", "QC Plots", "Plots"), function(tab) {
+  lapply(c("Embeddings", "Gene expression", "QC Plots", "Metadata plots"), function(tab) {
     suffix_map <- list(
       "Embeddings" = "",
       "Gene expression" = "_exp",
       "QC Plots" = "_qc",
-      "Plots" = "_meta"
+      "Metadata plots" = "_meta"
     )
     suffix <- suffix_map[[tab]]
 
@@ -519,16 +519,16 @@ server <- function(input, output, session) {
   })
 
 
-  # Plots tab: number boxes and the plot builder (server/tab_plots.R)
-  plots_tab_server(input, output, filtered_data, tab_filters[["Plots"]])
+  # Metadata plots tab: number boxes and the plot builder (server/tab_plots.R)
+  plots_tab_server(input, output, filtered_data, tab_filters[["Metadata plots"]])
 
-  # Data table tabset: one row per cell, filtered by the Data table filters
+  # Metadata table tab: one row per cell, filtered by the tab's filters
   observeEvent(
     c(
-      list(input$data_opt, tab_filters[["Data table"]]())
+      list(input$data_opt, tab_filters[["Metadata table"]]())
     ),
     {
-      current_inputs <- tab_filters[["Data table"]]()
+      current_inputs <- tab_filters[["Metadata table"]]()
 
       filt_data <- apply_secondary_filters(filtered_data(), current_inputs)
 

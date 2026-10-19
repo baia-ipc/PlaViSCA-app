@@ -15,8 +15,8 @@
 FILTER_TAB_SUFFIXES <- c(
   "Embeddings" = "",
   "Gene expression" = "_gex",
-  "Plots" = "_meta",
-  "Data table" = "_table",
+  "Metadata plots" = "_meta",
+  "Metadata table" = "_table",
   "QC Plots" = "_qc"
 )
 

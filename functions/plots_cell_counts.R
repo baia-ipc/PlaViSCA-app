@@ -1,4 +1,4 @@
-# Plots of cell counts by one or two metadata fields (Plots tab).
+# Plots of cell counts by one or two metadata fields (Metadata plots tab).
 # =============================================================================
 # plot_cell_counts() draws a count table from count_cells() as one of the plot
 # types below. One field: each value is coloured as in the other tabs. Two

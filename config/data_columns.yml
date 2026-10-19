@@ -283,7 +283,7 @@ category_fields:
   - parasite_origin_location
   - sc_technology
 
-# Logical keys offered in the Plots tab, in the order of its menus.
+# Logical keys offered in the Metadata plots tab, in the order of its menus.
 plot_fields:
   - study_label
   - broad_stage
