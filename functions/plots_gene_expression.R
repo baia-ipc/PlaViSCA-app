@@ -62,3 +62,15 @@ gene_expression_card_plot <- function(fg, genes, use_ids, group, type = "violin"
         heatmap = plot_gene_heatmap(table, group, value, scaled = !isFALSE(opts$scale))
     )
 }
+
+# Empty plot with a message as title (no data, or nothing selected yet).
+create_empty_plot <- function(title = "") {
+    plotly::plot_ly() %>%
+        plotly::add_trace(x = c(), y = c(), type = "scatter", mode = "markers") %>%
+        plotly::layout(
+            title = title,
+            xaxis = list(title = ""),
+            yaxis = list(title = ""),
+            showlegend = FALSE
+        )
+}

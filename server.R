@@ -1,38 +1,3 @@
-library(shiny)
-library(shinyjs)
-library(DT)
-library(plotly)
-library(RColorBrewer)
-suppressPackageStartupMessages(library(conflicted))
-suppressPackageStartupMessages(library(tidyverse))
-library(later)
-library(writexl)
-
-# Resolve namespace conflicts - set these AFTER loading packages
-suppressMessages({
-  conflict_prefer("filter", "dplyr")
-  conflict_prefer("lag", "dplyr")
-  conflict_prefer("show", "methods")
-  conflict_prefer("layout", "plotly")
-})
-
-# Helper function to create empty plots without warnings
-create_empty_plot <- function(title = "") {
-  plotly::plot_ly() %>%
-    plotly::add_trace(
-      x = c(),
-      y = c(),
-      type = "scatter",
-      mode = "markers"
-    ) %>%
-    plotly::layout(
-      title = title,
-      xaxis = list(title = ""),
-      yaxis = list(title = ""),
-      showlegend = FALSE
-    )
-}
-
 server <- function(input, output, session) {
   sessionData <- new.env(parent = emptyenv())
 
@@ -52,121 +17,26 @@ server <- function(input, output, session) {
   # Reactive value for comparison mode (toggled by action button)
   comparison_mode <- reactiveVal(FALSE)
 
-  # Reactive values to preserve UI state across mode changes
-  ui_state <- reactiveValues(
-    stored_color = get_data_column("broad_stage"),
-    stored_genes = NULL,
-    stored_check = FALSE
-  )
+  # Colour of the single plot, restored when leaving comparison mode
+  ui_state <- reactiveValues(stored_color = get_data_column("broad_stage"))
 
-  # Bibliography / data-source table, loaded and checked against the data at
-  # startup in global.R (see stop_if_app_data_invalid()).
-  pub_data <- reactive({
-    pub_data_table
-  })
-
-  observeEvent(filtered_gene_exp_data(), {
-    try(
-      {
-        df_gene0(NULL)
-      },
-      silent = TRUE
-    )
-  })
-  # Synchronize plot controls (data type, size, dimension) across tabs
+  # Opening the Gene expression tab with no gene selected selects the first
   observeEvent(input$tabset, {
-    syncing_tabs(TRUE)
-
-    # Define mapping between tab names and their input suffixes
-    tab_suffixes <- list(
-      "Embeddings" = "",
-      "Gene expression" = "_exp",
-      "QC Plots" = "_qc",
-      "Metadata plots" = "_meta"
-    )
-
-    current_tab <- input$tabset
-
-    # Ensure gene is selected when navigating to Gene expression tab
-    if (current_tab == "Gene expression") {
-      if (is.null(input$genes_exp_0) || length(input$genes_exp_0) == 0) {
-        req(gene_data()$genes)
-        choices <- get_gene_choices(gene_data()$genes, input$check_exp_0)
-        if (length(choices) > 0) {
-          updateSelectizeInput(session, "genes_exp_0", selected = choices[1])
-        }
+    if (input$tabset == "Gene expression" && length(input$genes_exp_0) == 0) {
+      req(gene_data()$genes)
+      choices <- get_gene_choices(gene_data()$genes, input$check_exp_0)
+      if (length(choices) > 0) {
+        updateSelectizeInput(session, "genes_exp_0", selected = choices[1])
       }
     }
-
-    if (current_tab %in% names(tab_suffixes)) {
-      source_suffix <- tab_suffixes[[current_tab]]
-
-      # Determine current global values from the active tab's inputs
-      # If they are NULL (e.g., initial load), use defaults
-      current_data_type <- if (!is.null(input[[paste0("data_type", source_suffix)]])) {
-        input[[paste0("data_type", source_suffix)]]
-      } else {
-        "normalize"
-      }
-      current_size <- if (!is.null(input[[paste0("size", source_suffix)]])) {
-        input[[paste0("size", source_suffix)]]
-      } else {
-        4
-      }
-      current_plot <- if (!is.null(input[[paste0("plot", source_suffix)]])) {
-        input[[paste0("plot", source_suffix)]]
-      } else {
-        "3d"
-      }
-
-      # Update all other tabs
-      for (tab in names(tab_suffixes)) {
-        if (tab != current_tab) {
-          target_suffix <- tab_suffixes[[tab]]
-
-          # Sync data type
-          if (is.null(input[[paste0("data_type", target_suffix)]]) ||
-            input[[paste0("data_type", target_suffix)]] != current_data_type) {
-            updateRadioButtons(session, paste0("data_type", target_suffix), selected = current_data_type)
-          }
-
-          # Sync size
-          if (is.null(input[[paste0("size", target_suffix)]]) ||
-            input[[paste0("size", target_suffix)]] != current_size) {
-            updateRadioButtons(session, paste0("size", target_suffix), selected = current_size)
-          }
-
-          # Sync plot dimension
-          if (is.null(input[[paste0("plot", target_suffix)]]) ||
-            input[[paste0("plot", target_suffix)]] != current_plot) {
-            updateRadioButtons(session, paste0("plot", target_suffix), selected = current_plot)
-          }
-        }
-      }
-    }
-
-    # Reset flag after a short delay
-    later(
-      function() {
-        syncing_tabs(FALSE)
-      },
-      0.1
-    )
   })
 
-  # Data caching system for performance optimization
-  default_df_filter <- reactiveVal(NULL)
+  # Data loading
   app_initialized <- reactiveVal(FALSE)
   data_loading_trigger <- reactiveVal(0)
-  syncing_tabs <- reactiveVal(FALSE)
   global_loading <- reactiveVal(FALSE)
 
-  cached_data <- reactiveValues(
-    raw = NULL,
-    normalize = NULL,
-    current_type = NULL,
-    current_filter = NULL
-  )
+  cached_data <- reactiveValues(raw = NULL, normalize = NULL)
 
   # get current data type regardless of tab
   get_current_data_type <- reactive({
@@ -251,24 +121,12 @@ server <- function(input, output, session) {
 
       # Show progress bar when loading new data
       withProgress(message = "Updating visualization", value = 30, {
-        display_name <- switch(current_type,
-          raw = "Raw",
-          normalize = "Normalized"
-          # scale = "Scaled"
-        )
-
         # Load dataset (from cache if available)
         dataset <- load_dataset(current_type)
-
-        result <- list(
+        list(
           data = dataset,
           genes = genes(dataset, gff_data)
         )
-
-        # Cache the current state
-        cached_data$current_type <- current_type
-        sessionData$last_gene_data <- result
-        return(result)
       })
     },
     ignoreNULL = FALSE
@@ -442,95 +300,19 @@ server <- function(input, output, session) {
     return(result)
   })
 
-  # Synchronize plot controls between tabs on change
-  lapply(c("Embeddings", "Gene expression", "QC Plots", "Metadata plots"), function(tab) {
-    suffix_map <- list(
-      "Embeddings" = "",
-      "Gene expression" = "_exp",
-      "QC Plots" = "_qc",
-      "Metadata plots" = "_meta"
-    )
-    suffix <- suffix_map[[tab]]
-
-    # Sync data type
-    observeEvent(input[[paste0("data_type", suffix)]],
-      {
-        if (!is.null(input$tabset) && input$tabset == tab && !syncing_tabs()) {
-          val <- input[[paste0("data_type", suffix)]]
-          for (other_tab in names(suffix_map)) {
-            if (other_tab != tab) {
-              updateRadioButtons(session, paste0("data_type", suffix_map[[other_tab]]), selected = val)
-            }
-          }
-        }
-      },
-      ignoreInit = TRUE
-    )
-
-    # Sync size
-    observeEvent(input[[paste0("size", suffix)]],
-      {
-        if (!is.null(input$tabset) && input$tabset == tab && !syncing_tabs()) {
-          val <- input[[paste0("size", suffix)]]
-          for (other_tab in names(suffix_map)) {
-            if (other_tab != tab) {
-              updateRadioButtons(session, paste0("size", suffix_map[[other_tab]]), selected = val)
-            }
-          }
-        }
-      },
-      ignoreInit = TRUE
-    )
-
-    # Sync plot dimension
-    observeEvent(input[[paste0("plot", suffix)]],
-      {
-        if (!is.null(input$tabset) && input$tabset == tab && !syncing_tabs()) {
-          val <- input[[paste0("plot", suffix)]]
-          for (other_tab in names(suffix_map)) {
-            if (other_tab != tab) {
-              updateRadioButtons(session, paste0("plot", suffix_map[[other_tab]]), selected = val)
-            }
-          }
-        }
-      },
-      ignoreInit = TRUE
-    )
-  })
-
-  create_data_type_sync_observer(
-    input = input,
-    session = session,
-    input_name = "data_type_exp", # from exp tabset
-    target_input = "data_type",
-    expected_tabset = "Gene expression",
-    global_loading = global_loading
-  )
-
-  # Filter choices are built from config/data_columns.yml in the gene_data()
-  # observer above.
-
-  user_interact <- reactiveVal(FALSE)
-
-  # Reactive for base metadata (no filtering - just returns mr_data)
-  # Filtering is done at the individual tab level using shared filter inputs
-  filtered_data <- reactive({
-    mr_data
-  })
-
+  # The "Data type" controls of the Embeddings and Gene expression tabs
+  sync_data_type_controls(input, session, global_loading)
 
   # Metadata plots tab: number boxes and the plot builders (server/tab_plots.R)
-  plots_tab_server(input, output, filtered_data, tab_filters[["Metadata plots"]])
+  plots_tab_server(input, output, reactive(mr_data), tab_filters[["Metadata plots"]])
 
   # Metadata table tab: one row per cell, filtered by the tab's filters
   observeEvent(
-    c(
-      list(input$data_opt, tab_filters[["Metadata table"]]())
-    ),
+    tab_filters[["Metadata table"]](),
     {
       current_inputs <- tab_filters[["Metadata table"]]()
 
-      filt_data <- apply_secondary_filters(filtered_data(), current_inputs)
+      filt_data <- apply_secondary_filters(mr_data, current_inputs)
 
       output$data_table <- renderDT(
         {
@@ -590,13 +372,11 @@ server <- function(input, output, session) {
 
   # QC Plots tabset
   observeEvent(
-    c(
-      list(input$data_opt, tab_filters[["QC Plots"]]())
-    ),
+    tab_filters[["QC Plots"]](),
     {
       current_inputs <- tab_filters[["QC Plots"]]()
 
-      filt_data <- apply_secondary_filters(filtered_data(), current_inputs)
+      filt_data <- apply_secondary_filters(mr_data, current_inputs)
 
       # QC Value Boxes
       output$total_cells_qc <- renderUI({
@@ -689,7 +469,7 @@ server <- function(input, output, session) {
     if (input$tabset == "Data sources") {
       output$data_source <- renderDT({
         DT::datatable(
-          format_data_sources(pub_data()),
+          format_data_sources(pub_data_table),
           escape = FALSE,
           options = list(
             pageLength = 10,
@@ -806,68 +586,7 @@ server <- function(input, output, session) {
     ignoreInit = TRUE
   )
 
-  ## gene_exp_0 block with minimal caching for speed
-  choice_exp_0 <- reactive({
-    req(gene_data()$genes)
-    get_gene_choices(gene_data()$genes, input$check_exp_0)
-  })
-
-  # df_exp data for genes_exp_0 with simplified reactive approach and debouncing
-  df_exp_0 <- reactive({
-    req(filtered_gene_exp_data(), input$genes_exp_0, input$group_exp_0)
-
-    # Skip processing during loading states
-    if (global_loading()) {
-      return(NULL)
-    }
-
-    # Create a safe cache key without digest
-    cache_key <- make_cache_key(
-      "df_exp",
-      input$genes_exp_0,
-      input$group_exp_0,
-      input$check_exp_0,
-      get_current_data_type(),
-      paste(
-        vapply(
-          paste0(filter_field_keys(), "_gex"),
-          function(id) paste(input[[id]], collapse = "|"),
-          character(1)
-        ),
-        collapse = "__"
-      )
-    )
-
-    # Check cache first for instant gene switching
-    if (exists(cache_key, envir = sessionData, inherits = FALSE)) {
-      return(sessionData[[cache_key]])
-    }
-
-    # Compute result efficiently
-    # CRITICAL: Check the actual data being passed to df_exp0
-    filtered_data <- filtered_gene_exp_data()
-
-    result <- tryCatch(
-      {
-        df_exp0(
-          filtered_gene_exp_data(),
-          input$genes_exp_0,
-          input$group_exp_0,
-          check_exp = input$check_exp_0,
-          full_data = filtered_gene_exp_data()$full
-        )
-      },
-      error = function(e) {
-        return(NULL)
-      }
-    )
-
-    return(result)
-  }) %>% debounce(300)
-
-  df_gene0 <- reactiveVal(NULL)
-
-  # Initialize dropdown
+  # Gene menu of card 0, filled once the data are loaded
   observeEvent(
     gene_data(),
     {
@@ -898,12 +617,6 @@ server <- function(input, output, session) {
     once = TRUE
   )
 
-  # Data summary output for gene expression tab
-  output$gene_exp_data_summary <- renderUI({
-    # Summary display removed per user request - keeping terminal debug only
-    return(HTML(""))
-  })
-
   # Debounced gene selection to prevent flickering
   genes_exp_0_debounced <- reactive({
     input$genes_exp_0
@@ -920,7 +633,7 @@ server <- function(input, output, session) {
          value = opt("value"), scale = opt("scale"))
   }
 
-  # df_exp_0 when the user selects a gene/group
+  # Plot of card 0
   output$gene_exp_plotly_0 <- renderPlotly({
     # Use debounced inputs
     selected_genes <- genes_exp_0_debounced()
@@ -968,10 +681,7 @@ server <- function(input, output, session) {
     gene_links(gene_id)
   })
 
-  # Redundant observer removed to prevent gene selection resets
-
-  # gene_exp_i block
-  # observe add button click from js
+  # "+" button of a card (www/script.js sends click_add_btn): adds a card
   observeEvent(input$click_add_btn, {
     btn_id <- input$click_add_btn
     req(btn_id)
@@ -1044,7 +754,9 @@ server <- function(input, output, session) {
         )
       })
     })
-  }) # observe remove button click from js
+  })
+
+  # "-" button of a card (www/script.js sends click_remove_btn): removes it
   observeEvent(
     input$click_remove_btn,
     {
@@ -1129,42 +841,8 @@ server <- function(input, output, session) {
     }
   })
 
-  ## update plot when data_type_exp_change from js with debouncing
-  gene_exp_plots_trigger <- reactiveVal(0)
-
-  choice <- eventReactive(list(input$check, input$data_type), {
-    req(gene_data()$genes)
-    get_gene_choices(gene_data()$genes, input$check)
-  })
-
-  ## dynamic UI for gene selection (RNA_snn commented out)
-  shinyjs::hide("gene_snn_ui")
-  observe({
-    req(input$color) # Ensure input$color is available
-    if (input$color == "genes") {
-      shinyjs::show("gene_snn_ui")
-      shinyjs::show("gene_link_ui")
-      shinyjs::show("switch_id")
-
-      # Set loading state when showing gene UI
-      genes_loading(TRUE)
-
-      # Reset loading state after a short delay to allow other observers to complete
-      later(
-        function() {
-          genes_loading(FALSE)
-        },
-        0.5
-      )
-    } else {
-      shinyjs::hide("gene_snn_ui")
-      shinyjs::hide("gene_link_ui")
-      shinyjs::hide("switch_id")
-      genes_loading(FALSE)
-    }
-  })
-
-  # Separate observer to update gene choices when color changes to genes or toggle changes
+  # Gene menu of the single plot, when it is coloured by genes: choices as
+  # names or IDs (input$check)
   observeEvent(list(input$color, input$check),
     {
       if (!identical(input$color, "genes")) {
@@ -1173,21 +851,16 @@ server <- function(input, output, session) {
 
       req(gene_data()$genes)
 
-      # Set loading state to prevent plot updates
-      genes_loading(TRUE)
-
       tryCatch(
         {
           genes_df <- gene_data()$genes
           if (is.null(genes_df) || nrow(genes_df) == 0) {
-            genes_loading(FALSE)
             return()
           }
 
           gene_choices <- get_gene_choices(genes_df, input$check)
 
           if (is.null(gene_choices) || length(gene_choices) == 0) {
-            genes_loading(FALSE)
             return()
           }
 
@@ -1211,31 +884,14 @@ server <- function(input, output, session) {
             ),
             server = TRUE
           )
-
-          # Update the label text based on toggle state
-          label_text <- if (isTRUE(input$check)) "Gene ID" else "Gene name"
-          runjs(sprintf('$("#gene_label").text("%s");', label_text))
-
-          # Reset loading state after choices are updated
-          later(
-            function() {
-              genes_loading(FALSE)
-            },
-            0.1
-          )
         },
         error = function(e) {
           message("Error updating gene choices: ", e$message)
-          genes_loading(FALSE)
         }
       )
     },
     ignoreInit = FALSE
   )
-
-  ## hide switch for tsne
-  # The integration toggle is shown or hidden by a conditionalPanel in ui.R
-
 
   ## get x- and y- axis selections for 2D plots
   observeEvent(
@@ -1247,7 +903,6 @@ server <- function(input, output, session) {
     ),
     {
       if (input$plot == "2d") {
-        shinyjs::show("axis")
         x_choices <- switch(input$embedding,
           "umap" = if (isTRUE(input$check_all)) umap_i else umap_u,
           "pca" = if (isTRUE(input$check_all)) pca_i else pca_u,
@@ -1282,8 +937,6 @@ server <- function(input, output, session) {
             y_choices[2]
           }
         )
-      } else {
-        shinyjs::hide("axis")
       }
     }
   )
@@ -1434,13 +1087,8 @@ server <- function(input, output, session) {
     )
   })
 
-  # Add debouncing for plot updates
-  plot_update_trigger <- reactiveVal(0)
+  # The single plot is redrawn only once its inputs have not changed for 0.6 s
   plot_ready <- reactiveVal(TRUE)
-  genes_loading <- reactiveVal(FALSE)
-  autoUpdatePlot <- reactiveVal(TRUE)
-
-  # Simplified debounced observer for plot-related inputs
   observe({
     list(
       input$embedding,
@@ -1457,34 +1105,8 @@ server <- function(input, output, session) {
       lapply(filter_field_keys(), function(k) input[[k]])
     )
 
-    # Set plot as not ready immediately when inputs change
-    tryCatch(
-      {
-        plot_ready(FALSE)
-        autoUpdatePlot(FALSE)
-      },
-      error = function(e) {}
-    )
-
-    # Simple debounce - wait for inputs to stabilize
-    later(
-      function() {
-        tryCatch(
-          {
-            isolate({
-              plot_update_trigger(plot_update_trigger() + 1)
-              plot_ready(TRUE)
-              autoUpdatePlot(TRUE)
-            })
-          },
-          error = function(e) {
-            plot_ready(TRUE)
-            autoUpdatePlot(TRUE)
-          }
-        )
-      },
-      0.6
-    )
+    plot_ready(FALSE)
+    later(function() plot_ready(TRUE), 0.6)
   })
 
   ## determine plot type
@@ -1518,8 +1140,8 @@ server <- function(input, output, session) {
       return(FALSE)
     }
 
-    # Plot readiness and auto-update flags
-    if (!plot_ready() || !autoUpdatePlot()) {
+    # Inputs still changing
+    if (!plot_ready()) {
       return(FALSE)
     }
 
@@ -1614,10 +1236,7 @@ server <- function(input, output, session) {
       # Initialize Bootstrap tooltips
       shinyjs::runjs("var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle=\"tooltip\"]')); var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) { return new bootstrap.Tooltip(tooltipTriggerEl); });")
 
-      # Store current selections
       ui_state$stored_color <- input$color
-      ui_state$stored_genes <- input$genes_n
-      ui_state$stored_check <- input$check
 
       # Initialize comparison plots with same settings as main plot
       updateSelectInput(session, "color_first_comp", selected = input$color)
@@ -1658,8 +1277,6 @@ server <- function(input, output, session) {
   observe({
     if (!comparison_mode()) {
       ui_state$stored_color <- input$color
-      ui_state$stored_genes <- input$genes_n
-      ui_state$stored_check <- input$check
     }
   })
 
@@ -1727,10 +1344,6 @@ server <- function(input, output, session) {
             ),
             server = TRUE
           )
-
-          # Update the label text based on toggle state
-          label_text_second <- if (isTRUE(input$check_second)) "Gene ID" else "Gene name"
-          runjs(sprintf('$("#gene_label_second").text("%s");', label_text_second))
         },
         error = function(e) {
           message("Error updating second plot gene choices: ", e$message)
@@ -1739,24 +1352,6 @@ server <- function(input, output, session) {
     },
     ignoreInit = FALSE
   )
-
-  # Helper function to validate gene selection
-  validate_gene_selection <- function(genes_input, plot_name = "plot") {
-    if (is.null(genes_input)) {
-      return(FALSE)
-    }
-
-    if (length(genes_input) == 0) {
-      return(FALSE)
-    }
-
-    # Check if all gene inputs are non-empty strings
-    if (any(is.na(genes_input)) || any(genes_input == "")) {
-      return(FALSE)
-    }
-
-    return(TRUE)
-  }
 
   # Observer for first plot gene links (during comparison)
   observe({
@@ -1883,12 +1478,6 @@ server <- function(input, output, session) {
     embplot(TRUE)
     p
   })
-
-  # Add a loading state output for the plot
-  output$plot_loading_state <- reactive({
-    !all_dependencies_ready()
-  })
-  outputOptions(output, "plot_loading_state", suspendWhenHidden = FALSE)
 
   ## Cell details: opened by a double-click or right-click on a cell of an
   ## embedding plot (input$embedding_cell_open, set in www/script.js)
@@ -2035,21 +1624,6 @@ server <- function(input, output, session) {
       formatRound("exp_value", digits = 3)
   })
 
-  # Clear selected table and cell cache when modal is dismissed
-  observeEvent(input$shiny_modal, {
-    if (!isTruthy(input$shiny_modal)) {
-      selected_table(NULL)
-      cache_keys <- names(cell_data_cache)
-      cell_keys <- cache_keys[grepl("^cell_", cache_keys)]
-      if (length(cell_keys) > 10) {
-        old_keys <- head(cell_keys, length(cell_keys) - 10)
-        for (key in old_keys) {
-          cell_data_cache[[key]] <- NULL
-        }
-      }
-    }
-  })
-
   ## handle export data
   output$export_data <- downloadHandler(
     filename = function() {
@@ -2083,7 +1657,7 @@ server <- function(input, output, session) {
     content = function(file) {
       withProgress(message = "Processing Data", value = 0, {
         incProgress(0.4, detail = "Saving file...")
-        write.csv(filtered_data(), file, row.names = FALSE)
+        write.csv(mr_data, file, row.names = FALSE)
         incProgress(1, detail = "Download complete")
       })
     }

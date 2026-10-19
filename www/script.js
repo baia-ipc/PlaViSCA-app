@@ -277,22 +277,6 @@ $(document).ready(function () {
     Shiny.setInputValue('change_gene_exp', this.id, { priority: 'event' });
   });
 
-  // More efficient data type change handler with throttling
-  let dataTypeChangeTimeout;
-  $(document).on('change', 'input[name^="data_type_exp"]', function () {
-    clearTimeout(dataTypeChangeTimeout);
-    dataTypeChangeTimeout = setTimeout(() => {
-      const $geneElements = $('[id^="genes_exp_"]');
-      const ids = $geneElements.map(function () {
-        const id = this.id;
-        return (!id.endsWith('-label') && !id.endsWith('-selectized')) ? id : null;
-      }).get().filter(Boolean);
-
-      Shiny.setInputValue('data_type_exp_change', { ids: ids, nonce: Date.now() },
-        { priority: 'event' });
-    }, 100);
-  });
-
   // Setup Plotly 2D highlight feature
   setupPlotlyHighlight();
 

@@ -1,11 +1,23 @@
-# Load required libraries for global scope
+# Packages of the app
+library(shiny)
+library(shinyjs)
+library(DT)
+library(plotly)
 library(memoise)
 library(bslib)
 library(fontawesome)
 suppressPackageStartupMessages(library(conflicted))
+suppressPackageStartupMessages(library(tidyverse))
+library(later)
+library(writexl)
 
-# Resolve namespace conflicts BEFORE sourcing function files
-suppressMessages(conflict_prefer("layout", "plotly"))
+# Resolve namespace conflicts before sourcing the function files
+suppressMessages({
+  conflict_prefer("filter", "dplyr")
+  conflict_prefer("lag", "dplyr")
+  conflict_prefer("show", "methods")
+  conflict_prefer("layout", "plotly")
+})
 
 # Source data column config first - other function files rely on
 # get_data_column()/get_data_label() and the vocabulary/ordering helpers.

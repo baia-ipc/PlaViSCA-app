@@ -1,6 +1,6 @@
 # Keeping tabs in sync, and cache keys for per-session data caches.
 
-# Cache key generator
+# Cache key made of the given values (vectors are sorted and joined).
 make_cache_key <- function(...) {
     args <- list(...)
     parts <- lapply(args, function(x) {
@@ -15,87 +15,22 @@ make_cache_key <- function(...) {
     paste(parts, collapse = "__")
 }
 
-# Create a cache key for filtered gene expression inputs
-filtered_gene_exp_cache_key <- function(input) {
-    get_field <- function(name) {
-        if (is.null(input)) {
-            return(NULL)
+# The Embeddings and Gene expression tabs each have a "Data type" control
+# (data_type, data_type_exp): a change on the tab being viewed is copied to
+# the other tab. A change on the Gene expression tab sets `global_loading`
+# for 1.5 s, while the data are reloaded.
+sync_data_type_controls <- function(input, session, global_loading) {
+    observeEvent(input$data_type, {
+        if (identical(input$tabset, "Embeddings")) {
+            updateRadioButtons(session, "data_type_exp", selected = input$data_type)
         }
-        if (is.list(input) && !is.null(input[[name]])) {
-            return(input[[name]])
+    }, ignoreInit = TRUE)
+
+    observeEvent(input$data_type_exp, {
+        if (identical(input$tabset, "Gene expression")) {
+            global_loading(TRUE)
+            updateRadioButtons(session, "data_type", selected = input$data_type_exp)
+            later(function() global_loading(FALSE), 1.5)
         }
-        tryCatch(
-            input[[name]],
-            error = function(e) NULL
-        )
-    }
-
-    do.call(
-        make_cache_key,
-        c(
-            list("filtered_gene_exp"),
-            lapply(paste0(FILTER_FIELDS, "_gex"), get_field),
-            list(get_field("data_type_exp"), get_field("embedding"))
-        )
-    )
-}
-
-# Helper function to sync data types between tabs
-sync_data_type <- function(
-  session,
-  from_input,
-  to_input,
-  new_value,
-  global_loading,
-  delay = 1.5
-) {
-    global_loading(TRUE)
-    updateRadioButtons(
-        session,
-        to_input,
-        selected = new_value
-    )
-    later(
-        function() {
-            tryCatch(
-                {
-                    global_loading(FALSE)
-                },
-                error = function(e) {
-                    # Silent error handling
-                }
-            )
-        },
-        delay
-    )
-}
-
-# Helper function to create data type
-create_data_type_sync_observer <- function(
-  input,
-  session,
-  input_name,
-  target_input,
-  expected_tabset,
-  global_loading
-) {
-    observeEvent(
-        input[[input_name]],
-        {
-            if (
-                !is.null(input[[input_name]]) &&
-                    !is.null(input$tabset) &&
-                    input$tabset == expected_tabset
-            ) {
-                sync_data_type(
-                    session = session,
-                    from_input = input_name,
-                    to_input = target_input,
-                    new_value = input[[input_name]],
-                    global_loading = global_loading
-                )
-            }
-        },
-        ignoreInit = TRUE
-    )
+    }, ignoreInit = TRUE)
 }
