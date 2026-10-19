@@ -33,6 +33,8 @@ from pathlib import Path
 import yaml
 from playwright.sync_api import sync_playwright
 
+from PIL import Image
+
 from compose_figures import compose_figure
 
 APP_DIR = Path(__file__).resolve().parents[2]
@@ -107,6 +109,14 @@ def wait_until_drawn(page, timeout):
         timeout=timeout * 1000, polling=500)
 
 
+def crop_image(path, crop, scale):
+    """Cut {top, bottom, left, right} CSS pixels off the edges of the image."""
+    image = Image.open(path)
+    cut = {side: round(crop.get(side, 0) * scale) for side in ("top", "bottom", "left", "right")}
+    image.crop((cut["left"], cut["top"], image.width - cut["right"],
+                image.height - cut["bottom"])).save(path)
+
+
 def take_shot(page, shot, settings, out):
     """Open the shot's tab, perform its steps and save the screenshot to out."""
     if "tab" in shot:
@@ -121,6 +131,8 @@ def take_shot(page, shot, settings, out):
         page.locator(shot["element"]).first.screenshot(path=out)
     else:
         page.screenshot(path=out, full_page=shot.get("full_page", False))
+    if "crop" in shot:
+        crop_image(out, shot["crop"], settings["scale"])
     print(f"{shot['name']}: {out}")
 
 

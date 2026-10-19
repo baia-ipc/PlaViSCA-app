@@ -66,7 +66,8 @@ shots:
 Other steps: `wait: <seconds>`, `wait_for: <selector>` (until visible) and
 `js: <JavaScript>`. By default the whole window is captured; `element:
 <selector>` captures one element only (e.g. a card), and `full_page: true` the
-whole scrollable page. Output paths are relative to the app directory.
+whole scrollable page. `crop: {bottom: 110}` cuts CSS pixels off the edges of
+the screenshot (`top`, `bottom`, `left`, `right`). Output paths are relative to the app directory.
 
 A shot without `output` is a panel of a figure. The `figures:` section
 composes panels into one multi-panel image, one list of shot names per row;
