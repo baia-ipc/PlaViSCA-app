@@ -89,3 +89,19 @@ test_that_("the expression tables carry every required metadata column", {
         "required metadata columns missing from normalize_df"
     )
 })
+
+test_that_("switching the gene menu between names and IDs keeps the selection", {
+    if (!exists("convert_gene_selection")) skip_test("gene helpers not loaded")
+    genes_df <- data.frame(
+        gene = c("PVP01_0835600", "PVP01_0602100", "PVP01_0602200", "PVP01_0000100"),
+        name = c("CSP", "ETRAMP (PVP01_0602100)", "ETRAMP (PVP01_0602200)", "PVP01_0000100")
+    )
+    expect_equal_(convert_gene_selection(c("CSP", "ETRAMP (PVP01_0602100)"), genes_df, TRUE),
+        c("PVP01_0835600", "PVP01_0602100"), "names to IDs, shared names included")
+    expect_equal_(convert_gene_selection(c("PVP01_0835600", "PVP01_0602200", "PVP01_0000100"), genes_df, FALSE),
+        c("CSP", "ETRAMP (PVP01_0602200)", "PVP01_0000100"), "IDs to names; a gene without a name keeps its ID")
+    expect_equal_(convert_gene_selection(c("CSP", "PVP01_0000100"), genes_df, FALSE), c("CSP", "PVP01_0000100"),
+        "values already in the target form are kept")
+    expect_equal_(convert_gene_selection(c("unknown", ""), genes_df, TRUE), character(0), "unknown genes dropped")
+    expect_equal_(convert_gene_selection(NULL, genes_df, TRUE), character(0), "empty selection")
+})

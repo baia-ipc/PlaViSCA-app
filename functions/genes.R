@@ -63,3 +63,24 @@ get_gene_id <- function(gene_name, gene_names) {
         unname(gene_map[name])
     }, USE.NAMES = FALSE)
 }
+
+# Selected genes after the menu switches between gene names and IDs
+# (`to_ids`): names become their IDs, IDs become their names. A gene without
+# a name in the menu keeps its ID; values that are not genes of `genes_df`
+# are dropped.
+convert_gene_selection <- function(selected, genes_df, to_ids) {
+    selected <- as.character(selected)
+    selected <- selected[!is.na(selected) & nzchar(selected)]
+    if (length(selected) == 0 || is.null(genes_df) || nrow(genes_df) == 0) {
+        return(character(0))
+    }
+    id_of <- c(setNames(genes_df$gene, genes_df$name), setNames(genes_df$gene, genes_df$gene))
+    ids <- unname(id_of[selected])
+    ids <- unique(ids[!is.na(ids)])
+    if (to_ids) {
+        return(ids)
+    }
+    names <- genes_df$name[match(ids, genes_df$gene)]
+    unnamed <- is.na(names) | grepl("^PVP01", names)
+    ifelse(unnamed, ids, names)
+}

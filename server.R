@@ -1247,8 +1247,9 @@ server <- function(input, output, session) {
             return()
           }
 
-          # Store current selection before updating choices
-          current_selection <- input$genes_n
+          # Keep the selection, as names or IDs like the menu
+          current_selection <- convert_gene_selection(input$genes_n, genes_df, isTRUE(input$check))
+          gene_choices <- c(gene_choices, setdiff(current_selection, gene_choices))
 
           # If color by genes is selected and no gene is chosen, pick a default
           if (is.null(current_selection) || length(current_selection) == 0) {
@@ -1424,8 +1425,12 @@ server <- function(input, output, session) {
     req(isTRUE(comparison_mode()), identical(input$color_first_comp, "genes"), gene_data()$genes)
     tryCatch(
       {
-        choices <- get_gene_choices(gene_data()$genes, isTRUE(input$check_first_comp))
-        updateSelectizeInput(session, "genes_n_first_comp", choices = choices, selected = input$genes_n_first_comp, server = TRUE)
+        genes_df <- gene_data()$genes
+        # Keep the selection, as names or IDs like the menu
+        selected <- convert_gene_selection(input$genes_n_first_comp, genes_df, isTRUE(input$check_first_comp))
+        choices <- get_gene_choices(genes_df, isTRUE(input$check_first_comp))
+        choices <- c(choices, setdiff(selected, choices))
+        updateSelectizeInput(session, "genes_n_first_comp", choices = choices, selected = selected, server = TRUE)
       },
       error = function(e) {}
     )
@@ -1885,10 +1890,13 @@ server <- function(input, output, session) {
 
       # If using genes, copy gene selection
       if (!is.null(input$color) && input$color == "genes" && !is.null(input$genes_n) && length(input$genes_n) > 0) {
-        current_genes <- input$genes_n
+        # as names or IDs, like each comparison menu
+        genes_df <- gene_data()$genes
+        genes_a <- convert_gene_selection(input$genes_n, genes_df, isTRUE(input$check_first_comp))
+        genes_b <- convert_gene_selection(input$genes_n, genes_df, isTRUE(input$check_second))
         later(function() {
-          updateSelectizeInput(session, "genes_n_first_comp", selected = current_genes)
-          updateSelectizeInput(session, "genes_second", selected = current_genes)
+          updateSelectizeInput(session, "genes_n_first_comp", selected = genes_a)
+          updateSelectizeInput(session, "genes_second", selected = genes_b)
         }, 0.2)
       }
     } else {
@@ -1951,8 +1959,9 @@ server <- function(input, output, session) {
             return()
           }
 
-          # Store current selection before updating choices
-          current_selection_second <- input$genes_second
+          # Keep the selection, as names or IDs like the menu
+          current_selection_second <- convert_gene_selection(input$genes_second, genes_df, isTRUE(input$check_second))
+          gene_choices <- c(gene_choices, setdiff(current_selection_second, gene_choices))
 
           updateSelectizeInput(
             session,
