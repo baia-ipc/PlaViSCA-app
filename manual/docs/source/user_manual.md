@@ -93,9 +93,9 @@ The Gene Expression tab provides an interactive interface for exploring gene exp
 - **Gene Search**: Toggle between Gene Name and Gene ID search using the switch in each panel.
 - **Gene Selection**: Select up to 10 genes per panel.
 - **Group by**: Organize expression by Study label, Broad life-cycle stage, Life-cycle stage, Host species, or Treatment.
-- **Plot**: the first menu of each panel; the options below it depend on the plot:
+- **Plot type**: the first menu of each panel; the options below it depend on the plot type:
 
-  | Plot | What it shows | Options |
+  | Plot type | What it shows | Options |
   |---|---|---|
   | Violin plot, Box plot | the expression of each cell, per group | **Split by**: a second field, drawn side by side in its colours; **Combine genes**: with several genes, their *Mean* or *Sum* in each cell, or *Each gene separately* (one row per gene) |
   | Cleveland dot plot | one point per group and gene, one row per gene | **Value**; **Points by**: one point per value of a second field (Study label by default), side by side |

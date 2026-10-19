@@ -2,6 +2,10 @@
 # of the plot type (GENE_PLOT_OPTIONS in functions/plots_gene_expression.R),
 # the plot and its buttons. Card `i` has the input IDs <name>_exp_<i>.
 
+# Menus open on top of the page, not inside the card, so that the next row of
+# menus does not cover them.
+DROPDOWN_ON_BODY <- list(dropdownParent = "body")
+
 gene_expression_card <- function(i) {
   card(
     class = "shadow-sm mb-3",
@@ -11,11 +15,12 @@ gene_expression_card <- function(i) {
         class = "g-1 align-items-end",
         column(
           width = 4,
-          selectInput(
+          selectizeInput(
             paste0("plot_type_exp_", i),
-            tags$span("Plot", class = "small fw-semibold"),
+            tags$span("Plot type", class = "small fw-semibold"),
             choices = GENE_PLOT_TYPES,
-            width = "100%"
+            width = "100%",
+            options = DROPDOWN_ON_BODY
           )
         ),
         column(width = 6, gene_select(i)),
@@ -50,7 +55,7 @@ gene_select <- function(i) {
       label = "Gene(s) name",
       choices = NULL,
       multiple = TRUE,
-      options = list(maxItems = 10, placeholder = "Search genes...", dropdownParent = "body")
+      options = c(list(maxItems = 10, placeholder = "Search genes..."), DROPDOWN_ON_BODY)
     )
   )
 }
@@ -76,8 +81,9 @@ gene_links <- function(i) {
 # types that use it.
 gene_plot_options_row <- function(i) {
   field <- function(name, label, choices, selected) {
-    selectInput(paste0(name, "_exp_", i), tags$span(label, class = "small fw-semibold"),
-                choices = choices, selected = selected, width = "100%")
+    selectizeInput(paste0(name, "_exp_", i), tags$span(label, class = "small fw-semibold"),
+                   choices = choices, selected = selected, width = "100%",
+                   options = DROPDOWN_ON_BODY)
   }
   split_choices <- c("None" = NO_SPLIT, group_choices)
   fluidRow(
