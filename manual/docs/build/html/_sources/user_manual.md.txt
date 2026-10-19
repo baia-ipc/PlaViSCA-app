@@ -16,8 +16,8 @@ PlaViSca is a single page: a top bar with the application name and the Institut 
 
 - **Embeddings**
 - **Gene Expression**
-- **Plots**: charts of the cell metadata
-- **Data table**: one row per cell with its metadata
+- **Metadata plots**: charts of the cell metadata
+- **Metadata table**: one row per cell with its metadata
 - **QC Plots**
 - **Data Sources**
 - **Code**: opens the source code of the app on GitHub, in a new browser tab
@@ -26,7 +26,7 @@ PlaViSca is a single page: a top bar with the application name and the Institut 
 
 The app opens on the Embeddings tab, over an animated particle background.
 
-All data tabs (Embeddings, Gene Expression, Plots, Data table, QC Plots) share a common **Filters** row at the top with the following fields:
+All data tabs (Embeddings, Gene Expression, Metadata plots, Metadata table, QC Plots) share a common **Filters** row at the top with the following fields:
 
 | Filter field | Description |
 |---|---|
@@ -97,12 +97,12 @@ The Gene Expression tab provides an interactive interface for exploring gene exp
 - **Annotations**: Direct links to PlasmoDB and NCBI per gene (supports multiple tabs for multi-gene selections).
 - **Download**: Export per-panel expression data as an `.xlsx` file containing an Expression Data sheet and a Metadata sheet.
 
-### Plots
+### Metadata plots
 
-![Figure 5: Plots tab](imgs/plots.png)
-**Figure 5**: Plots tab
+![Figure 5: Metadata plots tab](imgs/plots.png)
+**Figure 5**: Metadata plots tab
 
-The Plots tab counts the selected cells by one or two metadata fields and draws the counts as the plot you choose (**Figure 5**). Changing the filters updates the value boxes and the plot.
+The Metadata plots tab counts the selected cells by one or two metadata fields and draws the counts as the plot you choose (**Figure 5**). Changing the filters updates the value boxes and the plots.
 
 **Summary value boxes:**
 
@@ -112,14 +112,14 @@ The Plots tab counts the selected cells by one or two metadata fields and draws 
 | Studies       | Number of distinct studies represented |
 | Host Species  | Number of distinct host species        |
 
-**Plot builder.** Four controls above the plot choose what it shows:
+**Plots.** Each plot sits in a panel taking half the width of the page. Choose the plot type first; it decides whether the cells are counted by one field or by two:
 
 | Control | What it does |
 |---|---|
-| **Count cells by** | the field to count the cells by, e.g. Study label or Life-cycle stage |
-| **Split by** | optionally, a second field that splits each group of cells, e.g. the life-cycle stages within each study; "Nothing" counts by one field only |
-| **Plot type** | with one field: bar chart or pie chart. With two fields: stacked bars, grouped bars, heatmap, sunburst, or one pie per group (up to 12 groups) |
-| **Show** | numbers of cells, or percentages. With one field, a percentage is the share of all selected cells; with two fields, the share of the cells with the same value of the first field (each bar of a stacked bar chart then adds up to 100%) |
+| **Plot type** | for one field: bar chart or pie chart. For two fields: stacked bars, grouped bars, heatmap, sunburst, or one pie per group (up to 12 groups) |
+| **Count by** | the field to count the cells by, e.g. Study label or Life-cycle stage |
+| **Split by** | only for the plot types of two fields: the second field, which splits each group of cells, e.g. the life-cycle stages within each study |
+| **Cells / % of cells** | below the plot: numbers of cells, or percentages. With one field, a percentage is the share of all selected cells; with two fields, the share of the cells with the same value of the first field (each bar of a stacked bar chart then adds up to 100%) |
 
 The two-field plot types show the same counts in different ways:
 
@@ -131,18 +131,20 @@ The two-field plot types show the same counts in different ways:
 
 Below the plot are the descriptions of the chosen fields and **Export .csv**, which saves the counts shown in the plot as a table.
 
-*Example: compare the life-cycle stages of the studies.* Choose **Count cells by** "Study label", **Split by** "Life-cycle stage", **Plot type** "Stacked bars" and **Show** "% of cells". Each bar is one study, divided into its stages. Switch to "Heatmap" to read the exact percentages.
+**More plots.** Click **+** below the last plot to add another one next to it (two per row), and **−** to remove a plot. Each plot has its own controls; all of them use the same filters.
+
+*Example: compare the life-cycle stages of the studies.* Choose **Plot type** "Stacked bars", **Count by** "Study label", **Split by** "Life-cycle stage" and "% of cells". Each bar is one study, divided into its stages. Click **+** and choose "Heatmap" with the same fields in the new plot to read the exact percentages next to it.
 
 > **Note:** Blood-stage cells get the life-cycle stage inferred by PlaViSca: the gametocyte call of the cell's cluster, otherwise the most similar reference time point. Sporozoites and liver stages, which PlaViSca does not classify, keep the authors' labels. The field "Source of the life-cycle stage" says which one a cell's stage comes from. The authors' labels remain available for comparison ("Life-cycle stage (authors)", "Gametocyte sex (authors)"): split one by the other to compare them.
 
-The settings panel (cog button) has one option, **Show missing**: untick it to leave out of the plot the cells whose value is missing.
+The settings panel (cog button) has one option, **Show missing**: untick it to leave out of all plots the cells whose value is missing.
 
 Hover over the plot for details; use the controls in its top-right corner to zoom, pan or download it (as PNG or SVG).
 
-### Data table
+### Metadata table
 
-![Figure 6: Data table tab](imgs/data_table.png)
-**Figure 6**: Data table tab
+![Figure 6: Metadata table tab](imgs/data_table.png)
+**Figure 6**: Metadata table tab
 
 One row per cell: the cell ID, study, SRA run and the authors' cell ID (missing for Hazzard2022, whose cells were called by PlaViSca), then the host and tissue, strain and origin, treatment, life-cycle stage (and the authors' stage), reference time point, gametocyte calls, biological replicate, day post infection, technology, sequencer and counts. Search globally or filter by column, and export the table as CSV.
 

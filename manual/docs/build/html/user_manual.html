@@ -48,8 +48,8 @@
 <li class="toctree-l2"><a class="reference internal" href="#overview-of-plavisca-features">Overview of PlaViSca Features</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#embeddings">Embeddings</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#gene-expression">Gene Expression</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#plots">Plots</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#data-table">Data table</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#metadata-plots">Metadata plots</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#metadata-table">Metadata table</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#qc-plots">QC Plots</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#data-sources">Data Sources</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#about">About</a></li>
@@ -117,8 +117,8 @@
 <ul class="simple">
 <li><p><strong>Embeddings</strong></p></li>
 <li><p><strong>Gene Expression</strong></p></li>
-<li><p><strong>Plots</strong>: charts of the cell metadata</p></li>
-<li><p><strong>Data table</strong>: one row per cell with its metadata</p></li>
+<li><p><strong>Metadata plots</strong>: charts of the cell metadata</p></li>
+<li><p><strong>Metadata table</strong>: one row per cell with its metadata</p></li>
 <li><p><strong>QC Plots</strong></p></li>
 <li><p><strong>Data Sources</strong></p></li>
 <li><p><strong>Code</strong>: opens the source code of the app on GitHub, in a new browser tab</p></li>
@@ -126,7 +126,7 @@
 <li><p><strong>About</strong>: the project, its team and how to get involved</p></li>
 </ul>
 <p>The app opens on the Embeddings tab, over an animated particle background.</p>
-<p>All data tabs (Embeddings, Gene Expression, Plots, Data table, QC Plots) share a common <strong>Filters</strong> row at the top with the following fields:</p>
+<p>All data tabs (Embeddings, Gene Expression, Metadata plots, Metadata table, QC Plots) share a common <strong>Filters</strong> row at the top with the following fields:</p>
 <table class="docutils align-default">
 <thead>
 <tr class="row-odd"><th class="head"><p>Filter field</p></th>
@@ -223,11 +223,11 @@
 <li><p><strong>Download</strong>: Export per-panel expression data as an <code class="docutils literal notranslate"><span class="pre">.xlsx</span></code> file containing an Expression Data sheet and a Metadata sheet.</p></li>
 </ul>
 </section>
-<section id="plots">
-<h3>Plots<a class="headerlink" href="#plots" title="Link to this heading"></a></h3>
-<p><img alt="Figure 5: Plots tab" src="_images/plots.png" />
-<strong>Figure 5</strong>: Plots tab</p>
-<p>The Plots tab counts the selected cells by one or two metadata fields and draws the counts as the plot you choose (<strong>Figure 5</strong>). Changing the filters updates the value boxes and the plot.</p>
+<section id="metadata-plots">
+<h3>Metadata plots<a class="headerlink" href="#metadata-plots" title="Link to this heading"></a></h3>
+<p><img alt="Figure 5: Metadata plots tab" src="_images/plots.png" />
+<strong>Figure 5</strong>: Metadata plots tab</p>
+<p>The Metadata plots tab counts the selected cells by one or two metadata fields and draws the counts as the plot you choose (<strong>Figure 5</strong>). Changing the filters updates the value boxes and the plots.</p>
 <p><strong>Summary value boxes:</strong></p>
 <table class="docutils align-default">
 <thead>
@@ -247,7 +247,7 @@
 </tr>
 </tbody>
 </table>
-<p><strong>Plot builder.</strong> Four controls above the plot choose what it shows:</p>
+<p><strong>Plots.</strong> Each plot sits in a panel taking half the width of the page. Choose the plot type first; it decides whether the cells are counted by one field or by two:</p>
 <table class="docutils align-default">
 <thead>
 <tr class="row-odd"><th class="head"><p>Control</p></th>
@@ -255,17 +255,17 @@
 </tr>
 </thead>
 <tbody>
-<tr class="row-even"><td><p><strong>Count cells by</strong></p></td>
+<tr class="row-even"><td><p><strong>Plot type</strong></p></td>
+<td><p>for one field: bar chart or pie chart. For two fields: stacked bars, grouped bars, heatmap, sunburst, or one pie per group (up to 12 groups)</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Count by</strong></p></td>
 <td><p>the field to count the cells by, e.g. Study label or Life-cycle stage</p></td>
 </tr>
-<tr class="row-odd"><td><p><strong>Split by</strong></p></td>
-<td><p>optionally, a second field that splits each group of cells, e.g. the life-cycle stages within each study; “Nothing” counts by one field only</p></td>
+<tr class="row-even"><td><p><strong>Split by</strong></p></td>
+<td><p>only for the plot types of two fields: the second field, which splits each group of cells, e.g. the life-cycle stages within each study</p></td>
 </tr>
-<tr class="row-even"><td><p><strong>Plot type</strong></p></td>
-<td><p>with one field: bar chart or pie chart. With two fields: stacked bars, grouped bars, heatmap, sunburst, or one pie per group (up to 12 groups)</p></td>
-</tr>
-<tr class="row-odd"><td><p><strong>Show</strong></p></td>
-<td><p>numbers of cells, or percentages. With one field, a percentage is the share of all selected cells; with two fields, the share of the cells with the same value of the first field (each bar of a stacked bar chart then adds up to 100%)</p></td>
+<tr class="row-odd"><td><p><strong>Cells / % of cells</strong></p></td>
+<td><p>below the plot: numbers of cells, or percentages. With one field, a percentage is the share of all selected cells; with two fields, the share of the cells with the same value of the first field (each bar of a stacked bar chart then adds up to 100%)</p></td>
 </tr>
 </tbody>
 </table>
@@ -278,17 +278,18 @@
 <li><p><strong>One pie per group</strong>: one pie for each value of the first field.</p></li>
 </ul>
 <p>Below the plot are the descriptions of the chosen fields and <strong>Export .csv</strong>, which saves the counts shown in the plot as a table.</p>
-<p><em>Example: compare the life-cycle stages of the studies.</em> Choose <strong>Count cells by</strong> “Study label”, <strong>Split by</strong> “Life-cycle stage”, <strong>Plot type</strong> “Stacked bars” and <strong>Show</strong> “% of cells”. Each bar is one study, divided into its stages. Switch to “Heatmap” to read the exact percentages.</p>
+<p><strong>More plots.</strong> Click <strong>+</strong> below the last plot to add another one next to it (two per row), and <strong>−</strong> to remove a plot. Each plot has its own controls; all of them use the same filters.</p>
+<p><em>Example: compare the life-cycle stages of the studies.</em> Choose <strong>Plot type</strong> “Stacked bars”, <strong>Count by</strong> “Study label”, <strong>Split by</strong> “Life-cycle stage” and “% of cells”. Each bar is one study, divided into its stages. Click <strong>+</strong> and choose “Heatmap” with the same fields in the new plot to read the exact percentages next to it.</p>
 <blockquote>
 <div><p><strong>Note:</strong> Blood-stage cells get the life-cycle stage inferred by PlaViSca: the gametocyte call of the cell’s cluster, otherwise the most similar reference time point. Sporozoites and liver stages, which PlaViSca does not classify, keep the authors’ labels. The field “Source of the life-cycle stage” says which one a cell’s stage comes from. The authors’ labels remain available for comparison (“Life-cycle stage (authors)”, “Gametocyte sex (authors)”): split one by the other to compare them.</p>
 </div></blockquote>
-<p>The settings panel (cog button) has one option, <strong>Show missing</strong>: untick it to leave out of the plot the cells whose value is missing.</p>
+<p>The settings panel (cog button) has one option, <strong>Show missing</strong>: untick it to leave out of all plots the cells whose value is missing.</p>
 <p>Hover over the plot for details; use the controls in its top-right corner to zoom, pan or download it (as PNG or SVG).</p>
 </section>
-<section id="data-table">
-<h3>Data table<a class="headerlink" href="#data-table" title="Link to this heading"></a></h3>
-<p><img alt="Figure 6: Data table tab" src="_images/data_table.png" />
-<strong>Figure 6</strong>: Data table tab</p>
+<section id="metadata-table">
+<h3>Metadata table<a class="headerlink" href="#metadata-table" title="Link to this heading"></a></h3>
+<p><img alt="Figure 6: Metadata table tab" src="_images/data_table.png" />
+<strong>Figure 6</strong>: Metadata table tab</p>
 <p>One row per cell: the cell ID, study, SRA run and the authors’ cell ID (missing for Hazzard2022, whose cells were called by PlaViSca), then the host and tissue, strain and origin, treatment, life-cycle stage (and the authors’ stage), reference time point, gametocyte calls, biological replicate, day post infection, technology, sequencer and counts. Search globally or filter by column, and export the table as CSV.</p>
 </section>
 <section id="qc-plots">
