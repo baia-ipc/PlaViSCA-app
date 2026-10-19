@@ -77,7 +77,7 @@ The Embeddings tab offers dimensionality reduction and customizable visualizatio
 
 **Color by** (in the title bar of the plot): **Genes ▸** (first in the menu), Study label, Broad life-cycle stage, Life-cycle stage, Host species, Host and tissue, Treatment, Parasite strain / isolate, Parasite origin location, or Single-cell technology (default: Life-cycle stage). With Genes, a row with the gene menu (and, for several genes, **Combine genes**) appears above the plot, under its title bar.
 
-**Coloring by genes**: with **Color by** set to *Genes*, select up to 10 genes by name, or by ID with the switch next to the menu (switching keeps the selected genes). With more than one gene, **Combine genes** sets how they color the cells:
+**Coloring by genes**: with **Color by** set to *Genes*, select up to 10 genes by name, or by ID with the switch next to the menu (switching keeps the selected genes). With one gene selected, the buttons at the end of the row open its PlasmoDB and NCBI pages. With more than one gene, **Combine genes** sets how they color the cells:
 
 | Combine genes | Color of a cell |
 |---|---|
@@ -131,7 +131,7 @@ The Gene Expression tab provides an interactive interface for exploring gene exp
   In the dot plots and the heatmap, groups with fewer cells than **Min. cells per group** (in the settings panel, 20 by default) and cells with a missing value are left out.
 
   Example: select DBP, CSP and AMA1, choose the Cleveland dot plot and group by Life-cycle stage, to see whether each study detects the genes in the same stages.
-- **Annotations**: Direct links to PlasmoDB and NCBI per gene (supports multiple tabs for multi-gene selections).
+- **Annotations**: with one gene selected, buttons next to the gene menu open its PlasmoDB and NCBI pages (hidden while several genes are selected).
 - **Download**: Export per-panel expression data as an `.xlsx` file containing an Expression Data sheet and a Metadata sheet.
 
 ### Metadata plots
