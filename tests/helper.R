@@ -1,4 +1,4 @@
-# Minimal test harness for the PlaViSca app.
+# Minimal test harness for the PlaViSCA app.
 # =============================================================================
 # Deliberately dependency-free (no testthat): not every environment the app
 # runs in has a test framework, and the checks here are simple assertions

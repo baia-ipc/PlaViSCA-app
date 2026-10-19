@@ -59,7 +59,7 @@ missing_files <- Filter(function(p) !file.exists(p), unlist(DATA_PATHS))
 if (length(missing_files) > 0) {
   stop(sprintf(
     paste0(
-      "PlaViSca cannot start: the following data file(s) are missing from ",
+      "PlaViSCA cannot start: the following data file(s) are missing from ",
       "PLAVISCA_DATA_DIR ('%s'):\n  - %s\n",
       "Set PLAVISCA_DATA_DIR to the app_data directory written by the ",
       "preprocessing pipeline."

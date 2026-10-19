@@ -359,7 +359,7 @@ validate_data_columns <- function(df, stop_on_error = TRUE) {
 
     if (length(problems) > 0 && stop_on_error) {
         stop(sprintf(
-            "PlaViSca: the data do not match %s:\n  - %s",
+            "PlaViSCA: the data do not match %s:\n  - %s",
             .data_columns_config_path(), paste(problems, collapse = "\n  - ")
         ), call. = FALSE)
     }

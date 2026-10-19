@@ -323,7 +323,7 @@ server <- function(input, output, session) {
         type = "error", duration = NULL
       )
       warning(sprintf(
-        "PlaViSca filter population: missing configured columns: %s",
+        "PlaViSCA filter population: missing configured columns: %s",
         paste(missing_columns, collapse = ", ")
       ))
     }

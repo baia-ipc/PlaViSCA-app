@@ -48,11 +48,11 @@ test_that_("IDC uncertainty companion fields are retained and configured", {
     }
 })
 
-test_that_("the stage of the reference time point is attributed to PlaViSca", {
+test_that_("the stage of the reference time point is attributed to PlaViSCA", {
     help <- get_data_help("idc_heuristic_stage_bin")
     expect_true_(
-        !is.null(help) && grepl("defined by PlaViSca", help, fixed = TRUE),
-        "the help text must say that the time point stages are a PlaViSca choice"
+        !is.null(help) && grepl("defined by PlaViSCA", help, fixed = TRUE),
+        "the help text must say that the time point stages are a PlaViSCA choice"
     )
 })
 

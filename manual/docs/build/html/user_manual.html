@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>User Manual &mdash; PlaViSca</title>
+  <title>User Manual &mdash; PlaViSCA</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
 
@@ -20,7 +20,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Setup Guide" href="setup_guide.html" />
-    <link rel="prev" title="Welcome to PlaViSca" href="index.html" /> 
+    <link rel="prev" title="Welcome to PlaViSCA" href="index.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -32,7 +32,7 @@
           
           
           <a href="index.html" class="icon icon-home">
-            PlaViSca
+            PlaViSCA
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -45,7 +45,7 @@
               <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">User Manual</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#overview-of-plavisca-features">Overview of PlaViSca Features</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#overview-of-plavisca-features">Overview of PlaViSCA Features</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#embeddings">Embeddings</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#gene-expression">Gene Expression</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#metadata-plots">Metadata plots</a></li>
@@ -82,7 +82,7 @@
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="index.html">PlaViSca</a>
+          <a href="index.html">PlaViSCA</a>
       </nav>
 
       <div class="wy-nav-content">
@@ -102,7 +102,7 @@
              
   <section id="user-manual">
 <h1>User Manual<a class="headerlink" href="#user-manual" title="Link to this heading"></a></h1>
-<p>Welcome to PlaViSca, an interactive web application for exploring single-cell RNA-seq data from <em>Plasmodium vivax</em>. This manual provides comprehensive guidance on navigating and utilizing the application’s features for malaria research.</p>
+<p>Welcome to PlaViSCA, an interactive web application for exploring single-cell RNA-seq data from <em>Plasmodium vivax</em>. This manual provides comprehensive guidance on navigating and utilizing the application’s features for malaria research.</p>
 <p><strong>Quick Start:</strong></p>
 <ol class="arabic simple">
 <li><p>Open the <strong>Filters</strong> box on any tab to focus on relevant samples</p></li>
@@ -110,10 +110,10 @@
 <li><p>Compare multiple genes in the <strong>Gene Expression</strong> tab</p></li>
 <li><p>Download plots and data for external analysis</p></li>
 </ol>
-<p><strong>Data Integration</strong>: PlaViSca brings together about 106,000 cells from six published studies, processed with one preprocessing pipeline. See the Data Processing Pipeline section for details.</p>
+<p><strong>Data Integration</strong>: PlaViSCA brings together about 106,000 cells from six published studies, processed with one preprocessing pipeline. See the Data Processing Pipeline section for details.</p>
 <section id="overview-of-plavisca-features">
-<h2>Overview of PlaViSca Features<a class="headerlink" href="#overview-of-plavisca-features" title="Link to this heading"></a></h2>
-<p>PlaViSca is a single page: a top bar with the application name and the Institut Pasteur du Cambodge (IPC) and BAIA logos, and below it a row of tabs, each focusing on one aspect of the data:</p>
+<h2>Overview of PlaViSCA Features<a class="headerlink" href="#overview-of-plavisca-features" title="Link to this heading"></a></h2>
+<p>PlaViSCA is a single page: a top bar with the application name and the Institut Pasteur du Cambodge (IPC) and BAIA logos, and below it a row of tabs, each focusing on one aspect of the data:</p>
 <ul class="simple">
 <li><p><strong>Embeddings</strong></p></li>
 <li><p><strong>Gene Expression</strong></p></li>
@@ -331,7 +331,7 @@
 <p><strong>More plots.</strong> Click <strong>+</strong> below the last plot to add another one next to it (two per row), and <strong>−</strong> to remove a plot. Each plot has its own controls; all of them use the same filters.</p>
 <p><em>Example: compare the life-cycle stages of the studies.</em> Choose <strong>Plot type</strong> “Stacked bars”, <strong>Count by</strong> “Study label”, <strong>Split by</strong> “Life-cycle stage” and “% of cells”. Each bar is one study, divided into its stages. Click <strong>+</strong> and choose “Heatmap” with the same fields in the new plot to read the exact percentages next to it.</p>
 <blockquote>
-<div><p><strong>Note:</strong> Blood-stage cells get the life-cycle stage inferred by PlaViSca: the gametocyte call of the cell’s cluster, otherwise the most similar reference time point. Sporozoites and liver stages, which PlaViSca does not classify, keep the authors’ labels. The field “Source of the life-cycle stage” says which one a cell’s stage comes from. The authors’ labels remain available for comparison (“Life-cycle stage (authors)”, “Gametocyte sex (authors)”): split one by the other to compare them.</p>
+<div><p><strong>Note:</strong> Blood-stage cells get the life-cycle stage inferred by PlaViSCA: the gametocyte call of the cell’s cluster, otherwise the most similar reference time point. Sporozoites and liver stages, which PlaViSCA does not classify, keep the authors’ labels. The field “Source of the life-cycle stage” says which one a cell’s stage comes from. The authors’ labels remain available for comparison (“Life-cycle stage (authors)”, “Gametocyte sex (authors)”): split one by the other to compare them.</p>
 </div></blockquote>
 <p>The settings panel (cog button) has one option, <strong>Show missing</strong>: untick it to leave out of all plots the cells whose value is missing.</p>
 <p>Hover over the plot for details; use the controls in its top-right corner to zoom, pan or download it (as PNG or SVG).</p>
@@ -340,7 +340,7 @@
 <h3>Metadata table<a class="headerlink" href="#metadata-table" title="Link to this heading"></a></h3>
 <p><img alt="Figure 6: Metadata table tab" src="_images/data_table.png" />
 <strong>Figure 6</strong>: Metadata table tab</p>
-<p>One row per cell: the cell ID, study, SRA run and the authors’ cell ID (missing for Hazzard2022, whose cells were called by PlaViSca), then the host and tissue, strain and origin, treatment, life-cycle stage (and the authors’ stage), reference time point, gametocyte calls, biological replicate, day post infection, technology, sequencer and counts. Search globally or filter by column, and export the table as CSV.</p>
+<p>One row per cell: the cell ID, study, SRA run and the authors’ cell ID (missing for Hazzard2022, whose cells were called by PlaViSCA), then the host and tissue, strain and origin, treatment, life-cycle stage (and the authors’ stage), reference time point, gametocyte calls, biological replicate, day post infection, technology, sequencer and counts. Search globally or filter by column, and export the table as CSV.</p>
 </section>
 <section id="qc-plots">
 <h3>QC Plots<a class="headerlink" href="#qc-plots" title="Link to this heading"></a></h3>
@@ -379,16 +379,16 @@
 <h3>Data Sources<a class="headerlink" href="#data-sources" title="Link to this heading"></a></h3>
 <p><img alt="Figure 8: Data sources tab" src="_images/data_source.png" />
 <strong>Figure 8</strong>: Data sources tab</p>
-<p>The Data Sources section provides detailed documentation and attribution for the datasets utilized within PlaViSca (<strong>Figure 8</strong>). It lists each study with its number of cells, authors, title, journal, year, PubMed ID and DOI link, enabling users to directly access the original publications. This ensures transparency, facilitates reproducibility, and appropriately credits the contributors of the datasets.</p>
+<p>The Data Sources section provides detailed documentation and attribution for the datasets utilized within PlaViSCA (<strong>Figure 8</strong>). It lists each study with its number of cells, authors, title, journal, year, PubMed ID and DOI link, enabling users to directly access the original publications. This ensures transparency, facilitates reproducibility, and appropriately credits the contributors of the datasets.</p>
 <section id="data-processing-pipeline">
 <h4>Data Processing Pipeline<a class="headerlink" href="#data-processing-pipeline" title="Link to this heading"></a></h4>
-<p>All six studies are processed by the <a class="reference external" href="https://github.com/baia-ipc/PlaViSca-meta-analysis">PlaViSca preprocessing pipeline</a>: from the sequencing reads (STARsolo count matrices) or the authors’ count matrices, through cell calling, normalisation, integration (Harmony), embeddings and life-cycle stage annotation, to the data files read by the app. Expression is available as raw counts and log-normalised values.</p>
+<p>All six studies are processed by the <a class="reference external" href="https://github.com/baia-ipc/PlaViSCA-meta-analysis">PlaViSCA preprocessing pipeline</a>: from the sequencing reads (STARsolo count matrices) or the authors’ count matrices, through cell calling, normalisation, integration (Harmony), embeddings and life-cycle stage annotation, to the data files read by the app. Expression is available as raw counts and log-normalised values.</p>
 <p>To set up the app with these files, see the <a class="reference internal" href="setup_guide.html"><span class="std std-doc">Setup Guide</span></a>.</p>
 </section>
 </section>
 <section id="about">
 <h3>About<a class="headerlink" href="#about" title="Link to this heading"></a></h3>
-<p>The <strong>About</strong> tab describes what PlaViSca contains and how the data were processed, links to the source code of the app and of the analysis pipeline, and gives the citation of the PlaViSca study and the contact person.</p>
+<p>The <strong>About</strong> tab describes what PlaViSCA contains and how the data were processed, links to the source code of the app and of the analysis pipeline, and gives the citation of the PlaViSCA study and the contact person.</p>
 </section>
 </section>
 <section id="best-practices">
@@ -407,8 +407,8 @@
 <li><p><strong>Giorgio Gonnella</strong>, Head of Bioinformatics and AI Applications, Institut Pasteur du Cambodge (<a class="reference external" href="mailto:ggonnella&#37;&#52;&#48;pasteur-kh&#46;org">ggonnella<span>&#64;</span>pasteur-kh<span>&#46;</span>org</a>), for questions related to the implementation of the software, its features, the meta-analysis and the integration of new datasets.</p></li>
 <li><p><strong>Anthony Ruberto</strong>, Assistant Professor, Department of Biomedical Sciences, College of Medicine, Florida State University (<a class="reference external" href="mailto:anthony&#46;ruberto&#37;&#52;&#48;med&#46;fsu&#46;edu">anthony<span>&#46;</span>ruberto<span>&#64;</span>med<span>&#46;</span>fsu<span>&#46;</span>edu</a>), for questions related to the meta-analysis, his datasets included in this work in particular, or general questions related to single-cell transcriptomics of <em>P. vivax</em> parasites.</p></li>
 </ul>
-<p>Bug reports and suggestions can also be filed as an issue on <a class="reference external" href="https://github.com/baia-ipc/PlaViSca-app/issues">GitHub</a>.</p>
-<p>PlaViSca is a research tool for exploring published data; verify results independently before drawing conclusions.</p>
+<p>Bug reports and suggestions can also be filed as an issue on <a class="reference external" href="https://github.com/baia-ipc/PlaViSCA-app/issues">GitHub</a>.</p>
+<p>PlaViSCA is a research tool for exploring published data; verify results independently before drawing conclusions.</p>
 </section>
 </section>
 
@@ -416,7 +416,7 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="index.html" class="btn btn-neutral float-left" title="Welcome to PlaViSca" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="index.html" class="btn btn-neutral float-left" title="Welcome to PlaViSCA" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="setup_guide.html" class="btn btn-neutral float-right" title="Setup Guide" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

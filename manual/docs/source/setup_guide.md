@@ -1,6 +1,6 @@
 # Setup Guide
 
-This guide provides step-by-step instructions for installing and running PlaViSca locally.
+This guide provides step-by-step instructions for installing and running PlaViSCA locally.
 
 ## System Requirements
 
@@ -24,16 +24,16 @@ If you restore with `renv`, these exact versions will be installed automatically
 
 ## Installation Steps
 
-PlaViSca is compatible with macOS, Windows, and Linux operating systems. Follow the steps below to set up the application on your system.
+PlaViSCA is compatible with macOS, Windows, and Linux operating systems. Follow the steps below to set up the application on your system.
 
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/baia-ipc/PlaViSca-app.git
-cd PlaViSca-app
+git clone https://github.com/baia-ipc/PlaViSCA-app.git
+cd PlaViSCA-app
 ```
 
-This will create a directory named `PlaViSca-app` containing all application files.
+This will create a directory named `PlaViSCA-app` containing all application files.
 
 ### 2. Install Dependencies
 
@@ -87,7 +87,7 @@ R prints harmless warnings that packages were built under another version.
 
 ### 3. Prepare the Data
 
-PlaViSca reads its data from the directory named by the `PLAVISCA_DATA_DIR` environment variable (default: `data/` inside the app directory). This directory must contain:
+PlaViSCA reads its data from the directory named by the `PLAVISCA_DATA_DIR` environment variable (default: `data/` inside the app directory). This directory must contain:
 
 | File | Description |
 |---|---|
@@ -97,7 +97,7 @@ PlaViSca reads its data from the directory named by the `PLAVISCA_DATA_DIR` envi
 | `gene_annotation.rds` | _P. vivax_ P01 gene identifiers, names and descriptions |
 | `data_source.csv` | Publication table for the Data Sources tab |
 
-These files are written by the [PlaViSca preprocessing pipeline](https://github.com/baia-ipc/PlaViSca-meta-analysis) into the `results/app_data/` directory of a pipeline run. Point the app at them, for example:
+These files are written by the [PlaViSCA preprocessing pipeline](https://github.com/baia-ipc/PlaViSCA-meta-analysis) into the `results/app_data/` directory of a pipeline run. Point the app at them, for example:
 
 ```bash
 export PLAVISCA_DATA_DIR=/path/to/run/results/app_data
@@ -135,7 +135,7 @@ Then open a browser and go to: `http://localhost:3838` (or replace `localhost` w
 
 #### Option B: Using RStudio (Desktop)
 
-1. Open RStudio and set the working directory to the `PlaViSca-app` project folder.
+1. Open RStudio and set the working directory to the `PlaViSCA-app` project folder.
 2. Open `app.R` in the editor.
 3. Click the **Run App** button in the top-right corner of the editor pane.
 
@@ -167,7 +167,7 @@ hostname -I
 | **`renv::restore()` fails** | Run `R -e "renv::status()"` to identify missing packages. On Linux, you may need system libraries: `sudo apt-get install libcurl4-openssl-dev libssl-dev libxml2-dev`. On macOS, see *Notes for macOS* in Step 2. |
 | **App stops at startup with "data file(s) are missing"** | Set `PLAVISCA_DATA_DIR` to a directory containing the five files listed in Step 3. |
 | **App stops at startup with "data check(s) failed"** | The data do not match `config/data_columns.yml` (e.g. a different number of cells or studies). Use the data written by the matching version of the preprocessing pipeline, or update `config/data_columns.yml` (see the developer guide, `docs/developer.md`). |
-| **App is slow or crashes** | PlaViSca requires at least 16 GB RAM. Close other applications. The first load is slower due to data caching. |
+| **App is slow or crashes** | PlaViSCA requires at least 16 GB RAM. Close other applications. The first load is slower due to data caching. |
 | **Browser display issues** | Clear the browser cache or try a different browser. Ensure JavaScript is enabled. |
 | **Package not found after `renv::restore()`** | Try `renv::repair()` followed by `renv::restore()` again. |
 
@@ -187,8 +187,8 @@ For questions, feedback, or collaboration inquiries, please contact the correspo
 
 ## Source Code
 
-PlaViSca is freely available under the Creative Commons Attribution 4.0 International license (CC BY 4.0). The authors maintain authority to update and improve the application. Developers and contributors are welcome to explore, modify, or extend the app by visiting the official GitHub repository:
+PlaViSCA is freely available under the Creative Commons Attribution 4.0 International license (CC BY 4.0). The authors maintain authority to update and improve the application. Developers and contributors are welcome to explore, modify, or extend the app by visiting the official GitHub repository:
 
-[GitHub Repository – PlaViSca](https://github.com/baia-ipc/PlaViSca-app)
+[GitHub Repository – PlaViSCA](https://github.com/baia-ipc/PlaViSCA-app)
 
 © 2025 BAIA Team, Institut Pasteur du Cambodge. All rights reserved.

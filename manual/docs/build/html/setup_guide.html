@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Setup Guide &mdash; PlaViSca</title>
+  <title>Setup Guide &mdash; PlaViSCA</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
 
@@ -31,7 +31,7 @@
           
           
           <a href="index.html" class="icon icon-home">
-            PlaViSca
+            PlaViSCA
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -44,7 +44,7 @@
               <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="user_manual.html">User Manual</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="user_manual.html#overview-of-plavisca-features">Overview of PlaViSca Features</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="user_manual.html#overview-of-plavisca-features">Overview of PlaViSCA Features</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="user_manual.html#embeddings">Embeddings</a></li>
 <li class="toctree-l3"><a class="reference internal" href="user_manual.html#gene-expression">Gene Expression</a></li>
 <li class="toctree-l3"><a class="reference internal" href="user_manual.html#metadata-plots">Metadata plots</a></li>
@@ -81,7 +81,7 @@
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="index.html">PlaViSca</a>
+          <a href="index.html">PlaViSCA</a>
       </nav>
 
       <div class="wy-nav-content">
@@ -101,7 +101,7 @@
              
   <section id="setup-guide">
 <h1>Setup Guide<a class="headerlink" href="#setup-guide" title="Link to this heading"></a></h1>
-<p>This guide provides step-by-step instructions for installing and running PlaViSca locally.</p>
+<p>This guide provides step-by-step instructions for installing and running PlaViSCA locally.</p>
 <section id="system-requirements">
 <h2>System Requirements<a class="headerlink" href="#system-requirements" title="Link to this heading"></a></h2>
 <ul class="simple">
@@ -126,14 +126,14 @@
 </section>
 <section id="installation-steps">
 <h2>Installation Steps<a class="headerlink" href="#installation-steps" title="Link to this heading"></a></h2>
-<p>PlaViSca is compatible with macOS, Windows, and Linux operating systems. Follow the steps below to set up the application on your system.</p>
+<p>PlaViSCA is compatible with macOS, Windows, and Linux operating systems. Follow the steps below to set up the application on your system.</p>
 <section id="clone-the-repository">
 <h3>1. Clone the Repository<a class="headerlink" href="#clone-the-repository" title="Link to this heading"></a></h3>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/baia-ipc/PlaViSca-app.git
-<span class="nb">cd</span><span class="w"> </span>PlaViSca-app
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/baia-ipc/PlaViSCA-app.git
+<span class="nb">cd</span><span class="w"> </span>PlaViSCA-app
 </pre></div>
 </div>
-<p>This will create a directory named <code class="docutils literal notranslate"><span class="pre">PlaViSca-app</span></code> containing all application files.</p>
+<p>This will create a directory named <code class="docutils literal notranslate"><span class="pre">PlaViSCA-app</span></code> containing all application files.</p>
 </section>
 <section id="install-dependencies">
 <h3>2. Install Dependencies<a class="headerlink" href="#install-dependencies" title="Link to this heading"></a></h3>
@@ -181,7 +181,7 @@ R prints harmless warnings that packages were built under another version.</p>
 </section>
 <section id="prepare-the-data">
 <h3>3. Prepare the Data<a class="headerlink" href="#prepare-the-data" title="Link to this heading"></a></h3>
-<p>PlaViSca reads its data from the directory named by the <code class="docutils literal notranslate"><span class="pre">PLAVISCA_DATA_DIR</span></code> environment variable (default: <code class="docutils literal notranslate"><span class="pre">data/</span></code> inside the app directory). This directory must contain:</p>
+<p>PlaViSCA reads its data from the directory named by the <code class="docutils literal notranslate"><span class="pre">PLAVISCA_DATA_DIR</span></code> environment variable (default: <code class="docutils literal notranslate"><span class="pre">data/</span></code> inside the app directory). This directory must contain:</p>
 <table class="docutils align-default">
 <thead>
 <tr class="row-odd"><th class="head"><p>File</p></th>
@@ -206,7 +206,7 @@ R prints harmless warnings that packages were built under another version.</p>
 </tr>
 </tbody>
 </table>
-<p>These files are written by the <a class="reference external" href="https://github.com/baia-ipc/PlaViSca-meta-analysis">PlaViSca preprocessing pipeline</a> into the <code class="docutils literal notranslate"><span class="pre">results/app_data/</span></code> directory of a pipeline run. Point the app at them, for example:</p>
+<p>These files are written by the <a class="reference external" href="https://github.com/baia-ipc/PlaViSCA-meta-analysis">PlaViSCA preprocessing pipeline</a> into the <code class="docutils literal notranslate"><span class="pre">results/app_data/</span></code> directory of a pipeline run. Point the app at them, for example:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span><span class="w"> </span><span class="nv">PLAVISCA_DATA_DIR</span><span class="o">=</span>/path/to/run/results/app_data
 </pre></div>
 </div>
@@ -257,7 +257,7 @@ R prints harmless warnings that packages were built under another version.</p>
 <section id="option-b-using-rstudio-desktop">
 <h4>Option B: Using RStudio (Desktop)<a class="headerlink" href="#option-b-using-rstudio-desktop" title="Link to this heading"></a></h4>
 <ol class="arabic simple">
-<li><p>Open RStudio and set the working directory to the <code class="docutils literal notranslate"><span class="pre">PlaViSca-app</span></code> project folder.</p></li>
+<li><p>Open RStudio and set the working directory to the <code class="docutils literal notranslate"><span class="pre">PlaViSCA-app</span></code> project folder.</p></li>
 <li><p>Open <code class="docutils literal notranslate"><span class="pre">app.R</span></code> in the editor.</p></li>
 <li><p>Click the <strong>Run App</strong> button in the top-right corner of the editor pane.</p></li>
 </ol>
@@ -301,7 +301,7 @@ R prints harmless warnings that packages were built under another version.</p>
 <td><p>The data do not match <code class="docutils literal notranslate"><span class="pre">config/data_columns.yml</span></code> (e.g. a different number of cells or studies). Use the data written by the matching version of the preprocessing pipeline, or update <code class="docutils literal notranslate"><span class="pre">config/data_columns.yml</span></code> (see the developer guide, <code class="docutils literal notranslate"><span class="pre">docs/developer.md</span></code>).</p></td>
 </tr>
 <tr class="row-even"><td><p><strong>App is slow or crashes</strong></p></td>
-<td><p>PlaViSca requires at least 16 GB RAM. Close other applications. The first load is slower due to data caching.</p></td>
+<td><p>PlaViSCA requires at least 16 GB RAM. Close other applications. The first load is slower due to data caching.</p></td>
 </tr>
 <tr class="row-odd"><td><p><strong>Browser display issues</strong></p></td>
 <td><p>Clear the browser cache or try a different browser. Ensure JavaScript is enabled.</p></td>
@@ -327,8 +327,8 @@ R prints harmless warnings that packages were built under another version.</p>
 </section>
 <section id="source-code">
 <h2>Source Code<a class="headerlink" href="#source-code" title="Link to this heading"></a></h2>
-<p>PlaViSca is freely available under the Creative Commons Attribution 4.0 International license (CC BY 4.0). The authors maintain authority to update and improve the application. Developers and contributors are welcome to explore, modify, or extend the app by visiting the official GitHub repository:</p>
-<p><a class="reference external" href="https://github.com/baia-ipc/PlaViSca-app">GitHub Repository – PlaViSca</a></p>
+<p>PlaViSCA is freely available under the Creative Commons Attribution 4.0 International license (CC BY 4.0). The authors maintain authority to update and improve the application. Developers and contributors are welcome to explore, modify, or extend the app by visiting the official GitHub repository:</p>
+<p><a class="reference external" href="https://github.com/baia-ipc/PlaViSCA-app">GitHub Repository – PlaViSCA</a></p>
 <p>© 2025 BAIA Team, Institut Pasteur du Cambodge. All rights reserved.</p>
 </section>
 </section>

@@ -8,7 +8,7 @@ user manual, or to make figures of the interface.
 ## Setup (once)
 
 ```bash
-cd PlaViSca-app
+cd PlaViSCA-app
 python3 -m venv tools/screenshots/.venv
 tools/screenshots/.venv/bin/pip install -r tools/screenshots/requirements.txt
 tools/screenshots/.venv/bin/playwright install chromium-headless-shell

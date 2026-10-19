@@ -1,4 +1,4 @@
-# About tab: what PlaViSca contains, how the data were processed, citation
+# About tab: what PlaViSCA contains, how the data were processed, citation
 # and contact.
 
 ui_tab_about <- function() {
@@ -13,9 +13,9 @@ ui_tab_about <- function() {
     value = "About",
     div(
       class = "about-content",
-      h3("About PlaViSca"),
+      h3("About PlaViSCA"),
       p(
-        "PlaViSca is an atlas of ", em("Plasmodium vivax"), " single-cell ",
+        "PlaViSCA is an atlas of ", em("Plasmodium vivax"), " single-cell ",
         "transcriptomes. It brings together ", n_cells, " cells and ", n_genes,
         " genes from ", n_studies, " published single-cell RNA-seq studies, ",
         "covering sporozoites, liver stages (including hypnozoites) and blood ",

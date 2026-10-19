@@ -6,7 +6,7 @@
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-project = 'PlaViSca'
+project = 'PlaViSCA'
 copyright = 'BAIA 2025, Sopheap Oeng'
 author = 'Sopheap Oeng'
 release = 'V.01'
@@ -31,7 +31,7 @@ source_suffix = {
 
 #html_theme = "furo"
 html_theme = "sphinx_rtd_theme"
-html_title = "PlaViSca"
+html_title = "PlaViSCA"
 html_theme_options = {
     # Show navigation sidebar entries for deeper levels
     'navigation_depth': 3,

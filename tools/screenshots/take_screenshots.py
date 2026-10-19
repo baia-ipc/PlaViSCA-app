@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Take screenshots of the PlaViSca app, as listed in a shot list.
+"""Take screenshots of the PlaViSCA app, as listed in a shot list.
 
 Usage:
   take_screenshots.py <shot_list.yml> [--url URL] [--start-app] [--only NAME...]

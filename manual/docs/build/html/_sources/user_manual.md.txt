@@ -1,6 +1,6 @@
 # User Manual
 
-Welcome to PlaViSca, an interactive web application for exploring single-cell RNA-seq data from _Plasmodium vivax_. This manual provides comprehensive guidance on navigating and utilizing the application's features for malaria research.
+Welcome to PlaViSCA, an interactive web application for exploring single-cell RNA-seq data from _Plasmodium vivax_. This manual provides comprehensive guidance on navigating and utilizing the application's features for malaria research.
 
 **Quick Start:**
 1. Open the **Filters** box on any tab to focus on relevant samples
@@ -8,11 +8,11 @@ Welcome to PlaViSca, an interactive web application for exploring single-cell RN
 3. Compare multiple genes in the **Gene Expression** tab
 4. Download plots and data for external analysis
 
-**Data Integration**: PlaViSca brings together about 106,000 cells from six published studies, processed with one preprocessing pipeline. See the Data Processing Pipeline section for details.
+**Data Integration**: PlaViSCA brings together about 106,000 cells from six published studies, processed with one preprocessing pipeline. See the Data Processing Pipeline section for details.
 
-## Overview of PlaViSca Features
+## Overview of PlaViSCA Features
 
-PlaViSca is a single page: a top bar with the application name and the Institut Pasteur du Cambodge (IPC) and BAIA logos, and below it a row of tabs, each focusing on one aspect of the data:
+PlaViSCA is a single page: a top bar with the application name and the Institut Pasteur du Cambodge (IPC) and BAIA logos, and below it a row of tabs, each focusing on one aspect of the data:
 
 - **Embeddings**
 - **Gene Expression**
@@ -158,7 +158,7 @@ Below the plot are the descriptions of the chosen fields and **Export .csv**, wh
 
 *Example: compare the life-cycle stages of the studies.* Choose **Plot type** "Stacked bars", **Count by** "Study label", **Split by** "Life-cycle stage" and "% of cells". Each bar is one study, divided into its stages. Click **+** and choose "Heatmap" with the same fields in the new plot to read the exact percentages next to it.
 
-> **Note:** Blood-stage cells get the life-cycle stage inferred by PlaViSca: the gametocyte call of the cell's cluster, otherwise the most similar reference time point. Sporozoites and liver stages, which PlaViSca does not classify, keep the authors' labels. The field "Source of the life-cycle stage" says which one a cell's stage comes from. The authors' labels remain available for comparison ("Life-cycle stage (authors)", "Gametocyte sex (authors)"): split one by the other to compare them.
+> **Note:** Blood-stage cells get the life-cycle stage inferred by PlaViSCA: the gametocyte call of the cell's cluster, otherwise the most similar reference time point. Sporozoites and liver stages, which PlaViSCA does not classify, keep the authors' labels. The field "Source of the life-cycle stage" says which one a cell's stage comes from. The authors' labels remain available for comparison ("Life-cycle stage (authors)", "Gametocyte sex (authors)"): split one by the other to compare them.
 
 The settings panel (cog button) has one option, **Show missing**: untick it to leave out of all plots the cells whose value is missing.
 
@@ -169,7 +169,7 @@ Hover over the plot for details; use the controls in its top-right corner to zoo
 ![Figure 6: Metadata table tab](imgs/data_table.png)
 **Figure 6**: Metadata table tab
 
-One row per cell: the cell ID, study, SRA run and the authors' cell ID (missing for Hazzard2022, whose cells were called by PlaViSca), then the host and tissue, strain and origin, treatment, life-cycle stage (and the authors' stage), reference time point, gametocyte calls, biological replicate, day post infection, technology, sequencer and counts. Search globally or filter by column, and export the table as CSV.
+One row per cell: the cell ID, study, SRA run and the authors' cell ID (missing for Hazzard2022, whose cells were called by PlaViSCA), then the host and tissue, strain and origin, treatment, life-cycle stage (and the authors' stage), reference time point, gametocyte calls, biological replicate, day post infection, technology, sequencer and counts. Search globally or filter by column, and export the table as CSV.
 
 ### QC Plots
 
@@ -201,17 +201,17 @@ All plots respect the shared metadata filters and support interactive zooming, p
 ![Figure 8: Data sources tab](imgs/data_source.png)
 **Figure 8**: Data sources tab
 
-The Data Sources section provides detailed documentation and attribution for the datasets utilized within PlaViSca (**Figure 8**). It lists each study with its number of cells, authors, title, journal, year, PubMed ID and DOI link, enabling users to directly access the original publications. This ensures transparency, facilitates reproducibility, and appropriately credits the contributors of the datasets.
+The Data Sources section provides detailed documentation and attribution for the datasets utilized within PlaViSCA (**Figure 8**). It lists each study with its number of cells, authors, title, journal, year, PubMed ID and DOI link, enabling users to directly access the original publications. This ensures transparency, facilitates reproducibility, and appropriately credits the contributors of the datasets.
 
 #### Data Processing Pipeline
 
-All six studies are processed by the [PlaViSca preprocessing pipeline](https://github.com/baia-ipc/PlaViSca-meta-analysis): from the sequencing reads (STARsolo count matrices) or the authors' count matrices, through cell calling, normalisation, integration (Harmony), embeddings and life-cycle stage annotation, to the data files read by the app. Expression is available as raw counts and log-normalised values.
+All six studies are processed by the [PlaViSCA preprocessing pipeline](https://github.com/baia-ipc/PlaViSCA-meta-analysis): from the sequencing reads (STARsolo count matrices) or the authors' count matrices, through cell calling, normalisation, integration (Harmony), embeddings and life-cycle stage annotation, to the data files read by the app. Expression is available as raw counts and log-normalised values.
 
 To set up the app with these files, see the [Setup Guide](setup_guide.md).
 
 ### About
 
-The **About** tab describes what PlaViSca contains and how the data were processed, links to the source code of the app and of the analysis pipeline, and gives the citation of the PlaViSca study and the contact person.
+The **About** tab describes what PlaViSCA contains and how the data were processed, links to the source code of the app and of the analysis pipeline, and gives the citation of the PlaViSCA study and the contact person.
 
 ## Best Practices
 
@@ -226,6 +226,6 @@ The **About** tab describes what PlaViSca contains and how the data were process
 - **Giorgio Gonnella**, Head of Bioinformatics and AI Applications, Institut Pasteur du Cambodge ([ggonnella@pasteur-kh.org](mailto:ggonnella@pasteur-kh.org)), for questions related to the implementation of the software, its features, the meta-analysis and the integration of new datasets.
 - **Anthony Ruberto**, Assistant Professor, Department of Biomedical Sciences, College of Medicine, Florida State University ([anthony.ruberto@med.fsu.edu](mailto:anthony.ruberto@med.fsu.edu)), for questions related to the meta-analysis, his datasets included in this work in particular, or general questions related to single-cell transcriptomics of _P. vivax_ parasites.
 
-Bug reports and suggestions can also be filed as an issue on [GitHub](https://github.com/baia-ipc/PlaViSca-app/issues).
+Bug reports and suggestions can also be filed as an issue on [GitHub](https://github.com/baia-ipc/PlaViSCA-app/issues).
 
-PlaViSca is a research tool for exploring published data; verify results independently before drawing conclusions.
+PlaViSCA is a research tool for exploring published data; verify results independently before drawing conclusions.

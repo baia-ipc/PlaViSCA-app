@@ -467,7 +467,7 @@ embedding_plot <- function(
     if (!fallback %in% names(df)) {
       stop(sprintf(
         paste0(
-          "PlaViSca data error: neither the requested colour column ",
+          "PlaViSCA data error: neither the requested colour column ",
           "('%s') nor the configured fallback ('%s') exists in the plotting ",
           "data. Check config/data_columns.yml against the loaded dataset."
         ),

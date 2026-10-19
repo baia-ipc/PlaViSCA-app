@@ -213,7 +213,7 @@ check_app_data <- function(mr_data,
     add(
         "inferred_sex_blood_only",
         gam_leak == 0,
-        sprintf("%d non-blood cells carry a PlaViSca-inferred gametocyte sex", gam_leak)
+        sprintf("%d non-blood cells carry a PlaViSCA-inferred gametocyte sex", gam_leak)
     )
 
     # --- 10. embeddings -------------------------------------------------------
@@ -431,7 +431,7 @@ stop_if_app_data_invalid <- function(mr_data, expr_df = NULL, bibliography = NUL
 
     if (nrow(warnings_) > 0) {
         message(sprintf(
-            "PlaViSca data checks: %d warning(s):\n  - %s",
+            "PlaViSCA data checks: %d warning(s):\n  - %s",
             nrow(warnings_),
             paste(sprintf("%s: %s", warnings_$check, warnings_$detail), collapse = "\n  - ")
         ))
@@ -439,7 +439,7 @@ stop_if_app_data_invalid <- function(mr_data, expr_df = NULL, bibliography = NUL
     if (nrow(failures) > 0) {
         stop(sprintf(
             paste0(
-                "PlaViSca cannot start: %d data check(s) failed.\n",
+                "PlaViSCA cannot start: %d data check(s) failed.\n",
                 "The data in '%s' do not match config/data_columns.yml:\n",
                 "  - %s"
             ),
@@ -448,7 +448,7 @@ stop_if_app_data_invalid <- function(mr_data, expr_df = NULL, bibliography = NUL
         ), call. = FALSE)
     }
     message(sprintf(
-        "PlaViSca data checks: %d/%d passed for '%s'.",
+        "PlaViSCA data checks: %d/%d passed for '%s'.",
         sum(result$status == "PASS"), nrow(result), app_data_dir()
     ))
     invisible(result)

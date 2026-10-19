@@ -1,4 +1,4 @@
-# PlaViSca developer guide
+# PlaViSCA developer guide
 
 How the app is organised and how to change it. For installing and running
 the app, see the [README](../README.md); for using it, see the

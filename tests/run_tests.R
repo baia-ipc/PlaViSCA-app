@@ -1,5 +1,5 @@
 #!/usr/bin/env Rscript
-# PlaViSca test runner.
+# PlaViSCA test runner.
 # =============================================================================
 #   Rscript tests/run_tests.R [output.tsv]
 #
@@ -14,7 +14,7 @@ out_tsv <- if (length(args) >= 1) args[[1]] else NA_character_
 
 app_root <- Sys.getenv("PLAVISCA_APP_ROOT", unset = getwd())
 if (!file.exists(file.path(app_root, "config", "data_columns.yml"))) {
-    stop("Run from the PlaViSca app root, or set PLAVISCA_APP_ROOT.", call. = FALSE)
+    stop("Run from the PlaViSCA app root, or set PLAVISCA_APP_ROOT.", call. = FALSE)
 }
 setwd(app_root)
 Sys.setenv(PLAVISCA_APP_ROOT = normalizePath(app_root))
@@ -57,7 +57,7 @@ test_files <- c(
     "tests/test_app_code.R"
 )
 
-cat(sprintf("PlaViSca test suite\n  app root: %s\n  data dir: %s\n\n",
+cat(sprintf("PlaViSCA test suite\n  app root: %s\n  data dir: %s\n\n",
     app_root, app_data_dir()))
 
 for (f in test_files) {

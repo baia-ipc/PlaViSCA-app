@@ -1,9 +1,9 @@
-# PlaViSca app: which data columns the app uses.
+# PlaViSCA app: which data columns the app uses.
 # =============================================================================
 # Maps the field names used in ui.R, server.R and functions/ to the columns of
 # the data files (cleaned_dataset.rds$mr_data, normalize_df.rds, raw_df.rds)
 # written by the preprocessing pipeline (stage 50; the columns are described
-# in PlaViSca-meta-analysis/metadata/columns.tsv).
+# in PlaViSCA-meta-analysis/metadata/columns.tsv).
 #
 # Every metadata column used as a filter, "Color by", "Group by" or detail
 # field is declared here and read through get_data_column() /
@@ -65,7 +65,7 @@ fields:
     required: true
     help: >
       Identifier of the cell in the source study's data; missing for
-      Hazzard2022, whose cells were called by PlaViSca.
+      Hazzard2022, whose cells were called by PlaViSCA.
   n_count_rna:
     label: "RNA count"
     column: n_count_rna
@@ -135,7 +135,7 @@ fields:
       Stage assigned to the reference time point: 6-12 h ring/early
       trophozoite, 24 h
       trophozoite, 32-42 h schizont, 48 h late schizont/merozoite. This
-      assignment is defined by PlaViSca, not by the reference publication.
+      assignment is defined by PlaViSCA, not by the reference publication.
   idc_similarity_score_delta:
     label: "Reference similarity delta"
     column: idc_delta
@@ -151,7 +151,7 @@ fields:
     required: true
     help: >
       Female or male gametocytes if the cell's cluster has high marker
-      scores for that sex (computed by PlaViSca, blood cells with at least
+      scores for that sex (computed by PlaViSCA, blood cells with at least
       10 UMIs only).
   gametocyte_state:
     label: "Gametocyte state"
@@ -373,7 +373,7 @@ vocabularies:
     - Merozoite
 
 # Detailed -> broad life-cycle stage mapping, the app's copy of
-# PlaViSca-meta-analysis/metadata/stages.tsv. The broad/detailed stage filters use
+# PlaViSCA-meta-analysis/metadata/stages.tsv. The broad/detailed stage filters use
 # it to offer only compatible choices. It is checked against the loaded data
 # at startup; if the data disagree, the app stops.
 stage_compatibility:
@@ -390,7 +390,7 @@ stage_compatibility:
 
 # Fixed colours for some values (the others use the automatic palette).
 # Each study and each life-cycle stage has one colour in every field that
-# shows it, the same as in the manuscript figures (PlaViSca-meta-analysis,
+# shows it, the same as in the manuscript figures (PlaViSCA-meta-analysis,
 # R/lib/plots.R): the asexual blood cycle from yellow to dark red,
 # gametocytes in pale blue, green and blue (early lighter than late), liver
 # stages in lilac and purple, sporozoites in dark teal. Every pair of stage

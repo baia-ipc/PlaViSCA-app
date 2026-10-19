@@ -1,9 +1,9 @@
-# PlaViSca — _Plasmodium vivax_ single-cell atlas
+# PlaViSCA — _Plasmodium vivax_ single-cell atlas
 
 [![R](https://img.shields.io/badge/R-4.3-blue?logo=r&logoColor=white)](https://www.r-project.org/)
 [![Shiny](https://img.shields.io/badge/Shiny-app-brightgreen?logo=r&logoColor=white)](https://shiny.posit.co/)
 
-PlaViSca is an interactive R/Shiny application for exploring single-cell
+PlaViSCA is an interactive R/Shiny application for exploring single-cell
 RNA-seq data of _Plasmodium vivax_. It brings together about 106,000 cells from
 six published studies (blood stages, liver stages and sporozoites) and lets
 you, without writing code:
@@ -27,8 +27,8 @@ You need R 4.3 and git. The package versions are fixed with
 [renv](https://rstudio.github.io/renv/), which installs them for you:
 
 ```bash
-git clone https://github.com/baia-ipc/PlaViSca-app.git
-cd PlaViSca-app
+git clone https://github.com/baia-ipc/PlaViSCA-app.git
+cd PlaViSCA-app
 R -e 'renv::restore()'
 ```
 
@@ -39,7 +39,7 @@ The `.Rprofile` in this directory activates renv whenever R starts here.
 The app reads its data from the directory named by the `PLAVISCA_DATA_DIR`
 environment variable (default: `data/` inside the app directory). The data
 files are written by the
-[PlaViSca preprocessing pipeline](https://github.com/baia-ipc/PlaViSca-meta-analysis)
+[PlaViSCA preprocessing pipeline](https://github.com/baia-ipc/PlaViSCA-meta-analysis)
 into the `results/app_data/` directory of a pipeline run.
 
 ```bash
@@ -76,7 +76,7 @@ exactly the studies in the data. If a check fails, the app stops with a
 message saying what is wrong, for example:
 
 ```
-PlaViSca cannot start: 1 data check(s) failed.
+PlaViSCA cannot start: 1 data check(s) failed.
 The data in '/path/to/app_data' do not match config/data_columns.yml:
   - cell_count: expected 105949 metadata rows, found 98000
 ```
@@ -126,10 +126,10 @@ tests/                            test suite (tests/run_tests.R)
 manual/                           user manual (Sphinx sources and HTML build)
 docs/                             developer documentation
 renv.lock, renv/                  R package versions
-PlaViSca-app.Rproj                RStudio project
+PlaViSCA-app.Rproj                RStudio project
 ```
 
 ## License
 
-PlaViSca is released under the Creative Commons Attribution 4.0
+PlaViSCA is released under the Creative Commons Attribution 4.0
 International license (CC BY 4.0); see [LICENSE](LICENSE).

@@ -20,7 +20,7 @@ check_plot_columns <- function(data, columns) {
     if (length(absent) > 0) {
         stop(sprintf(
             paste0(
-                "PlaViSca data error: column '%s' is not present in the ",
+                "PlaViSCA data error: column '%s' is not present in the ",
                 "loaded data. The data do not match config/data_columns.yml; ",
                 "this is not caused by user input."
             ),

@@ -28,7 +28,7 @@ ui_menu_bar <- function() {
     class = "menu-bar",
     div(
       class = "menu-title",
-      h1("PlaViSca"),
+      h1("PlaViSCA"),
       span(tags$i("Plasmodium vivax"), " Single Cell Analysis Platform")
     ),
     create_org_logos()

@@ -7,7 +7,7 @@ ui_tab_manual <- function() {
     tags$iframe(
       src = "manual/index.html",
       class = "manual-frame",
-      title = "PlaViSca user manual"
+      title = "PlaViSCA user manual"
     )
   )
 }
