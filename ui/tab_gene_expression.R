@@ -1,4 +1,5 @@
-# Gene expression tab: violin plots of selected genes by group.
+# Gene expression tab: cards with plots of selected genes
+# (functions/gene_expression_card.R).
 
 ui_tab_gene_expression <- function() {
   tabPanel(
@@ -9,13 +10,23 @@ ui_tab_gene_expression <- function() {
 
     # Plot settings in a sidebar left of the gene panels
     plot_settings_layout(
-      data_type_control("data_type_exp"),
+      tagList(
+        data_type_control("data_type_exp"),
+        tags$div(
+          title = "In the dot plots and the heatmap, groups with fewer cells are left out",
+          numericInput(
+            "min_cells_exp",
+            tags$span("Min. cells per group", class = "settings-label"),
+            value = SUMMARY_MIN_CELLS, min = 1, step = 1
+          )
+        )
+      ),
       fluidRow(
         id = "gene_exp_container",
         column(
           width = 6,
           id = "dynamic_col_0",
-          subBlock(0)
+          gene_expression_card(0)
         )
       )
     )

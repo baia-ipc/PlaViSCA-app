@@ -36,8 +36,10 @@ suppressWarnings(try({
     source("functions/plots_qc.R")
     source("functions/cell_counts.R")
     source("functions/plots_cell_counts.R")
+    source("functions/gene_summaries.R")
     source("functions/plots_gene_expression.R")
-    source("functions/plots_gene_detection.R")
+    source("functions/plots_gene_distribution.R")
+    source("functions/plots_gene_summaries.R")
     source("functions/embedding_plots.R")
 }, silent = TRUE))
 
@@ -49,6 +51,7 @@ test_files <- c(
     "tests/test_bibliography_and_filters.R",
     "tests/test_expression.R",
     "tests/test_cell_count_plots.R",
+    "tests/test_gene_plots.R",
     "tests/test_app_code.R"
 )
 

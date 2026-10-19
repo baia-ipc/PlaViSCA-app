@@ -30,12 +30,15 @@ source("functions/tab_sync.R")
 source("functions/cell_counts.R")
 source("functions/plots_cell_counts.R")
 source("functions/plots_qc.R")
+source("functions/gene_summaries.R")
 source("functions/plots_gene_expression.R")
-source("functions/plots_gene_detection.R")
+source("functions/plots_gene_distribution.R")
+source("functions/plots_gene_summaries.R")
 source("functions/embedding_plots.R")
 
 # UI building blocks
 source("functions/helpers_UI.R")
+source("functions/gene_expression_card.R")
 source("functions/plot_builder.R")
 
 # Server code of the tabs that have their own file (called from server.R)

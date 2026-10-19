@@ -951,6 +951,13 @@ server <- function(input, output, session) {
     input$group_exp_0
   }) %>% debounce(500)
 
+  # Options of the plot type of gene expression card `i`
+  gene_plot_inputs <- function(i) {
+    opt <- function(name) input[[paste0(name, "_exp_", i)]]
+    list(split = opt("split"), combine = opt("combine"), points = opt("points"),
+         value = opt("value"), scale = opt("scale"))
+  }
+
   # df_exp_0 when the user selects a gene/group
   output$gene_exp_plotly_0 <- renderPlotly({
     # Use debounced inputs
@@ -975,9 +982,9 @@ server <- function(input, output, session) {
         }
         gene_expression_card_plot(
           fg, selected_genes, selected_check, selected_group,
-          plot_type = input$plot_type_exp_0,
-          split = input$split_exp_0,
-          min_cells = input$min_cells_exp_0
+          type = input$plot_type_exp_0,
+          opts = gene_plot_inputs(0),
+          min_cells = input$min_cells_exp
         )
       },
       error = function(e) {
@@ -1026,7 +1033,7 @@ server <- function(input, output, session) {
       ui = column(
         width = 6,
         id = paste0("dynamic_col_", new_id),
-        subBlock(new_id)
+        gene_expression_card(new_id)
       )
     )
 
@@ -1074,9 +1081,9 @@ server <- function(input, output, session) {
 
             gene_expression_card_plot(
               fg, cur_genes, cur_check, cur_group,
-              plot_type = input[[paste0("plot_type_exp_", curr_id)]],
-              split = input[[paste0("split_exp_", curr_id)]],
-              min_cells = input[[paste0("min_cells_exp_", curr_id)]]
+              type = input[[paste0("plot_type_exp_", curr_id)]],
+              opts = gene_plot_inputs(curr_id),
+              min_cells = input$min_cells_exp
             )
           },
           error = function(e) {

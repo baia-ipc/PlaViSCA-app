@@ -11,8 +11,9 @@ you, without writing code:
 - explore the cells on PCA, UMAP and t-SNE plots (2D or 3D), coloured by
   study, life-cycle stage, host, treatment or gene expression, and compare
   two colourings side by side;
-- plot the expression of one or more genes per group, or the fraction of
-  cells detecting them per group and study, with links to PlasmoDB and NCBI;
+- plot the expression of one or more genes per group (violin and box plots,
+  Cleveland and Seurat-style dot plots, heatmaps), with links to PlasmoDB and
+  NCBI;
 - count the cells by one or two metadata fields (e.g. the life-cycle stages
   of each study) as bar, pie, heatmap or sunburst plots;
 - filter all views by study, life-cycle stage, host, tissue, treatment,
