@@ -71,7 +71,7 @@ The Embeddings tab offers dimensionality reduction and customizable visualizatio
 | Dimension    | 2D / 3D (default)                              |
 | X / Y axes   | Selectable when 2D mode is active              |
 
-**Color by** (in the title bar of the plot): Study label, Broad life-cycle stage, Life-cycle stage, Host species, Host and tissue, Treatment, Parasite strain / isolate, Parasite origin location, Single-cell technology, or Genes. With Genes, a gene menu appears above the plot, under its title bar.
+**Color by** (in the title bar of the plot): Study label, Broad life-cycle stage, Life-cycle stage, Host species, Host and tissue, Treatment, Parasite strain / isolate, Parasite origin location, Single-cell technology, or Genes. With Genes, a row with the gene menu (and, for several genes, **Combine genes**) appears above the plot, under its title bar.
 
 **Coloring by genes**: with **Color by** set to *Genes*, select up to 10 genes by name, or by ID with the switch next to the menu (switching keeps the selected genes). With more than one gene, **Combine genes** sets how they color the cells:
 
@@ -85,7 +85,7 @@ With *Each gene separately*, the expression of each gene is scaled to 0–1 with
 
 **Visualization bar**: the title bar of the plot holds **Color by** and the **Compare Plots** and **Download Data** buttons.
 
-**Compare Plots mode**: Click **Compare Plots** to display two independent plots (Plot A and Plot B) side-by-side, each with its own **Color by** selector in its title bar; a plot colored by genes has its own gene menu and **Combine genes** menu between its title bar and the plot. In 2D, the legends sit below the plots, so that they do not cover cells.
+**Compare Plots mode**: Click **Compare Plots** to display two independent plots (Plot A and Plot B) side-by-side, each with its own **Color by** selector in its title bar; a plot colored by genes has its own gene row between its title bar and the plot, and the two plots stay aligned. In 2D, the legends sit below the plots, so that they do not cover cells.
 
 **Interactive Cell Selection**: Click any cell to open a modal dialog showing a per-cell gene expression table (gene ID, gene name, expression value, description). The table is filterable and exportable as CSV.
 

@@ -237,10 +237,83 @@ body {
   margin-bottom: 0 !important;
 }
 
-/* Gene selectors of the embedding plots, between title bar and plot */
+/* Gene selectors of the embedding plots, between title bar and plot: one
+   row, as compact as the "Color by" selectors */
 .embedding-gene-panel {
-  padding: 6px 10px !important;
+  padding: 4px 10px !important;
   overflow: visible !important;
+}
+
+.embedding-gene-row,
+.embedding-combine-menu {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.embedding-gene-row {
+  flex-wrap: wrap;
+}
+
+.embedding-gene-menu {
+  flex: 1 1 100px;
+  min-width: 100px;
+}
+
+.embedding-gene-panel .shiny-input-container {
+  margin-bottom: 0 !important;
+}
+
+.embedding-gene-panel label.control-label {
+  display: none !important;
+}
+
+.embedding-gene-panel .selectize-input {
+  min-height: 0 !important;
+  padding: 1px 6px !important;
+  font-size: 0.75rem;
+  line-height: 1.4;
+}
+
+.embedding-gene-panel .selectize-control.single .selectize-input {
+  padding-right: 22px !important;
+}
+
+.embedding-gene-panel .selectize-input > .item {
+  font-size: 0.75rem;
+  margin: 1px 3px 1px 0 !important;
+  padding: 0 4px !important;
+}
+
+.embedding-gene-panel .selectize-input > input {
+  font-size: 0.75rem !important;
+}
+
+.embedding-gene-panel .form-switch {
+  font-size: 0.75rem;
+  margin: 0 !important;
+}
+
+.embedding-toggle-container .shiny-input-container {
+  width: auto !important;
+}
+
+.embedding-gene-panel .embedding-toggle-container .form-check.form-switch {
+  min-height: 0;
+  padding-left: 0 !important;
+}
+
+.embedding-combine-menu .selectize-input > .item {
+  white-space: nowrap;
+}
+
+.embedding-gene-links {
+  display: flex;
+  gap: 4px;
+}
+
+.embedding-gene-panel .gene-link-btn {
+  padding: 1px 5px;
 }
 
 /* Standardize card margins */
@@ -1087,10 +1160,6 @@ table.dataTable thead th {
   width: 100%;
 }
 
-.embedding-gene-panel .shiny-input-container {
-  margin-bottom: 0 !important;
-}
-
 .gene-select-wrapper label.control-label {
   display: flex;
   align-items: flex-end;
@@ -1132,6 +1201,28 @@ table.dataTable thead th {
 
 .comparison-plots-container .card {
   margin-bottom: 0 !important;
+}
+
+/* Plot A and Plot B side by side, sharing three rows (title bar, gene
+   selector, plot): the plots stay aligned when only one of them is coloured
+   by genes, the other card leaving the gene selector row empty */
+.comparison-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto auto auto;
+  column-gap: 1rem;
+}
+
+.comparison-grid > .comparison-card:not([data-full-screen="true"]) {
+  display: grid !important;
+  grid-row: span 3;
+  grid-template-rows: subgrid;
+}
+
+.comparison-grid > .comparison-card:not([data-full-screen="true"]) > .card-body {
+  display: grid !important;
+  grid-row: span 2;
+  grid-template-rows: subgrid;
 }
 
 .comparison-card {

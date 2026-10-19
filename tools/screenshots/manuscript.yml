@@ -65,8 +65,6 @@ shots:
       - select: {id: combine_genes_second, value: each}
       - drawn: true
     element: "#comparison_plots_panel"
-    # the plot cards are taller than the plots: cut the empty space below
-    crop: {bottom: 110}
 
   - name: fig5_gene_dotplot
     tab: Gene expression

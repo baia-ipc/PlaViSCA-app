@@ -94,8 +94,10 @@ ui_tab_embeddings <- function() {
             id = "comparison_plots_panel",
             class = "comparison-plots-container",
             style = "display: none;",
-            layout_column_wrap(
-              width = 1 / 2,
+            # the two cards share their rows (title bar, gene selector, plot),
+            # so that the plots stay aligned when only one has a gene selector
+            div(
+              class = "comparison-grid",
               comparison_plot_card("a", "Plot A", "#007bff", "color_first_comp",
                 get_data_column("broad_stage"), "first_plotly",
                 embedding_gene_panel("input.color_first_comp == 'genes'", "genes_label_first_comp",
@@ -184,87 +186,76 @@ embedding_settings_controls <- function() {
   )
 }
 
-# Gene selector of an embedding plot (with ID/name switch, PlasmoDB/NCBI links
-# and "Combine genes" menu), shown while `condition` (JavaScript) holds, i.e.
-# while the plot is coloured by genes. It sits between the plot and its title
-# bar.
+# Gene selector of an embedding plot, on one row: the gene menu with its
+# ID/name switch, the "Combine genes" menu and the PlasmoDB/NCBI links. It is
+# shown while `condition` (JavaScript) holds, i.e. while the plot is coloured
+# by genes, and sits between the plot and its title bar.
 embedding_gene_panel <- function(condition, label_id, check_id, genes_id, plasmo_id, ncbi_id,
                                  combine_id, btn_class, class = NULL) {
   conditionalPanel(
     condition = condition,
     class = paste("embedding-gene-panel", class),
-    fluidRow(
-      class = "g-1 align-items-end",
-      column(
-        width = 10,
-        div(
-          class = "gene-select-wrapper",
-          style = "position: relative;",
-          tags$label(
-            class = "control-label d-flex align-items-center gap-2",
-            tags$span(textOutput(label_id, inline = TRUE), class = "settings-label"),
-            div(
-              class = "embedding-toggle-container",
-              title = "Click to switch ID and name",
-              `data-bs-toggle` = "tooltip",
-              `data-bs-placement` = "top",
-              bslib::input_switch(check_id, label = NULL, value = FALSE)
-            )
-          ),
-          selectizeInput(
-            genes_id,
-            label = NULL,
-            choices = "", multiple = TRUE,
-            options = list(placeholder = "Search genes...", maxItems = 10, dropdownParent = "body"),
-            width = "100%"
-          )
+    div(
+      class = "embedding-gene-row",
+      tags$span(textOutput(label_id, inline = TRUE), class = "header-color-by-label"),
+      div(
+        class = "embedding-toggle-container",
+        title = "Click to switch ID and name",
+        `data-bs-toggle` = "tooltip",
+        `data-bs-placement` = "top",
+        bslib::input_switch(check_id, label = NULL, value = FALSE)
+      ),
+      div(
+        class = "embedding-gene-menu",
+        selectizeInput(
+          genes_id,
+          label = NULL,
+          choices = "", multiple = TRUE,
+          options = list(placeholder = "Search genes...", maxItems = 10, dropdownParent = "body"),
+          width = "100%"
         )
       ),
-      column(
-        width = 2,
-        div(
-          class = "links-row",
-          tags$a(
-            id = plasmo_id, href = "#", target = "_blank",
-            class = paste("btn btn-sm gene-link-btn", btn_class),
-            `data-bs-toggle` = "tooltip", `data-bs-placement` = "top",
-            title = "PlasmoDB",
-            tags$i(class = "fas fa-external-link-alt")
-          ),
-          tags$a(
-            id = ncbi_id, href = "#", target = "_blank",
-            class = paste("btn btn-sm gene-link-btn", btn_class),
-            `data-bs-toggle` = "tooltip", `data-bs-placement` = "top",
-            title = "NCBI",
-            tags$i(class = "fas fa-dna")
-          )
+      gene_combine_menu(combine_id, genes_id),
+      div(
+        class = "embedding-gene-links",
+        tags$a(
+          id = plasmo_id, href = "#", target = "_blank",
+          class = paste("btn btn-sm gene-link-btn", btn_class),
+          `data-bs-toggle` = "tooltip", `data-bs-placement` = "top",
+          title = "PlasmoDB",
+          tags$i(class = "fas fa-external-link-alt")
+        ),
+        tags$a(
+          id = ncbi_id, href = "#", target = "_blank",
+          class = paste("btn btn-sm gene-link-btn", btn_class),
+          `data-bs-toggle` = "tooltip", `data-bs-placement` = "top",
+          title = "NCBI",
+          tags$i(class = "fas fa-dna")
         )
       )
-    ),
-    gene_combine_menu(combine_id, genes_id, width = "50%")
+    )
   )
 }
 
 # "Combine genes" menu of an embedding plot (choices: COMBINE_GENES), shown
 # while more than one gene is selected in `genes_id`. The server offers "Each
 # gene separately" only for 2 or 3 genes.
-gene_combine_menu <- function(id, genes_id, width = "100%") {
+gene_combine_menu <- function(id, genes_id) {
   conditionalPanel(
     condition = sprintf("input.%s && input.%s.length > 1", genes_id, genes_id),
-    class = "mt-1",
-    title = "How the expression of the selected genes gives the colour of a cell",
-    selectizeInput(
-      id,
-      tags$span("Combine genes", class = "settings-label"),
-      choices = COMBINE_GENES,
-      selected = "mean",
-      width = width,
-      options = list(dropdownParent = "body")
-    ),
-    conditionalPanel(
-      condition = sprintf("input.%s.length > %d", genes_id, MAX_GENES_EACH_COLOUR),
-      tags$small(class = "text-muted",
-        sprintf("Each gene separately: at most %d genes.", MAX_GENES_EACH_COLOUR))
+    title = sprintf(paste("How the expression of the selected genes gives the colour of a cell",
+                          "(Each gene separately: at most %d genes)"), MAX_GENES_EACH_COLOUR),
+    div(
+      class = "embedding-combine-menu",
+      tags$span("Combine genes", class = "header-color-by-label"),
+      selectizeInput(
+        id,
+        NULL,
+        choices = COMBINE_GENES,
+        selected = "mean",
+        width = "165px",
+        options = list(dropdownParent = "body")
+      )
     )
   )
 }
@@ -296,7 +287,7 @@ comparison_plot_card <- function(side, title, colour, color_id, selected, plot_i
       )
     ),
     card_body(
-      gene_panel,
+      div(class = "comparison-gene-slot", gene_panel),
       div(
         class = "comparison-plot-area",
         withSpinner(
