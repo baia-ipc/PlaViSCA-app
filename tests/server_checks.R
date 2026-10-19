@@ -41,6 +41,24 @@ n_cells <- function(study) sum(mr_data$study_label == study)
 
 STUDY <- "Sa2020"
 
+# The data loaded as by data_loading_server(), normalized.
+loaded_data <- function() {
+  gene_data <- list(data = norm_df, genes = genes(norm_df, gff_data))
+  list(
+    gene_data = reactive(gene_data),
+    data_type = reactive("normalize"),
+    cached_data = list(normalize = norm_df),
+    global_loading = reactiveVal(FALSE)
+  )
+}
+
+# The cells of the Gene expression tab, unfiltered.
+gex_cells <- function() {
+  meta <- apply_secondary_filters(norm_df, study_filter(NULL), keep_gene_matrix = FALSE,
+                                  genes = genes(norm_df, gff_data)$gene)
+  list(data = meta, genes = genes(norm_df, gff_data), full = norm_df, row_idx = attr(meta, "row_idx"))
+}
+
 # one file of checks per server file: tests/server/<server file>.R
 for (f in sort(list.files("tests/server", pattern = "\\.R$", full.names = TRUE))) {
   source(f, local = TRUE)

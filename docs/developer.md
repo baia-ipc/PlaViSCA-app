@@ -17,7 +17,7 @@ the app, see the [README](../README.md); for using it, see the
 3. **`server.R`** — the `server()` function. It calls the server code in
    `server/` (one file per tab or shared part) and passes it the reactives
    the parts share: the loaded data and the filter values of each tab. The
-   Embeddings and Gene expression tabs are in `server.R` itself.
+   Embeddings tab is in `server.R` itself.
 
 ## Where things are
 
@@ -31,7 +31,7 @@ the app, see the [README](../README.md); for using it, see the
 | `functions/data_columns_config.R` | accessors for `data_columns.yml`: `get_data_column()`, `get_data_label()`, orderings, colours, stage mapping |
 | `functions/site_config.R` | accessors for `external_links.yml` and `team.yml` |
 | `functions/filters.R` | reading the filter widgets and filtering cells |
-| `functions/genes.R`, `gene_expression_data.R` | gene lists, name/ID conversion, per-plot expression tables |
+| `functions/genes.R`, `gene_expression_data.R` | gene lists, name/ID conversion, per-plot expression tables, the "Data" download of a gene expression card |
 | `functions/plots_*.R`, `embedding_plots.R` | plotly plots of each tab |
 | `functions/embedding_gene_colours.R` | embeddings coloured by genes: expression of the selected genes, "Combine genes" (mean, sum, or one colour per gene mixed in each cell, `blend_gene_colours()`), the colour key; `embedding_gene_plot()` |
 | `functions/gene_expression_card.R` | the card of the Gene expression tab: plot type, genes, grouping, the options of the plot type |
@@ -41,7 +41,7 @@ the app, see the [README](../README.md); for using it, see the
 | `functions/plot_builder.R` | the plot builder of the Metadata plots tab (a Shiny module: `plot_builder_ui()`, `plot_builder_server()`); the tab adds and removes builders in `server/tab_plots.R` |
 | `functions/data_summary.R`, `cache_keys.R` | selection summaries; cache keys |
 | `functions/helpers_UI.R` | UI building blocks: filter rows, gene links, team cards |
-| `server/` | server code, one file per tab or shared part: the data of the session and the two Data type controls (`data_loading.R`), the filter menus and the stage filters (`filter_choices.R`), the filter state shared by the tabs (`shared_filters.R`), the Metadata plots, Metadata table, QC Plots and Data sources tabs (`tab_*.R`) |
+| `server/` | server code, one file per tab or shared part: the data of the session and the two Data type controls (`data_loading.R`), the filter menus and the stage filters (`filter_choices.R`), the filter state shared by the tabs (`shared_filters.R`), the Gene expression, Metadata plots, Metadata table, QC Plots and Data sources tabs (`tab_*.R`), one card of the Gene expression tab (`gene_card.R`) |
 | `ui/` | the top bar (`page_frame.R`), the tab set (`analysis.R`) and one file per tab (`tab_*.R`, `about.R`) |
 | `www/` | `style.css`, `script.js` and images served to the browser |
 | `tests/` | test suite, see [Tests](#tests) |

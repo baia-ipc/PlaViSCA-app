@@ -3,6 +3,7 @@ library(shiny)
 library(shinyjs)
 library(DT)
 library(plotly)
+library(shinycssloaders)
 library(memoise)
 library(bslib)
 library(fontawesome)
@@ -62,6 +63,8 @@ source("server/tab_plots.R")
 source("server/tab_data_table.R")
 source("server/tab_qc.R")
 source("server/tab_data_sources.R")
+source("server/tab_gene_expression.R")
+source("server/gene_card.R")
 
 # Define a function for memoized data loading.
 load_data <- memoise(function(file_path) {
