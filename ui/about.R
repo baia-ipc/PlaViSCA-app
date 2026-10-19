@@ -42,7 +42,7 @@ ui_tab_about <- function() {
       # one HTML string, so that no space is added before the full stops; the
       # title may contain <em>
       p(HTML(sprintf(
-        "%s. <strong>%s</strong>. %s",
+        "<em>%s</em>. <strong>%s</strong>. %s",
         htmltools::htmlEscape(citation$authors), citation$title,
         htmltools::htmlEscape(citation$status)
       ))),
