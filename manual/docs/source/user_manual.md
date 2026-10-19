@@ -73,7 +73,7 @@ The Embeddings tab offers dimensionality reduction and customizable visualizatio
 | Dimension    | 2D / 3D (default)                              |
 | X / Y axes   | Selectable when 2D mode is active              |
 
-**Legend position and size**: the legend (the colors of a category, the color scale of gene expression, or the color wheel of *Each gene separately*) goes over a corner of the plot, right of it or below it, or is hidden. *Auto* puts it over the top-left corner, or below the plots in 2D Compare Plots mode; the color wheel goes right of the plot. Outside the plot, the legend takes room from the plot. **Legend Size** makes its text and color scale smaller or larger, e.g. for a screenshot.
+**Legend position and size**: the legend (the colors of a category, the color scale of gene expression, or the color key of *Each gene separately*) goes over a corner of the plot, right of it or below it, or is hidden. *Auto* puts it over the top-left corner, or below the plots in 2D Compare Plots mode; the color grid of 2 genes and the color wheel of 4 or more genes go right of the plot. Outside the plot, the legend takes room from the plot. **Legend Size** makes its text and color scale smaller or larger, e.g. for a screenshot.
 
 **Color by** (in the title bar of the plot): **Genes ▸** (first in the menu), Study label, Broad life-cycle stage, Life-cycle stage, Host species, Host and tissue, Treatment, Parasite strain / isolate, Parasite origin location, or Single-cell technology (default: Life-cycle stage). With Genes, a row with the gene menu (and, for several genes, **Combine genes**) appears above the plot, under its title bar.
 
@@ -83,19 +83,19 @@ The Embeddings tab offers dimensionality reduction and customizable visualizatio
 |---|---|
 | *Mean* (default for more than 8 genes) | the mean expression of the genes, on one color scale |
 | *Sum* | the sum of their expression |
-| *Each gene separately* (2 to 8 genes; default) | each gene has its own color on a color wheel, and the color of a cell mixes the colors of the genes it expresses (see below) |
+| *Each gene separately* (2 to 8 genes; default) | each gene has its own color, and the color of a cell mixes the colors of the genes it expresses (see below) |
 
-With *Each gene separately*, the genes get evenly spaced colors around a color wheel, in the order in which they were selected: the first gene is red and is at the top of the wheel, the others follow clockwise (with 3 genes: red, green, blue). The wheel, by default right of the plot, shows each gene at its color. To read the color of a cell:
+With *Each gene separately*, the expression of each gene is scaled to 0–1 within the cells shown, with full color at its 99th percentile, and the cells with the highest expression are drawn on top. The hover text gives the expression of each gene. How the colors mix depends on the number of genes.
+
+*2 or 3 genes*: light grey where no gene is expressed, red for the first gene, green for the second, blue for the third. Co-expression gives mixed colors: red + green = yellow, red + blue = magenta, green + blue = cyan, all three = dark grey. For 2 genes, a color grid (by default right of the plot) shows the color of each combination of the two expression values; for 3 genes, the legend lists the color of each gene and of their combinations. Example: select CSP and AMA1 (*Each gene separately* is chosen by default), to see the cells expressing CSP (red), AMA1 (green) or both (yellow).
+
+*4 to 8 genes*: the genes get evenly spaced colors around a color wheel, in the order in which they were selected: the first gene is red and is at the top of the wheel, the others follow clockwise. The wheel, by default right of the plot, shows each gene at its color. To read the color of a cell:
 
 - **hue**: which genes the cell expresses. A cell expressing one gene has that gene's color; a cell expressing two neighboring genes on the wheel has a color between theirs.
 - **saturation**: how specific the cell is. One gene gives a strong color; several genes mix toward grey.
 - **darkness**: how strongly the cell expresses its strongest gene, from light grey (no expression) to a dark, strong color.
 
-The expression of each gene is scaled to 0–1 within the cells shown, with full color at its 99th percentile, and the cells with the highest expression are drawn on top. The hover text gives the expression of each gene and the gene with the largest share of the cell's expression (e.g. *Dominant: CSP (72%)*).
-
-Genes opposite each other on the wheel cancel out: a cell expressing both equally is grey, as is a cell expressing all genes equally. With 2 genes, the two colors are always opposite (red and teal), so cells expressing both are grey, darker when the expression is higher. Select genes that you expect in the same cells one after the other, so that they get neighboring colors. With many genes, neighboring colors are hard to tell apart: from about 6 genes, check the hover text, or use *Mean* or *Sum*.
-
-Example: select CSP, DBP and P47 (*Each gene separately* is chosen by default), to see the cells expressing CSP (red), DBP (green) or P47 (blue).
+The hover text also gives the gene with the largest share of the cell's expression (e.g. *Dominant: CSP (72%)*). Genes opposite each other on the wheel cancel out: a cell expressing both equally is grey, as is a cell expressing all genes equally. Select genes that you expect in the same cells one after the other, so that they get neighboring colors. With many genes, neighboring colors are hard to tell apart: from about 6 genes, check the hover text, or use *Mean* or *Sum*.
 
 **Visualization bar**: the title bar of the plot holds **Color by** and the **Compare Plots** and **Download Data** buttons.
 
