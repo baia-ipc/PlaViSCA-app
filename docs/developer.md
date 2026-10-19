@@ -15,9 +15,9 @@ the app, see the [README](../README.md); for using it, see the
 2. **`ui.R`** — sources `ui/` and assembles the page from one function per
    section (`ui_menu_bar()`, `ui_analysis_section()`).
 3. **`server.R`** — the `server()` function. It calls the server code in
-   `server/` (one file per tab or shared part) and passes it the reactives
-   the parts share: the loaded data and the filter values of each tab. The
-   Embeddings tab is in `server.R` itself.
+   `server/` (one file per tab or shared part, see below) and passes it the
+   reactives the parts share: the loaded data and the filter values of each
+   tab.
 
 ## Where things are
 
@@ -41,7 +41,8 @@ the app, see the [README](../README.md); for using it, see the
 | `functions/plot_builder.R` | the plot builder of the Metadata plots tab (a Shiny module: `plot_builder_ui()`, `plot_builder_server()`); the tab adds and removes builders in `server/tab_plots.R` |
 | `functions/data_summary.R`, `cache_keys.R` | selection summaries; cache keys |
 | `functions/helpers_UI.R` | UI building blocks: filter rows, gene links, team cards |
-| `server/` | server code, one file per tab or shared part: the data of the session and the two Data type controls (`data_loading.R`), the filter menus and the stage filters (`filter_choices.R`), the filter state shared by the tabs (`shared_filters.R`), the Gene expression, Metadata plots, Metadata table, QC Plots and Data sources tabs (`tab_*.R`), one card of the Gene expression tab (`gene_card.R`) |
+| `functions/embedding_figure.R`, `cell_details.R` | the embedding plot of a set of cells (`embedding_figure()`); the expressed genes of one cell |
+| `server/` | server code, one file per tab or shared part (see [The server code](#the-server-code)) |
 | `ui/` | the top bar (`page_frame.R`), the tab set (`analysis.R`) and one file per tab (`tab_*.R`, `about.R`) |
 | `www/` | `style.css`, `script.js` and images served to the browser |
 | `tests/` | test suite, see [Tests](#tests) |
@@ -56,6 +57,32 @@ Rules the tests enforce:
   `config/team.yml`;
 - no code uses the column names listed under `unsupported_columns` in
   `config/data_columns.yml`.
+
+## The server code
+
+`server.R` connects the files of `server/`. Each file defines a function
+`<part>_server(input, output, ...)`: the reactives it needs come in as
+arguments, the ones other parts need are returned.
+
+| File | Content | Returns |
+|---|---|---|
+| `data_loading.R` | the expression data of the session, raw or normalized; keeps the two Data type controls in sync | `gene_data`, `data_type`, `cached_data`, `global_loading` |
+| `filter_choices.R` | the choices of the filter menus; the coupling of the broad and detailed stage filters | the choices of each filter |
+| `shared_filters.R` | the filter state shared by the tabs | the filter values of each tab |
+| `tab_embeddings.R` | Embeddings tab: the filtered cells, the single plot, Download Data | |
+| `embedding_controls.R` | axes, point size, gene menus, Combine genes menus and gene links of the embedding plots | |
+| `embedding_compare.R` | Compare Plots: the two plots side by side | |
+| `cell_details.R` | the window with the genes of a cell opened in an embedding plot | |
+| `tab_gene_expression.R` | Gene expression tab: the filtered cells, Group by, adding and removing cards, the name/ID switch | the IDs of the cards |
+| `gene_card.R` | one card of the Gene expression tab: plot, gene links, Data download | |
+| `tab_plots.R` | Metadata plots tab | |
+| `tab_data_table.R`, `tab_qc.R`, `tab_data_sources.R` | Metadata table, QC Plots and Data sources tabs | |
+
+To add a tab: build its page in `ui/tab_<name>.R`, write
+`<name>_tab_server()` in `server/tab_<name>.R`, source it in `global.R`,
+call it from `server.R`, and add its checks to `tests/server/tab_<name>.R`.
+If it has filters, add it to `FILTER_TAB_SUFFIXES` in
+`server/shared_filters.R` and pass it `tab_filters[["<tab title>"]]`.
 
 ## The data column configuration
 

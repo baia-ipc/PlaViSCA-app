@@ -49,6 +49,8 @@ source("functions/plots_gene_distribution.R")
 source("functions/plots_gene_summaries.R")
 source("functions/embedding_plots.R")
 source("functions/embedding_gene_colours.R")
+source("functions/embedding_figure.R")
+source("functions/cell_details.R")
 
 # UI building blocks
 source("functions/helpers_UI.R")
@@ -65,6 +67,10 @@ source("server/tab_qc.R")
 source("server/tab_data_sources.R")
 source("server/tab_gene_expression.R")
 source("server/gene_card.R")
+source("server/tab_embeddings.R")
+source("server/embedding_controls.R")
+source("server/embedding_compare.R")
+source("server/cell_details.R")
 
 # Define a function for memoized data loading.
 load_data <- memoise(function(file_path) {
