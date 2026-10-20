@@ -89,8 +89,8 @@ scale_gene_expression <- function(x, upper = 0.99) {
 
 # Colours of "Each gene separately" from the scaled expression (cells x
 # genes): mixed as red, green and blue up to MAX_GENES_RGB_MIX genes, on the
-# colour wheel above. Returns `colour` (hex, one per cell), `intensity` (the
-# strongest gene, 0..1) and, on the wheel, `dominant` and `share` (see
+# colour wheel above. Returns `colour` (hex, one per cell), `intensity` (0..1:
+# the strongest gene, or on the wheel the total expression) and, on the wheel, `dominant` and `share` (see
 # wheel_gene_colours()).
 each_gene_colours <- function(scaled) {
     if (ncol(scaled) > MAX_GENES_RGB_MIX) {

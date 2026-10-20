@@ -124,9 +124,12 @@ test_that_("colour wheel: hues of the genes and the colour of a cell", {
         expect_true_(hcl_of(wheel_gene_colours(matrix(1, 1, k))$colour)$c < 2,
                      sprintf("%d genes equal: grey", k))
     }
-    weak <- wheel_gene_colours(matrix(c(0.3, 0), 1))
-    expect_true_(mean(rgb_of(weak$colour)) > mean(rgb_of(alone$colour[[1]])),
+    two <- wheel_gene_colours(rbind(c(1, 0, 0, 0), c(0.3, 0, 0, 0)))
+    expect_true_(mean(rgb_of(two$colour[[2]])) > mean(rgb_of(two$colour[[1]])),
                  "lower expression: lighter")
+    cells <- wheel_gene_colours(rbind(c(1, 0, 0, 0), c(1, 1, 0, 0), c(1, 1, 1, 0)))
+    expect_true_(all(diff(cells$intensity) > 0), "darkness follows the total expression of the cell")
+    expect_equal_(cells$intensity[[3]], 1, "the highest total at full darkness")
 })
 
 test_that_("colour wheel: no expression, rare genes and many cells", {
@@ -154,7 +157,13 @@ test_that_("colour wheel key: genes at their hues, gene 1 at the top", {
     expect_equal_(round(key$genes$x[[2]], 6), 1, "gene 2 on the right: clockwise")
     expect_equal_(key$genes$position, c("top center", "middle right", "bottom center", "middle left"),
                   "names outside the wheel")
-    expect_true_(all(abs(sqrt(key$ring$x^2 + key$ring$y^2) - 1) < 1e-9), "ring of radius 1")
+    expect_equal_(dim(key$disc), c(81L, 81L, 4L), "colour disc: RGBA image")
+    expect_equal_(key$disc[1, 1, 4], 0, "transparent outside the disc")
+    centre <- key$disc[41, 41, 1:3]
+    expect_true_(max(centre) - min(centre) <= 2, "grey in the centre")
+    top <- grDevices::rgb(key$disc[81, 41, 1], key$disc[81, 41, 2], key$disc[81, 41, 3], maxColorValue = 255)
+    expect_true_(hue_distance(hcl_of(top)$h, GENE_WHEEL_HUE_OFFSET) < 5, "gene 1's hue at the top of the disc")
+    expect_equal_(nrow(key$spokes), 12L, "one spoke per gene")
 })
 
 test_that_("Each gene separately: red, green, blue up to 3 genes, the wheel above", {
@@ -198,8 +207,9 @@ test_that_("embedding plots coloured by genes: mean, sum and each gene, 2D and 3
                 expect_equal_(length(cells$x), n, sprintf("%s %s %d genes: every cell", combine, dim, length(genes)))
                 if (combine == "each") {
                     expect_true_(is.character(cells$marker$color), "one colour per cell")
-                    expect_true_(grepl("AMA1 5.00", cells$text[[n]]), "hover shows each gene's value")
-                    expect_equal_(as.numeric(cells$key[[n]]), n, "cell keys follow the rows of the data")
+                    last <- which(as.numeric(cells$key) == n)
+                    expect_equal_(length(last), 1L, "cell keys follow the rows of the data")
+                    expect_true_(grepl("AMA1 5.00", cells$text[[last]]), "hover shows each gene's value")
                     expect_true_(length(built$data) > 1, "colour key added")
                 } else {
                     expect_true_(is.numeric(cells$marker$color), "colour scale of the combined value")

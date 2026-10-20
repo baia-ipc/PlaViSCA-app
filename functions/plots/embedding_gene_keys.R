@@ -54,25 +54,36 @@ add_gene_colour_legend <- function(p, genes, coords, position, scale = 1) {
 }
 
 # Colour wheel of the genes (gene_wheel_key()), on axes of its own placed as
-# in `placement` (gene_wheel_placement()), its text scaled by `text_scale`. The
-# gene names and the title reach out of the axes, which do not clip them; the
-# title follows the wheel, which plotly shrinks to keep it round.
+# in `placement` (gene_wheel_placement()), its text scaled by `text_scale`:
+# the colour disc, an outline, a spoke to each gene, the genes on the edge
+# with their names, and the centre. The gene names and the title reach out of
+# the axes, which do not clip them; the title follows the wheel, which plotly
+# shrinks to keep it round.
 add_gene_wheel_key <- function(p, genes, placement, text_scale = 1) {
     key <- gene_wheel_key(genes)
     key_axis <- function(domain, anchor) {
         list(domain = domain, anchor = anchor, range = c(-1.3, 1.3), fixedrange = TRUE,
              visible = FALSE, showgrid = FALSE, zeroline = FALSE)
     }
-    p <- add_trace(p, type = "scatter", mode = "markers", x = key$ring$x, y = key$ring$y,
-                   marker = list(color = key$ring$colour, size = 5 * text_scale),
-                   hoverinfo = "skip", showlegend = FALSE, xaxis = "x2", yaxis = "y2", inherit = FALSE)
+    pixels <- dim(key$disc)[[1]]
+    step <- 2 / (pixels - 1)
+    p <- add_trace(p, type = "image", z = key$disc, colormodel = "rgba", x0 = -1, dx = step,
+                   y0 = -1, dy = step, hoverinfo = "skip", xaxis = "x2", yaxis = "y2", inherit = FALSE)
+    outline <- seq(0, 2 * pi, length.out = 121)
+    p <- add_trace(p, type = "scatter", mode = "lines", x = cos(outline), y = sin(outline),
+                   line = list(color = "rgba(90,90,90,0.6)", width = 1), hoverinfo = "skip",
+                   showlegend = FALSE, xaxis = "x2", yaxis = "y2", inherit = FALSE)
+    p <- add_trace(p, type = "scatter", mode = "lines", x = key$spokes$x, y = key$spokes$y,
+                   line = list(color = "rgba(255,255,255,0.8)", width = 1), hoverinfo = "skip",
+                   showlegend = FALSE, xaxis = "x2", yaxis = "y2", inherit = FALSE)
     p <- add_trace(p, type = "scatter", mode = "markers", x = key$centre$x, y = key$centre$y,
-                   marker = list(color = key$centre$colour, size = 12 * text_scale),
-                   text = "No expression", hoverinfo = "text", showlegend = FALSE,
+                   marker = list(color = "white", size = 6 * text_scale,
+                                 line = list(color = "#333333", width = 1.5)),
+                   text = key$centre$text, hoverinfo = "text", showlegend = FALSE,
                    xaxis = "x2", yaxis = "y2", inherit = FALSE)
     p <- add_trace(p, type = "scatter", mode = "markers+text", x = key$genes$x, y = key$genes$y,
-                   marker = list(color = key$genes$colour, size = 11 * text_scale,
-                                 line = list(color = "white", width = 1)),
+                   marker = list(color = key$genes$colour, size = 10 * text_scale,
+                                 line = list(color = "white", width = 1.5)),
                    text = key$genes$label, textposition = key$genes$position,
                    textfont = list(size = 11 * text_scale), cliponaxis = FALSE,
                    hovertext = key$genes$text, hoverinfo = "text", showlegend = FALSE,

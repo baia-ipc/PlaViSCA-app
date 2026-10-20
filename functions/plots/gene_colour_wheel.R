@@ -7,8 +7,9 @@
 #                weighted by their share of the cell's scaled expression);
 #   saturation   how specific the cell is: one gene gives the full colour,
 #                genes evenly spread around the wheel cancel out to grey;
-#   darkness     how strongly the cell expresses its strongest gene, from
-#                light grey (none) to a dark, saturated colour.
+#   darkness     the total expression of the cell (the sum of its scaled
+#                genes, scaled again to its 99th percentile among the
+#                cells), from light grey (none) to a dark, saturated colour.
 # Colours are computed in HCL (grDevices::hcl()), so that hues of equal
 # chroma and luminance look equally strong. A colour that sRGB cannot show
 # keeps its hue and luminance and loses chroma (wheel_hcl()).
@@ -60,7 +61,8 @@ wheel_gene_hues <- function(k) {
 
 # Colour of cells from their scaled expression (`scaled`: cells x genes,
 # values 0..1, columns in gene order). Returns a list of `colour` (hex, one
-# per cell), `intensity` (the strongest gene of each cell, 0..1), `dominant`
+# per cell), `intensity` (the scaled total expression of each cell, 0..1,
+# which sets its darkness), `dominant`
 # (the column of the gene with the largest share; NA without expression),
 # `share` (its share of the cell's expression) and `hues` (one per gene).
 wheel_gene_colours <- function(scaled) {
@@ -79,7 +81,7 @@ wheel_gene_colours <- function(scaled) {
     specificity <- pmin(sqrt(a^2 + b^2), 1)
     cells <- seq_len(nrow(scaled))
     dominant <- max.col(scaled, ties.method = "first")
-    intensity <- scaled[cbind(cells, dominant)]
+    intensity <- as.numeric(scale_gene_expression(total))
     luminance <- GENE_WHEEL_LUMINANCE[["none"]] +
         (GENE_WHEEL_LUMINANCE[["full"]] - GENE_WHEEL_LUMINANCE[["none"]]) * intensity
     colour <- wheel_hcl((atan2(b, a) * 180 / pi) %% 360, GENE_WHEEL_CHROMA * specificity * intensity,
@@ -91,30 +93,49 @@ wheel_gene_colours <- function(scaled) {
     list(colour = colour, intensity = intensity, dominant = dominant, share = share, hues = hues)
 }
 
-# Colour wheel of the legend, on axes from -1 to 1: a ring of `steps` hues at
-# full colour (`ring`), one point per gene at its hue, with its name
-# (`genes`), and the grey of no expression in the centre (`centre`). Gene 1 is
-# at the top, the others follow clockwise. Each part has columns x, y and
-# colour; `genes` also has the label, its text position and the hover text.
-gene_wheel_key <- function(genes, steps = 72) {
-    at <- function(hue) {
-        angle <- (90 - (hue - GENE_WHEEL_HUE_OFFSET)) * pi / 180
-        list(x = cos(angle), y = sin(angle))
+# Angle (radians, counterclockwise from the x axis) at which the legend draws
+# `hue`: gene 1 at the top, the others clockwise.
+wheel_display_angle <- function(hue) {
+    (90 - (hue - GENE_WHEEL_HUE_OFFSET)) * pi / 180
+}
+
+# Colour disc of the legend: a square image of `pixels` x `pixels` covering
+# -1..1 on both axes, as an array of RGBA values (rows from y = -1 up, 0..255;
+# transparent outside the disc). Each point has the colour of a cell at full
+# intensity whose genes add up to that point: the hue of its angle, and less
+# chroma towards the centre, which is the grey of balanced genes.
+wheel_disc_image <- function(pixels = 81) {
+    at <- seq(-1, 1, length.out = pixels)
+    x <- rep(at, times = pixels)
+    y <- rep(at, each = pixels)
+    radius <- sqrt(x^2 + y^2)
+    hue <- (GENE_WHEEL_HUE_OFFSET + 90 - atan2(y, x) * 180 / pi) %% 360
+    colour <- wheel_hcl(hue, GENE_WHEEL_CHROMA * pmin(radius, 1), GENE_WHEEL_LUMINANCE[["full"]])
+    rgba <- rbind(grDevices::col2rgb(colour), alpha = ifelse(radius <= 1, 255, 0))
+    image <- array(0, c(pixels, pixels, 4))
+    for (channel in 1:4) {
+        image[, , channel] <- matrix(rgba[channel, ], pixels, pixels, byrow = TRUE)
     }
-    full <- function(hue) {
-        wheel_hcl(hue, GENE_WHEEL_CHROMA, GENE_WHEEL_LUMINANCE[["full"]])
-    }
-    ring_hues <- (GENE_WHEEL_HUE_OFFSET + 360 * (seq_len(steps) - 1) / steps) %% 360
-    ring <- as.data.frame(at(ring_hues))
-    ring$colour <- full(ring_hues)
+    image
+}
+
+# Colour wheel of the legend, on axes from -1 to 1: the colour disc
+# (wheel_disc_image()), one point per gene on its edge at the gene's hue,
+# with its name (`genes`, with the text position and hover text of each), a
+# spoke from the centre to each gene (`spokes`: x, y, with NA between
+# spokes) and the centre (`centre`). Gene 1 is at the top, the others follow
+# clockwise.
+gene_wheel_key <- function(genes) {
     hues <- wheel_gene_hues(length(genes))
-    points <- as.data.frame(at(hues))
-    points$colour <- full(hues)
+    angle <- wheel_display_angle(hues)
+    points <- data.frame(x = cos(angle), y = sin(angle))
+    points$colour <- wheel_hcl(hues, GENE_WHEEL_CHROMA, GENE_WHEEL_LUMINANCE[["full"]])
     points$label <- genes
     points$position <- ifelse(points$x > 0.3, "middle right",
                        ifelse(points$x < -0.3, "middle left",
                        ifelse(points$y > 0, "top center", "bottom center")))
     points$text <- paste0(genes, " only")
-    none <- grDevices::rgb(GENE_COLOUR_NONE[1], GENE_COLOUR_NONE[2], GENE_COLOUR_NONE[3])
-    list(ring = ring, genes = points, centre = data.frame(x = 0, y = 0, colour = none))
+    spokes <- data.frame(x = as.vector(rbind(0, points$x, NA)), y = as.vector(rbind(0, points$y, NA)))
+    list(disc = wheel_disc_image(), genes = points, spokes = spokes,
+         centre = data.frame(x = 0, y = 0, text = "Genes mixed in balance: grey"))
 }
