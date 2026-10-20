@@ -89,11 +89,11 @@ With *Each gene separately*, the expression of each gene is scaled to 0–1 with
 
 *2 or 3 genes*: light grey where no gene is expressed, red for the first gene, green for the second, blue for the third. Co-expression gives mixed colors: red + green = yellow, red + blue = magenta, green + blue = cyan, all three = dark grey. For 2 genes, a color grid (by default right of the plot) shows the color of each combination of the two expression values; for 3 genes, the legend lists the color of each gene and of their combinations. Example: select CSP and AMA1 (*Each gene separately* is chosen by default), to see the cells expressing CSP (red), AMA1 (green) or both (yellow).
 
-*4 to 8 genes*: the genes get evenly spaced colors around a color wheel, in the order in which they were selected: the first gene is red and is at the top of the wheel, the others follow clockwise. The wheel, by default right of the plot, shows each gene at its color. To read the color of a cell:
+*4 to 8 genes*: the genes get evenly spaced colors around a color wheel, in the order in which they were selected: the first gene is red and is at the top of the wheel, the others follow clockwise. The wheel, by default right of the plot, shows each gene at its color around a color disc: the disc gives the color of a strongly expressing cell from the mix of its genes, with mixed colors between neighboring genes and grey in the center, where genes in balance cancel out. To read the color of a cell:
 
 - **hue**: which genes the cell expresses. A cell expressing one gene has that gene's color; a cell expressing two neighboring genes on the wheel has a color between theirs.
 - **saturation**: how specific the cell is. One gene gives a strong color; several genes mix toward grey.
-- **darkness**: how strongly the cell expresses its strongest gene, from light grey (no expression) to a dark, strong color.
+- **darkness**: the total expression of the cell: the sum of its scaled genes, with full darkness at the 99th percentile of this sum among the cells shown. It goes from light grey (no expression) to a dark, strong color, so a cell expressing several genes is darker than a cell expressing one of them at the same level.
 
 The hover text also gives the gene with the largest share of the cell's expression (e.g. *Dominant: CSP (72%)*). Genes opposite each other on the wheel cancel out: a cell expressing both equally is grey, as is a cell expressing all genes equally. Select genes that you expect in the same cells one after the other, so that they get neighboring colors. With many genes, neighboring colors are hard to tell apart: from about 6 genes, check the hover text, or use *Mean* or *Sum*.
 
