@@ -81,6 +81,10 @@ figures:
       - [fig5_side_by_side]
       - [fig5_gene_dotplot, fig5_metadata_sunburst]
     output: fig5_app_views.png
-``` Each
+    tiff: plos/Fig5.tif
+```
+
+`tiff` (optional) also saves the figure as an LZW-compressed TIFF, the
+format of a PLOS submission. Each
 shot starts from a freshly loaded app, and is saved only once the server is
 idle, no output is recalculating and every visible plot is drawn.

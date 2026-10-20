@@ -100,3 +100,4 @@ figures:
       - [fig5_side_by_side]
       - [fig5_gene_dotplot, fig5_metadata_sunburst]
     output: fig5_app_views.png
+    tiff: plos/Fig5.tif   # for the PLOS submission (LZW, 600 dpi)

@@ -179,8 +179,9 @@ def main():
             names = [n for row in figure["rows"] for n in row]
             if all(n in taken for n in names):
                 rows = [[paths[n] for n in row] for row in figure["rows"]]
-                compose_figure(rows, out_dir / figure["output"])
-                print(f"{figure['name']}: {out_dir / figure['output']}")
+                tiff = out_dir / figure["tiff"] if "tiff" in figure else None
+                compose_figure(rows, out_dir / figure["output"], tiff)
+                print(f"{figure['name']}: {out_dir / figure['output']}" + (f", {tiff}" if tiff else ""))
     finally:
         if app:
             stop_app(app)

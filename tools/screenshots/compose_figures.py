@@ -46,9 +46,11 @@ def compose_row(images, gap):
     return row, offsets, images
 
 
-def compose_figure(rows, out, gap=60, label_size=90, margin=110):
-    """Save the figure made of `rows` (lists of image paths) to `out`. Each
-    panel gets a white band of `margin` pixels above it with its letter."""
+def compose_figure(rows, out, tiff=None, gap=60, label_size=90, margin=110):
+    """Save the figure made of `rows` (lists of image paths) to `out`, and,
+    if `tiff` is given, also there as an LZW-compressed TIFF (the format of a
+    PLOS submission). Each panel gets a white band of `margin` pixels above
+    it with its letter."""
     panels = [[Image.open(p).convert("RGB") for p in row] for row in rows]
     built = [compose_row(row, gap) for row in panels]
     width = max(row.width for row, _, _ in built)
@@ -70,3 +72,6 @@ def compose_figure(rows, out, gap=60, label_size=90, margin=110):
         y += margin + row.height + gap
     Path(out).parent.mkdir(parents=True, exist_ok=True)
     figure.save(out, dpi=(600, 600))
+    if tiff:
+        Path(tiff).parent.mkdir(parents=True, exist_ok=True)
+        figure.save(tiff, dpi=(600, 600), compression="tiff_lzw")
