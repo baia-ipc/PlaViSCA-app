@@ -968,7 +968,9 @@ table.dataTable thead th {
 }
 
 /* "Genes" choice of the Color by menus: first and set apart from the
-   categories, since it opens the gene menu */
+   categories, since it opens the gene menu. The triangle after the label
+   comes from CSS, so that the R sources stay ASCII and the label renders
+   the same whatever the locale of the server. */
 .selectize-dropdown .option[data-value="genes"] {
   font-weight: 700;
   color: var(--primary-color);
@@ -977,6 +979,11 @@ table.dataTable thead th {
 
 .header-color-by .selectize-input .item[data-value="genes"] {
   font-weight: 700;
+}
+
+.selectize-dropdown .option[data-value="genes"]::after,
+.selectize-input .item[data-value="genes"]::after {
+  content: " \25B8";
 }
 
 /* "Color by" of the single plot, in the dark title bar */

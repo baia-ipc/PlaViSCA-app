@@ -112,11 +112,11 @@ filter_data_columns <- function() {
 }
 
 #' "Color by" / "Group by" choices, plus the pseudo-option for genes: first,
-#' as "Genes" with a triangle (it opens the gene menu), styled apart in
+#' as "Genes" (it opens the gene menu), styled apart and given a triangle in
 #' www/style.css.
 category_choices <- function(include_genes = TRUE) {
     choices <- field_choices(category_field_keys())
-    if (include_genes) choices <- c(list("Genes \u25b8" = "genes"), choices)
+    if (include_genes) choices <- c(list("Genes" = "genes"), choices)
     choices
 }
 
