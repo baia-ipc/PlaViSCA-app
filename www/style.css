@@ -668,7 +668,7 @@ body {
 
 .comparison-card[data-full-screen="true"] .comparison-plot-area {
   flex: 1 1 auto;
-  height: auto;
+  height: auto !important;
   min-height: 0;
 }
 
@@ -876,8 +876,34 @@ table.dataTable thead th {
   min-height: 0;
 }
 
-#single_plot_panel .card[data-full-screen="true"] {
-  height: auto !important;
+/* An expanded (full-screen) card is positioned relative to the window only
+   while no ancestor has a backdrop filter or transform: the cards around it
+   drop their glass effect while it is expanded */
+#analysis_section .card:has([data-full-screen="true"]),
+#analysis_section .card-body:has([data-full-screen="true"]) {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  transform: none !important;
+}
+
+/* The plot cards of the Embeddings tab can be dragged taller or shorter by
+   their bottom-right corner (not while expanded); the expand button moves
+   left of the corner handle. The comparison plots follow each other
+   (script.js), so dragging one resizes both. */
+.plot-resizable {
+  resize: vertical;
+  overflow: hidden !important;
+  min-height: 250px;
+}
+
+[data-full-screen="true"] .plot-resizable,
+.plot-resizable[data-full-screen="true"] {
+  resize: none;
+}
+
+.plot-resizable,
+.comparison-card {
+  --bslib-full-screen-enter-right: 1.2rem;
 }
 
 #analysis_section .bslib-value-box.bg-studies,

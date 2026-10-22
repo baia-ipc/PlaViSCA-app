@@ -390,6 +390,26 @@ document.addEventListener('bslib.sidebar', function () {
   setTimeout(function () { window.dispatchEvent(new Event('resize')); }, 400);
 });
 
+// Dragging the corner of a resizable plot card changes its height: let the
+// plot inside redraw at the new size (plotly listens to window resize). The
+// two comparison plots keep the same height: dragging one resizes the other.
+$(function () {
+  if (typeof ResizeObserver === 'undefined') return;
+  let timer = null;
+  const observer = new ResizeObserver(function (entries) {
+    entries.forEach(function (entry) {
+      const el = entry.target;
+      if (!el.classList.contains('comparison-plot-area') || el.closest('[data-full-screen="true"]')) return;
+      document.querySelectorAll('.comparison-plot-area').forEach(function (other) {
+        if (other !== el && other.style.height !== el.style.height) other.style.height = el.style.height;
+      });
+    });
+    clearTimeout(timer);
+    timer = setTimeout(function () { window.dispatchEvent(new Event('resize')); }, 150);
+  });
+  document.querySelectorAll('.plot-resizable').forEach(function (el) { observer.observe(el); });
+});
+
 // The fold button of the plot settings sidebars says what it opens.
 $(function () {
   $('.plot-settings-layout .collapse-toggle').attr('title', 'Plot settings');

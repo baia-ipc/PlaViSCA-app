@@ -79,7 +79,7 @@ ui_tab_embeddings <- function() {
             card(
               full_screen = TRUE,
               height = "650px",
-              class = "mb-0",
+              class = "mb-0 plot-resizable",
               withSpinner(
                 type = 6,
                 size = 0.5,
@@ -311,7 +311,7 @@ comparison_plot_card <- function(side, title, colour, color_id, selected, plot_i
     card_body(
       div(class = "comparison-gene-slot", gene_panel),
       div(
-        class = "comparison-plot-area",
+        class = "comparison-plot-area plot-resizable",
         withSpinner(
           type = 6,
           size = 0.4,
