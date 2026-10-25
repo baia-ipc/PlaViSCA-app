@@ -156,6 +156,142 @@ shots:
     element: "#dynamic_col_0 .card"
 
 
+  # S7 Fig: the plot types of the Gene expression tab not shown elsewhere,
+  # on four stage markers (AMA1, blood schizonts; P25, gametocytes; CSP,
+  # sporozoites; LISP2, liver stages): (A) box plot of ACT1 by life-cycle
+  # stage, split by study; (B) Cleveland dot plot of the % of cells detecting
+  # each gene, by stage, one point per study; (C) heatmap of the % detecting,
+  # scaled per gene; (D) violin plots, one row per gene, by broad stage.
+  # Only the plot is captured; the settings are in the caption.
+  - name: s7_box
+    tab: Gene expression
+    steps:
+      - drawn: true
+      - select: {id: plot_type_exp_0, value: box}
+      - select: {id: group_exp_0, value: stage}
+      - select: {id: split_exp_0, value: study_label}
+      - js: >-
+          (() => { const s = document.getElementById('genes_exp_0').selectize;
+          const genes = ['ACT1'];
+          genes.forEach(g => s.addOption({value: g, label: g}));
+          s.setValue(genes); })()
+      - drawn: true
+    element: "#gene_exp_plotly_0"
+
+  - name: s7_cleveland
+    tab: Gene expression
+    steps:
+      - drawn: true
+      - select: {id: plot_type_exp_0, value: cleveland}
+      - select: {id: group_exp_0, value: stage}
+      - select: {id: points_exp_0, value: study_label}
+      - select: {id: value_exp_0, value: percent}
+      - js: >-
+          (() => { const s = document.getElementById('genes_exp_0').selectize;
+          const genes = ['AMA1', 'P25', 'CSP', 'LISP2'];
+          genes.forEach(g => s.addOption({value: g, label: g}));
+          s.setValue(genes); })()
+      - drawn: true
+    element: "#gene_exp_plotly_0"
+
+  - name: s7_heatmap
+    tab: Gene expression
+    steps:
+      - drawn: true
+      - select: {id: plot_type_exp_0, value: heatmap}
+      - select: {id: group_exp_0, value: stage}
+      - select: {id: value_exp_0, value: percent}
+      - js: >-
+          (() => { const s = document.getElementById('genes_exp_0').selectize;
+          const genes = ['AMA1', 'P25', 'CSP', 'LISP2'];
+          genes.forEach(g => s.addOption({value: g, label: g}));
+          s.setValue(genes); })()
+      - drawn: true
+    element: "#gene_exp_plotly_0"
+
+  - name: s7_violin_each
+    tab: Gene expression
+    steps:
+      - drawn: true
+      - select: {id: plot_type_exp_0, value: violin}
+      - select: {id: group_exp_0, value: broad_stage}
+      - select: {id: split_exp_0, value: none}
+      - js: >-
+          (() => { const s = document.getElementById('genes_exp_0').selectize;
+          const genes = ['AMA1', 'P25', 'CSP', 'LISP2'];
+          genes.forEach(g => s.addOption({value: g, label: g}));
+          s.setValue(genes); })()
+      - wait: 3
+      - select: {id: combine_exp_0, value: each}
+      - js: >-
+          (() => { const p = document.getElementById('gene_exp_plotly_0'); p.style.height = '700px';
+          window.dispatchEvent(new Event('resize')); })()
+      - drawn: true
+    element: "#gene_exp_plotly_0"
+
+  # S8 Fig: the plot types of the Metadata plots tab not shown elsewhere,
+  # cells by study (A, B) and by study and life-cycle stage (C-F): bar chart,
+  # pie chart, stacked bars as percentages, grouped bars, heatmap, one pie
+  # per study. Only the plot is captured.
+  - name: s8_bar
+    tab: Metadata plots
+    steps:
+      - drawn: true
+      - select: {id: plot_builder_1-type, value: bar}
+      - select: {id: plot_builder_1-field, value: study_label}
+      - drawn: true
+    element: "#plot_builder_1-plot"
+
+  - name: s8_pie
+    tab: Metadata plots
+    steps:
+      - drawn: true
+      - select: {id: plot_builder_1-type, value: pie}
+      - select: {id: plot_builder_1-field, value: study_label}
+      - drawn: true
+    element: "#plot_builder_1-plot"
+
+  - name: s8_stacked
+    tab: Metadata plots
+    steps:
+      - drawn: true
+      - select: {id: plot_builder_1-type, value: stacked}
+      - select: {id: plot_builder_1-field, value: study_label}
+      - select: {id: plot_builder_1-split_by, value: detailed_stage}
+      - click: "input[name='plot_builder_1-show_as'][value='percent']"
+      - drawn: true
+    element: "#plot_builder_1-plot"
+
+  - name: s8_grouped
+    tab: Metadata plots
+    steps:
+      - drawn: true
+      - select: {id: plot_builder_1-type, value: grouped}
+      - select: {id: plot_builder_1-field, value: study_label}
+      - select: {id: plot_builder_1-split_by, value: detailed_stage}
+      - drawn: true
+    element: "#plot_builder_1-plot"
+
+  - name: s8_heatmap
+    tab: Metadata plots
+    steps:
+      - drawn: true
+      - select: {id: plot_builder_1-type, value: heatmap}
+      - select: {id: plot_builder_1-field, value: study_label}
+      - select: {id: plot_builder_1-split_by, value: detailed_stage}
+      - drawn: true
+    element: "#plot_builder_1-plot"
+
+  - name: s8_pies
+    tab: Metadata plots
+    steps:
+      - drawn: true
+      - select: {id: plot_builder_1-type, value: pies}
+      - select: {id: plot_builder_1-field, value: study_label}
+      - select: {id: plot_builder_1-split_by, value: detailed_stage}
+      - drawn: true
+    element: "#plot_builder_1-plot"
+
 figures:
   - name: fig5_app_views
     rows:
@@ -170,3 +306,17 @@ figures:
       - [s6_gene_violin]
     output: s6_fig_gene_exploration.png
     tiff: plos/S6_Fig.tif
+
+  - name: s7_fig_gene_plot_types
+    rows:
+      - [s7_box, s7_cleveland]
+      - [s7_heatmap, s7_violin_each]
+    output: s7_fig_gene_plot_types.png
+    tiff: plos/S7_Fig.tif
+
+  - name: s8_fig_metadata_plot_types
+    rows:
+      - [s8_bar, s8_pie, s8_stacked]
+      - [s8_grouped, s8_heatmap, s8_pies]
+    output: s8_fig_metadata_plot_types.png
+    tiff: plos/S8_Fig.tif
