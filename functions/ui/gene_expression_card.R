@@ -23,8 +23,7 @@ gene_expression_card <- function(i) {
             options = DROPDOWN_ON_BODY
           )
         ),
-        column(width = 6, gene_select(i)),
-        column(width = 2, gene_link_buttons(i))
+        column(width = 8, div(class = "d-flex align-items-end gap-2", gene_select(i), gene_link_buttons(i)))
       ),
       gene_plot_options_row(i),
       withSpinner(plotlyOutput(paste0("gene_exp_plotly_", i), height = "400px"), type = 6, size = 0.5, color = "#3498db"),
@@ -113,12 +112,16 @@ gene_plot_options_row <- function(i) {
   )
 }
 
-# `ui`, shown only while the plot type of card `i` uses `option`.
+# `ui`, shown only while the plot type of card `i` uses `option`; the
+# "Combine genes" menu also needs at least two genes.
 gene_plot_option <- function(i, option, ui) {
   types <- names(Filter(function(opts) option %in% opts, GENE_PLOT_OPTIONS))
   condition <- sprintf(
     "[%s].indexOf(input['plot_type_exp_%s']) >= 0",
     paste0("'", types, "'", collapse = ", "), i
   )
+  if (option == "combine") {
+    condition <- sprintf("%s && input['genes_exp_%s'] && input['genes_exp_%s'].length > 1", condition, i, i)
+  }
   conditionalPanel(condition, ui)
 }

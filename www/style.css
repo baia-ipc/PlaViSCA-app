@@ -1211,9 +1211,10 @@ table.dataTable thead th {
   background: rgba(40, 167, 69, 0.02);
 }
 
-/* Gene select wrapper */
+/* Gene select wrapper: as wide as the gene menu, the links follow it */
 .gene-select-wrapper {
-  width: 100%;
+  width: 300px;
+  max-width: 100%;
 }
 
 .gene-select-wrapper label.control-label {
@@ -1223,10 +1224,10 @@ table.dataTable thead th {
 }
 
 /* Links row - used for gene links alignment */
+/* PlasmoDB and NCBI buttons, right after the gene menu */
 .links-row {
   display: flex;
   align-items: center;
-  justify-content: flex-end;
   gap: 6px;
   height: 38px;
   /* Match standard Bootstrap input height */

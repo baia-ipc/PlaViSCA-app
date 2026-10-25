@@ -63,25 +63,48 @@ distribution_plot <- function(data, values, group_col, split_col, kind, title = 
         signif(df$expr, 3), signif(st[, "mean"], 3), signif(st[, "sd"], 3), format_cells(st[, "n"])
     )
 
+    # Without a split, one trace per group, drawn over each other. With a
+    # split, one trace per group and split value, side by side: the traces
+    # of a group take the slots 1, 2, ... in the order of the split values
+    # present in it (offsetgroup), so that a group with fewer split values
+    # than the plot does not keep empty slots, and the legend has one entry
+    # per split value.
     p <- plot_ly()
+    legend_done <- character(0)
+    style <- if (kind == "violin") {
+        list(box = list(visible = TRUE), meanline = list(visible = TRUE),
+             points = if (is.null(split_col)) "all" else FALSE, jitter = 0.3,
+             pointpos = 0, scalemode = "width", spanmode = "hard", bandwidth = 0.2)
+    } else {
+        list(boxpoints = FALSE, boxmean = TRUE)
+    }
+    add_distribution <- function(p, rows, i, slot = NULL) {
+        label <- colour_labels[[i]]
+        trace <- list(
+            p, x = df$x[rows], y = df$expr[rows], type = kind,
+            name = label, legendgroup = label,
+            line = list(color = colours[[i]]), fillcolor = colours[[i]],
+            marker = list(color = colours[[i]], size = 2, opacity = 0.5),
+            text = hover[rows], hoverinfo = "text",
+            showlegend = show_legend && !is.null(split_col) && !label %in% legend_done
+        )
+        if (!is.null(slot)) trace <- c(trace, list(alignmentgroup = "groups", offsetgroup = as.character(slot)))
+        legend_done <<- union(legend_done, label)
+        do.call(add_trace, c(trace, style))
+    }
     for (i in seq_along(colour_levels)) {
         rows <- df[[colour_col]] == colour_levels[[i]]
         if (!any(rows)) next
-        trace <- list(
-            p, x = df$x[rows], y = df$expr[rows], type = kind,
-            name = colour_labels[[i]], legendgroup = colour_labels[[i]],
-            line = list(color = colours[[i]]), fillcolor = colours[[i]],
-            marker = list(color = colours[[i]], size = 2, opacity = 0.5),
-            text = hover[rows], hoverinfo = "text", showlegend = show_legend && !is.null(split_col)
-        )
-        trace <- c(trace, if (kind == "violin") {
-            list(box = list(visible = TRUE), meanline = list(visible = TRUE),
-                 points = if (is.null(split_col)) "all" else FALSE, jitter = 0.3,
-                 pointpos = 0, scalemode = "count", spanmode = "hard", bandwidth = 0.2)
-        } else {
-            list(boxpoints = FALSE, boxmean = TRUE)
-        })
-        p <- do.call(add_trace, trace)
+        if (is.null(split_col)) {
+            p <- add_distribution(p, rows, i)
+            next
+        }
+        for (group in group_labels) {
+            group_rows <- df$x == group
+            present <- colour_levels[colour_levels %in% df[[colour_col]][group_rows]]
+            if (!colour_levels[[i]] %in% present) next
+            p <- add_distribution(p, rows & group_rows, i, slot = match(colour_levels[[i]], present))
+        }
     }
     mode <- if (is.null(split_col)) "overlay" else "group"
     p <- layout(
@@ -92,9 +115,13 @@ distribution_plot <- function(data, values, group_col, split_col, kind, title = 
         yaxis = list(title = y_title),
         legend = list(title = list(text = if (is.null(split_col)) "" else get_label_for_column(split_col)))
     )
-    # plotly.js knows violinmode, but the attribute check of the R package
-    # warns about it: set it only where it is needed
+    # plotly.js knows violinmode and the gaps between the plots, but the
+    # attribute check of the R package warns about them: set violinmode only
+    # where it is needed, and the gaps (smaller than the default 0.3, so that
+    # the plots are wider) in the browser, once the plot is drawn
     if (kind == "violin" && !is.null(split_col)) p <- layout(p, violinmode = mode)
+    gaps <- if (kind == "violin") "{violingap: 0.15, violingroupgap: 0.1}" else "{boxgap: 0.15, boxgroupgap: 0.1}"
+    p <- htmlwidgets::onRender(p, sprintf("function(el) { Plotly.relayout(el, %s); }", gaps))
     p
 }
 

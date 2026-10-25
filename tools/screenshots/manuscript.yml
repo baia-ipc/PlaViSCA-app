@@ -151,7 +151,7 @@ shots:
       # red box around the PlasmoDB and NCBI buttons, referred to in the caption
       - js: >-
           (() => { const b = document.querySelector("#dynamic_col_0 .links-row");
-          b.style.width = "fit-content"; b.style.marginLeft = "auto"; b.style.outline = "3px solid red"; b.style.outlineOffset = "4px"; })()
+          b.style.outline = "3px solid red"; b.style.outlineOffset = "4px"; })()
       - wait: 1
     element: "#dynamic_col_0 .card"
 
