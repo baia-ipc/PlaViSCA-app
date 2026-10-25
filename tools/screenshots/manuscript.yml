@@ -94,11 +94,11 @@ shots:
       - drawn: true
     element: "#plot_builder_1_column .card"
 
-  # S6 Fig: exploration of one gene (AMA1) in the app. (A) Integrated 2D UMAP
+  # S6 Fig: exploration of one gene (ACT1) in the app. (A) Integrated 2D UMAP
   # coloured by its expression, with the gene row (search by name, PlasmoDB
   # and NCBI buttons) above the plot; (B) the same in 3D; (C) Gene expression
   # card, widened to the window: violin plot by life-cycle stage, split by
-  # study; (D) the gene row alone, narrowed so that the buttons are legible.
+  # study, with a red box around the PlasmoDB and NCBI buttons.
   # Composed into s6_fig_gene_exploration.png (figures: below).
   - name: s6_gene_2d
     tab: Embeddings
@@ -110,11 +110,11 @@ shots:
       - wait: 8
       - js: >-
           (() => { const s = document.getElementById('genes_n').selectize;
-          s.addOption({value: 'AMA1', label: 'AMA1'}); s.setValue(['AMA1']); })()
+          s.addOption({value: 'ACT1', label: 'ACT1'}); s.setValue(['ACT1']); })()
       - wait: 5
       - js: >-
           (() => { const s = document.getElementById('genes_n').selectize;
-          s.addOption({value: 'AMA1', label: 'AMA1'}); s.setValue(['AMA1']); })()
+          s.addOption({value: 'ACT1', label: 'ACT1'}); s.setValue(['ACT1']); })()
       - drawn: true
     element: "#single_plot_panel"
 
@@ -127,11 +127,11 @@ shots:
       - wait: 8
       - js: >-
           (() => { const s = document.getElementById('genes_n').selectize;
-          s.addOption({value: 'AMA1', label: 'AMA1'}); s.setValue(['AMA1']); })()
+          s.addOption({value: 'ACT1', label: 'ACT1'}); s.setValue(['ACT1']); })()
       - wait: 5
       - js: >-
           (() => { const s = document.getElementById('genes_n').selectize;
-          s.addOption({value: 'AMA1', label: 'AMA1'}); s.setValue(['AMA1']); })()
+          s.addOption({value: 'ACT1', label: 'ACT1'}); s.setValue(['ACT1']); })()
       - drawn: true
     element: "#single_plot_panel"
 
@@ -146,30 +146,15 @@ shots:
       - select: {id: split_exp_0, value: study_label}
       - js: >-
           (() => { const s = document.getElementById('genes_exp_0').selectize;
-          s.addOption({value: 'AMA1', label: 'AMA1'}); s.setValue(['AMA1']); })()
+          s.addOption({value: 'ACT1', label: 'ACT1'}); s.setValue(['ACT1']); })()
       - drawn: true
+      # red box around the PlasmoDB and NCBI buttons, referred to in the caption
+      - js: >-
+          (() => { const b = document.querySelector("#dynamic_col_0 .links-row");
+          b.style.width = "fit-content"; b.style.marginLeft = "auto"; b.style.outline = "3px solid red"; b.style.outlineOffset = "4px"; })()
+      - wait: 1
     element: "#dynamic_col_0 .card"
 
-  - name: s6_gene_links
-    tab: Embeddings
-    steps:
-      - click: ".tab-pane.active .plot-settings-layout .collapse-toggle"
-      - click: "input[name='plot'][value='2d']"
-      - drawn: true
-      - select: {id: color, value: genes}
-      - wait: 8
-      - js: >-
-          (() => { const s = document.getElementById('genes_n').selectize;
-          s.addOption({value: 'AMA1', label: 'AMA1'}); s.setValue(['AMA1']); })()
-      - wait: 5
-      - js: >-
-          (() => { const s = document.getElementById('genes_n').selectize;
-          s.addOption({value: 'AMA1', label: 'AMA1'}); s.setValue(['AMA1']); })()
-      - js: >-
-          (() => { const p = document.querySelector(".single-gene-panel"); p.style.maxWidth = "700px"; p.querySelector(".embedding-gene-row").style.maxWidth = "700px"; })()
-      - wait: 1
-      - drawn: true
-    element: ".single-gene-panel .embedding-gene-row"
 
 figures:
   - name: fig5_app_views
@@ -183,6 +168,5 @@ figures:
     rows:
       - [s6_gene_2d, s6_gene_3d]
       - [s6_gene_violin]
-      - [s6_gene_links]
     output: s6_fig_gene_exploration.png
     tiff: plos/S6_Fig.tif
