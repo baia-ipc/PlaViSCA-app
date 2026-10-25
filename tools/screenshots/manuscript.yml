@@ -156,6 +156,56 @@ shots:
     element: "#dynamic_col_0 .card"
 
 
+  # (D) two genes, each in its own colour, with the colour grid of their
+  # combinations; (E) six genes around the colour wheel.
+  - name: s6_gene_grid
+    tab: Embeddings
+    steps:
+      - click: ".tab-pane.active .plot-settings-layout .collapse-toggle"
+      - click: "input[name='plot'][value='2d']"
+      - drawn: true
+      - select: {id: color, value: genes}
+      - wait: 8
+      - js: >-
+          (() => { const s = document.getElementById('genes_n').selectize;
+          const genes = ['DBP', 'AMA1'];
+          genes.forEach(g => s.addOption({value: g, label: g}));
+          s.setValue(genes); })()
+      - wait: 5
+      - js: >-
+          (() => { const s = document.getElementById('genes_n').selectize;
+          const genes = ['DBP', 'AMA1'];
+          genes.forEach(g => s.addOption({value: g, label: g}));
+          s.setValue(genes); })()
+      - drawn: true
+      - select: {id: combine_genes, value: each}
+      - drawn: true
+    element: "#single_plot_panel"
+
+  - name: s6_gene_wheel
+    tab: Embeddings
+    steps:
+      - click: ".tab-pane.active .plot-settings-layout .collapse-toggle"
+      - click: "input[name='plot'][value='2d']"
+      - drawn: true
+      - select: {id: color, value: genes}
+      - wait: 8
+      - js: >-
+          (() => { const s = document.getElementById('genes_n').selectize;
+          const genes = ['CSP', 'LISP2', 'SBP1', 'PM4', 'AMA1', 'P25'];
+          genes.forEach(g => s.addOption({value: g, label: g}));
+          s.setValue(genes); })()
+      - wait: 5
+      - js: >-
+          (() => { const s = document.getElementById('genes_n').selectize;
+          const genes = ['CSP', 'LISP2', 'SBP1', 'PM4', 'AMA1', 'P25'];
+          genes.forEach(g => s.addOption({value: g, label: g}));
+          s.setValue(genes); })()
+      - drawn: true
+      - select: {id: combine_genes, value: each}
+      - drawn: true
+    element: "#single_plot_panel"
+
   # S7 Fig: the plot types of the Gene expression tab not shown elsewhere,
   # on four stage markers (AMA1, blood schizonts; P25, gametocytes; CSP,
   # sporozoites; LISP2, liver stages): (A) box plot of ACT1 by life-cycle
@@ -304,6 +354,7 @@ figures:
     rows:
       - [s6_gene_2d, s6_gene_3d]
       - [s6_gene_violin]
+      - [s6_gene_grid, s6_gene_wheel]
     output: s6_fig_gene_exploration.png
     tiff: plos/S6_Fig.tif
 
