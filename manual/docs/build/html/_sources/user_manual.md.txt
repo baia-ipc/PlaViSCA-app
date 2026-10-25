@@ -99,6 +99,8 @@ The hover text also gives the gene with the largest share of the cell's expressi
 
 **Visualization bar**: the title bar of the plot holds **Color by** and the **Compare Plots** and **Download Data** buttons.
 
+**Plot size**: drag the bottom-right corner of the plot card to make it taller or shorter (in Compare Plots mode, both plots follow). The expand button next to the corner, shown when the mouse is over the plot, shows the plot full screen; close it with the button again or with Esc.
+
 **Compare Plots mode**: Click **Compare Plots** to display two independent plots (Plot A and Plot B) side-by-side, each with its own **Color by** selector in its title bar; a plot colored by genes has its own gene row between its title bar and the plot, and the two plots stay aligned. In 2D, the legends sit below the plots by default, so that they do not cover cells; the two plots share the plot settings, including the legend position and size.
 
 **Interactive Cell Selection**: Click any cell to open a modal dialog showing a per-cell gene expression table (gene ID, gene name, expression value, description). The table is filterable and exportable as CSV.
