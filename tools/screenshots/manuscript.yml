@@ -211,6 +211,21 @@ shots:
       - drawn: true
     element: "#single_plot_panel"
 
+  # (F) the window opened by a double-click (or right-click) on a cell of an
+  # embedding: the genes the cell expresses, sorted by expression. The
+  # double-click is simulated by calling the page's openCellDetails() with the
+  # key (row number) of the first plotted cell.
+  - name: s6_cell_details
+    tab: Embeddings
+    steps:
+      - click: ".tab-pane.active .plot-settings-layout .collapse-toggle"
+      - click: "input[name='plot'][value='2d']"
+      - drawn: true
+      - js: "openCellDetails(1)"
+      - wait_for: ".modal-dialog table"
+      - wait: 4
+    element: ".modal-content"
+
   # S7 Fig: the plot types of the Gene expression tab not shown elsewhere,
   # on four stage markers (AMA1, blood schizonts; P25, gametocytes; CSP,
   # sporozoites; LISP2, liver stages): (A) box plot of ACT1 by life-cycle
@@ -360,6 +375,7 @@ figures:
       - [s6_gene_2d, s6_gene_3d]
       - [s6_gene_violin]
       - [s6_gene_grid, s6_gene_wheel]
+      - [s6_cell_details]
     output: s6_fig_gene_exploration.png
     tiff: plos/S6_Fig.tif
 

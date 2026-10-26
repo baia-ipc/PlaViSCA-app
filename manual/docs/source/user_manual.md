@@ -103,7 +103,7 @@ The hover text also gives the gene with the largest share of the cell's expressi
 
 **Compare Plots mode**: Click **Compare Plots** to display two independent plots (Plot A and Plot B) side-by-side, each with its own **Color by** selector in its title bar; a plot colored by genes has its own gene row between its title bar and the plot, and the two plots stay aligned. In 2D, the legends sit below the plots by default, so that they do not cover cells; the two plots share the plot settings, including the legend position and size.
 
-**Interactive Cell Selection**: Click any cell to open a modal dialog showing a per-cell gene expression table (gene ID, gene name, expression value, description). The table is filterable and exportable as CSV.
+**Cell details**: double-click (or right-click) a cell to open a window with the genes it expresses, sorted by expression (gene ID, gene name, expression value, description). The table can be searched, filtered and exported as CSV.
 
 **Download Data**: Exports the currently filtered metadata as a CSV file.
 
