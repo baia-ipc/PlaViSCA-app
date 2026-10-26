@@ -133,6 +133,11 @@ shots:
           (() => { const s = document.getElementById('genes_n').selectize;
           s.addOption({value: 'ACT1', label: 'ACT1'}); s.setValue(['ACT1']); })()
       - drawn: true
+      # closer camera than the default (eye at 1.25 on each axis)
+      - js: >-
+          (() => { Plotly.relayout(document.getElementById('all_plotly'),
+          {'scene.camera.eye': {x: 0.85, y: 0.85, z: 0.85}}); })()
+      - wait: 4
     element: "#single_plot_panel"
 
   - name: s6_gene_violin
