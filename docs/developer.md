@@ -209,7 +209,7 @@ rebuild and commit it after editing the pages:
 
 ```bash
 pip install sphinx myst-parser sphinx-rtd-theme
-sphinx-build -E -b html manual/docs/source manual/docs/build/html
+sphinx-build -E -d manual/docs/build/doctrees -b html manual/docs/source manual/docs/build/html
 ```
 
 The images in `manual/docs/source/imgs/` are screenshots of the app, made with

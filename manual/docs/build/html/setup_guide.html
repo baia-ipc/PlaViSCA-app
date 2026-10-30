@@ -68,6 +68,14 @@
 <li class="toctree-l3"><a class="reference internal" href="#run-the-application">4. Run the Application</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#serving-several-users">Serving Several Users</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#why-one-r-process-is-a-bottleneck">Why one R process is a bottleneck</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#several-instances-behind-nginx">Several instances behind nginx</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#alternatives">Alternatives</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sizing">Sizing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#locale">Locale</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#troubleshooting">Troubleshooting</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#contact">Contact</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#source-code">Source Code</a></li>
@@ -109,7 +117,7 @@
 <li><p><strong>R Version</strong>: 4.3.3 (tested) (<a class="reference external" href="https://cran.r-project.org/">Download R</a>)</p></li>
 <li><p><strong>RStudio</strong>: 2024.09 or later (recommended) (<a class="reference external" href="https://posit.co/download/rstudio-desktop/">Download RStudio</a>)</p></li>
 <li><p><strong>Git</strong>: 2.43 or later (<a class="reference external" href="https://git-scm.com/downloads">Download Git</a>)</p></li>
-<li><p><strong>RAM</strong>: 16 GB minimum</p></li>
+<li><p><strong>RAM</strong>: 8 GB minimum (one instance of the app uses about 2 GB with the normalized data, 3 GB once the raw data are loaded)</p></li>
 <li><p><strong>CPU</strong>: 4 cores minimum</p></li>
 <li><p><strong>Disk Space</strong>: 5 GB free</p></li>
 </ul>
@@ -192,11 +200,11 @@ R prints harmless warnings that packages were built under another version.</p>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">cleaned_dataset.rds</span></code></p></td>
 <td><p>Per-cell metadata and embeddings, per-study PCA and variable-gene tables</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">normalize_df.rds</span></code></p></td>
-<td><p>Metadata plus log-normalised expression</p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">normalized_expression.rds</span></code></p></td>
+<td><p>Log-normalised expression: a sparse matrix (<code class="docutils literal notranslate"><span class="pre">Matrix::dgCMatrix</span></code>), cells x genes, rows named by cell barcode in the order of the metadata, columns by gene ID</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">raw_df.rds</span></code></p></td>
-<td><p>Metadata plus raw counts</p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">raw_expression.rds</span></code></p></td>
+<td><p>Raw counts, same layout</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">gene_annotation.rds</span></code></p></td>
 <td><p><em>P. vivax</em> P01 gene identifiers, names and descriptions</p></td>
@@ -279,6 +287,152 @@ R prints harmless warnings that packages were built under another version.</p>
 </section>
 </section>
 </section>
+<section id="serving-several-users">
+<h2>Serving Several Users<a class="headerlink" href="#serving-several-users" title="Link to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">./run_app.sh</span></code> is enough for one person, or for a few colleagues who take
+turns. For a public server, read on.</p>
+<section id="why-one-r-process-is-a-bottleneck">
+<h3>Why one R process is a bottleneck<a class="headerlink" href="#why-one-r-process-is-a-bottleneck" title="Link to this heading"></a></h3>
+<p>A Shiny app runs in a single R process, and R does one thing at a time. All
+browsers connected to that process share it: while it draws a plot for one
+user, every other user waits, and the whole process holds one copy of the
+data for everybody. The remedy is to run several copies of the app
+(<em>instances</em>), each in its own R process, and to spread the users over them.</p>
+</section>
+<section id="several-instances-behind-nginx">
+<h3>Several instances behind nginx<a class="headerlink" href="#several-instances-behind-nginx" title="Link to this heading"></a></h3>
+<p>Start one instance per port. Each one loads its own copy of the data, which
+takes 2 to 3 GB of memory:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span><span class="w"> </span><span class="nv">PLAVISCA_DATA_DIR</span><span class="o">=</span>/path/to/app_data
+./run_app.sh<span class="w"> </span>--host<span class="w"> </span><span class="m">127</span>.0.0.1<span class="w"> </span>--port<span class="w"> </span><span class="m">3838</span><span class="w"> </span><span class="p">&amp;</span>
+./run_app.sh<span class="w"> </span>--host<span class="w"> </span><span class="m">127</span>.0.0.1<span class="w"> </span>--port<span class="w"> </span><span class="m">3839</span><span class="w"> </span><span class="p">&amp;</span>
+./run_app.sh<span class="w"> </span>--host<span class="w"> </span><span class="m">127</span>.0.0.1<span class="w"> </span>--port<span class="w"> </span><span class="m">3840</span><span class="w"> </span><span class="p">&amp;</span>
+./run_app.sh<span class="w"> </span>--host<span class="w"> </span><span class="m">127</span>.0.0.1<span class="w"> </span>--port<span class="w"> </span><span class="m">3841</span><span class="w"> </span><span class="p">&amp;</span>
+</pre></div>
+</div>
+<p>On a Linux server, let systemd start them at boot and restart them if they
+stop. The repository provides a <em>template unit</em>, a service definition in
+which <code class="docutils literal notranslate"><span class="pre">%i</span></code> stands for the instance name, here the port
+(<a class="reference external" href="https://github.com/baia-ipc/PlaViSCA-app/blob/master/deploy/systemd/plavisca&#64;.service"><code class="docutils literal notranslate"><span class="pre">deploy/systemd/plavisca&#64;.service</span></code></a>):</p>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[Unit]</span>
+<span class="na">Description</span><span class="o">=</span><span class="s">PlaViSCA Shiny app on port %i</span>
+<span class="na">After</span><span class="o">=</span><span class="s">network.target</span>
+
+<span class="k">[Service]</span>
+<span class="na">Type</span><span class="o">=</span><span class="s">simple</span>
+<span class="na">User</span><span class="o">=</span><span class="s">plavisca</span>
+<span class="na">WorkingDirectory</span><span class="o">=</span><span class="s">/path/to/PlaViSCA-app</span>
+<span class="na">Environment</span><span class="o">=</span><span class="s">PLAVISCA_DATA_DIR=/path/to/app_data</span>
+<span class="na">ExecStart</span><span class="o">=</span><span class="s">/path/to/PlaViSCA-app/run_app.sh --host 127.0.0.1 --port %i</span>
+<span class="na">Restart</span><span class="o">=</span><span class="s">on-failure</span>
+<span class="na">RestartSec</span><span class="o">=</span><span class="s">10</span>
+<span class="na">TimeoutStartSec</span><span class="o">=</span><span class="s">300</span>
+
+<span class="k">[Install]</span>
+<span class="na">WantedBy</span><span class="o">=</span><span class="s">multi-user.target</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">WorkingDirectory</span></code> must be the app directory: R reads the <code class="docutils literal notranslate"><span class="pre">.Rprofile</span></code>
+there, which activates the renv library with the right package versions.
+Install and start four instances with:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo<span class="w"> </span>cp<span class="w"> </span>deploy/systemd/plavisca@.service<span class="w"> </span>/etc/systemd/system/
+sudo<span class="w"> </span>systemctl<span class="w"> </span>daemon-reload
+sudo<span class="w"> </span>systemctl<span class="w"> </span><span class="nb">enable</span><span class="w"> </span>--now<span class="w"> </span>plavisca@3838<span class="w"> </span>plavisca@3839<span class="w"> </span>plavisca@3840<span class="w"> </span>plavisca@3841
+journalctl<span class="w"> </span>-u<span class="w"> </span>plavisca@3838<span class="w"> </span>-f<span class="w">     </span><span class="c1"># follow the log of one instance</span>
+</pre></div>
+</div>
+<p>Then put <a class="reference external" href="https://nginx.org/">nginx</a> in front as a <em>reverse proxy</em>: a web
+server that receives the users on one address and forwards each of them to
+one of the instances. Two things matter for Shiny:</p>
+<ul class="simple">
+<li><p><strong>Sticky sessions.</strong> A Shiny session lives in one R process, so a browser
+must keep talking to the instance it started on. <code class="docutils literal notranslate"><span class="pre">ip_hash</span></code> sends each
+client address always to the same instance.</p></li>
+<li><p><strong>Websocket upgrade.</strong> Shiny keeps one open connection (a <em>websocket</em>) per
+session, and the proxy must pass the <code class="docutils literal notranslate"><span class="pre">Upgrade</span></code> headers through.</p></li>
+</ul>
+<p>A complete minimal server block
+(<a class="reference external" href="https://github.com/baia-ipc/PlaViSCA-app/blob/master/deploy/nginx/plavisca.conf"><code class="docutils literal notranslate"><span class="pre">deploy/nginx/plavisca.conf</span></code></a>):</p>
+<div class="highlight-nginx notranslate"><div class="highlight"><pre><span></span><span class="k">upstream</span><span class="w"> </span><span class="s">plavisca</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kn">ip_hash</span><span class="p">;</span>
+<span class="w">    </span><span class="kn">server</span><span class="w"> </span><span class="n">127.0.0.1</span><span class="p">:</span><span class="mi">3838</span><span class="p">;</span>
+<span class="w">    </span><span class="kn">server</span><span class="w"> </span><span class="n">127.0.0.1</span><span class="p">:</span><span class="mi">3839</span><span class="p">;</span>
+<span class="w">    </span><span class="kn">server</span><span class="w"> </span><span class="n">127.0.0.1</span><span class="p">:</span><span class="mi">3840</span><span class="p">;</span>
+<span class="w">    </span><span class="kn">server</span><span class="w"> </span><span class="n">127.0.0.1</span><span class="p">:</span><span class="mi">3841</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="k">server</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kn">listen</span><span class="w"> </span><span class="mi">80</span><span class="p">;</span>
+<span class="w">    </span><span class="kn">server_name</span><span class="w"> </span><span class="s">plavisca.example.org</span><span class="p">;</span>
+
+<span class="w">    </span><span class="kn">gzip</span><span class="w"> </span><span class="no">on</span><span class="p">;</span>
+<span class="w">    </span><span class="kn">gzip_types</span><span class="w"> </span><span class="s">text/plain</span><span class="w"> </span><span class="s">text/css</span><span class="w"> </span><span class="s">application/javascript</span><span class="w"> </span><span class="s">application/json</span>
+<span class="w">               </span><span class="s">image/svg+xml</span><span class="p">;</span>
+<span class="w">    </span><span class="kn">gzip_min_length</span><span class="w"> </span><span class="mi">1024</span><span class="p">;</span>
+
+<span class="w">    </span><span class="kn">location</span><span class="w"> </span><span class="s">/</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kn">proxy_pass</span><span class="w"> </span><span class="s">http://plavisca</span><span class="p">;</span>
+<span class="w">        </span><span class="kn">proxy_http_version</span><span class="w"> </span><span class="mi">1</span><span class="s">.1</span><span class="p">;</span>
+<span class="w">        </span><span class="kn">proxy_set_header</span><span class="w"> </span><span class="s">Upgrade</span><span class="w"> </span><span class="nv">$http_upgrade</span><span class="p">;</span>
+<span class="w">        </span><span class="kn">proxy_set_header</span><span class="w"> </span><span class="s">Connection</span><span class="w"> </span><span class="s">"upgrade"</span><span class="p">;</span>
+<span class="w">        </span><span class="kn">proxy_set_header</span><span class="w"> </span><span class="s">Host</span><span class="w"> </span><span class="nv">$host</span><span class="p">;</span>
+<span class="w">        </span><span class="kn">proxy_set_header</span><span class="w"> </span><span class="s">X-Real-IP</span><span class="w"> </span><span class="nv">$remote_addr</span><span class="p">;</span>
+<span class="w">        </span><span class="kn">proxy_set_header</span><span class="w"> </span><span class="s">X-Forwarded-For</span><span class="w"> </span><span class="nv">$proxy_add_x_forwarded_for</span><span class="p">;</span>
+<span class="w">        </span><span class="kn">proxy_set_header</span><span class="w"> </span><span class="s">X-Forwarded-Proto</span><span class="w"> </span><span class="nv">$scheme</span><span class="p">;</span>
+<span class="w">        </span><span class="kn">proxy_read_timeout</span><span class="w"> </span><span class="s">3600s</span><span class="p">;</span>
+<span class="w">        </span><span class="kn">proxy_send_timeout</span><span class="w"> </span><span class="s">3600s</span><span class="p">;</span>
+<span class="w">        </span><span class="kn">proxy_buffering</span><span class="w"> </span><span class="no">off</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo<span class="w"> </span>cp<span class="w"> </span>deploy/nginx/plavisca.conf<span class="w"> </span>/etc/nginx/sites-available/plavisca
+sudo<span class="w"> </span>ln<span class="w"> </span>-s<span class="w"> </span>/etc/nginx/sites-available/plavisca<span class="w"> </span>/etc/nginx/sites-enabled/
+sudo<span class="w"> </span>nginx<span class="w"> </span>-t<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>sudo<span class="w"> </span>systemctl<span class="w"> </span>reload<span class="w"> </span>nginx
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">gzip</span></code> compresses the page, scripts and styles sent over plain HTTP. The
+plots travel over the websocket, and websocket messages are not compressed
+by the proxy. For HTTPS, add a certificate (for example with
+<a class="reference external" href="https://certbot.eff.org/">certbot</a>) to the same server block.</p>
+</section>
+<section id="alternatives">
+<h3>Alternatives<a class="headerlink" href="#alternatives" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong><a class="reference external" href="https://www.shinyproxy.io/">ShinyProxy</a></strong> (open source) starts one
+Docker container, with its own R process, per user. The strongest
+isolation, at the cost of one data copy per user and a container start
+before the first page.</p></li>
+<li><p><strong><a class="reference external" href="https://posit.co/products/enterprise/connect/">Posit Connect</a></strong> and
+<strong>Shiny Server Pro</strong> (commercial) run several R processes per app and
+balance the users over them, with authentication built in.</p></li>
+<li><p><strong><a class="reference external" href="https://posit.co/products/open-source/shiny-server/">Shiny Server</a></strong>
+open source runs one R process per app, with no load balancing: all users
+of the app share that process, as with <code class="docutils literal notranslate"><span class="pre">./run_app.sh</span></code>. Simple to set up,
+fine for a small group.</p></li>
+</ul>
+</section>
+<section id="sizing">
+<h3>Sizing<a class="headerlink" href="#sizing" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>Memory</strong>: 2 to 3 GB per instance (each holds its own copy of the data:
+about 2 GB with the normalized data, 3 GB once the raw data are loaded),
+plus what the system needs. Check the instances with <code class="docutils literal notranslate"><span class="pre">free</span> <span class="pre">-h</span></code> once they
+are started.</p></li>
+<li><p><strong>CPU</strong>: one core per instance plus one for the proxy and the system, so
+four instances need five cores.</p></li>
+<li><p><strong>Users per instance</strong>: a handful; users are only served in turn while a
+plot is being drawn, so more instances mean shorter waits.</p></li>
+</ul>
+</section>
+<section id="locale">
+<h3>Locale<a class="headerlink" href="#locale" title="Link to this heading"></a></h3>
+<p>Shiny Server, and systemd by default, run R in the C locale (plain ASCII,
+no language settings). The app is written for that: its sources are ASCII
+and it reads and writes its files as UTF-8, so no <code class="docutils literal notranslate"><span class="pre">LANG</span></code> or <code class="docutils literal notranslate"><span class="pre">LC_ALL</span></code>
+setting is needed.</p>
+</section>
+</section>
 <section id="troubleshooting">
 <h2>Troubleshooting<a class="headerlink" href="#troubleshooting" title="Link to this heading"></a></h2>
 <table class="docutils align-default">
@@ -301,7 +455,7 @@ R prints harmless warnings that packages were built under another version.</p>
 <td><p>The data do not match <code class="docutils literal notranslate"><span class="pre">config/data_columns.yml</span></code> (e.g. a different number of cells or studies). Use the data written by the matching version of the preprocessing pipeline, or update <code class="docutils literal notranslate"><span class="pre">config/data_columns.yml</span></code> (see the developer guide, <code class="docutils literal notranslate"><span class="pre">docs/developer.md</span></code>).</p></td>
 </tr>
 <tr class="row-even"><td><p><strong>App is slow or crashes</strong></p></td>
-<td><p>PlaViSCA requires at least 16 GB RAM. Close other applications. The first load is slower due to data caching.</p></td>
+<td><p>Check the memory (see the system requirements) and close other applications. Starting the app takes about 20 s (reading the data and drawing the first embedding plot); the raw data are read the first time a session selects them. If several people use the app at once, run several instances behind a proxy: see <em>Serving Several Users</em>.</p></td>
 </tr>
 <tr class="row-odd"><td><p><strong>Browser display issues</strong></p></td>
 <td><p>Clear the browser cache or try a different browser. Ensure JavaScript is enabled.</p></td>

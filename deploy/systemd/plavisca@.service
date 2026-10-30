@@ -1,0 +1,31 @@
+# systemd template unit: one PlaViSCA instance per port.
+# The instance name is the port, so "plavisca@3838" listens on port 3838.
+#
+#   sudo cp deploy/systemd/plavisca@.service /etc/systemd/system/
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now plavisca@3838 plavisca@3839 plavisca@3840 plavisca@3841
+#
+# Edit User, WorkingDirectory and PLAVISCA_DATA_DIR before installing.
+# WorkingDirectory must be the app directory: R reads its .Rprofile there,
+# which activates the renv library with the app's package versions.
+
+[Unit]
+Description=PlaViSCA Shiny app on port %i
+After=network.target
+
+[Service]
+Type=simple
+User=plavisca
+WorkingDirectory=/path/to/PlaViSCA-app
+Environment=PLAVISCA_DATA_DIR=/path/to/app_data
+# Uncomment if R is not on the PATH of a non-login shell:
+# Environment=PATH=/usr/local/bin:/usr/bin:/bin
+ExecStart=/path/to/PlaViSCA-app/run_app.sh --host 127.0.0.1 --port %i
+Restart=on-failure
+RestartSec=10
+# Loading the data takes a while; give R time to start and to stop.
+TimeoutStartSec=300
+TimeoutStopSec=30
+
+[Install]
+WantedBy=multi-user.target

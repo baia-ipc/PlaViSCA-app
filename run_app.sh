@@ -31,5 +31,8 @@ done
 echo "Starting PlaViSCA on http://$HOST:$PORT..."
 echo "Press Ctrl+C to stop the application."
 
-# Run the Shiny app
-R -e "shiny::runApp('.', host='$HOST', port=$PORT, launch.browser=$BROWSER)"
+# Run from the app directory, so that .Rprofile activates renv whatever the
+# caller's working directory is. exec replaces this shell with R, so that a
+# stop signal (Ctrl+C, systemd) reaches R directly.
+cd "$(dirname "$0")" || exit 1
+exec R -e "shiny::runApp('.', host='$HOST', port=$PORT, launch.browser=$BROWSER)"
