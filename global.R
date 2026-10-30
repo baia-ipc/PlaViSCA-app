@@ -48,11 +48,13 @@ source("functions/plots/gene_distribution.R")
 source("functions/plots/gene_summaries.R")
 source("functions/plots/embedding_legend.R")
 source("functions/plots/embeddings.R")
+source("functions/plots/embedding_hover.R")
 source("functions/plots/gene_colour_mix.R")
 source("functions/plots/gene_colour_wheel.R")
 source("functions/plots/embedding_gene_colours.R")
 source("functions/plots/embedding_gene_keys.R")
 source("functions/plots/embedding_figure.R")
+source("functions/plots/embedding_cache.R")
 
 # UI building blocks
 source("functions/ui/helpers.R")

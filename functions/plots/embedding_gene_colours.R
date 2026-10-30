@@ -135,27 +135,29 @@ embedding_each_gene_plot <- function(df, expression, xaxis_input, yaxis_input, s
     tops <- vapply(scaled, function(s) attr(s, "top"), numeric(1))
     scaled <- matrix(unlist(lapply(scaled, as.numeric)), nrow = nrow(expression))
     colours <- each_gene_colours(scaled)
-    df$plotly_key <- seq_len(nrow(df))
-    df$.gene_colour <- colours$colour
-    df$.gene_values <- gene_hover_values(expression, colours$dominant, colours$share)
+    values <- gene_hover_values(expression, colours$dominant, colours$share)
 
-    df <- df[order(colours$intensity), , drop = FALSE]
-
+    # cells with higher expression on top; the trace holds only the columns
+    # it draws (the plot is cached), each cell gets its hover (embedding_hover.R)
+    on_top <- order(colours$intensity)
+    df <- df[on_top, , drop = FALSE]
+    values <- values[on_top]
     axes <- embedding_axes(plot_type, xaxis_input, yaxis_input, plot_dim)
-    coords <- lapply(axes, function(a) df[[a]])
-    hover <- build_hover_text(df, "Expression", df$.gene_values, coords[[1]], coords[[2]],
-                              if (plot_dim == "3d") coords[[3]])
+    coords <- lapply(axes, function(a) compact_coordinates(df[[a]]))
+    cells <- data.frame(.x = coords[[1]], .y = coords[[2]], .colour = colours$colour[on_top])
     p <- if (plot_dim == "3d") {
-        plot_ly(x = coords[[1]], y = coords[[2]], z = coords[[3]], type = "scatter3d", mode = "markers",
-                marker = list(size = as.numeric(size) * 0.4, color = df$.gene_colour),
-                text = hover, hoverinfo = "text", key = df$plotly_key, source = "embedding",
-                showlegend = FALSE)
+        cells$.z <- coords[[3]]
+        plot_ly(cells, x = ~.x, y = ~.y, z = ~.z, type = "scatter3d", mode = "markers",
+                marker = list(size = as.numeric(size) * 0.4, color = ~.colour),
+                source = "embedding", showlegend = FALSE)
     } else {
-        plot_ly(data = df, x = coords[[1]], y = coords[[2]], type = "scattergl", mode = "markers",
-                marker = list(size = size, color = df$.gene_colour, line = list(width = 0)),
-                text = hover, hoverinfo = "text", key = ~plotly_key, source = "embedding",
-                showlegend = FALSE)
+        plot_ly(cells, x = ~.x, y = ~.y, type = "scattergl", mode = "markers",
+                marker = list(size = size, color = ~.colour, line = list(width = 0)),
+                source = "embedding", showlegend = FALSE)
     }
+    p <- add_embedding_hover(p, df, ".gene_colour", "Expression",
+                             embedding_trace_groups(df, ".gene_colour", FALSE), NULL,
+                             length(coords), values)
     if (position == "hidden") {
         p <- layout(p, font = list(size = 14), margin = legend_margins(position), autosize = TRUE)
         return(embedding_axis_titles(p, axes, plot_dim))

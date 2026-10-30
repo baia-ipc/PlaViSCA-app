@@ -123,9 +123,10 @@ embedding_axes <- function(plot_type, xaxis_input, yaxis_input, plot_dim = "2d")
   c(xaxis_input, yaxis_input)
 }
 
-# Click events and mode bar of an embedding plot.
+# Click events, mode bar and JSON of an embedding plot.
 embedding_plot_config <- function(p) {
   p %>%
+    with_compact_json() %>%
     event_register("plotly_click") %>%
     config(
       displaylogo = FALSE,
@@ -146,45 +147,60 @@ embedding_plot_config <- function(p) {
     )
 }
 
-# Hover text for 2D and 3D plots (optimized for performance)
-build_hover_text <- function(df, legend_title, display_color, x_vals = NULL, y_vals = NULL, z_vals = NULL) {
-  # Simplified hover text - only show most important info
-  # This reduces data sent to browser significantly
-
-  # Build base text
-  stage_col <- get_data_column("detailed_stage")
-  stage_vals <- if (stage_col %in% colnames(df)) {
-    relabel_missing(df[[stage_col]], missing_label_for(stage_col))
-  } else {
-    missing_label_for(stage_col)
+# The marker traces of the cells `df`, added to the plot `p`: a categorical
+# `color` gives one trace per category (named by it, in the order of the
+# levels, in the colours `colors`) and detailed stage, a numeric one a single
+# trace coloured by the values `selected_color`, with the colour bar `key`
+# (embedding_legend()); see embedding_trace_groups(). The coordinates are
+# the columns .x, .y and, in 3D (`n_dims` 3), .z of `df`; `marker` are the
+# marker settings shared by the traces. Each cell gets its hover
+# (embedding_hover.R). A trace keeps only the columns it draws: plotly
+# stores the data frame it is given inside the plot, which is cached.
+embedding_traces <- function(p, df, n_dims, color, legend_title, is_categorical, selected_color,
+                             colors, marker, key) {
+  coords <- c(".x", ".y", ".z")[seq_len(n_dims)]
+  add_cells <- function(p, rows, columns, marker, name = NULL, legend = TRUE) {
+    args <- list(p, data = df[rows, columns, drop = FALSE], x = ~.x, y = ~.y, type = "scattergl",
+                 mode = "markers", marker = marker)
+    if (n_dims == 3) {
+      args$z <- ~.z
+      args$type <- "scatter3d"
+    }
+    if (!is.null(name)) {
+      args$name <- name
+      args$legendgroup <- name
+      args$showlegend <- legend
+    }
+    do.call(add_trace, args)
   }
 
-  base_text <- paste0(
-    "Cell: ", df[[get_data_column("barcode")]],
-    "<br>", legend_title, ": ", display_color,
-    "<br>", get_data_label("study_label"), ": ", df[[get_data_column("study_label")]],
-    "<br>", get_data_label("detailed_stage"), ": ", stage_vals
-  )
-
-  # Add coordinates only if they are numeric
-  coords_text <- ""
-  if (!is.null(x_vals) && is.numeric(x_vals)) {
-    coords_text <- paste0("<br>X: ", round(x_vals, 2))
-  }
-  if (!is.null(y_vals) && is.numeric(y_vals)) {
-    coords_text <- paste0(coords_text, "<br>Y: ", round(y_vals, 2))
+  groups <- embedding_trace_groups(df, color, is_categorical)
+  if (is_categorical) {
+    for (group in groups) {
+      p <- add_cells(p, group$rows, coords, c(marker, list(color = toRGB(colors[[group$category]]))),
+                     group$category, group$legend)
+    }
+    categories <- vapply(groups, function(group) group$category, character(1))
+    if (color %in% italicised_columns()) {
+      categories <- format_species_name(categories, color)
+    }
+    return(add_embedding_hover(p, df, color, legend_title, groups, categories, n_dims))
   }
 
-  # Conditionally add Z if provided and numeric
-  if (!is.null(z_vals) && is.numeric(z_vals)) {
-    coords_text <- paste0(coords_text, "<br>Z: ", round(z_vals, 2))
-  }
-
-  return(~ paste0(base_text, coords_text))
+  df$.colour <- compact_colour_values(selected_color)
+  p <- add_cells(p, seq_len(nrow(df)), c(coords, ".colour"), c(marker, list(
+    color = ~.colour,
+    colorscale = list(c(0, "#0000FF4C"), c(1, "red")),
+    showscale = key$show,
+    colorbar = key$layout
+  )))
+  add_embedding_hover(p, df, color, legend_title, groups, NULL, n_dims)
 }
 
 
-# Generate 2d plot
+# 2D plot of the cells `df` at the coordinates `x` and `y`, coloured by the
+# column `color` (categorical, in the colours `colors`, or numeric with the
+# values `selected_color`).
 plot_2d <- function(
   df,
   x,
@@ -198,69 +214,22 @@ plot_2d <- function(
   is_dual_plot = FALSE,
   legend = legend_settings()
 ) {
-  display_color <- if (color %in% italicised_columns()) {
-    format_species_name(selected_color, color)
-  } else {
-    selected_color
-  }
-
-  hover_text <- build_hover_text(df, legend_title, display_color, x, y)
-
   key <- embedding_legend(legend_title, legend, !is_categorical, is_dual_plot, "2d")
-  df$plotly_key <- seq_len(nrow(df))
+  df$.x <- compact_coordinates(x)
+  df$.y <- compact_coordinates(y)
 
+  p <- embedding_traces(
+    plot_ly(source = "embedding"), df, 2, color, legend_title, is_categorical, selected_color,
+    colors, marker = list(size = size, line = list(width = 0)), key
+  )
+  p <- layout(
+    p,
+    font = list(size = 14),
+    margin = key$margins,
+    autosize = TRUE
+  )
   if (is_categorical) {
-    p <- plot_ly(
-      data = df,
-      x = x,
-      y = y,
-      type = "scattergl", # Use WebGL for better performance with large datasets
-      mode = "markers",
-      color = ~ factor(df[[color]]),
-      marker = list(
-        size = size,
-        line = list(width = 0, color = "rgba(0,0,0,0)") # Disable borders for performance
-      ),
-      text = hover_text,
-      hoverinfo = "text",
-      colors = colors,
-      source = "embedding",
-      key = ~plotly_key
-    ) %>%
-      layout(
-        xaxis = list(title = paste("X-", x)),
-        yaxis = list(title = paste("Y-", y)),
-        legend = key$layout,
-        font = list(size = 14),
-        margin = key$margins,
-        autosize = TRUE
-      )
-  } else {
-    p <- plot_ly(
-      data = df,
-      x = x,
-      y = y,
-      type = "scattergl", # Use WebGL for better performance with large datasets
-      mode = "markers",
-      text = hover_text,
-      hoverinfo = "text",
-      key = ~plotly_key,
-      source = "embedding",
-      marker = list(
-        size = size,
-        color = selected_color,
-        colorscale = list(c(0, "#0000FF4C"), c(1, "red")),
-        showscale = key$show,
-        colorbar = key$layout
-      )
-    ) %>%
-      layout(
-        xaxis = list(title = paste("X-", x)),
-        yaxis = list(title = paste("Y-", y)),
-        font = list(size = 14),
-        margin = key$margins,
-        autosize = TRUE
-      )
+    p <- layout(p, legend = key$layout)
   }
   if (!key$show) {
     p <- layout(p, showlegend = FALSE)
@@ -269,7 +238,8 @@ plot_2d <- function(
 }
 
 
-# Generate 3d plot
+# 3D plot of the cells `df` at the coordinate columns `coords`, coloured
+# like plot_2d().
 plot_3d <- function(
   df,
   color,
@@ -282,84 +252,30 @@ plot_3d <- function(
   is_dual_plot = FALSE,
   legend = legend_settings()
 ) {
-  x_col <- coords[1]
-  y_col <- coords[2]
-  z_col <- coords[3]
-
-  x_vals <- df[[x_col]]
-  y_vals <- df[[y_col]]
-  z_vals <- df[[z_col]]
-
-  # Format selected_color for display if it's host_species
-  display_color <- if (
-    !is.null(color) && !is.na(color) && color == "host_species"
-  ) {
-    format_species_name(selected_color, color)
-  } else {
-    selected_color
-  }
-
-  hover_text <- build_hover_text(df, legend_title, display_color, x_vals, y_vals, z_vals)
-
   # by default a 3D scene keeps all of the height: side by side too, the
   # legend goes over the plot
   key <- embedding_legend(legend_title, legend, !is_categorical, is_dual_plot, "3d")
+  df$.x <- compact_coordinates(df[[coords[1]]])
+  df$.y <- compact_coordinates(df[[coords[2]]])
+  df$.z <- compact_coordinates(df[[coords[3]]])
 
+  p <- embedding_traces(
+    plot_ly(source = "embedding"), df, 3, color, legend_title, is_categorical, selected_color,
+    colors, marker = list(size = as.numeric(size) * 0.4), key
+  )
+  p <- layout(
+    p,
+    scene = list(
+      xaxis = list(title = paste("X-", coords[1])),
+      yaxis = list(title = paste("Y-", coords[2])),
+      zaxis = list(title = paste("Z-", coords[3]))
+    ),
+    font = list(size = 14),
+    margin = key$margins,
+    autosize = TRUE
+  )
   if (is_categorical) {
-    p <- plot_ly(
-      x = x_vals,
-      y = y_vals,
-      z = z_vals,
-      type = "scatter3d",
-      mode = "markers",
-      color = factor(df[[color]]),
-      key = ~ df$id,
-      source = "embedding",
-      marker = list(size = as.numeric(size) * 0.4),
-      colors = colors,
-      text = hover_text,
-      hoverinfo = "text"
-    ) %>%
-      layout(
-        scene = list(
-          xaxis = list(title = paste("X-", x_col)),
-          yaxis = list(title = paste("Y-", y_col)),
-          zaxis = list(title = paste("Z-", z_col))
-        ),
-        legend = key$layout,
-        font = list(size = 14),
-        margin = key$margins,
-        autosize = TRUE
-      )
-  } else {
-    p <- plot_ly(
-      x = x_vals,
-      y = y_vals,
-      z = z_vals,
-      type = "scatter3d",
-      mode = "markers",
-      marker = list(
-        size = as.numeric(size) * 0.4,
-        color = selected_color,
-        colorscale = list(c(0, "#0000FF4C"), c(1, "red")),
-        showscale = key$show,
-        colorbar = key$layout
-      ),
-      text = hover_text,
-      hoverinfo = "text",
-      source = "embedding",
-      key = ~ df$id
-    ) %>%
-      layout(
-        scene = list(
-          xaxis = list(title = paste("X-", x_col)),
-          yaxis = list(title = paste("Y-", y_col)),
-          zaxis = list(title = paste("Z-", z_col))
-        ),
-        font = list(size = 14),
-        margin = key$margins,
-        autosize = TRUE
-      )
+    p <- layout(p, legend = key$layout)
   }
   if (!key$show) {
     p <- layout(p, showlegend = FALSE)
@@ -413,10 +329,6 @@ embedding_plot <- function(
     return(NULL)
   }
 
-  # ensure stable per-row idenfitifier for plotly key usage
-  if (!"id" %in% names(df)) df$id <- seq_len(nrow(df))
-  if (!"plotly_key" %in% names(df)) df$plotly_key <- seq_len(nrow(df))
-
   selected_color <- df[[color]]
   is_categorical <- is_categorical_data(selected_color)
 
@@ -428,8 +340,6 @@ embedding_plot <- function(
     prep <- prepare_categorical_colors(df, color)
     df <- prep$df
     colors <- prep$colors
-    # hover text shows the missing label of the column, not NA
-    selected_color <- as.character(df[[color]])
   } else {
     colors <- NULL
   }

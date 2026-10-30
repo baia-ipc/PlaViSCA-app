@@ -472,17 +472,23 @@ $(document).on('plotly_relayout plotly_relayouting', '#first_plotly, #second_plo
 });
 
 // Embedding plots: a double-click or right-click on a cell opens its details
-// (server.R, input$embedding_cell_open); a single click does not. Plotly has
-// no right-click event, so the cell under the mouse is remembered from the
-// hover events.
+// (server/cell_details.R, input$embedding_cell_open); a single click does
+// not. Plotly has no right-click event, so the cell under the mouse is
+// remembered from the hover events.
 const embeddingPlots = '#all_plotly, #first_plotly, #second_plotly';
 let hoveredCellKey = null;
+
+// The key of the cell of a plotly point: its barcode, the customdata of the
+// point, or its first column (functions/plots/embedding_hover.R).
+function cellKey(pt) {
+  if (pt.customdata === undefined || pt.customdata === null) return undefined;
+  return Array.isArray(pt.customdata) ? pt.customdata[0] : pt.customdata;
+}
 
 $(document).on('plotly_hover', embeddingPlots, function (event, data) {
   const pt = data && data.points && data.points[0];
   if (!pt) return;
-  let key = pt.key;
-  if (key === undefined && pt.data && pt.data.key) key = pt.data.key[pt.pointNumber];
+  const key = cellKey(pt);
   hoveredCellKey = key === undefined ? null : key;
 });
 
@@ -500,8 +506,7 @@ let lastCellClick = { key: null, time: 0 };
 $(document).on('plotly_click', embeddingPlots, function (event, data) {
   const pt = data && data.points && data.points[0];
   if (!pt) return;
-  let key = pt.key;
-  if (key === undefined && pt.data && pt.data.key) key = pt.data.key[pt.pointNumber];
+  const key = cellKey(pt);
   if (key === undefined) return;
   const now = Date.now();
   if (lastCellClick.key === key && now - lastCellClick.time < 400) {

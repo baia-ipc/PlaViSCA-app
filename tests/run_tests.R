@@ -43,6 +43,7 @@ suppressWarnings(try({
     source("functions/plots/gene_summaries.R")
     source("functions/plots/embedding_legend.R")
     source("functions/plots/embeddings.R")
+    source("functions/plots/embedding_hover.R")
     source("functions/plots/gene_colour_mix.R")
     source("functions/plots/gene_colour_wheel.R")
     source("functions/plots/embedding_gene_colours.R")
@@ -62,6 +63,7 @@ test_files <- c(
     "tests/test_gene_plots.R",
     "tests/test_embedding_gene_colours.R",
     "tests/test_embedding_legend.R",
+    "tests/test_embedding_hover.R",
     "tests/test_app_code.R",
     "tests/test_server.R"
 )
