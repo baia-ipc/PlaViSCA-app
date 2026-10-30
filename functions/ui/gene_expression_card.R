@@ -26,7 +26,7 @@ gene_expression_card <- function(i) {
         column(width = 8, div(class = "d-flex align-items-end gap-2", gene_select(i), gene_link_buttons(i)))
       ),
       gene_plot_options_row(i),
-      withSpinner(plotlyOutput(paste0("gene_exp_plotly_", i), height = "400px"), type = 6, size = 0.5, color = "#3498db"),
+      fetched_plot_output(paste0("gene_exp_plotly_", i), height = "400px"),
       div(
         class = "d-flex justify-content-end gap-2 mt-2",
         downloadButton(paste0("download_gene_exp_", i), label = "Data", class = "btn-sm btn-outline-secondary"),

@@ -18,13 +18,16 @@
     return (bytes / 1e6).toFixed(1) + ' MB';
   }
 
+  // Shows `text` over the plot, with the bar at `fraction` (0..1), moving
+  // when null, absent when undefined (a message).
   function showProgress(el, text, fraction) {
     const box = el.querySelector('.plot-progress');
     if (!box) return;
     box.querySelector('.plot-progress-text').textContent = text;
     const fill = box.querySelector('.plot-progress-fill');
-    fill.style.width = (fraction === null ? 0 : Math.round(100 * fraction)) + '%';
+    fill.style.width = (fraction ? Math.round(100 * fraction) : 0) + '%';
     box.classList.toggle('plot-progress-indeterminate', fraction === null);
+    box.classList.toggle('plot-progress-no-bar', fraction === undefined);
     box.classList.add('plot-progress-shown');
   }
 
@@ -123,9 +126,12 @@
   binding.renderValue = function (el, data) {
     if (inflight[el.id]) inflight[el.id].abort();
     const graphDiv = el.querySelector('.html-widget-output');
-    if (!data || !graphDiv) {
-      hideProgress(el);
-      el.classList.remove('downloading');
+    if (!graphDiv) return;
+    el.classList.remove('downloading');
+    if (!data || data.message) {
+      // nothing to draw: the previous plot goes, a message may take its place
+      if (graphDiv.data) Plotly.purge(graphDiv);
+      if (data && data.message) showProgress(el, data.message); else hideProgress(el);
       return;
     }
     const controller = new AbortController();
@@ -156,7 +162,7 @@
     }).catch(function (error) {
       if (error.name === 'AbortError') return;
       el.classList.remove('downloading');
-      showProgress(el, 'The plot could not be loaded (' + error.message + ')', 0);
+      showProgress(el, 'The plot could not be loaded (' + error.message + ')');
     });
   };
 
@@ -167,7 +173,7 @@
     if (inflight[el.id]) inflight[el.id].abort();
     el.classList.remove('downloading');
     if (err && err.message) {
-      showProgress(el, 'The plot could not be drawn: ' + err.message, 0);
+      showProgress(el, 'The plot could not be drawn: ' + err.message);
     } else {
       hideProgress(el);
     }

@@ -26,13 +26,17 @@ embeddings_tab_server <- function(input, output, session, loaded, filters) {
     )
   })
 
-  # Plot of the cells as set by `params` (see embedding_figure()); `dual`
+  # Plot of the cells as set by `params` (see embedding_figure()), or the
+  # message shown instead when the filters keep no cell; `dual`
   # for the comparison plots. The plot depends on `params`, the cells and the
   # embedding; the rest is read without dependency. A plot drawn once, by
   # any session, is taken from the cache (cached_embedding_plot()).
   draw_plot <- function(params, dual) {
     force(params)
     plot_data <- cells()$data
+    if (is.null(plot_data) || nrow(plot_data) == 0) {
+      return(NO_CELLS_MESSAGE)
+    }
     type <- plot_type()
     isolate(cached_embedding_plot(
       params, type, dual, filters(), loaded$data_type(),
@@ -70,7 +74,7 @@ embeddings_tab_server <- function(input, output, session, loaded, filters) {
   last_gene_selection <- reactiveVal("")
   plot_inputs_ready <- reactive({
     plot_data <- try(cells()$data, silent = TRUE)
-    if (inherits(plot_data, "try-error") || is.null(plot_data) || nrow(plot_data) == 0) {
+    if (inherits(plot_data, "try-error") || is.null(plot_data)) {
       return(FALSE)
     }
     if (is.null(input$xaxis) || is.null(input$yaxis) || !inputs_settled()) {
@@ -96,7 +100,7 @@ embeddings_tab_server <- function(input, output, session, loaded, filters) {
   })
 
   plot_drawn <- reactiveVal(FALSE)
-  output$all_plotly_payload <- render_plot_payload(session, "all_plotly", {
+  output$all_plotly_payload <- render_plot_payload("all_plotly", {
     req(!isTRUE(comparison_mode()), plot_inputs_ready(), plot_ready())
     params <- isolate(list(
       color = input$color, genes = input$genes_n, check = input$check, combine = input$combine_genes,

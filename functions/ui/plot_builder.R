@@ -71,10 +71,7 @@ plot_builder_ui <- function(id, type = "stacked", field = "study_label",
                     )
                 )
             ),
-            withSpinner(
-                type = 6, size = 0.5, color = "#3498db",
-                plotlyOutput(ns("plot"), height = "450px")
-            ),
+            fetched_plot_output(ns("plot"), height = "450px"),
             div(class = "text-muted small mt-2", uiOutput(ns("help")))
         ),
         card_footer(
@@ -126,7 +123,7 @@ plot_builder_server <- function(id, cells, show_missing) {
         columns <- reactive(vapply(keys(), get_data_column, character(1), USE.NAMES = FALSE))
         file_stem <- reactive(paste0("plavisca_cells_by_", paste(keys(), collapse = "_and_")))
 
-        output$plot <- renderPlotly({
+        output$plot_payload <- render_plot_payload(session$ns("plot"), {
             cols <- columns()
             plot_cell_counts(
                 cells(), cols[[1]], if (length(cols) > 1) cols[[2]],

@@ -8,7 +8,7 @@ check("gene_card_server draws the plot of a card and writes its download", {
                       check_exp_3 = FALSE, plot_type_exp_3 = "violin", min_cells_exp = 0,
                       data_type_exp = "normalize")
     session$elapse(1000)
-    stop_unless(!is.null(output$gene_exp_plotly_3), "no plot")
+    stop_unless(!is.null(output$gene_exp_plotly_3_payload$json), "no plot")
     file <- output$download_gene_exp_3
     sheets <- readxl::excel_sheets(file)
     stop_unless(identical(sheets, c("Expression Data", "Metadata")), paste("sheets:", paste(sheets, collapse = ", ")))

@@ -60,7 +60,7 @@ arguments, the ones other parts need are returned.
 | `data_loading.R` | the expression data of the session, raw or normalized (from `expression_data()`, `functions/data/expression_data.R`); keeps the two Data type controls in sync | `gene_data`, `data_type`, `global_loading` |
 | `filter_choices.R` | the choices of the filter menus; the coupling of the broad and detailed stage filters | the choices of each filter |
 | `shared_filters.R` | the filter state shared by the tabs | the filter values of each tab |
-| `plot_payload.R` | `render_plot_payload()`: the output of an embedding plot, a small value with the address and size of its JSON, which the session serves over HTTP and the browser downloads with a progress bar (`www/fetched_plot.js`); websocket messages are neither compressed nor measurable | |
+| `plot_payload.R` | `render_plot_payload()`: the output of a large plotly plot (embeddings, gene expression cards, QC distributions), a small value with the address and size of its JSON, which the session serves over HTTP and the browser downloads with a progress bar (`www/fetched_plot.js`); websocket messages are neither compressed nor measurable | |
 | `tab_embeddings.R` | Embeddings tab: the filtered cells, the single plot (through the plot cache of `functions/plots/embedding_cache.R`), Download Data | |
 | `embedding_controls.R` | axes, point size, gene menus, Combine genes menus and gene links of the embedding plots | |
 | `embedding_compare.R` | Compare Plots: the two plots side by side | |

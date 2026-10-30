@@ -19,22 +19,12 @@ ui_tab_qc <- function() {
         card(
           full_screen = TRUE,
           card_header("RNA Count distribution"),
-          withSpinner(
-            type = 6,
-            size = 0.5,
-            color = "#3498db",
-            plotlyOutput("data_count_plotly")
-          )
+          fetched_plot_output("data_count_plotly", height = "400px")
         ),
         card(
           full_screen = TRUE,
           card_header("Feature Count distribution"),
-          withSpinner(
-            type = 6,
-            size = 0.5,
-            color = "#3498db",
-            plotlyOutput("data_feature_plotly")
-          )
+          fetched_plot_output("data_feature_plotly", height = "400px")
         )
       ),
       layout_column_wrap(
@@ -43,12 +33,12 @@ ui_tab_qc <- function() {
         card(
           full_screen = TRUE,
           card_header("Elbow Plot"),
-          plotlyOutput("data_pca_stdv_plotly")
+          fetched_plot_output("data_pca_stdv_plotly", height = "400px")
         ),
         card(
           full_screen = TRUE,
           card_header("Variable Genes"),
-          plotlyOutput("variable_genes_plotly")
+          fetched_plot_output("variable_genes_plotly", height = "400px")
         )
       )
     )

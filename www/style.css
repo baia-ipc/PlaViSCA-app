@@ -1607,6 +1607,10 @@ table.dataTable thead th {
   transition: width 0.15s linear;
 }
 
+.fetched-plot .plot-progress-no-bar .plot-progress-bar {
+  display: none;
+}
+
 .fetched-plot .plot-progress-indeterminate .plot-progress-fill {
   width: 30%;
   animation: plot-progress-slide 1.2s ease-in-out infinite;

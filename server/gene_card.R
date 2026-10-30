@@ -12,7 +12,7 @@ gene_card_server <- function(i, input, output, cells, global_loading) {
   genes <- debounce(reactive(card_input("genes")), 800)
   group <- debounce(reactive(card_input("group")), 500)
 
-  output[[paste0("gene_exp_plotly_", i)]] <- renderPlotly({
+  output[[paste0("gene_exp_plotly_", i, "_payload")]] <- render_plot_payload(paste0("gene_exp_plotly_", i), {
     selected_genes <- genes()
     selected_group <- group()
     if (length(selected_genes) == 0 || is.null(selected_group)) {

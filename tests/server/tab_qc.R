@@ -5,8 +5,8 @@ check("qc_tab_server counts the cells of the filtered study", {
     session$flushReact()
     stop_unless(grepl(format(n_cells(STUDY), big.mark = ","), output$total_cells_qc$html, fixed = TRUE),
                 "wrong number of cells")
-    stop_unless(!is.null(output$data_count_plotly), "no RNA count plot")
-    stop_unless(!is.null(output$data_pca_stdv_plotly), "no elbow plot")
+    stop_unless(!is.null(output$data_count_plotly_payload$json), "no RNA count plot")
+    stop_unless(!is.null(output$data_pca_stdv_plotly_payload$json), "no elbow plot")
   })
 })
 

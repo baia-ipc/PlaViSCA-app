@@ -36,7 +36,7 @@ qc_tab_server <- function(output, filters) {
       )
     })
 
-    output$data_count_plotly <- renderPlotly({
+    output$data_count_plotly_payload <- render_plot_payload("data_count_plotly", {
       feature_plot(
         filt_data,
         x = "study_label",
@@ -47,7 +47,7 @@ qc_tab_server <- function(output, filters) {
       )
     })
 
-    output$data_feature_plotly <- renderPlotly({
+    output$data_feature_plotly_payload <- render_plot_payload("data_feature_plotly", {
       feature_plot(
         filt_data,
         x = "study_label",
@@ -58,12 +58,12 @@ qc_tab_server <- function(output, filters) {
       )
     })
 
-    output$data_pca_stdv_plotly <- renderPlotly({
+    output$data_pca_stdv_plotly_payload <- render_plot_payload("data_pca_stdv_plotly", {
       selected_study <- qc_study(filters())
       elbow_plot(pca_df %>% filter(study == selected_study), selected_study)
     })
 
-    output$variable_genes_plotly <- renderPlotly({
+    output$variable_genes_plotly_payload <- render_plot_payload("variable_genes_plotly", {
       var_genes_plot(hiv_data, qc_study(filters()), top_n = 15)
     })
   })

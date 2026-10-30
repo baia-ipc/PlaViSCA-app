@@ -75,10 +75,10 @@ embedding_compare_server <- function(input, output, session, gene_data, comparis
   params_b <- plot_params("color_second", "genes_second", "check_second",
                           "combine_genes_second", "detailed_stage")
 
-  output$first_plotly_payload <- render_plot_payload(session, "first_plotly", {
+  output$first_plotly_payload <- render_plot_payload("first_plotly", {
     record_plot("first_plotly", draw_plot(params_a(), dual = TRUE))
   })
-  output$second_plotly_payload <- render_plot_payload(session, "second_plotly", {
+  output$second_plotly_payload <- render_plot_payload("second_plotly", {
     record_plot("second_plotly", draw_plot(params_b(), dual = TRUE))
   })
 }
