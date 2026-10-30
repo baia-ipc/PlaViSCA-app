@@ -2,18 +2,17 @@
 # "Data type" control of the tab being viewed.
 #
 # Returns a list of
-#   - gene_data: reactive, list(data = cells x (metadata + genes) table,
-#     genes = gene names and IDs, see genes());
+#   - gene_data: reactive, list(metadata = mr_data, expression = the
+#     expression matrix of the data type (cells x genes, see
+#     functions/data/expression.R), genes = gene names and IDs (genes()),
+#     type = the data type);
 #   - data_type: reactive, "raw" or "normalize";
-#   - cached_data: reactiveValues with the tables loaded so far, by data type;
 #   - global_loading: reactiveVal, TRUE while the Gene expression data type
 #     is being changed.
 data_loading_server <- function(input, session) {
   app_initialized <- reactiveVal(FALSE)
   data_loading_trigger <- reactiveVal(0)
   global_loading <- reactiveVal(FALSE)
-
-  cached_data <- reactiveValues(raw = NULL, normalize = NULL)
 
   # the data type of the tab being viewed
   data_type <- reactive({
@@ -25,26 +24,6 @@ data_loading_server <- function(input, session) {
       "normalize"
     }
   })
-
-  # the table of a data type, loaded once per session
-  load_dataset <- function(type) {
-    if (!is.null(cached_data[[type]])) {
-      return(cached_data[[type]])
-    }
-
-    dataset <- switch(type,
-      raw = if (!is.null(DATA_PATHS$raw_df)) load_data(DATA_PATHS$raw_df),
-      normalize = norm_df
-    )
-
-    if (!is.null(dataset)) {
-      cached_data[[type]] <- dataset
-      if (type == "raw") {
-        gc(verbose = FALSE)
-      }
-    }
-    dataset
-  }
 
   # reload 0.3 s after a change of a data type control
   observe({
@@ -69,8 +48,8 @@ data_loading_server <- function(input, session) {
       req(type, input$embedding)
 
       withProgress(message = "Updating visualization", value = 30, {
-        dataset <- load_dataset(type)
-        list(data = dataset, genes = genes(dataset, gff_data))
+        loaded <- expression_data(type)
+        list(metadata = mr_data, expression = loaded$expression, genes = loaded$genes, type = type)
       })
     },
     ignoreNULL = FALSE
@@ -81,7 +60,6 @@ data_loading_server <- function(input, session) {
   list(
     gene_data = gene_data,
     data_type = data_type,
-    cached_data = cached_data,
     global_loading = global_loading
   )
 }

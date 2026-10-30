@@ -30,6 +30,7 @@ suppressWarnings(try({
         library(dplyr)
         library(plotly)
     })
+    source("functions/data/cache_keys.R")
     source("functions/data/filters.R")
     source("functions/data/genes.R")
     source("functions/data/gene_expression.R")

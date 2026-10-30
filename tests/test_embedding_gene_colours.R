@@ -47,7 +47,8 @@ test_that_("Combine genes: mean and sum of the genes in each cell", {
 
 test_that_("expression of the selected genes, by name or ID, for the plotted cells", {
     needs_gene_colour_functions()
-    table <- data.frame(PVP01_A = c(1, 2, 3, 4), PVP01_B = c(0, 5, 0, 6), barcode = letters[1:4])
+    table <- Matrix::Matrix(cbind(PVP01_A = c(1, 2, 3, 4), PVP01_B = c(0, 5, 0, 6)), sparse = TRUE)
+    rownames(table) <- letters[1:4]
     gene_names <- data.frame(gene = c("PVP01_A", "PVP01_B"), name = c("CSP", "AMA1"))
     by_name <- embedding_gene_expression(c("AMA1", "CSP", "unknown"), FALSE, gene_names, table,
                                          row_idx = c(2, 4))

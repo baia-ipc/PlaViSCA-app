@@ -32,7 +32,7 @@ ui_tab_embeddings <- function() {
                   "color",
                   NULL,
                   choices = category_choices(),
-                  selected = get_data_column("detailed_stage"),
+                  selected = EMBEDDING_PLOT_DEFAULTS$color,
                   width = "190px",
                   options = list(dropdownParent = "body")
                 )
@@ -139,7 +139,7 @@ embedding_settings_controls <- function() {
           id = "tab_switch",
           class = "switch-container-compact d-flex align-items-center gap-1",
           tags$span("Unintegrated", class = "switch-text text-muted switch-text-small"),
-          input_switch("check_all", label = NULL, value = TRUE),
+          input_switch("check_all", label = NULL, value = EMBEDDING_PLOT_DEFAULTS$integrated),
           tags$span("Integrated", class = "switch-text switch-text-small")
         )
       )
@@ -151,7 +151,7 @@ embedding_settings_controls <- function() {
         tags$span("Embedding", class = "settings-label"),
         inline = TRUE,
         choices = list("PCA" = "pca", "UMAP" = "umap", "tSNE" = "tsne"),
-        selected = "umap"
+        selected = EMBEDDING_PLOT_DEFAULTS$embedding
       )
     ),
     tags$div(
@@ -160,7 +160,7 @@ embedding_settings_controls <- function() {
         "size",
         tags$span("Point size", class = "settings-label"),
         choices = list("S" = 2, "M" = 4, "L" = 6),
-        selected = 4,
+        selected = EMBEDDING_PLOT_DEFAULTS$size,
         inline = TRUE
       )
     ),
@@ -171,7 +171,7 @@ embedding_settings_controls <- function() {
         "legend_pos",
         tags$span("Legend position", class = "settings-label"),
         choices = LEGEND_POSITIONS,
-        selected = "auto",
+        selected = EMBEDDING_PLOT_DEFAULTS$legend_pos,
         width = "130px"
       )
     ),
@@ -181,7 +181,7 @@ embedding_settings_controls <- function() {
         "legend_size",
         tags$span("Legend size", class = "settings-label"),
         choices = names(LEGEND_SIZES),
-        selected = "M",
+        selected = EMBEDDING_PLOT_DEFAULTS$legend_size,
         inline = TRUE
       )
     ),
@@ -191,7 +191,7 @@ embedding_settings_controls <- function() {
         "plot",
         tags$span("Dimension", class = "settings-label"),
         choices = list("2D" = "2d", "3D" = "3d"),
-        selected = "3d",
+        selected = EMBEDDING_PLOT_DEFAULTS$plot,
         inline = TRUE
       )
     ),
@@ -199,8 +199,8 @@ embedding_settings_controls <- function() {
       condition = "input.plot == '2d'",
       div(
         class = "xy-selector-horizontal",
-        div(class = "d-flex align-items-center gap-1", tags$span("X", class = "xy-label"), tags$div(selectInput("xaxis", NULL, choices = c("pc_1" = "pc_1"), selected = "pc_1", width = "80px"))),
-        div(class = "d-flex align-items-center gap-1", tags$span("Y", class = "xy-label"), tags$div(selectInput("yaxis", NULL, choices = c("pc_2" = "pc_2"), selected = "pc_2", width = "80px")))
+        div(class = "d-flex align-items-center gap-1", tags$span("X", class = "xy-label"), tags$div(selectInput("xaxis", NULL, choices = EMBEDDING_PLOT_DEFAULTS$xaxis, selected = EMBEDDING_PLOT_DEFAULTS$xaxis, width = "80px"))),
+        div(class = "d-flex align-items-center gap-1", tags$span("Y", class = "xy-label"), tags$div(selectInput("yaxis", NULL, choices = EMBEDDING_PLOT_DEFAULTS$yaxis, selected = EMBEDDING_PLOT_DEFAULTS$yaxis, width = "80px")))
       )
     ),
     shinyjs::hidden(checkboxInput("comparison_active", NULL, value = FALSE))
@@ -274,7 +274,7 @@ gene_combine_menu <- function(id, genes_id) {
         id,
         NULL,
         choices = COMBINE_GENES,
-        selected = "each",
+        selected = EMBEDDING_PLOT_DEFAULTS$combine,
         width = "165px",
         options = list(dropdownParent = "body")
       )

@@ -1,16 +1,14 @@
 # Gene identifiers and names: building the gene list and converting between
 # gene names and PVP01 identifiers.
 
-# Gene IDs of the expression table and their names in the menus: the name of
-# the annotation, or the ID if there is none. Names that the annotation gives
-# to several genes (e.g. "ETRAMP") get the ID added, "ETRAMP (PVP01_0602100)",
-# so that every name selects one gene.
-genes <- function(data, gff_data, pattern = "pvp") {
-    data %>%
-        colnames() %>%
-        grep(pattern, ., ignore.case = TRUE, value = TRUE) %>%
-        as.data.frame() %>%
-        setNames("gene") %>%
+# The genes of an expression matrix, with their names in the menus: `gene_ids`
+# are its gene IDs (expression_gene_ids()), the name is the one of the
+# annotation, or the ID if there is none. Names that the annotation gives to
+# several genes (e.g. "ETRAMP") get the ID added, "ETRAMP (PVP01_0602100)",
+# so that every name selects one gene. Built once per data type when its
+# matrix is loaded (expression_data(), functions/data/expression_data.R).
+genes <- function(gene_ids, gff_data) {
+    data.frame(gene = as.character(gene_ids), stringsAsFactors = FALSE) %>%
         left_join(gff_data, by = c("gene" = "id")) %>%
         mutate(name = unique_gene_names(coalesce(name, gene), gene)) %>%
         select(gene, name)

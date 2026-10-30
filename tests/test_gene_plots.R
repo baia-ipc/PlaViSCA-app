@@ -11,19 +11,20 @@ needs_gene_plot_functions <- function() {
 
 col <- function(key) get_data_column(key)
 
-# Two genes of the normalized data, and their expression in all cells.
-test_genes <- function(n) head(grep("^PVP01", colnames(n), value = TRUE), 2)
+# Two genes of the normalized data.
+test_genes <- function(n) head(expression_gene_ids(n), 2)
 
 test_that_("summaries per stage and study: cells, detection, means", {
     needs_gene_plot_functions()
-    n <- app_data("norm_df")
+    m <- app_data("mr_data")
+    n <- app_data("normalized_expression")
     genes <- test_genes(n)
     stage <- col("detailed_stage")
     study <- col("study_label")
-    expression <- as.matrix(n[, genes, drop = FALSE])
-    table <- gene_group_summary(n, expression, stage, study, min_cells = 1)
+    expression <- expression_values(n, genes)
+    table <- gene_group_summary(m, expression, stage, study, min_cells = 1)
 
-    known <- !is_missing_value(n[[stage]]) & !is_missing_value(n[[study]])
+    known <- !is_missing_value(m[[stage]]) & !is_missing_value(m[[study]])
     expect_true_(all(tapply(table$cells, table$gene, sum) == sum(known)),
         "every cell with a stage and study is counted once per gene")
     first <- table$gene == genes[[1]]
@@ -33,9 +34,9 @@ test_that_("summaries per stage and study: cells, detection, means", {
         "means times cells give the total expression")
     expect_true_(all(table$percent >= 0 & table$percent <= 100), "percentages between 0 and 100")
 
-    table20 <- gene_group_summary(n, expression, stage, study, min_cells = 20)
+    table20 <- gene_group_summary(m, expression, stage, study, min_cells = 20)
     expect_true_(all(table20$cells >= 20), "groups with fewer than 20 cells are left out")
-    one_field <- gene_group_summary(n, expression, stage, min_cells = 1)
+    one_field <- gene_group_summary(m, expression, stage, min_cells = 1)
     expect_true_(!"split" %in% names(one_field), "no split column without a split field")
 })
 
@@ -48,9 +49,10 @@ test_that_("scaling per gene: mean 0 within each gene, clipped", {
 
 test_that_("every plot type draws, with and without split, one or two genes", {
     needs_gene_plot_functions()
-    n <- app_data("norm_df")
+    m <- app_data("mr_data")
+    n <- app_data("normalized_expression")
     genes <- test_genes(n)
-    fg <- list(data = n, full = n, row_idx = seq_len(nrow(n)),
+    fg <- list(data = m, expression = n, row_idx = seq_len(nrow(m)),
                genes = data.frame(gene = genes, name = genes))
     for (type in GENE_PLOT_TYPES) {
         for (opts in list(
@@ -71,7 +73,7 @@ test_that_("every plot type draws, with and without split, one or two genes", {
 
 test_that_("every gene name of the menus selects one gene", {
     if (!exists("genes") || !exists("get_gene_id")) skip_test("gene functions not loaded in this context")
-    g <- genes(app_data("norm_df"), readRDS(app_data_path("gene_annotation.rds")))
+    g <- genes(expression_gene_ids(app_data("normalized_expression")), readRDS(app_data_path("gene_annotation.rds")))
     expect_true_(!any(duplicated(g$name)), "gene names are unique")
     choices <- get_gene_choices(g, FALSE)
     expect_equal_(get_gene_id(choices, g), g$gene[match(choices, g$name)], "names map back to their IDs")

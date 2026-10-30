@@ -1,6 +1,6 @@
 check("filter_choices_server takes the filter choices from the data", {
   testServer(function(input, output, session) {
-    choices <- filter_choices_server(input, session, reactive(list(data = mr_data)))
+    choices <- filter_choices_server(input, session, reactive(list(metadata = mr_data)))
   }, {
     session$flushReact()
     studies <- unlist(choices[["study_label"]])

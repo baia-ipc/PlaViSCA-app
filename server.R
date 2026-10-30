@@ -20,13 +20,5 @@ server <- function(input, output, session) {
   data_sources_tab_server(input, output)
 
   # free the memory of the session
-  onSessionEnded(function() {
-    tryCatch(
-      {
-        memoise::forget(load_data)
-        gc()
-      },
-      error = function(e) {}
-    )
-  })
+  onSessionEnded(function() gc())
 }

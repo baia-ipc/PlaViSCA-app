@@ -19,7 +19,7 @@ check("gene_expression_sheets: expression of the genes and the settings", {
   cells <- gex_cells()
   sheets <- gene_expression_sheets(cells, c("CSP", "DBP"), get_data_column("broad_stage"), FALSE,
                                    "normalize", c("Study" = STUDY))
-  stop_unless(nrow(sheets[["Expression Data"]]) == nrow(norm_df), "not one row per cell")
+  stop_unless(nrow(sheets[["Expression Data"]]) == nrow(cells$data), "not one row per cell")
   meta <- sheets[["Metadata"]]
   stop_unless(meta$Value[meta$Parameter == "Gene Name(s)"] == "CSP, DBP", "gene names")
   stop_unless(meta$Value[meta$Parameter == "Study"] == STUDY, "filter value")

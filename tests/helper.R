@@ -92,6 +92,7 @@ load_app_config <- function() {
     source(file.path(APP_ROOT, "functions", "config", "data_columns.R"), local = FALSE)
     source(file.path(APP_ROOT, "functions", "config", "site.R"), local = FALSE)
     source(file.path(APP_ROOT, "functions", "config", "data_paths.R"), local = FALSE)
+    source(file.path(APP_ROOT, "functions", "data", "expression.R"), local = FALSE)
     source(file.path(APP_ROOT, "functions", "data", "checks.R"), local = FALSE)
     invisible(TRUE)
 }
@@ -99,7 +100,7 @@ load_app_config <- function() {
 .DATA_CACHE <- new.env(parent = emptyenv())
 
 #' Load a data object once per test run.
-app_data <- function(which = c("mr_data", "norm_df", "raw_df", "bibliography")) {
+app_data <- function(which = c("mr_data", "normalized_expression", "raw_expression", "bibliography")) {
     which <- match.arg(which)
     if (!is.null(.DATA_CACHE[[which]])) {
         return(.DATA_CACHE[[which]])
@@ -110,13 +111,13 @@ app_data <- function(which = c("mr_data", "norm_df", "raw_df", "bibliography")) 
             if (!file.exists(p)) skip_test(sprintf("no data at %s", p))
             readRDS(p)$mr_data
         },
-        norm_df = {
-            p <- app_data_path("normalize_df.rds")
+        normalized_expression = {
+            p <- app_data_path("normalized_expression.rds")
             if (!file.exists(p)) skip_test(sprintf("no data at %s", p))
             readRDS(p)
         },
-        raw_df = {
-            p <- app_data_path("raw_df.rds")
+        raw_expression = {
+            p <- app_data_path("raw_expression.rds")
             if (!file.exists(p)) skip_test(sprintf("no data at %s", p))
             readRDS(p)
         },

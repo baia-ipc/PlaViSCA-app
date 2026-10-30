@@ -1,7 +1,9 @@
 # Filtering cells by the shared filter widgets.
 # =============================================================================
-# Reads the filter selections of one tab and applies them to the metadata or
-# expression table. Field names come from config/data_columns.yml.
+# Reads the filter selections of one tab and applies them to the metadata
+# (mr_data). The expression matrix is not touched: the selected cells are
+# given as row indices, which address its rows. Field names come from
+# config/data_columns.yml.
 # =============================================================================
 
 # Standard set of metadata filter fields shared by the Embeddings, Metadata,
@@ -23,7 +25,7 @@ filter_exclude_id <- function(key, suffix = "") paste0(key, "_exclude", suffix)
 
 # Collects the current filter widget selections into a named list keyed by the
 # actual data column names (via get_data_column()), suitable for
-# apply_secondary_filters()/fun_filter_df(). `suffix` selects which tab's set
+# apply_secondary_filters(). `suffix` selects which tab's set
 # of widgets to read (e.g. "_meta", "_table", "_qc", "_gex", or "" for Embeddings).
 # The attribute "exclude" names the columns whose filter has its "exclude"
 # switch on: their selected values are left out instead of kept.
@@ -37,6 +39,15 @@ collect_filter_inputs <- function(input, suffix = "") {
         isTRUE(input[[filter_exclude_id(field, suffix)]])
     }, logical(1))
     attr(out, "exclude") <- unname(columns[excluded])
+    out
+}
+
+# The filter values of a tab with nothing selected (every filter keeps all
+# cells), as collect_filter_inputs() gives them.
+empty_filter_inputs <- function() {
+    columns <- vapply(FILTER_FIELDS, get_data_column, character(1))
+    out <- setNames(vector("list", length(columns)), columns)
+    attr(out, "exclude") <- character(0)
     out
 }
 
@@ -67,126 +78,42 @@ format_species_name <- function(species_names, column = NULL) {
     ifelse(is_binomial, paste0("<i>", chr, "</i>"), chr)
 }
 
-# The set of metadata (non-gene) columns the app works with, resolved from
-# config/data_columns.yml. Used to separate metadata from the gene matrix.
-app_metadata_columns <- function() {
-    unique(vapply(data_field_keys(), get_data_column, character(1), USE.NAMES = FALSE))
-}
-
-fun_filter_df <- function(data, selections) {
-    if (is.null(data)) {
-        return(NULL)
+# The cells of `data` (the metadata) selected by the filter values `inputs`
+# (see collect_filter_inputs()): the cells with at least one count and one
+# gene, kept by every filter with a selection (an empty selection keeps all;
+# a filter in attr "exclude" leaves its selection out instead). Returns the
+# selected rows, with their positions in `data` in the attribute "row_idx":
+# these are also their rows in the expression matrix.
+apply_secondary_filters <- function(data, inputs) {
+    keep <- rep(TRUE, nrow(data))
+    if (all(c("n_feature_rna", "n_count_rna") %in% names(data))) {
+        keep <- keep & data$n_feature_rna > 0 & data$n_count_rna > 0
     }
-    if (is.null(selections) || length(selections) == 0) {
-        return(data)
-    }
-
-    # Parse selections safely
-    parts <- strsplit(selections, "__", fixed = TRUE)
-    valid_parts <- Filter(function(x) length(x) == 2, parts)
-    if (length(valid_parts) == 0) {
-        return(data)
-    }
-
-    # Build filter list
-    filter_list <- lapply(
-        split(valid_parts, vapply(valid_parts, `[[`, character(1), 1)),
-        function(lst) vapply(lst, `[[`, character(1), 2)
-    )
-
-    keep_rows <- rep(TRUE, nrow(data))
-    for (colname in names(filter_list)) {
-        if (colname %in% names(data)) {
-            keep_rows <- keep_rows & data[[colname]] %in% filter_list[[colname]]
-        } else {
-            warning(sprintf(
-                "Column '%s' not found in data; skipping filter.",
-                colname
-            ))
-        }
-    }
-
-    # Always return with the same columns as input
-    out <- data[keep_rows, , drop = FALSE]
-    if (nrow(out) == 0) {
-        out <- data[0, , drop = FALSE]
-    }
-
-    # subset the full expression matrix by row without re-running filters.
-    attr(out, "row_idx") <- which(keep_rows)
-    return(out)
-}
-
-
-# Helper function to apply secondary filters
-apply_secondary_filters <- function(data, inputs, keep_gene_matrix = TRUE, genes = NULL) {
-    filtered <- data
-    if ("n_feature_rna" %in% names(data) && "n_count_rna" %in% names(data)) {
-        filtered <- filtered %>%
-            filter(n_feature_rna > 0 & n_count_rna > 0)
-    }
-
-    # Select relevant columns. The list comes from config/data_columns.yml.
-    metadata_cols <- app_metadata_columns()
-
-    # For gene expression data, keep all columns (metadata + gene expression)
-    # For regular metadata, select only metadata columns
-    available_metadata_cols <- intersect(metadata_cols, names(filtered))
-    non_metadata_cols_count <- length(setdiff(names(filtered), metadata_cols))
-
-    if (!keep_gene_matrix) {
-        if (!is.null(genes) && length(genes) > 0) {
-            keep_cols <- setdiff(names(filtered), genes)
-            keep_cols <- intersect(keep_cols, names(filtered))
-            keep_cols <- unique(c(keep_cols, available_metadata_cols))
-            filtered <- filtered %>% select(any_of(keep_cols))
-        } else {
-            filtered <- filtered %>% select(any_of(metadata_cols))
-        }
-    } else {
-        if (non_metadata_cols_count > 10) {
-            filtered <- filtered
-        } else {
-            filtered <- filtered %>% select(any_of(metadata_cols))
-        }
-    }
-
-
-    # Dynamically apply filters for each non-empty input (on the filtered view)
     excluded <- attr(inputs, "exclude")
     for (col in names(inputs)) {
         values <- inputs[[col]]
-        if (!is.null(values) && length(values) > 0 && col %in% names(filtered)) {
-            filtered <- filtered[filter_keeps(filtered[[col]], values, col %in% excluded), , drop = FALSE]
+        if (length(values) > 0 && col %in% names(data)) {
+            keep <- keep & filter_keeps(data[[col]], values, col %in% excluded)
         }
     }
+    row_idx <- which(keep)
+    out <- data[row_idx, , drop = FALSE]
+    attr(out, "row_idx") <- row_idx
+    out
+}
 
-    # Create row indices based on original data before any column selection/filtering
-    original <- data
-    if (!is.null(original) && nrow(original) > 0) {
-        keep_rows <- rep(TRUE, nrow(original))
+# The rows of mr_data selected by a set of filter values (see
+# apply_secondary_filters()). The row positions found for a set of filter
+# values are kept for every session: the second request with the same
+# filters, from any session, does not filter again.
+FILTERED_CELLS_CACHE <- shared_cache(size = 50)
 
-        # Apply the RNA QC filters if present
-        if ("n_feature_rna" %in% names(original) && "n_count_rna" %in% names(original)) {
-            keep_rows <- keep_rows & (original$n_feature_rna > 0 & original$n_count_rna > 0)
-        }
-
-        # Apply the dynamic inputs - THIS IS THE KEY FILTERING STEP
-        if (!is.null(inputs) && length(inputs) > 0) {
-            for (col in names(inputs)) {
-                values <- inputs[[col]]
-                if (!is.null(values) && length(values) > 0 && col %in% names(original)) {
-                    keep_rows <- keep_rows & filter_keeps(original[[col]], values, col %in% excluded)
-                }
-            }
-        }
-
-        # Attach row indices (positions in the original data)
-        idx <- which(keep_rows)
-        attr(filtered, "row_idx") <- idx
-    } else {
-        attr(filtered, "row_idx") <- integer(0)
-    }
-
-    return(filtered)
+filtered_cells <- function(inputs) {
+    key <- make_cache_key("cells", inputs, attr(inputs, "exclude"))
+    row_idx <- cache_fetch(FILTERED_CELLS_CACHE, key, function() {
+        attr(apply_secondary_filters(mr_data, inputs), "row_idx")
+    })
+    out <- mr_data[row_idx, , drop = FALSE]
+    attr(out, "row_idx") <- row_idx
+    out
 }

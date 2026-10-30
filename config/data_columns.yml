@@ -1,9 +1,11 @@
 # PlaViSCA app: which data columns the app uses.
 # =============================================================================
 # Maps the field names used in ui.R, server.R and functions/ to the columns of
-# the data files (cleaned_dataset.rds$mr_data, normalize_df.rds, raw_df.rds)
-# written by the preprocessing pipeline (stage 50; the columns are described
-# in PlaViSCA-meta-analysis/metadata/columns.tsv).
+# the cell metadata (cleaned_dataset.rds$mr_data) written by the preprocessing
+# pipeline (stage 50; the columns are described in
+# PlaViSCA-meta-analysis/metadata/columns.tsv). The expression matrices
+# (normalized_expression.rds, raw_expression.rds) carry no metadata: their
+# rows are the cells of mr_data, in the same order.
 #
 # Every metadata column used as a filter, "Color by", "Group by" or detail
 # field is declared here and read through get_data_column() /

@@ -10,9 +10,9 @@ filter_choices_server <- function(input, session, gene_data) {
   filter_choices <- reactiveValues()
 
   observeEvent(gene_data(), {
-    req(gene_data()$data)
+    req(gene_data()$metadata)
 
-    filt_data <- gene_data()$data
+    filt_data <- gene_data()$metadata
     missing_columns <- character(0)
 
     for (key in filter_field_keys()) {

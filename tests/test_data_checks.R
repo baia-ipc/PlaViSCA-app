@@ -57,32 +57,48 @@ test_that_("no literal 'NA'/'None' strings in app-visible categorical fields", {
     expect_empty_(offenders, "literal missing-ish strings in app-visible fields")
 })
 
-test_that_("raw, normalized and metadata tables describe the same cells", {
+test_that_("raw and normalized expression matrices are the cells of the metadata, in order", {
     m <- app_data("mr_data")
-    n <- app_data("norm_df")
-    r <- app_data("raw_df")
-    expect_equal_(nrow(n), nrow(m), "normalize_df row count")
-    expect_equal_(nrow(r), nrow(m), "raw_df row count")
-    expect_true_(setequal(rownames(n), rownames(m)), "normalize_df/metadata cell sets differ")
-    expect_true_(identical(rownames(r), rownames(n)), "raw_df/normalize_df cell order differs")
-    expect_true_(identical(colnames(r), colnames(n)), "raw_df/normalize_df columns differ")
+    n <- app_data("normalized_expression")
+    r <- app_data("raw_expression")
+    barcodes <- as.character(m[[get_data_column("barcode")]])
+    expect_true_(inherits(n, "dgCMatrix"), "normalized expression is not a dgCMatrix")
+    expect_true_(inherits(r, "dgCMatrix"), "raw expression is not a dgCMatrix")
+    expect_true_(identical(rownames(n), barcodes), "normalized expression rows are not the metadata cells")
+    expect_true_(identical(rownames(r), barcodes), "raw expression rows are not the metadata cells")
+    expect_true_(identical(colnames(r), colnames(n)), "raw/normalized genes differ")
 })
 
-test_that_("no duplicate cell ids in the expression tables", {
-    n <- app_data("norm_df")
+test_that_("no duplicate cell ids or gene ids in the expression matrices", {
+    n <- app_data("normalized_expression")
     expect_empty_(rownames(n)[duplicated(rownames(n))], "duplicate expression rownames")
+    expect_empty_(colnames(n)[duplicated(colnames(n))], "duplicate gene ids")
 })
 
-test_that_("all startup data checks pass", {
+test_that_("all startup data checks pass, for the normalized and the raw matrix", {
     m <- app_data("mr_data")
-    n <- app_data("norm_df")
     b <- app_data("bibliography")
-    res <- check_app_data(m, n, b)
-    failures <- res[res$status == "FAIL", , drop = FALSE]
-    expect_empty_(
-        sprintf("%s: %s", failures$check, failures$detail),
-        "failed startup data checks"
-    )
+    for (type in c("normalized_expression", "raw_expression")) {
+        res <- check_app_data(m, app_data(type), b, expr_label = type)
+        failures <- res[res$status == "FAIL", , drop = FALSE]
+        expect_empty_(
+            sprintf("%s: %s", failures$check, failures$detail),
+            sprintf("failed startup data checks (%s)", type)
+        )
+    }
+})
+
+test_that_("the expression checks report a matrix that does not match the metadata", {
+    m <- app_data("mr_data")
+    n <- app_data("normalized_expression")
+    shuffled <- n[c(2, 1, seq_len(nrow(n))[-(1:2)]), ]
+    res <- check_expression_matrix(m, shuffled)
+    expect_true_("FAIL" %in% res$status[res$check == "normalized_expression_cell_keys"],
+        "a reordered matrix must fail the cell check")
+    dense <- as.matrix(n[1:5, 1:5])
+    res <- check_expression_matrix(m, dense)
+    expect_true_(all(c("FAIL") %in% res$status[grepl("_class$|_row_count$|_gene_identification$", res$check)]),
+        "a dense 5 x 5 matrix must fail the class, row count and gene checks")
 })
 
 test_that_("required embedding/reduction columns exist", {

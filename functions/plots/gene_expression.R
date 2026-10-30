@@ -28,8 +28,9 @@ GENE_PLOT_OPTIONS <- list(
 NO_SPLIT <- "none"
 
 # Plot of one Gene expression card. `fg` is the filtered expression data of
-# the tab (data = metadata of the selected cells, full = expression of all
-# cells, row_idx = rows of the selected cells in full), `genes` the selected
+# the tab (data = metadata of the selected cells, expression = the expression
+# matrix of all cells, row_idx = rows of the selected cells in it, genes =
+# gene names and IDs), `genes` the selected
 # gene names (or IDs when `use_ids` is TRUE). `opts` holds the options of
 # the plot type: split, combine, points, value, scale; `min_cells` is the minimum
 # number of cells of a group in the summary plots.
@@ -37,11 +38,11 @@ gene_expression_card_plot <- function(fg, genes, use_ids, group, type = "violin"
                                       opts = list(), min_cells = SUMMARY_MIN_CELLS) {
     if (!type %in% GENE_PLOT_TYPES) type <- "violin"
     gene_ids <- if (isTRUE(use_ids)) genes else get_gene_id(genes, fg$genes)
-    found <- !is.na(gene_ids) & gene_ids %in% colnames(fg$full)
+    found <- !is.na(gene_ids) & gene_ids %in% colnames(fg$expression)
     if (!any(found)) {
         return(message_plot("Selected gene(s) not found in data"))
     }
-    expression <- as.matrix(fg$full[fg$row_idx, gene_ids[found], drop = FALSE])
+    expression <- expression_values(fg$expression, gene_ids[found], fg$row_idx)
     colnames(expression) <- genes[found]
     split_or_null <- function(x) if (is.null(x) || !nzchar(x) || x == NO_SPLIT) NULL else x
 

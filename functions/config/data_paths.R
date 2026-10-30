@@ -18,10 +18,13 @@ app_data_path <- function(filename) {
 APP_DATA_FILES <- list(
     cleaned_dataset = "cleaned_dataset.rds",
     gene_annotation = "gene_annotation.rds",
-    norm_df = "normalize_df.rds",
-    raw_df = "raw_df.rds",
+    normalized_expression = "normalized_expression.rds",
+    raw_expression = "raw_expression.rds",
     data_source = "data_source.csv"
 )
+
+# The expression file of each data type of the "Data type" controls.
+EXPRESSION_FILES <- c(normalize = "normalized_expression", raw = "raw_expression")
 
 #' Named list of the paths of all data files used by the app.
 app_data_paths <- function() {

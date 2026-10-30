@@ -9,27 +9,11 @@ embeddings_tab_server <- function(input, output, session, loaded, filters) {
   gene_data <- loaded$gene_data
   comparison_mode <- reactiveVal(FALSE)
 
-  # the cells selected by the filters, kept per data type and selection
-  cache <- new.env(parent = emptyenv())
+  # the cells selected by the filters (metadata rows, with attr "row_idx"
+  # giving their rows in the expression matrix), and the gene table
   cells <- reactive({
     req(gene_data())
-    current_filters <- filters()
-    cache_key <- make_cache_key("cells", loaded$data_type(), current_filters,
-                                list(exclude = attr(current_filters, "exclude")))
-    if (exists(cache_key, envir = cache, inherits = FALSE)) {
-      return(cache[[cache_key]])
-    }
-
-    # no fallback to unfiltered data: if filtering fails, data and
-    # configuration do not match, and showing all cells would mislead
-    meta <- apply_secondary_filters(
-      gene_data()$data,
-      current_filters,
-      keep_gene_matrix = FALSE,
-      genes = gene_data()$genes$gene
-    )
-    cache[[cache_key]] <- list(data = meta, genes = gene_data()$genes)
-    cache[[cache_key]]
+    list(data = filtered_cells(filters()), genes = gene_data()$genes)
   })
 
   plot_type <- reactive({
@@ -44,15 +28,17 @@ embeddings_tab_server <- function(input, output, session, loaded, filters) {
 
   # Plot of the cells as set by `params` (see embedding_figure()); `dual`
   # for the comparison plots. The plot depends on `params`, the cells and the
-  # embedding; the rest is read without dependency.
+  # embedding; the rest is read without dependency. A plot drawn once, by
+  # any session, is taken from the cache (cached_embedding_plot()).
   draw_plot <- function(params, dual) {
     force(params)
     plot_data <- cells()$data
     type <- plot_type()
-    isolate(embedding_figure(
-      plot_data, params, type, dual,
-      gene_names = gene_data()$genes,
-      expression_table = loaded$cached_data[[loaded$data_type()]] %||% gene_data()$data
+    isolate(cached_embedding_plot(
+      params, type, dual, filters(), loaded$data_type(),
+      function() embedding_figure(plot_data, params, type, dual,
+                                  gene_names = gene_data()$genes,
+                                  expression = gene_data()$expression)
     ))
   }
 

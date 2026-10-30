@@ -59,7 +59,7 @@ shiny::runApp(".", port = 3838)
 | File | Content |
 |---|---|
 | `cleaned_dataset.rds` | per-cell metadata and embeddings (`mr_data`), per-study PCA and variable-gene tables |
-| `normalize_df.rds`, `raw_df.rds` | metadata plus log-normalised expression or raw counts |
+| `normalized_expression.rds`, `raw_expression.rds` | log-normalised expression or raw counts: a sparse matrix (`Matrix::dgCMatrix`), cells x genes, with the cell barcodes as row names (in the order of `mr_data`) and the gene IDs as column names |
 | `gene_annotation.rds` | gene identifiers, names and descriptions |
 | `data_source.csv` | one row per study: authors, title, journal, date, PMID, DOI, cell count |
 
@@ -70,8 +70,8 @@ The per-cell columns are described in the pipeline's `metadata/columns.tsv`.
 At startup the app checks that the data match what it expects, as set in
 `config/data_columns.yml`: the number of cells and the list of studies, that
 every configured column is present, that cell identifiers are unique, that
-broad and detailed life-cycle stages agree, that the expression tables
-describe the same cells as the metadata, and that `data_source.csv` lists
+broad and detailed life-cycle stages agree, that the rows of the expression
+matrices are the cells of the metadata in the same order, and that `data_source.csv` lists
 exactly the studies in the data. If a check fails, the app stops with a
 message saying what is wrong, for example:
 

@@ -5,7 +5,7 @@ ui_tab_about <- function() {
   contacts <- team_info()$contacts
   citation <- team_info()$citation
   n_cells <- format(nrow(mr_data), big.mark = ",")
-  n_genes <- format(length(GENE_COLUMNS), big.mark = ",")
+  n_genes <- format(nrow(expression_data("normalize")$genes), big.mark = ",")
   n_studies <- length(unique(mr_data[[get_data_column("study_label")]]))
 
   tabPanel(

@@ -14,16 +14,12 @@ cell_details_server <- function(input, output, cells, gene_data, plot_drawn) {
     cell_key <- input$embedding_cell_open$key
     req(cell_key)
 
-    expression_table <- gene_data()$data
-    row <- cell_row(cell_key, cells()$data, expression_table)
-    selected_table(cell_expression_table(row, expression_table, gff_data))
+    expression <- gene_data()$expression
+    row <- cell_row(cell_key, cells()$data, expression)
+    selected_table(cell_expression_table(row, expression, gff_data))
 
     found <- !is.na(row)
-    barcode <- if (found && "barcode" %in% colnames(expression_table)) {
-      as.character(expression_table$barcode[row])
-    } else {
-      as.character(cell_key)
-    }
+    barcode <- if (found) rownames(expression)[row] else as.character(cell_key)
     close_button <- modalButton(label = tagList(icon("times")))
     showModal(modalDialog(
       title = paste("Selected cell ID:", barcode),

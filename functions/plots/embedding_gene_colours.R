@@ -37,17 +37,18 @@ effective_gene_combine <- function(combine, n_genes) {
 }
 
 # Expression of the selected genes in the cells of the plot: a numeric matrix
-# with one column per gene found in `expression_table` (named as in the
-# menu), one row per entry of `row_idx` (all rows if NULL); NULL if no gene is
-# found. `ids_entered`: the menu lists gene IDs instead of names.
-embedding_gene_expression <- function(gene_inputs, ids_entered, gene_names, expression_table,
+# with one column per gene found in the expression matrix `expression`
+# (named as in the menu), one row per entry of `row_idx` (all rows if NULL);
+# NULL if no gene is found. `ids_entered`: the menu lists gene IDs instead of
+# names.
+embedding_gene_expression <- function(gene_inputs, ids_entered, gene_names, expression,
                                       row_idx = NULL) {
     gene_inputs <- as.character(gene_inputs)
     gene_inputs <- unique(gene_inputs[!is.na(gene_inputs) & nzchar(gene_inputs)])
-    if (length(gene_inputs) == 0 || is.null(expression_table)) {
+    if (length(gene_inputs) == 0 || is.null(expression)) {
         return(NULL)
     }
-    columns <- colnames(expression_table)
+    columns <- colnames(expression)
     ids <- vapply(gene_inputs, function(g) {
         if (isTRUE(ids_entered) && g %in% columns) return(g)
         id <- get_gene_id(g, gene_names)[1]
@@ -58,12 +59,9 @@ embedding_gene_expression <- function(gene_inputs, ids_entered, gene_names, expr
     if (!any(found)) {
         return(NULL)
     }
-    rows <- if (is.null(row_idx)) seq_len(nrow(expression_table)) else row_idx
-    expression <- vapply(ids[found], function(id) as.numeric(expression_table[[id]][rows]),
-                         numeric(length(rows)))
-    expression <- matrix(expression, nrow = length(rows))
-    colnames(expression) <- gene_inputs[found]
-    expression
+    values <- expression_values(expression, unname(ids[found]), row_idx)
+    colnames(values) <- gene_inputs[found]
+    values
 }
 
 # Mean or sum of the genes in each cell (one gene: its expression).

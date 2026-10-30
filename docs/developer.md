@@ -9,9 +9,12 @@ the app, see the [README](../README.md); for using it, see the
 `app.R` sources three files and starts Shiny:
 
 1. **`global.R`** — loads packages, sources `functions/`, reads the data from
-   `PLAVISCA_DATA_DIR` and runs the startup checks
+   `PLAVISCA_DATA_DIR` (the metadata, and the normalized expression matrix
+   through `load_expression_data()`) and runs the startup checks
    (`stop_if_app_data_invalid()` in `functions/data/checks.R`). If a check
-   fails the app stops here, with a message listing the failed checks.
+   fails the app stops here, with a message listing the failed checks. Once
+   the app has started, it draws the plot the Embeddings tab opens with into
+   the plot cache (`warm_embedding_plot_cache()`, via `later::later()`).
 2. **`ui.R`** — sources `ui/` and assembles the page from one function per
    section (`ui_menu_bar()`, `ui_analysis_section()`).
 3. **`server.R`** — the `server()` function. It calls the server code in
@@ -27,8 +30,8 @@ the app, see the [README](../README.md); for using it, see the
 | `config/external_links.yml` | every external URL; read with `external_link()` |
 | `config/team.yml` | team, organisations, contacts; read with `team_info()` |
 | `functions/config/` | reading the configuration: `data_columns.R` (`get_data_column()`, `get_data_label()`, orderings, colours, stage mapping), `site.R` (`external_link()`, `team_info()`), `data_paths.R` (where the data files are, `PLAVISCA_DATA_DIR`) |
-| `functions/data/` | working with the data, without Shiny: startup checks (`checks.R`: `check_app_data()`, `stop_if_app_data_invalid()`), filtering cells (`filters.R`), gene lists and name/ID conversion (`genes.R`), per-plot expression tables and the "Data" download of a gene expression card (`gene_expression.R`), per-group summaries of gene expression (`gene_summaries.R`: `gene_group_summary()`), counting cells by one or two fields (`cell_counts.R`), the expressed genes of one cell (`cell_details.R`), the Data sources table (`data_sources.R`), cache keys (`cache_keys.R`) |
-| `functions/plots/` | plotly plots: QC (`qc.R`), cell counts of the Metadata plots tab (`cell_counts.R`), the plot types of a gene expression card (`gene_expression.R`: `GENE_PLOT_TYPES`, `GENE_PLOT_OPTIONS`, `gene_expression_card_plot()`), violin and box plots (`gene_distribution.R`), plots of per-group summaries (`gene_summaries.R`), embeddings (`embeddings.R`), their legends (`embedding_legend.R`: `LEGEND_POSITIONS`, `LEGEND_SIZES`, `embedding_legend()`, the place of the 2-gene colour grid and of the colour wheel, the margins), embeddings coloured by genes (`embedding_gene_colours.R`: "Combine genes", the plot of "Each gene separately"), the colours of "Each gene separately" (`gene_colour_mix.R`: red, green and blue for 2 or 3 genes, `blend_gene_colours()`; `gene_colour_wheel.R`: the colour wheel for 4 to 8 genes, `wheel_gene_colours()`), their colour keys (`embedding_gene_keys.R`: grid, legend entries, wheel), the embedding plot of a set of cells (`embedding_figure.R`: `embedding_figure()`) |
+| `functions/data/` | working with the data, without Shiny: startup checks (`checks.R`: `check_app_data()`, `check_expression_matrix()`, `stop_if_app_data_invalid()`), reading the expression matrices (`expression.R`: `expression_values()`, `expression_vector()`, `cell_expressed_genes()`, the only file that reads values out of them), loading them once per R process (`expression_data.R`: `expression_data()`, `load_expression_data()`), filtering cells (`filters.R`: `apply_secondary_filters()`, `filtered_cells()`), gene lists and name/ID conversion (`genes.R`), per-plot expression tables and the "Data" download of a gene expression card (`gene_expression.R`), per-group summaries of gene expression (`gene_summaries.R`: `gene_group_summary()`), counting cells by one or two fields (`cell_counts.R`), the expressed genes of one cell (`cell_details.R`), the Data sources table (`data_sources.R`), cache keys and the caches shared by the sessions (`cache_keys.R`: `make_cache_key()`, `shared_cache()`, `cache_fetch()`) |
+| `functions/plots/` | plotly plots: QC (`qc.R`), cell counts of the Metadata plots tab (`cell_counts.R`), the plot types of a gene expression card (`gene_expression.R`: `GENE_PLOT_TYPES`, `GENE_PLOT_OPTIONS`, `gene_expression_card_plot()`), violin and box plots (`gene_distribution.R`), plots of per-group summaries (`gene_summaries.R`), embeddings (`embeddings.R`), their legends (`embedding_legend.R`: `LEGEND_POSITIONS`, `LEGEND_SIZES`, `embedding_legend()`, the place of the 2-gene colour grid and of the colour wheel, the margins), embeddings coloured by genes (`embedding_gene_colours.R`: "Combine genes", the plot of "Each gene separately"), the colours of "Each gene separately" (`gene_colour_mix.R`: red, green and blue for 2 or 3 genes, `blend_gene_colours()`; `gene_colour_wheel.R`: the colour wheel for 4 to 8 genes, `wheel_gene_colours()`), their colour keys (`embedding_gene_keys.R`: grid, legend entries, wheel), the embedding plot of a set of cells (`embedding_figure.R`: `embedding_figure()`), the embedding plots kept for every session (`embedding_cache.R`: `cached_embedding_plot()`, `warm_embedding_plot_cache()`) |
 | `functions/ui/` | UI building blocks: filter rows, gene links, logos (`helpers.R`), the card of the Gene expression tab (`gene_expression_card.R`), the plot builder of the Metadata plots tab (`plot_builder.R`, a Shiny module: `plot_builder_ui()`, `plot_builder_server()`) |
 | `server/` | server code, one file per tab or shared part (see [The server code](#the-server-code)) |
 | `ui/` | the top bar (`page_frame.R`), the tab set (`analysis.R`) and one file per tab (`tab_*.R`, `about.R`) |
@@ -54,10 +57,10 @@ arguments, the ones other parts need are returned.
 
 | File | Content | Returns |
 |---|---|---|
-| `data_loading.R` | the expression data of the session, raw or normalized; keeps the two Data type controls in sync | `gene_data`, `data_type`, `cached_data`, `global_loading` |
+| `data_loading.R` | the expression data of the session, raw or normalized (from `expression_data()`, `functions/data/expression_data.R`); keeps the two Data type controls in sync | `gene_data`, `data_type`, `global_loading` |
 | `filter_choices.R` | the choices of the filter menus; the coupling of the broad and detailed stage filters | the choices of each filter |
 | `shared_filters.R` | the filter state shared by the tabs | the filter values of each tab |
-| `tab_embeddings.R` | Embeddings tab: the filtered cells, the single plot, Download Data | |
+| `tab_embeddings.R` | Embeddings tab: the filtered cells, the single plot (through the plot cache of `functions/plots/embedding_cache.R`), Download Data | |
 | `embedding_controls.R` | axes, point size, gene menus, Combine genes menus and gene links of the embedding plots | |
 | `embedding_compare.R` | Compare Plots: the two plots side by side | |
 | `cell_details.R` | the window with the genes of a cell opened in an embedding plot | |
@@ -71,6 +74,26 @@ To add a tab: build its page in `ui/tab_<name>.R`, write
 call it from `server.R`, and add its checks to `tests/server/tab_<name>.R`.
 If it has filters, add it to `FILTER_TAB_SUFFIXES` in
 `server/shared_filters.R` and pass it `tab_filters[["<tab title>"]]`.
+
+## The data
+
+`global.R` keeps the data in global variables shared by every session:
+
+- `mr_data`: the cell metadata and embeddings, one row per cell (77 MB);
+- `expression_data(type)`: the expression matrix of a data type
+  (`"normalize"` or `"raw"`) and its gene table (`genes()`). A matrix is a
+  `Matrix::dgCMatrix`, cells x genes (about 1.2 GB each), whose rows are the
+  cells of `mr_data` in the same order and whose columns are gene IDs. The
+  normalized matrix is read at startup, the raw one the first time a session
+  selects it.
+
+Filtering works on `mr_data` only (`filtered_cells()`): it returns the
+selected rows with their positions in the attribute `row_idx`, which are
+also their rows in the expression matrices. The plots then ask
+`expression_values(matrix, gene_ids, row_idx)` for the few genes they show,
+so the matrix is never copied or subset as a whole. The cells selected by a
+set of filters and the embedding plots drawn are kept in caches shared by
+all sessions (`functions/data/cache_keys.R`), bounded in size.
 
 ## The data column configuration
 
@@ -149,12 +172,12 @@ PLAVISCA_DATA_DIR=/path/to/app_data Rscript tests/run_tests.R
 
 | File | Checks |
 |---|---|
-| `test_data_checks.R` | the data load and pass every startup check |
+| `test_data_checks.R` | the data load and pass every startup check; the expression checks reject a matrix that does not match the metadata |
 | `test_config_fields.R` | every configured field exists in the data |
 | `test_lifecycle.R` | broad/detailed stage mapping, ordering, stage filters |
 | `test_idc_and_gametocytes.R` | reference time point, gametocyte, treatment and replicate fields |
 | `test_bibliography_and_filters.R` | `data_source.csv` agrees with the data; filter behaviour |
-| `test_expression.R` | gene columns, expression lookup, alignment of the tables, name/ID switch of the gene menus |
+| `test_expression.R` | gene IDs of the expression matrices, `expression_values()` and `cell_expressed_genes()`, alignment of matrix rows and metadata, name/ID switch of the gene menus |
 | `test_cell_count_plots.R`, `test_gene_plots.R` | plots of the Metadata plots and Gene expression tabs |
 | `test_embedding_gene_colours.R` | embeddings coloured by genes: mean, sum, scaling, red/green/blue mixing (2–3 genes), colour wheel (4–8 genes), colour keys, hover text |
 | `test_embedding_legend.R` | legends of the embeddings: every position and size, for each kind of legend |
@@ -205,8 +228,9 @@ them after a change of the interface (see its
 - In reactive code: `req()` before using an input; `observeEvent()` for side
   effects; `reactive()`/`eventReactive()` for values; `debounce()` for inputs
   that trigger heavy plots.
-- The expression tables are large: filter by row indices instead of copying
-  them, and wrap slow plots in `withSpinner()`.
+- The expression matrices are large: never subset or copy them as a whole;
+  filter the metadata and read the genes you need with `expression_values()`
+  (see [The data](#the-data)). Wrap slow plots in `withSpinner()`.
 - A mismatch between data and configuration is an error with a clear
   message, never a silent fallback to empty or unfiltered data.
 - Check that a package is in `renv.lock` before adding a `library()` call;

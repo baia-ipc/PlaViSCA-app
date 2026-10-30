@@ -8,7 +8,7 @@ This guide provides step-by-step instructions for installing and running PlaViSC
 - **R Version**: 4.3.3 (tested) ([Download R](https://cran.r-project.org/))
 - **RStudio**: 2024.09 or later (recommended) ([Download RStudio](https://posit.co/download/rstudio-desktop/))
 - **Git**: 2.43 or later ([Download Git](https://git-scm.com/downloads))
-- **RAM**: 16 GB minimum
+- **RAM**: 8 GB minimum (one instance of the app uses about 2 GB with the normalized data, 3 GB once the raw data are loaded)
 - **CPU**: 4 cores minimum
 - **Disk Space**: 5 GB free
 
@@ -18,7 +18,7 @@ The live app was run with the following versions:
 
 - **R**: 4.3.3
 - **renv**: 1.1.7
-- **Core packages**: bslib (0.9.0), conflicted (1.2.0), DT (0.34.0), dplyr (1.1.4), fontawesome (0.5.3), later (1.4.5), memoise (2.0.1), plotly (4.11.0), RColorBrewer (1.1-3), readr (2.1.6), shiny (1.12.1), shinycssloaders (1.1.0), shinyjs (2.1.1), stringr (1.6.0), tibble (3.3.1), tidyverse (2.0.0), viridis (0.6.5), writexl (1.5.4)
+- **Core packages**: bslib (0.9.0), conflicted (1.2.0), DT (0.34.0), dplyr (1.1.4), fontawesome (0.5.3), later (1.4.5), Matrix (1.6-5), plotly (4.11.0), RColorBrewer (1.1-3), readr (2.1.6), shiny (1.12.1), shinycssloaders (1.1.0), shinyjs (2.1.1), stringr (1.6.0), tibble (3.3.1), tidyverse (2.0.0), viridis (0.6.5), writexl (1.5.4)
 
 If you restore with `renv`, these exact versions will be installed automatically.
 
@@ -49,7 +49,7 @@ This installs the exact package versions listed above. If you prefer a minimal i
 ```r
 install.packages(c(
   "shiny", "shinyjs", "shinycssloaders", "plotly", "DT",
-  "RColorBrewer", "tidyverse", "later", "memoise", "viridis",
+  "RColorBrewer", "tidyverse", "later", "Matrix", "viridis",
   "readr", "tibble", "bslib", "fontawesome", "conflicted", "writexl"
 ))
 ```
@@ -92,8 +92,8 @@ PlaViSCA reads its data from the directory named by the `PLAVISCA_DATA_DIR` envi
 | File | Description |
 |---|---|
 | `cleaned_dataset.rds` | Per-cell metadata and embeddings, per-study PCA and variable-gene tables |
-| `normalize_df.rds` | Metadata plus log-normalised expression |
-| `raw_df.rds` | Metadata plus raw counts |
+| `normalized_expression.rds` | Log-normalised expression: a sparse matrix (`Matrix::dgCMatrix`), cells x genes, rows named by cell barcode in the order of the metadata, columns by gene ID |
+| `raw_expression.rds` | Raw counts, same layout |
 | `gene_annotation.rds` | _P. vivax_ P01 gene identifiers, names and descriptions |
 | `data_source.csv` | Publication table for the Data Sources tab |
 

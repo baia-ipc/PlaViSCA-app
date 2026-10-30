@@ -9,19 +9,16 @@
 gene_expression_tab_server <- function(input, output, session, loaded, filters) {
   gene_data <- loaded$gene_data
 
-  # the cells selected by the filters, and the expression table of the data type
+  # the cells selected by the filters (metadata rows, with attr "row_idx"
+  # giving their rows in the expression matrix), the gene table and the
+  # expression matrix of the data type
   cells <- reactive({
     req(gene_data())
     tryCatch(
       {
-        full_df <- loaded$cached_data[[loaded$data_type()]] %||% gene_data()$data
-        meta <- apply_secondary_filters(
-          gene_data()$data,
-          filters(),
-          keep_gene_matrix = FALSE,
-          genes = gene_data()$genes$gene
-        )
-        list(data = meta, genes = gene_data()$genes, full = full_df, row_idx = attr(meta, "row_idx"))
+        meta <- filtered_cells(filters())
+        list(data = meta, genes = gene_data()$genes, expression = gene_data()$expression,
+             row_idx = attr(meta, "row_idx"))
       },
       error = function(e) NULL
     )

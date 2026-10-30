@@ -2,7 +2,7 @@
 # =============================================================================
 # The app stops at startup, with a message saying what is wrong, when the data
 # in PLAVISCA_DATA_DIR does not match config/data_columns.yml (cell count,
-# studies, columns, life-cycle stages, expression tables, bibliography).
+# studies, columns, life-cycle stages, expression matrix, bibliography).
 # Starting anyway would show empty dropdowns or misleading plots.
 #
 # The checks do not depend on Shiny, so the tests can call them directly.
@@ -15,15 +15,16 @@
 #' Check the loaded data against what the app expects.
 #'
 #' @param mr_data     cleaned_dataset.rds$mr_data
-#' @param expr_df     the normalized (or raw) wide table, metadata + genes
+#' @param expression  the normalized (or raw) expression matrix, cells x
+#'                    genes (Matrix::dgCMatrix), or NULL to skip
 #' @param bibliography data_source.csv as a data.frame, or NULL to skip
-#' @param expr_label  label used in messages for `expr_df`
+#' @param expr_label  label used in messages for `expression`
 #' @return a data.frame of check/status/detail rows. Status is "PASS", "FAIL"
 #'         or "WARN".
 check_app_data <- function(mr_data,
-                           expr_df = NULL,
+                           expression = NULL,
                            bibliography = NULL,
-                           expr_label = "normalize_df") {
+                           expr_label = "normalized_expression") {
     rows <- list()
     add <- function(check, ok, detail, warn_only = FALSE) {
         status <- if (ok) "PASS" else if (warn_only) "WARN" else "FAIL"
@@ -226,43 +227,10 @@ check_app_data <- function(mr_data,
         )
     }
 
-    # --- 11. expression table alignment ---------------------------------------
-    if (!is.null(expr_df)) {
-        expr_cols <- colnames(expr_df)
-        add(
-            paste0(expr_label, "_row_count"),
-            nrow(expr_df) == nrow(mr_data),
-            sprintf("%d expression rows vs %d metadata rows", nrow(expr_df), nrow(mr_data))
-        )
-        add(
-            paste0(expr_label, "_cell_keys"),
-            setequal(rownames(expr_df), rownames(mr_data)),
-            "expression and metadata must describe the same set of cells"
-        )
-        add(
-            paste0(expr_label, "_no_duplicate_cells"),
-            !any(duplicated(rownames(expr_df))),
-            sprintf("%d duplicate expression rownames", sum(duplicated(rownames(expr_df))))
-        )
-        missing_meta <- setdiff(required_data_columns(), expr_cols)
-        add(
-            paste0(expr_label, "_carries_metadata"),
-            length(missing_meta) == 0,
-            if (length(missing_meta) == 0) {
-                "expression table carries every required metadata column"
-            } else {
-                paste(missing_meta, collapse = ", ")
-            }
-        )
-        gene_cols <- identify_gene_columns(expr_df, mr_data)
-        add(
-            paste0(expr_label, "_gene_identification"),
-            length(gene_cols) > 1000 && !any(gene_cols %in% colnames(mr_data)),
-            sprintf(
-                "%d gene columns identified by identifier, %d metadata columns excluded",
-                length(gene_cols), ncol(expr_df) - length(gene_cols)
-            )
-        )
+    # --- 11. expression matrix: the cells of the metadata, genes as columns --
+    if (!is.null(expression)) {
+        expr <- check_expression_matrix(mr_data, expression, expr_label)
+        rows <- c(rows, split(expr, seq_len(nrow(expr))))
     }
 
     # --- 12. bibliography -----------------------------------------------------
@@ -276,15 +244,57 @@ check_app_data <- function(mr_data,
     out
 }
 
-#' Identify the gene-expression columns of a wide expression table.
+#' Check an expression matrix against the metadata: a sparse matrix
+#' (Matrix::dgCMatrix) whose rows are the cells of the metadata, in the same
+#' order, and whose columns are gene IDs.
 #'
-#' Genes are identified by their identifier (PVP01_ prefix), never by column
-#' position: the number of metadata columns can change, and a positional range
-#' would then silently treat metadata as genes.
-identify_gene_columns <- function(expr_df, mr_data = NULL, pattern = "^PVP01_") {
-    cand <- grep(pattern, colnames(expr_df), value = TRUE, ignore.case = TRUE)
-    meta_cols <- if (!is.null(mr_data)) colnames(mr_data) else character(0)
-    setdiff(cand, meta_cols)
+#' @return a data.frame of check/status/detail rows, named by `label`.
+check_expression_matrix <- function(mr_data, expression, label = "normalized_expression") {
+    checks <- expression_checks(mr_data, expression)
+    out <- do.call(rbind, lapply(names(checks), function(name) {
+        .check_row(paste0(label, "_", name), if (isTRUE(checks[[name]]$ok)) "PASS" else "FAIL",
+                   checks[[name]]$detail)
+    }))
+    rownames(out) <- NULL
+    out
+}
+
+# The checks of check_expression_matrix(): a list of list(ok, detail), by
+# check name.
+expression_checks <- function(mr_data, expression) {
+    barcodes <- as.character(mr_data[[get_data_column("barcode")]])
+    # an object without dimensions (not a matrix at all) fails every check
+    # with a message, rather than stopping the checks with an error
+    n_rows <- if (is.null(dim(expression))) 0L else nrow(expression)
+    gene_ids <- colnames(expression)
+    not_genes <- gene_ids[!grepl(GENE_ID_PATTERN, gene_ids)]
+    list(
+        class = list(
+            ok = inherits(expression, "dgCMatrix"),
+            detail = sprintf("expected a Matrix::dgCMatrix, found %s", paste(class(expression), collapse = "/"))
+        ),
+        row_count = list(
+            ok = n_rows == nrow(mr_data),
+            detail = sprintf("%d expression rows vs %d metadata rows", n_rows, nrow(mr_data))
+        ),
+        cell_keys = list(
+            ok = identical(rownames(expression), barcodes),
+            detail = "expression rows must be the cells of the metadata, in the same order"
+        ),
+        no_duplicate_cells = list(
+            ok = !any(duplicated(rownames(expression))),
+            detail = sprintf("%d duplicate expression rownames", sum(duplicated(rownames(expression))))
+        ),
+        gene_identification = list(
+            ok = length(gene_ids) > 1000 && length(not_genes) == 0 && !any(duplicated(gene_ids)),
+            detail = if (length(not_genes) == 0) {
+                sprintf("%d gene columns, every one a PVP01 identifier", length(gene_ids))
+            } else {
+                sprintf("%d columns are not gene identifiers: %s", length(not_genes),
+                        paste(utils::head(not_genes, 5), collapse = ", "))
+            }
+        )
+    )
 }
 
 #' Check that the bibliography (data_source.csv) lists exactly the studies in
@@ -424,8 +434,9 @@ validate_bibliography <- function(mr_data, bibliography) {
 #' Run check_app_data() and stop the app if any check failed.
 #'
 #' @return the check results as a data.frame (invisibly) when all pass.
-stop_if_app_data_invalid <- function(mr_data, expr_df = NULL, bibliography = NULL) {
-    result <- check_app_data(mr_data, expr_df, bibliography)
+stop_if_app_data_invalid <- function(mr_data, expression = NULL, bibliography = NULL,
+                                     expr_label = "normalized_expression") {
+    result <- check_app_data(mr_data, expression, bibliography, expr_label)
     failures <- result[result$status == "FAIL", , drop = FALSE]
     warnings_ <- result[result$status == "WARN", , drop = FALSE]
 

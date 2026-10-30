@@ -1,6 +1,6 @@
 # One card of the Gene expression tab (functions/ui/gene_expression_card.R):
 # the plot and the "Data" download of card `i`, for the cells `cells`
-# (reactive, list(data, genes, full, row_idx), from
+# (reactive, list(data, genes, expression, row_idx), from
 # gene_expression_tab_server()). The inputs of card `i` have the IDs
 # <name>_exp_<i>. While `global_loading()` is TRUE the plot says "Loading...".
 # Returns the observer of the card's gene links, to destroy with the card.
