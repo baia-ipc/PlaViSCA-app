@@ -446,9 +446,10 @@ colors:
 
 # Human-readable display labels for otherwise machine-ish category values.
 value_labels:
-  # study label of Sá et al. with the accent
+  # the accent of Sa2020 as an escape: the file must stay ASCII, since the
+  # app may run in a C locale (Shiny Server), where R cannot read UTF-8 bytes
   study_label:
-    Sa2020: "Sá2020"
+    Sa2020: "S\u00e12020"
   treatment:
     study_control: "Study control"
     No_Treatment: "No treatment"
