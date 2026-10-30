@@ -476,51 +476,55 @@ $(document).on('plotly_relayout plotly_relayouting', '#first_plotly, #second_plo
 // not. Plotly has no right-click event, so the cell under the mouse is
 // remembered from the hover events.
 const embeddingPlots = '#all_plotly, #first_plotly, #second_plotly';
-let hoveredCellKey = null;
+let hoveredCell = null;
 
-// The key of the cell of a plotly point: its barcode, the customdata of the
-// point, or its first column (functions/plots/embedding_hover.R).
-function cellKey(pt) {
-  if (pt.customdata === undefined || pt.customdata === null) return undefined;
-  return Array.isArray(pt.customdata) ? pt.customdata[0] : pt.customdata;
+// A cell of a plotly point: the output id of its plot, its trace and its
+// point number; the server maps them to the cell
+// (functions/plots/embedding_hover.R).
+function cellRef(plot, pt) {
+  if (pt.curveNumber === undefined || pt.pointNumber === undefined) return null;
+  return { plot: plot.id, curve: pt.curveNumber, point: pt.pointNumber };
+}
+
+function sameCell(a, b) {
+  return a !== null && b !== null && a.plot === b.plot && a.curve === b.curve && a.point === b.point;
 }
 
 $(document).on('plotly_hover', embeddingPlots, function (event, data) {
   const pt = data && data.points && data.points[0];
   if (!pt) return;
-  const key = cellKey(pt);
-  hoveredCellKey = key === undefined ? null : key;
+  hoveredCell = cellRef(this, pt);
 });
 
 $(document).on('plotly_unhover', embeddingPlots, function () {
-  hoveredCellKey = null;
+  hoveredCell = null;
 });
 
-function openCellDetails(key) {
-  Shiny.setInputValue('embedding_cell_open', { key: key, at: Date.now() }, { priority: 'event' });
+function openCellDetails(cell) {
+  Shiny.setInputValue('embedding_cell_open', Object.assign({ at: Date.now() }, cell), { priority: 'event' });
 }
 
 // Plotly handles the mouse itself, so the browser's dblclick event does not
 // reach the page: a double click is two Plotly clicks on the same cell
-let lastCellClick = { key: null, time: 0 };
+let lastCellClick = { cell: null, time: 0 };
 $(document).on('plotly_click', embeddingPlots, function (event, data) {
   const pt = data && data.points && data.points[0];
   if (!pt) return;
-  const key = cellKey(pt);
-  if (key === undefined) return;
+  const cell = cellRef(this, pt);
+  if (cell === null) return;
   const now = Date.now();
-  if (lastCellClick.key === key && now - lastCellClick.time < 400) {
-    lastCellClick = { key: null, time: 0 };
-    openCellDetails(key);
+  if (sameCell(lastCellClick.cell, cell) && now - lastCellClick.time < 400) {
+    lastCellClick = { cell: null, time: 0 };
+    openCellDetails(cell);
   } else {
-    lastCellClick = { key: key, time: now };
+    lastCellClick = { cell: cell, time: now };
   }
 });
 
 $(document).on('contextmenu', embeddingPlots, function (event) {
-  if (hoveredCellKey === null) return;
+  if (hoveredCell === null) return;
   event.preventDefault();
-  openCellDetails(hoveredCellKey);
+  openCellDetails(hoveredCell);
 });
 
 // Every plot gets a "Download plot as SVG" button right next to the PNG one:

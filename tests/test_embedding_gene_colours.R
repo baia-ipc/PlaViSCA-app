@@ -208,10 +208,12 @@ test_that_("embedding plots coloured by genes: mean, sum and each gene, 2D and 3
                 expect_equal_(length(cells$x), n, sprintf("%s %s %d genes: every cell", combine, dim, length(genes)))
                 if (combine == "each") {
                     expect_true_(is.character(cells$marker$color), "one colour per cell")
-                    last <- which(cells$customdata[, 1] == paste0("cell", n))
-                    expect_equal_(length(last), 1L, "the barcode of each cell in its customdata")
-                    expect_true_(grepl("AMA1 5.00", cells$customdata[last, 2]), "hover shows each gene's value")
-                    expect_true_(grepl("Expression: %{customdata[1]}", cells$hovertemplate, fixed = TRUE),
+                    rows <- attr(p, "cell_rows")[[1]]
+                    expect_equal_(sort(rows), seq_len(n), "the plot knows the cell of each point")
+                    last <- which(rows == n)
+                    expect_equal_(length(last), 1L, "every cell drawn once")
+                    expect_true_(grepl("AMA1 5.00", cells$customdata[last]), "hover shows each gene's value")
+                    expect_true_(grepl("Expression: %{customdata}", cells$hovertemplate, fixed = TRUE),
                                  "the hover template shows the gene values")
                     expect_true_(is.null(cells$key), "no key per cell")
                     expect_equal_(as.character(cells$text), rep("Ring", n), "the stage of each cell")

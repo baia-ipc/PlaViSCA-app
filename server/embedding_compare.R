@@ -4,9 +4,11 @@
 # settings. The two plots start from the colour (and genes) of the single
 # plot, whose colour is restored when the single plot comes back.
 # `comparison_mode` (reactiveVal) is TRUE while the two plots are shown;
-# `draw_plot(params, dual)` draws a plot (see embeddings_tab_server()).
+# `draw_plot(params, dual)` draws a plot and `record_plot(id, p)` keeps the
+# cells of the plot `p` shown as output `id` (see embeddings_tab_server()).
 
-embedding_compare_server <- function(input, output, session, gene_data, comparison_mode, draw_plot) {
+embedding_compare_server <- function(input, output, session, gene_data, comparison_mode, draw_plot,
+                                     record_plot = function(id, p) p) {
   single_plot_color <- reactiveVal(get_data_column("detailed_stage"))
   observe({
     if (!comparison_mode()) single_plot_color(input$color)
@@ -73,6 +75,6 @@ embedding_compare_server <- function(input, output, session, gene_data, comparis
   params_b <- plot_params("color_second", "genes_second", "check_second",
                           "combine_genes_second", "detailed_stage")
 
-  output$first_plotly <- renderPlotly(draw_plot(params_a(), dual = TRUE))
-  output$second_plotly <- renderPlotly(draw_plot(params_b(), dual = TRUE))
+  output$first_plotly <- renderPlotly(record_plot("first_plotly", draw_plot(params_a(), dual = TRUE)))
+  output$second_plotly <- renderPlotly(record_plot("second_plotly", draw_plot(params_b(), dual = TRUE)))
 }

@@ -147,28 +147,29 @@ embedding_plot_config <- function(p) {
     )
 }
 
-# The marker traces of the cells `df`, added to the plot `p`: a categorical
-# `color` gives one trace per category (named by it, in the order of the
-# levels, in the colours `colors`), a numeric one a single
-# trace coloured by the values `selected_color`, with the colour bar `key`
-# (embedding_legend()); see embedding_trace_groups(). The coordinates are
-# the columns .x, .y and, in 3D (`n_dims` 3), .z of `df`; `marker` are the
-# marker settings shared by the traces. Each cell gets its hover
-# (embedding_hover.R). A trace keeps only the columns it draws: plotly
-# stores the data frame it is given inside the plot, which is cached.
+# The marker traces of the cells `df`, added to the plot `p`: one trace per
+# colour category (if `color` is categorical: named by it, in the order of
+# the levels, in the colours `colors`), study and detailed stage, so that
+# the hover is written once per trace (embedding_trace_groups(),
+# embedding_hover.R). A numeric `color` colours the cells by the values
+# `selected_color` on one colour scale shared by the traces (plotly
+# `coloraxis`), with the colour bar `key` (embedding_legend()). The
+# coordinates are the columns .x, .y and, in 3D (`n_dims` 3), .z of `df`;
+# `marker` are the marker settings shared by the traces. A trace keeps only
+# the columns it draws: plotly stores the data frame it is given inside the
+# plot, which is cached.
 embedding_traces <- function(p, df, n_dims, color, legend_title, is_categorical, selected_color,
                              colors, marker, key) {
   coords <- c(".x", ".y", ".z")[seq_len(n_dims)]
-  add_cells <- function(p, rows, columns, marker, name = NULL, legend = TRUE) {
+  add_cells <- function(p, rows, columns, marker, name = NULL, legend = FALSE) {
     args <- list(p, data = df[rows, columns, drop = FALSE], x = ~.x, y = ~.y, type = "scattergl",
-                 mode = "markers", marker = marker)
+                 mode = "markers", marker = marker, showlegend = legend)
     if (n_dims == 3) {
       args$z <- ~.z
       args$type <- "scatter3d"
     }
     if (!is.null(name)) {
       args$name <- name
-      args$showlegend <- legend
     }
     do.call(add_trace, args)
   }
@@ -187,13 +188,26 @@ embedding_traces <- function(p, df, n_dims, color, legend_title, is_categorical,
   }
 
   df$.colour <- compact_colour_values(selected_color)
-  p <- add_cells(p, seq_len(nrow(df)), c(coords, ".colour"), c(marker, list(
-    color = ~.colour,
+  for (group in groups) {
+    p <- add_cells(p, group$rows, c(coords, ".colour"), c(marker, list(color = ~.colour, coloraxis = "coloraxis")))
+  }
+  p <- layout(p, coloraxis = colour_scale_layout(df$.colour, key))
+  add_embedding_hover(p, df, color, legend_title, groups, NULL, n_dims)
+}
+
+# The colour scale (plotly `layout.coloraxis`) of the numeric `values` of
+# the cells, blue to red over their range, with the colour bar `key`
+# (embedding_legend()).
+colour_scale_layout <- function(values, key) {
+  finite <- values[is.finite(values)]
+  range <- if (length(finite) > 0) range(finite) else c(0, 1)
+  if (range[1] == range[2]) range[2] <- range[1] + 1
+  list(
     colorscale = list(c(0, "#0000FF4C"), c(1, "red")),
+    cmin = range[1], cmax = range[2],
     showscale = key$show,
     colorbar = key$layout
-  )))
-  add_embedding_hover(p, df, color, legend_title, groups, NULL, n_dims)
+  )
 }
 
 

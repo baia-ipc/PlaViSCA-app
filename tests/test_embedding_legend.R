@@ -105,7 +105,7 @@ test_that_("embedding plots: every legend position and size, all kinds of legend
                 p <- embedding_gene_plot(df, expression[, 1, drop = FALSE], "mean", "umap_i_1", "umap_i_2", 4,
                                          "umap_i", dim, dual, legend)
                 built <- plotly_build(p)$x
-                expect_equal_(isTRUE(built$data[[1]]$marker$showscale), position != "hidden",
+                expect_equal_(isTRUE(built$layout$coloraxis$showscale), position != "hidden",
                               paste(label, "colour bar shown unless hidden"))
                 for (genes in list(1:2, 1:3, 1:4)) {
                     p <- embedding_gene_plot(df, expression[, genes, drop = FALSE], "each", "umap_i_1",

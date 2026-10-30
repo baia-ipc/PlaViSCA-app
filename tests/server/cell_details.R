@@ -16,11 +16,15 @@ check("cell_row and cell_expression_table: the expressed genes of a cell", {
 check("cell_details_server opens the table of a cell", {
   cells <- apply_secondary_filters(mr_data, study_filter(STUDY))
   testServer(function(input, output, session) {
+    plot_cells <- reactiveValues(all_plotly = list(1:3, 4:nrow(cells)))
     table <- cell_details_server(input, output, reactive(list(data = cells)),
-                                 reactive(list(expression = NORMALIZED$expression)), reactiveVal(TRUE))
+                                 reactive(list(expression = NORMALIZED$expression)), reactiveVal(TRUE),
+                                 plot_cells)
   }, {
-    session$setInputs(embedding_cell_open = list(key = "5", at = 1))
+    session$setInputs(embedding_cell_open = list(plot = "all_plotly", curve = 1, point = 1, at = 1))
     stop_unless(nrow(table()) > 0, "no table")
+    row <- cell_row(5L, cells, NORMALIZED$expression)
+    stop_unless(nrow(table()) == sum(NORMALIZED$expression[row, ] > 0), "not the genes of the 5th cell")
     stop_unless(file.exists(output$export_data), "no export")
   })
 })

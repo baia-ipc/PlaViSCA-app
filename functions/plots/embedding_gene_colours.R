@@ -156,8 +156,10 @@ embedding_each_gene_plot <- function(df, expression, xaxis_input, yaxis_input, s
                 source = "embedding", showlegend = FALSE)
     }
     p <- add_embedding_hover(p, df, ".gene_colour", "Expression",
-                             embedding_trace_groups(df, ".gene_colour", FALSE), NULL,
+                             embedding_trace_groups(df, ".gene_colour", FALSE, per_cell = TRUE), NULL,
                              length(coords), values)
+    # the rows of the cells as given, not as reordered for drawing
+    attr(p, "cell_rows") <- list(on_top)
     if (position == "hidden") {
         p <- layout(p, font = list(size = 14), margin = legend_margins(position), autosize = TRUE)
         return(embedding_axis_titles(p, axes, plot_dim))

@@ -42,8 +42,16 @@ embeddings_tab_server <- function(input, output, session, loaded, filters) {
     ))
   }
 
+  # the rows (in the plotted cells) drawn by each trace of each plot shown,
+  # by output id, to find the cell of a point (embedding_hover.R)
+  plot_cells <- reactiveValues()
+  record_plot <- function(id, p) {
+    plot_cells[[id]] <- attr(p, "cell_rows")
+    p
+  }
+
   embedding_controls_server(input, output, session, gene_data, comparison_mode)
-  embedding_compare_server(input, output, session, gene_data, comparison_mode, draw_plot)
+  embedding_compare_server(input, output, session, gene_data, comparison_mode, draw_plot, record_plot)
 
   # The single plot is drawn once its inputs have not changed for 0.6 s and,
   # when coloured by genes, the gene selection has stayed the same for 0.15 s.
@@ -95,12 +103,12 @@ embeddings_tab_server <- function(input, output, session, loaded, filters) {
       xaxis = input$xaxis, yaxis = input$yaxis, size = input$size, plot = input$plot,
       legend_pos = input$legend_pos, legend_size = input$legend_size
     ))
-    p <- draw_plot(params, dual = FALSE)
+    p <- record_plot("all_plotly", draw_plot(params, dual = FALSE))
     plot_drawn(TRUE)
     p
   })
 
-  cell_details_server(input, output, cells, gene_data, plot_drawn)
+  cell_details_server(input, output, cells, gene_data, plot_drawn, plot_cells)
 
   # "Download Data": the metadata of the cells of the atlas
   output$download_data <- downloadHandler(
