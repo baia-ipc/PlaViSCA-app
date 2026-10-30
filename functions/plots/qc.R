@@ -3,25 +3,51 @@
 # Set color pallet
 colors <- RColorBrewer::brewer.pal(12, "Set3")
 
-# Generate plot for RNA and feature count
+# Violin plot of the values `y` of the cells `df` by `x` (the study),
+# coloured by the category `color`: one trace per category and study, so
+# that a cell sends only its value, with the study as the position of the
+# trace. The traces of a category share a legend group with one legend
+# entry. Each violin shows its box, its mean and the cells beyond the
+# whiskers as points.
 feature_plot <- function(df, x, y, color, y_title, title) {
     req(df)
-    plot_ly(
-        data = df,
-        x = ~ get(x),
-        y = ~ get(y),
-        color = ~ get(color),
-        colors = colors,
-        type = "violin",
-        box = list(visible = TRUE),
-        meanline = list(visible = TRUE),
-        jitter = 0.4
-    ) %>%
-        layout(
-            xaxis = list(title = x),
-            yaxis = list(title = y_title),
-            legend = list(title = list(text = color))
-        )
+    categories <- as.character(df[[color]])
+    levels_vec <- if (is.factor(df[[color]])) levels(df[[color]]) else sort(unique(categories))
+    levels_vec <- levels_vec[levels_vec %in% categories]
+    palette <- scales::col_factor(colors, levels = levels_vec)
+    groups <- as.character(df[[x]])
+
+    p <- plot_ly()
+    for (level in levels_vec) {
+        in_level <- which(categories == level)
+        colour <- palette(level)
+        first <- TRUE
+        for (group in sort(unique(groups[in_level]))) {
+            rows <- in_level[groups[in_level] == group]
+            p <- add_trace(
+                p,
+                type = "violin",
+                x0 = group,
+                y = df[[y]][rows],
+                name = level,
+                legendgroup = level,
+                showlegend = first,
+                fillcolor = toRGB(colour, 0.5),
+                line = list(color = toRGB(colour)),
+                marker = list(color = toRGB(colour)),
+                box = list(visible = TRUE),
+                meanline = list(visible = TRUE),
+                jitter = 0.4
+            )
+            first <- FALSE
+        }
+    }
+    layout(
+        p,
+        xaxis = list(title = x, categoryorder = "array", categoryarray = sort(unique(groups))),
+        yaxis = list(title = y_title),
+        legend = list(title = list(text = color))
+    )
 }
 
 # Generate Elbow plot for PCA
