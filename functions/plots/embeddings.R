@@ -149,7 +149,7 @@ embedding_plot_config <- function(p) {
 
 # The marker traces of the cells `df`, added to the plot `p`: a categorical
 # `color` gives one trace per category (named by it, in the order of the
-# levels, in the colours `colors`) and detailed stage, a numeric one a single
+# levels, in the colours `colors`), a numeric one a single
 # trace coloured by the values `selected_color`, with the colour bar `key`
 # (embedding_legend()); see embedding_trace_groups(). The coordinates are
 # the columns .x, .y and, in 3D (`n_dims` 3), .z of `df`; `marker` are the
@@ -168,7 +168,6 @@ embedding_traces <- function(p, df, n_dims, color, legend_title, is_categorical,
     }
     if (!is.null(name)) {
       args$name <- name
-      args$legendgroup <- name
       args$showlegend <- legend
     }
     do.call(add_trace, args)

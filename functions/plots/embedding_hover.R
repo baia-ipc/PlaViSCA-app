@@ -10,16 +10,10 @@
 # plotted values. A plot with its own value string per cell (the genes of
 # "Each gene separately") sends it as a second customdata column.
 #
-# The detailed stage is written in the template too: the cells of a
-# categorical plot are drawn in one trace per category and detailed stage,
-# up to MAX_EMBEDDING_TRACES traces. The traces of a category follow each
-# other, all in its colour, so the plot looks the same as with one trace per
-# category; only the first one has a legend entry, and the legend toggles all
-# of them (legendgroup). With more categories, and for a numeric colour
-# (whose cells are drawn in their order), the stage is sent per cell, as the
-# `text` of the point.
-
-MAX_EMBEDDING_TRACES <- 60
+# The cells of a categorical plot are drawn in one trace per category; the
+# detailed stage is written in the template when the plot is coloured by it,
+# and sent per cell, as the `text` of the point, otherwise (as for a numeric
+# colour, whose cells are drawn in one trace).
 
 # The values of the configured column `key` (e.g. "detailed_stage") of the
 # cells `df`, as displayed: one per cell, missing values (and a column
@@ -39,8 +33,8 @@ hover_stages <- function(df) {
 # The traces of a plot of the cells `df` coloured by `color`: a list with,
 # per trace, `rows` (the rows of `df` it draws), `category` (the value of
 # `color` of its cells; NULL for a numeric colour), `stage` (the detailed
-# stage of its cells; NULL when they differ) and `legend` (TRUE for the
-# trace that carries the legend entry of the category).
+# stage of its cells; NULL when it is sent per cell) and `legend` (TRUE for
+# a trace with a legend entry).
 embedding_trace_groups <- function(df, color, is_categorical) {
   rows <- seq_len(nrow(df))
   if (!is_categorical) {
@@ -49,25 +43,13 @@ embedding_trace_groups <- function(df, color, is_categorical) {
   category <- df[[color]]
   if (!is.factor(category)) category <- factor(category)
   levels <- levels(category)[tabulate(category, nlevels(category)) > 0]
-  stages <- hover_stages(df)
-  by_stage <- identical(color, get_data_column("detailed_stage")) ||
-    length(levels) * length(unique(stages)) <= MAX_EMBEDDING_TRACES
-  groups <- list()
-  for (level in levels) {
+  by_stage <- identical(color, get_data_column("detailed_stage"))
+  stages <- if (by_stage) hover_stages(df)
+  lapply(levels, function(level) {
     in_level <- rows[!is.na(category) & category == level]
-    if (!by_stage) {
-      groups[[length(groups) + 1]] <- list(rows = in_level, category = level, stage = NULL,
-                                           legend = TRUE)
-      next
-    }
-    for (stage in unique(stages[in_level])) {
-      groups[[length(groups) + 1]] <- list(
-        rows = in_level[stages[in_level] == stage], category = level, stage = stage,
-        legend = stage == stages[in_level][1]
-      )
-    }
-  }
-  groups
+    list(rows = in_level, category = level,
+         stage = if (by_stage) stages[in_level][1], legend = TRUE)
+  })
 }
 
 # Hovertemplate of a trace of cells coloured by `color`, named

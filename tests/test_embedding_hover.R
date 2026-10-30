@@ -39,26 +39,27 @@ test_that_("hover template: per-trace values written once, per-cell values as pl
     expect_true_(grepl("<br>Z: %{z:.2f}<extra>", numeric, fixed = TRUE), "Z in 3D")
 })
 
-test_that_("trace groups: one trace per category and stage up to the limit, then per category", {
+test_that_("trace groups: one trace per category, the stage per trace only when coloured by it", {
     needs_hover_functions()
     df <- hover_test_cells()
     study_col <- get_data_column("study_label")
+    stage_col <- get_data_column("detailed_stage")
     groups <- embedding_trace_groups(df, study_col, TRUE)
-    expect_equal_(length(groups), 6, "2 studies x 3 stages")
-    expect_equal_(vapply(groups, function(g) g$category, character(1)),
-                  rep(c("Study A", "Study B"), each = 3), "the traces of a category follow each other")
-    expect_equal_(vapply(groups, function(g) g$legend, logical(1)),
-                  rep(c(TRUE, FALSE, FALSE), 2), "one legend entry per category")
+    expect_equal_(length(groups), 2, "one trace per study")
+    expect_equal_(vapply(groups, function(g) g$category, character(1)), c("Study A", "Study B"),
+                  "the traces in the order of the levels")
+    expect_true_(all(vapply(groups, function(g) g$legend, logical(1))), "every trace has a legend entry")
+    expect_true_(all(vapply(groups, function(g) is.null(g$stage), logical(1))), "the stage is per cell")
     expect_equal_(sort(unlist(lapply(groups, function(g) g$rows))), seq_len(nrow(df)), "every cell once")
     for (g in groups) {
-        expect_true_(all(df[[study_col]][g$rows] == g$category) &&
-                     all(df[[get_data_column("detailed_stage")]][g$rows] == g$stage),
-                     "the cells of a trace share its category and stage")
+        expect_true_(all(df[[study_col]][g$rows] == g$category), "the cells of a trace share its category")
     }
-    df$many <- paste0("c", seq_len(nrow(df)))
-    groups <- embedding_trace_groups(df, "many", TRUE)
-    expect_equal_(length(groups), nrow(df), "beyond the limit: one trace per category")
-    expect_true_(all(vapply(groups, function(g) is.null(g$stage), logical(1))), "the stage is then per cell")
+    groups <- embedding_trace_groups(df, stage_col, TRUE)
+    expect_equal_(length(groups), 3, "one trace per stage")
+    for (g in groups) {
+        expect_true_(!is.null(g$stage) && all(df[[stage_col]][g$rows] == g$stage),
+                     "coloured by stage: the stage of the trace is in its template")
+    }
     groups <- embedding_trace_groups(df, "expression", FALSE)
     expect_equal_(length(groups), 1, "a numeric colour: one trace")
     expect_equal_(groups[[1]]$rows, seq_len(nrow(df)), "with all the cells")
@@ -69,23 +70,22 @@ test_that_("2D categorical plot: compact traces with the hover of each cell", {
     df <- hover_test_cells()
     study_col <- get_data_column("study_label")
     traces <- built_traces(embedding_plot(df, "umap_i_1", "umap_i_2", study_col, NULL, 4, plot_type = "umap_i"))
-    expect_equal_(length(traces), 6, "one trace per study and stage")
+    expect_equal_(length(traces), 2, "one trace per study")
     expect_equal_(sum(vapply(traces, function(t) isTRUE(t$showlegend), logical(1))), 2, "one legend entry per study")
-    expect_equal_(unique(vapply(traces, function(t) t$legendgroup, character(1))), c("Study A", "Study B"),
-                  "the traces of a study share its legend group")
+    expect_true_(all(vapply(traces, function(t) is.null(t$legendgroup), logical(1))), "no legend groups")
     first <- traces[[1]]
     expect_equal_(first$type, "scattergl", "WebGL scatter")
-    expect_true_(is.null(first$key) && is.null(first$text) && is.null(first$hovertext),
-                 "nothing per cell but coordinates and barcode")
+    expect_true_(is.null(first$key) && is.null(first$hovertext),
+                 "nothing per cell but coordinates, barcode and stage")
     expect_true_(length(first$marker$color) == 1 && length(first$marker$size) == 1 &&
                  length(first$marker$line$width) == 1, "marker settings are scalars")
-    rows <- which(df[[study_col]] == "Study A" & df[[get_data_column("detailed_stage")]] == "Ring")
+    rows <- which(df[[study_col]] == "Study A")
     expect_equal_(as.character(first$customdata), paste0("cell", rows), "the barcodes of the cells of the trace")
+    expect_equal_(as.character(first$text), df[[get_data_column("detailed_stage")]][rows], "the stage of each cell")
     expect_equal_(as.numeric(first$x), round(df$umap_i_1[rows], 3), "coordinates rounded to 3 decimals")
-    expect_true_(grepl("Study label: Study A<br>Study label: Study A<br>Life-cycle stage: Ring<br>X:",
-                       first$hovertemplate, fixed = TRUE) ||
-                 grepl(": Study A<br>.*: Ring<br>X:", first$hovertemplate),
-                 "the hover names the study and the stage of the trace")
+    expect_true_(grepl(": Study A<br>", first$hovertemplate, fixed = TRUE) &&
+                 grepl(": %{text}<br>X:", first$hovertemplate, fixed = TRUE),
+                 "the hover names the study of the trace and the stage of the cell")
 })
 
 test_that_("2D numeric plot: colour values at 3 significant digits, stage and study per cell", {
