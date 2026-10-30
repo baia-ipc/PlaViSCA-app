@@ -446,6 +446,9 @@ colors:
 
 # Human-readable display labels for otherwise machine-ish category values.
 value_labels:
+  # study label of Sá et al. with the accent
+  study_label:
+    Sa2020: "Sá2020"
   treatment:
     study_control: "Study control"
     No_Treatment: "No treatment"
