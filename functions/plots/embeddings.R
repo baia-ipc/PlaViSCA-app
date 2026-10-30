@@ -50,7 +50,7 @@ category_palette <- function(levels_vec, column = NULL) {
   auto <- if (n_real > 0) assign_colors(n_real) else character(0)
 
   out <- character(n)
-  out[is_missing_level] <- "#A9A9A94D"
+  out[is_missing_level] <- "#A9A9A9"
   out[!is_missing_level] <- auto
   names(out) <- levels_vec
 

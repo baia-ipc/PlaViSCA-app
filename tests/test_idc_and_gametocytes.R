@@ -177,7 +177,7 @@ test_that_("gametocyte state has its own missing label; other fields keep the gl
         state_col
     )
     expect_equal_(levels(prep$df[[state_col]])[1], "No gametocyte", "missing level of the colour legend")
-    expect_equal_(unname(prep$colors[["No gametocyte"]]), "#A9A9A94D", "missing level colour")
+    expect_equal_(unname(prep$colors[["No gametocyte"]]), "#A9A9A9", "missing level colour")
 })
 
 test_that_("embedding legends show stage display names with the stage colours", {
