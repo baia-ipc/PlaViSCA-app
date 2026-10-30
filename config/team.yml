@@ -9,6 +9,7 @@ organizations:
     url: "https://www.pasteur-kh.org/"
     logo: "ipc_logo.png"
   - name: "BAIA Unit"
+    url: "https://pasteur-kh.org/baia/"
     logo: "baia_logo.png"
 
 # Contacts, each with the questions to address to them (may contain <em>).
