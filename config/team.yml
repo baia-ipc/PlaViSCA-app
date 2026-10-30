@@ -27,5 +27,5 @@ contacts:
 # The title may contain <em> for italics.
 citation:
   authors: "Sopheap Oeng, Lionel Brice Feufack-Donfack, Sivyi Chhay, Thomas Obadia, Anthony Ruberto, Giorgio Gonnella"
-  title: "PlaViSCA: <em>Plasmodium vivax</em> single-cell transcriptomics meta-analysis and interactive community resource"
+  title: "PlaViSCA: an open-source platform for exploring <em>Plasmodium vivax</em> single-cell transcriptomic data"
   status: "Submitted."
