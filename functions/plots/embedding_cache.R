@@ -19,7 +19,7 @@ cached_embedding_plot <- function(params, plot_type, dual, filters, data_type, b
     }
     key <- make_cache_key("embedding_plot", data_type, plot_type, dual, settings,
                           filters, attr(filters, "exclude"))
-    cache_fetch(EMBEDDING_PLOT_CACHE, key, build)
+    cache_fetch(EMBEDDING_PLOT_CACHE, key, function() with_plot_payload(build()))
 }
 
 # Draws the plot shown when the Embeddings tab opens (EMBEDDING_PLOT_DEFAULTS,

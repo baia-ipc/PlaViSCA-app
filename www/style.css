@@ -866,7 +866,7 @@ table.dataTable thead th {
 }
 
 #single_plot_panel .card-body > div,
-#single_plot_panel .shiny-spinner-output-container,
+#single_plot_panel .fetched-plot,
 #single_plot_panel .html-widget,
 #single_plot_panel .plotly,
 #single_plot_panel .js-plotly-plot {
@@ -1558,4 +1558,96 @@ table.dataTable thead th {
   color: #b02a37 !important;
   background: #f8d7da !important;
   text-decoration: line-through;
+}
+
+/* Embedding plots downloaded with a progress bar (www/fetched_plot.js):
+   the bar sits over the plot while the server prepares it or the browser
+   downloads it */
+.fetched-plot {
+  position: relative;
+  height: 100%;
+}
+
+.fetched-plot .plot-progress {
+  display: none;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 5;
+  width: 320px;
+  max-width: 90%;
+  padding: 14px 18px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  font-size: 0.9rem;
+  color: #333;
+  text-align: center;
+}
+
+.fetched-plot .plot-progress.plot-progress-shown {
+  display: block;
+}
+
+.fetched-plot .plot-progress-bar {
+  margin-top: 8px;
+  height: 8px;
+  border-radius: 4px;
+  background: #e4e7ea;
+  overflow: hidden;
+}
+
+.fetched-plot .plot-progress-fill {
+  height: 100%;
+  width: 0;
+  border-radius: 4px;
+  background: #3498db;
+  transition: width 0.15s linear;
+}
+
+.fetched-plot .plot-progress-indeterminate .plot-progress-fill {
+  width: 30%;
+  animation: plot-progress-slide 1.2s ease-in-out infinite;
+}
+
+@keyframes plot-progress-slide {
+  0% { margin-left: 0; }
+  50% { margin-left: 70%; }
+  100% { margin-left: 0; }
+}
+
+/* Loading screen (ui/page_frame.R): over the page until the app is connected */
+.app-loading {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f4f7f9;
+}
+
+.app-loading-box {
+  text-align: center;
+  color: #333;
+  font-family: Roboto, Arial, sans-serif;
+}
+
+.app-loading-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #00796b;
+  margin-bottom: 6px;
+}
+
+.app-loading-text {
+  font-size: 1.1rem;
+}
+
+.app-loading-detail {
+  margin-top: 6px;
+  font-size: 0.9rem;
+  color: #666;
 }

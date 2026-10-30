@@ -178,7 +178,7 @@ Below the plot are the descriptions of the chosen fields and **Export .csv**, wh
 
 The settings panel (cog button) has one option, **Show missing**: untick it to leave out of all plots the cells whose value is missing.
 
-Hover over the plot for details; use the controls in its top-right corner to zoom, pan or download it (as PNG or SVG).
+Hover over the plot for details; use the controls in its top-right corner to zoom, pan or download it (as PNG or SVG). A plot is a few megabytes: a progress bar shows its download. The view you set (rotation, zoom) is kept when the plot is redrawn on the same axes, e.g. in another colour.
 
 ### Metadata table
 

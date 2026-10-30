@@ -96,7 +96,7 @@ embeddings_tab_server <- function(input, output, session, loaded, filters) {
   })
 
   plot_drawn <- reactiveVal(FALSE)
-  output$all_plotly <- renderPlotly({
+  output$all_plotly_payload <- render_plot_payload(session, "all_plotly", {
     req(!isTRUE(comparison_mode()), plot_inputs_ready(), plot_ready())
     params <- isolate(list(
       color = input$color, genes = input$genes_n, check = input$check, combine = input$combine_genes,

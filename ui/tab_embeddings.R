@@ -80,12 +80,7 @@ ui_tab_embeddings <- function() {
               full_screen = TRUE,
               height = "650px",
               class = "mb-0 plot-resizable",
-              withSpinner(
-                type = 6,
-                size = 0.5,
-                color = "#3498db",
-                plotlyOutput("all_plotly", height = "100%")
-              )
+              fetched_plot_output("all_plotly", height = "100%")
             )
           ),
 
@@ -312,12 +307,7 @@ comparison_plot_card <- function(side, title, colour, color_id, selected, plot_i
       div(class = "comparison-gene-slot", gene_panel),
       div(
         class = "comparison-plot-area plot-resizable",
-        withSpinner(
-          type = 6,
-          size = 0.4,
-          color = colour,
-          plotlyOutput(plot_id, height = "100%")
-        )
+        fetched_plot_output(plot_id, height = "100%")
       )
     )
   )

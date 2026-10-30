@@ -20,6 +20,7 @@ source("ui/about.R")
 ui <- fluidPage(
   theme = bs_theme(version = 5),
   ui_head(),
+  ui_loading_screen(),
   ui_menu_bar(),
   ui_analysis_section()
 )

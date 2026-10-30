@@ -94,14 +94,15 @@ def run_step(page, step, settings):
 
 
 def wait_until_drawn(page, timeout):
-    """Wait until the server is idle, no visible output is recalculating or
-    shows a loading spinner, and every visible plotly plot is drawn.
+    """Wait until the server is idle, no visible output is recalculating,
+    downloading or shows a loading spinner, and every visible plotly plot is
+    drawn.
     (Outputs on hidden tabs are paused by Shiny and stay "recalculating".)"""
     page.wait_for_function(
         """() => {
           const visible = e => e.offsetParent !== null;
           return !document.documentElement.classList.contains('shiny-busy')
-            && ![...document.querySelectorAll('.recalculating')].some(visible)
+            && ![...document.querySelectorAll('.recalculating, .fetched-plot.downloading')].some(visible)
             && ![...document.querySelectorAll('.load-container:not(.shiny-spinner-hidden)')].some(visible)
             && [...document.querySelectorAll('.plotly.html-widget')].filter(visible)
                  .every(e => e.querySelector('.main-svg'));
